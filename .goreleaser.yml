@@ -1,0 +1,38 @@
+builds:
+  -
+    main: server.go
+    env:
+      - CGO_ENABLED=0
+    binary: quickshare
+    goos:
+      - windows
+      - darwin
+      - linux
+    goarch:
+      - amd64
+archive:
+  name_template: "quickshare_{{ .Tag }}_{{ .Os }}_{{ .Arch }}"
+  format: zip
+  wrap_in_directory: true
+  replacements:
+    darwin: macos
+    linux: linux
+    windows: windows
+    amd64: x86_64
+  files:
+    - LICENSE
+    - README.md
+    - config.json
+    - public/*
+    - public/dist/*
+    - docs/*
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'

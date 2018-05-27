@@ -1,0 +1,8 @@
+**/*.bundle.js
+**/*.js.map
+**/coverage
+**/files
+**/node_modules/*
+**/dist
+**/vendor
+**/yarn-error
