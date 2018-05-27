@@ -5,6 +5,12 @@
   A succinct file sharing server
 </p>
 <p align="center">
+  <a href="https://travis-ci.org/ihexxa/quickshare">
+    <img src="https://travis-ci.org/ihexxa/quickshare.svg?branch=master" />
+  </a>
+  <a href="https://goreportcard.com/report/github.com/ihexxa/quickshare">
+    <img src="https://goreportcard.com/badge/github.com/ihexxa/quickshare" />
+  </a>
   <a href="https://gitter.im/quickshare/Lobby?utm_source=share-link&utm_medium=link&utm_campaign=share-link">
     <img src="https://badges.gitter.im/Join%20Chat.svg" />
   </a>
