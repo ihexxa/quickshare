@@ -9,11 +9,11 @@ import (
 )
 
 import (
-	"quickshare/server/libs/encrypt"
-	"quickshare/server/libs/fileidx"
-	"quickshare/server/libs/fsutil"
-	httpUtil "quickshare/server/libs/httputil"
-	worker "quickshare/server/libs/httpworker"
+	"github.com/ihexxa/quickshare/server/libs/encrypt"
+	"github.com/ihexxa/quickshare/server/libs/fileidx"
+	"github.com/ihexxa/quickshare/server/libs/fsutil"
+	httpUtil "github.com/ihexxa/quickshare/server/libs/httputil"
+	worker "github.com/ihexxa/quickshare/server/libs/httpworker"
 )
 
 const DefaultId = "0"

@@ -8,17 +8,17 @@ import (
 )
 
 import (
-	"quickshare/server/libs/cfg"
-	"quickshare/server/libs/encrypt"
-	"quickshare/server/libs/errutil"
-	"quickshare/server/libs/fileidx"
-	"quickshare/server/libs/fsutil"
-	"quickshare/server/libs/httputil"
-	"quickshare/server/libs/httpworker"
-	"quickshare/server/libs/limiter"
-	"quickshare/server/libs/logutil"
-	"quickshare/server/libs/qtube"
-	"quickshare/server/libs/walls"
+	"github.com/ihexxa/quickshare/server/libs/cfg"
+	"github.com/ihexxa/quickshare/server/libs/encrypt"
+	"github.com/ihexxa/quickshare/server/libs/errutil"
+	"github.com/ihexxa/quickshare/server/libs/fileidx"
+	"github.com/ihexxa/quickshare/server/libs/fsutil"
+	"github.com/ihexxa/quickshare/server/libs/httputil"
+	"github.com/ihexxa/quickshare/server/libs/httpworker"
+	"github.com/ihexxa/quickshare/server/libs/limiter"
+	"github.com/ihexxa/quickshare/server/libs/logutil"
+	"github.com/ihexxa/quickshare/server/libs/qtube"
+	"github.com/ihexxa/quickshare/server/libs/walls"
 )
 
 type AddDep func(*SrvShare)

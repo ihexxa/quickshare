@@ -8,7 +8,7 @@ import (
 )
 
 import (
-	"quickshare/server/libs/logutil"
+	"github.com/ihexxa/quickshare/server/libs/logutil"
 )
 
 var (

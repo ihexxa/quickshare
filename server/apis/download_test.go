@@ -8,12 +8,12 @@ import (
 )
 
 import (
-	"quickshare/server/libs/cfg"
-	"quickshare/server/libs/errutil"
-	"quickshare/server/libs/fileidx"
-	"quickshare/server/libs/httputil"
-	"quickshare/server/libs/logutil"
-	"quickshare/server/libs/qtube"
+	"github.com/ihexxa/quickshare/server/libs/cfg"
+	"github.com/ihexxa/quickshare/server/libs/errutil"
+	"github.com/ihexxa/quickshare/server/libs/fileidx"
+	"github.com/ihexxa/quickshare/server/libs/httputil"
+	"github.com/ihexxa/quickshare/server/libs/logutil"
+	"github.com/ihexxa/quickshare/server/libs/qtube"
 )
 
 func initServiceForDownloadTest(config *cfg.Config, indexMap map[string]*fileidx.FileInfo, content string) *SrvShare {

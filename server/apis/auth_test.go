@@ -7,9 +7,9 @@ import (
 )
 
 import (
-	"quickshare/server/libs/cfg"
-	"quickshare/server/libs/encrypt"
-	"quickshare/server/libs/httputil"
+	"github.com/ihexxa/quickshare/server/libs/cfg"
+	"github.com/ihexxa/quickshare/server/libs/encrypt"
+	"github.com/ihexxa/quickshare/server/libs/httputil"
 )
 
 func TestLogin(t *testing.T) {

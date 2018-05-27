@@ -8,8 +8,8 @@ import (
 )
 
 import (
-	"quickshare/server/apis"
-	"quickshare/server/libs/cfg"
+	"github.com/ihexxa/quickshare/server/apis"
+	"github.com/ihexxa/quickshare/server/libs/cfg"
 )
 
 func main() {

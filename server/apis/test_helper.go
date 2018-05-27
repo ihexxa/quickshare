@@ -8,8 +8,8 @@ import (
 )
 
 import (
-	"quickshare/server/libs/fileidx"
-	"quickshare/server/libs/qtube"
+	"github.com/ihexxa/quickshare/server/libs/fileidx"
+	"github.com/ihexxa/quickshare/server/libs/qtube"
 )
 
 type stubFsUtil struct {

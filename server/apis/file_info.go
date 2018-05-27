@@ -10,9 +10,9 @@ import (
 )
 
 import (
-	"quickshare/server/libs/fileidx"
-	"quickshare/server/libs/httputil"
-	"quickshare/server/libs/httpworker"
+	"github.com/ihexxa/quickshare/server/libs/fileidx"
+	"github.com/ihexxa/quickshare/server/libs/httputil"
+	"github.com/ihexxa/quickshare/server/libs/httpworker"
 )
 
 func (srv *SrvShare) FileInfoHandler(res http.ResponseWriter, req *http.Request) {
