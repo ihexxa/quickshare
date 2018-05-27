@@ -16,9 +16,9 @@
 
 ## 下载
 
-| Linux    | Mac      | Windows  |
-| -------- | -------- | -------- |
-| [下载]() | [下载]() | [下载]() |
+* Linux: [Download](https://github.com/ihexxa/quickshare/releases/download/0.0.16/quickshare_0.0.16_linux_x86_64.zip)
+* Mac: [Download](https://github.com/ihexxa/quickshare/releases/download/0.0.16/quickshare_0.0.16_macos_x86_64.zip)
+* Windows: [Download](https://github.com/ihexxa/quickshare/releases/download/0.0.16/quickshare_0.0.16_windows_x86_64.zip)
 
 ## 特点
 
