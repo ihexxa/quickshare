@@ -4,14 +4,15 @@
   "description": "A succinct file sharing server.",
   "main": "",
   "scripts": {
-    "start": "yarn build-client && go run server.go",
-    "test": "go test -v ./... && yarn jest --coverage",
-    "fmt": "go fmt ./...",
-    "clean": "go clean && rm -r ./dist && rm -r ./public/dist",
     "build":
       "rm -rf ./dist && rm -rf ./public/dist && yarn build-client && goreleaser --snapshot",
     "build-client": "webpack --config ./client/webpack.config.prod.js",
-    "build-client-dev": "webpack --config ./client/webpack.config.dev.js"
+    "build-client-dev": "webpack --config ./client/webpack.config.dev.js",
+    "clean": "go clean && rm -r ./dist && rm -r ./public/dist",
+    "fmt": "go fmt ./...",
+    "setup": "yarn && dep ensure",
+    "start": "yarn build-client && go run server.go",
+    "test": "go test -v ./... && yarn jest --coverage"
   },
   "author": "hexxa",
   "license": "ISC",
