@@ -10,6 +10,7 @@ import (
 import (
 	"github.com/ihexxa/quickshare/server/apis"
 	"github.com/ihexxa/quickshare/server/libs/cfg"
+	"github.com/skratchdot/open-golang/open"
 )
 
 func main() {
@@ -36,5 +37,9 @@ func main() {
 	}
 
 	log.Printf("quickshare starts @ %s:%d", config.HostName, config.Port)
+	err := open.Start(fmt.Sprintf("http://%s:%d", config.HostName, config.Port))
+	if err != nil {
+		log.Println(err)
+	}
 	log.Fatal(server.ListenAndServe())
 }
