@@ -81,9 +81,6 @@ func (srv *SrvShare) UploadHandler(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	srv.Log.Println("form", req.Form)
-	srv.Log.Println("pform", req.PostForm)
-	srv.Log.Println("mform", req.MultipartForm)
 	ack := make(chan error, 1)
 	ok := srv.WorkerPool.Put(&worker.Task{
 		Ack: ack,
