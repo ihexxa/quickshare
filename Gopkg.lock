@@ -13,9 +13,15 @@
   revision = "81ddea8e91eecffef557c5e4ce8e78a1d472d7d7"
   version = "v2.0.0"
 
+[[projects]]
+  branch = "master"
+  name = "github.com/skratchdot/open-golang"
+  packages = ["open"]
+  revision = "75fb7ed4208cf72d323d7d02fd1a5964a7a9073c"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "09f88c8b25db4caace633bcccce4f4d942a810603dd2befe65a69191b0869b14"
+  inputs-digest = "6452415dc9b42f64749516a240d3050c2d22527deeabbe1d438d6974345cd042"
   solver-name = "gps-cdcl"
   solver-version = 1
