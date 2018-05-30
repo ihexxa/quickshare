@@ -33,7 +33,7 @@ func TestIpLimit(t *testing.T) {
 	walls := newAccessWalls(1000, ttl, cyc, limit)
 
 	testIpLimit(t, walls, ip, limit)
-	// wait for tokens are re-fullfilled
+	// wait for tokens are re-fulfilled
 	time.Sleep(time.Duration(cyc) * time.Second)
 	testIpLimit(t, walls, ip, limit)
 
@@ -62,7 +62,7 @@ func TestOpLimit(t *testing.T) {
 
 	testOpLimit(t, walls, resourceId, op1, limit)
 	testOpLimit(t, walls, resourceId, op2, limit)
-	// wait for tokens are re-fullfilled
+	// wait for tokens are re-fulfilled
 	time.Sleep(time.Duration(ttl) * time.Second)
 	testOpLimit(t, walls, resourceId, op1, limit)
 	testOpLimit(t, walls, resourceId, op2, limit)

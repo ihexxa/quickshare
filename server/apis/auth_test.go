@@ -53,7 +53,7 @@ func TestLogin(t *testing.T) {
 		ret := srv.login(testCase.AdminId, testCase.AdminPwd, res)
 
 		if ret != testCase.Result {
-			t.Fatalf("login: reponse=%v testCase=%v", ret, testCase.Result)
+			t.Fatalf("login: response=%v testCase=%v", ret, testCase.Result)
 		}
 
 		// verify cookie (only token.adminid part))
