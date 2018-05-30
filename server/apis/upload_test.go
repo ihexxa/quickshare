@@ -150,7 +150,7 @@ func TestStartUpload(t *testing.T) {
 			}
 		case httputil.MsgRes:
 			if response != expectRes {
-				t.Fatalf(fmt.Sprintf("startUpload: reponse=%v expectRes=%v", response, expectRes))
+				t.Fatalf(fmt.Sprintf("startUpload: response=%v expectRes=%v", response, expectRes))
 			}
 		default:
 			t.Fatalf(fmt.Sprintf("startUpload: type not found: %T %T", testCase.Output.Response, httputil.Err400))
@@ -353,7 +353,7 @@ func TestFinishUpload(t *testing.T) {
 		case httputil.MsgRes:
 			expectRes := testCase.Output.Response.(httputil.MsgRes)
 			if res != expectRes {
-				t.Fatalf(fmt.Sprintf("finishUpload: reponse=%v expectRes=%v", res, expectRes))
+				t.Fatalf(fmt.Sprintf("finishUpload: response=%v expectRes=%v", res, expectRes))
 			}
 		case *ShareInfo:
 			info, found := testCase.Output.IndexMap[res.ShareId]

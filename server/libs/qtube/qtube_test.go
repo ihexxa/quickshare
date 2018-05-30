@@ -269,7 +269,7 @@ func TestCopyRange(t *testing.T) {
 			}
 		}
 		if res.StatusCode != tCase.Output.StatusCode {
-			t.Fatalf("copyRange: statusCodes are not match %v", res.StatusCode, tCase.Output.StatusCode)
+			t.Fatalf("copyRange: statusCodes are not match got: %v want: %v", res.StatusCode, tCase.Output.StatusCode)
 		}
 	}
 }
@@ -348,7 +348,7 @@ func TestServeAll(t *testing.T) {
 			}
 		}
 		if res.StatusCode != tCase.Output.StatusCode {
-			t.Fatalf("serveAll: statusCodes are not match %v", res.StatusCode, tCase.Output.StatusCode)
+			t.Fatalf("serveAll: statusCodes are not match got: %v want: %v", res.StatusCode, tCase.Output.StatusCode)
 		}
 	}
 }

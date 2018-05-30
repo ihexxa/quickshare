@@ -12,8 +12,8 @@ import (
 	"github.com/ihexxa/quickshare/server/libs/encrypt"
 	"github.com/ihexxa/quickshare/server/libs/fileidx"
 	"github.com/ihexxa/quickshare/server/libs/fsutil"
-	httpUtil "github.com/ihexxa/quickshare/server/libs/httputil"
-	worker "github.com/ihexxa/quickshare/server/libs/httpworker"
+	"github.com/ihexxa/quickshare/server/libs/httputil"
+	"github.com/ihexxa/quickshare/server/libs/httpworker"
 )
 
 const DefaultId = "0"
@@ -30,7 +30,7 @@ type ShareInfo struct {
 
 func (srv *SrvShare) StartUploadHandler(res http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
-		srv.Http.Fill(httpUtil.Err404, res)
+		srv.Http.Fill(httputil.Err404, res)
 		return
 	}
 
@@ -39,30 +39,30 @@ func (srv *SrvShare) StartUploadHandler(res http.ResponseWriter, req *http.Reque
 	loginPass := srv.Walls.PassLoginCheck(tokenStr, req)
 	opPass := srv.Walls.PassOpLimit(GetRemoteIp(req.RemoteAddr), srv.Conf.OpIdUpload)
 	if !ipPass || !loginPass || !opPass {
-		srv.Http.Fill(httpUtil.Err429, res)
+		srv.Http.Fill(httputil.Err429, res)
 		return
 	}
 
 	ack := make(chan error, 1)
-	ok := srv.WorkerPool.Put(&worker.Task{
+	ok := srv.WorkerPool.Put(&httpworker.Task{
 		Ack: ack,
 		Do:  srv.Wrap(srv.StartUpload),
 		Res: res,
 		Req: req,
 	})
 	if !ok {
-		srv.Http.Fill(httpUtil.Err503, res)
+		srv.Http.Fill(httputil.Err503, res)
 	}
 
 	execErr := srv.WorkerPool.IsInTime(ack, time.Duration(srv.Conf.Timeout)*time.Millisecond)
 	if srv.Err.IsErr(execErr) {
-		srv.Http.Fill(httpUtil.Err500, res)
+		srv.Http.Fill(httputil.Err500, res)
 	}
 }
 
 func (srv *SrvShare) UploadHandler(res http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
-		srv.Http.Fill(httpUtil.Err404, res)
+		srv.Http.Fill(httputil.Err404, res)
 		return
 	}
 
@@ -71,36 +71,36 @@ func (srv *SrvShare) UploadHandler(res http.ResponseWriter, req *http.Request) {
 	loginPass := srv.Walls.PassLoginCheck(tokenStr, req)
 	opPass := srv.Walls.PassOpLimit(GetRemoteIp(req.RemoteAddr), srv.Conf.OpIdUpload)
 	if !ipPass || !loginPass || !opPass {
-		srv.Http.Fill(httpUtil.Err429, res)
+		srv.Http.Fill(httputil.Err429, res)
 		return
 	}
 
 	multiFormErr := req.ParseMultipartForm(srv.Conf.ParseFormBufSize)
 	if srv.Err.IsErr(multiFormErr) {
-		srv.Http.Fill(httpUtil.Err400, res)
+		srv.Http.Fill(httputil.Err400, res)
 		return
 	}
 
 	ack := make(chan error, 1)
-	ok := srv.WorkerPool.Put(&worker.Task{
+	ok := srv.WorkerPool.Put(&httpworker.Task{
 		Ack: ack,
 		Do:  srv.Wrap(srv.Upload),
 		Res: res,
 		Req: req,
 	})
 	if !ok {
-		srv.Http.Fill(httpUtil.Err503, res)
+		srv.Http.Fill(httputil.Err503, res)
 	}
 
 	execErr := srv.WorkerPool.IsInTime(ack, time.Duration(srv.Conf.Timeout)*time.Millisecond)
 	if srv.Err.IsErr(execErr) {
-		srv.Http.Fill(httpUtil.Err500, res)
+		srv.Http.Fill(httputil.Err500, res)
 	}
 }
 
 func (srv *SrvShare) FinishUploadHandler(res http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
-		srv.Http.Fill(httpUtil.Err404, res)
+		srv.Http.Fill(httputil.Err404, res)
 		return
 	}
 
@@ -109,24 +109,24 @@ func (srv *SrvShare) FinishUploadHandler(res http.ResponseWriter, req *http.Requ
 	loginPass := srv.Walls.PassLoginCheck(tokenStr, req)
 	opPass := srv.Walls.PassOpLimit(GetRemoteIp(req.RemoteAddr), srv.Conf.OpIdUpload)
 	if !ipPass || !loginPass || !opPass {
-		srv.Http.Fill(httpUtil.Err429, res)
+		srv.Http.Fill(httputil.Err429, res)
 		return
 	}
 
 	ack := make(chan error, 1)
-	ok := srv.WorkerPool.Put(&worker.Task{
+	ok := srv.WorkerPool.Put(&httpworker.Task{
 		Ack: ack,
 		Do:  srv.Wrap(srv.FinishUpload),
 		Res: res,
 		Req: req,
 	})
 	if !ok {
-		srv.Http.Fill(httpUtil.Err503, res)
+		srv.Http.Fill(httputil.Err503, res)
 	}
 
 	execErr := srv.WorkerPool.IsInTime(ack, time.Duration(srv.Conf.Timeout)*time.Millisecond)
 	if srv.Err.IsErr(execErr) {
-		srv.Http.Fill(httpUtil.Err500, res)
+		srv.Http.Fill(httputil.Err500, res)
 	}
 }
 
@@ -136,7 +136,7 @@ func (srv *SrvShare) StartUpload(res http.ResponseWriter, req *http.Request) int
 
 func (srv *SrvShare) startUpload(fileName string) interface{} {
 	if !IsValidFileName(fileName) {
-		return httpUtil.Err400
+		return httputil.Err400
 	}
 
 	id := DefaultId
@@ -157,12 +157,12 @@ func (srv *SrvShare) startUpload(fileName string) interface{} {
 	case 0:
 		// go on
 	case -1:
-		return httpUtil.Err412
+		return httputil.Err412
 	case 1:
-		return httpUtil.Err500 // TODO: use correct status code
+		return httputil.Err500 // TODO: use correct status code
 	default:
 		srv.Index.Del(id)
-		return httpUtil.Err500
+		return httputil.Err500
 	}
 
 	fullPath := filepath.Join(srv.Conf.PathLocal, info.PathLocal)
@@ -170,10 +170,10 @@ func (srv *SrvShare) startUpload(fileName string) interface{} {
 	switch {
 	case createFileErr == fsutil.ErrExists:
 		srv.Index.Del(id)
-		return httpUtil.Err412
+		return httputil.Err412
 	case createFileErr == fsutil.ErrUnknown:
 		srv.Index.Del(id)
-		return httpUtil.Err500
+		return httputil.Err500
 	default:
 		srv.Index.SetState(id, fileidx.StateUploading)
 		return &ByteRange{
@@ -193,7 +193,7 @@ func (srv *SrvShare) Upload(res http.ResponseWriter, req *http.Request) interfac
 	if srv.Err.IsErr(startErr) ||
 		srv.Err.IsErr(lengthErr) ||
 		srv.Err.IsErr(chunkErr) {
-		return httpUtil.Err400
+		return httputil.Err400
 	}
 
 	return srv.upload(shareId, start, length, chunk)
@@ -201,25 +201,25 @@ func (srv *SrvShare) Upload(res http.ResponseWriter, req *http.Request) interfac
 
 func (srv *SrvShare) upload(shareId string, start int64, length int64, chunk io.Reader) interface{} {
 	if !srv.IsValidShareId(shareId) {
-		return httpUtil.Err400
+		return httputil.Err400
 	}
 
 	fileInfo, found := srv.Index.Get(shareId)
 	if !found {
-		return httpUtil.Err404
+		return httputil.Err404
 	}
 
 	if !srv.IsValidStart(start, fileInfo.Uploaded) || !srv.IsValidLength(length) {
-		return httpUtil.Err400
+		return httputil.Err400
 	}
 
 	fullPath := filepath.Join(srv.Conf.PathLocal, fileInfo.PathLocal)
 	if !srv.Fs.CopyChunkN(fullPath, chunk, start, length) {
-		return httpUtil.Err500
+		return httputil.Err500
 	}
 
 	if srv.Index.IncrUploaded(shareId, length) == 0 {
-		return httpUtil.Err404
+		return httputil.Err404
 	}
 
 	return &ByteRange{
@@ -236,7 +236,7 @@ func (srv *SrvShare) FinishUpload(res http.ResponseWriter, req *http.Request) in
 
 func (srv *SrvShare) finishUpload(shareId string) interface{} {
 	if !srv.Index.SetState(shareId, fileidx.StateDone) {
-		return httpUtil.Err404
+		return httputil.Err404
 	}
 
 	return &ShareInfo{

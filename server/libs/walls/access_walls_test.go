@@ -33,7 +33,7 @@ func TestIpLimit(t *testing.T) {
 	walls := newAccessWalls(1000, ttl, cyc, limit)
 
 	testIpLimit(t, walls, ip, limit)
-	// wait for tokens are re-fullfilled
+	// wait for tokens are re-fulfilled
 	time.Sleep(time.Duration(cyc) * time.Second)
 	testIpLimit(t, walls, ip, limit)
 
@@ -43,12 +43,12 @@ func TestIpLimit(t *testing.T) {
 func testIpLimit(t *testing.T, walls Walls, ip string, limit int16) {
 	for i := int16(0); i < limit; i++ {
 		if !walls.PassIpLimit(ip) {
-			t.Fatalf("ipLimiter: should be passed", time.Now().Unix())
+			t.Fatalf("ipLimiter: should be passed %d", time.Now().Unix())
 		}
 	}
 
 	if walls.PassIpLimit(ip) {
-		t.Fatalf("ipLimiter: should not be passed", time.Now().Unix())
+		t.Fatalf("ipLimiter: should not be passed %d", time.Now().Unix())
 	}
 }
 
@@ -62,7 +62,7 @@ func TestOpLimit(t *testing.T) {
 
 	testOpLimit(t, walls, resourceId, op1, limit)
 	testOpLimit(t, walls, resourceId, op2, limit)
-	// wait for tokens are re-fullfilled
+	// wait for tokens are re-fulfilled
 	time.Sleep(time.Duration(ttl) * time.Second)
 	testOpLimit(t, walls, resourceId, op1, limit)
 	testOpLimit(t, walls, resourceId, op2, limit)

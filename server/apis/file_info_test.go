@@ -416,7 +416,7 @@ func TestPublishId(t *testing.T) {
 			}
 
 			if res.ShareId != mockPublicId {
-				t.Fatalf("shadowId: mockId incorrect", res.ShareId, mockPublicId)
+				t.Fatalf("shadowId: mockId incorrect %v %v", res.ShareId, mockPublicId)
 			}
 
 		case httputil.MsgRes:
