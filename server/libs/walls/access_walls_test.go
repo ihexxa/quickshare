@@ -43,12 +43,12 @@ func TestIpLimit(t *testing.T) {
 func testIpLimit(t *testing.T, walls Walls, ip string, limit int16) {
 	for i := int16(0); i < limit; i++ {
 		if !walls.PassIpLimit(ip) {
-			t.Fatalf("ipLimiter: should be passed", time.Now().Unix())
+			t.Fatalf("ipLimiter: should be passed %d", time.Now().Unix())
 		}
 	}
 
 	if walls.PassIpLimit(ip) {
-		t.Fatalf("ipLimiter: should not be passed", time.Now().Unix())
+		t.Fatalf("ipLimiter: should not be passed %d", time.Now().Unix())
 	}
 }
 

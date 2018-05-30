@@ -211,7 +211,6 @@ func (srv *SrvShare) AddLocalFilesImp() interface{} {
 	for _, info := range infos {
 		info.DownLimit = srv.Conf.DownLimit
 		info.State = fileidx.StateDone
-		info.PathLocal = info.PathLocal
 		info.Id = srv.Encryptor.Encrypt([]byte(info.PathLocal))
 
 		addRet := srv.Index.Add(info)
