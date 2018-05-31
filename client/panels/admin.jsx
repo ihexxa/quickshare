@@ -12,7 +12,7 @@ import { Log } from "../components/composite/log";
 function getWidth() {
   if (window.innerWidth >= window.innerHeight) {
     return `${Math.floor(
-      window.innerWidth * 0.95 / config.rootSize / config.colWidth
+      (window.innerWidth * 0.95) / config.rootSize / config.colWidth
     ) * config.colWidth}rem`;
   }
   return "auto";

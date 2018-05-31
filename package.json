@@ -9,7 +9,9 @@
     "build-client": "webpack --config ./client/webpack.config.prod.js",
     "build-client-dev": "webpack --config ./client/webpack.config.dev.js",
     "clean": "go clean && rm -r ./dist && rm -r ./public/dist",
-    "fmt": "go fmt ./...",
+    "ci-check-fmt": "yarn prettier -l  '@(client|docs)/*.@(js|jsx|md)'",
+    "fmt":
+      "go fmt ./... && yarn prettier --write  '@(client|docs)/*.@(js|jsx|md)'",
     "setup": "yarn && dep ensure",
     "start": "yarn build-client && go run server.go",
     "test": "go test -v ./... && yarn jest --coverage"
@@ -37,6 +39,7 @@
     "html-webpack-plugin": "^3.2.0",
     "jest": "^21.2.1",
     "md5": "^2.2.1",
+    "prettier": "^1.13.3",
     "react-addons-test-utils": "^15.6.2",
     "react-test-renderer": "15",
     "regenerator-runtime": "^0.11.1",
