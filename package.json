@@ -17,6 +17,7 @@
   "author": "hexxa",
   "license": "LGPL-3.0",
   "devDependencies": {
+    "auto-bump": "^0.0.9",
     "babel-core": "^6.26.0",
     "babel-jest": "^21.2.0",
     "babel-loader": "^6.4.1",
