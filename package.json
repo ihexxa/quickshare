@@ -1,6 +1,6 @@
 {
   "name": "quickshare",
-  "version": "0.0.18",
+  "version": "0.2.2",
   "description": "A succinct file sharing server.",
   "main": "",
   "scripts": {
@@ -70,5 +70,6 @@
       "./client/tests/enzyme_setup.js"
     ],
     "verbose": true
-  }
+  },
+  "autoBump": {}
 }
