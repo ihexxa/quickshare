@@ -1,10 +1,12 @@
 import React from "react";
+import { CopyToClipboard } from "react-copy-to-clipboard";
 import { Button } from "../control/button";
 import { Input } from "../control/input";
 
 export const classDelBtn = "file-box-pane-btn-del";
 export const classDelYes = "del-no";
 export const classDelNo = "del-yes";
+const msgUrlCopied = "URL is copied.";
 
 let styleDetailPane = {
   color: "#666",
@@ -108,6 +110,10 @@ export class FileBoxDetail extends React.PureComponent {
     });
   };
 
+  onCopy = () => {
+    this.props.onOk(msgUrlCopied);
+  };
+
   render() {
     const delComfirmButtons = (
       <div>
@@ -127,6 +133,10 @@ export class FileBoxDetail extends React.PureComponent {
         />
       </div>
     );
+
+    const downloadURL = `${window.location.protocol}//${window.location.host}${
+      this.props.href
+    }`;
 
     return (
       <div style={styleDetailPane} className={this.props.className}>
@@ -149,9 +159,7 @@ export class FileBoxDetail extends React.PureComponent {
             <h4 style={styleDetailHeader}>Download Link</h4>
             <Input
               type="text"
-              value={`${window.location.protocol}//${window.location.host}${
-                this.props.href
-              }`}
+              value={downloadURL}
               style={{ marginBottom: "0.5rem" }}
             />
             {/* <Button label={"Copy"} onClick={this.onCopyLink} /> */}
@@ -168,8 +176,24 @@ export class FileBoxDetail extends React.PureComponent {
             <Button
               label={"Regenerate"}
               onClick={this.onShadowLink}
-              styleContainer={{ backgroundColor: "#ccc", marginTop: "0.25rem" }}
+              styleContainer={{
+                backgroundColor: "#ccc",
+                marginTop: "0.25rem",
+                marginRight: "0.5rem"
+              }}
             />
+            <CopyToClipboard text={downloadURL} onCopy={this.onCopy}>
+              <Button
+                label={"Copy"}
+                onClick={() => {}}
+                styleContainer={{
+                  backgroundColor: "#ccc",
+                  marginTop: "0.25rem"
+                }}
+              >
+                Copy
+              </Button>
+            </CopyToClipboard>
           </div>
           <div>
             <h4 style={styleDetailHeader}>

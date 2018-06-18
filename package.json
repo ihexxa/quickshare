@@ -1,17 +1,15 @@
 {
   "name": "quickshare",
-  "version": "0.0.18",
+  "version": "0.2.2",
   "description": "A succinct file sharing server.",
   "main": "",
   "scripts": {
-    "build":
-      "rm -rf ./dist && rm -rf ./public/dist && yarn build-client && goreleaser --snapshot",
+    "build": "rm -rf ./dist && rm -rf ./public/dist && yarn build-client && goreleaser --snapshot",
     "build-client": "webpack --config ./client/webpack.config.prod.js",
     "build-client-dev": "webpack --config ./client/webpack.config.dev.js",
     "clean": "go clean && rm -r ./dist && rm -r ./public/dist",
-    "ci-check-fmt": "yarn prettier -l  '@(client|docs)/*.@(js|jsx|md)'",
-    "fmt":
-      "go fmt ./... && yarn prettier --write  '@(client|docs)/*.@(js|jsx|md)'",
+    "check-fmt": "yarn prettier -l  '@(client|docs)/*.@(js|jsx|md)'",
+    "fmt": "go fmt ./... && yarn prettier --write  '@(client|docs)/*.@(js|jsx|md)'",
     "setup": "yarn && dep ensure",
     "start": "yarn build-client && go run server.go",
     "test": "go test -v ./... && yarn jest --coverage"
@@ -19,6 +17,7 @@
   "author": "hexxa",
   "license": "LGPL-3.0",
   "devDependencies": {
+    "auto-bump": "^0.0.9",
     "babel-core": "^6.26.0",
     "babel-jest": "^21.2.0",
     "babel-loader": "^6.4.1",
@@ -58,6 +57,7 @@
     "immutable": "^3.8.2",
     "lodash.throttle": "^4.1.1",
     "react": "^15.6.2",
+    "react-copy-to-clipboard": "^5.0.1",
     "react-dom": "^15.6.2",
     "react-icons": "^2.2.7",
     "webpack-merge": "^4.1.2"
@@ -66,7 +66,10 @@
     "transform": {
       "^.+\\.jsx?$": "babel-jest"
     },
-    "setupFiles": ["./client/tests/enzyme_setup.js"],
+    "setupFiles": [
+      "./client/tests/enzyme_setup.js"
+    ],
     "verbose": true
-  }
+  },
+  "autoBump": {}
 }

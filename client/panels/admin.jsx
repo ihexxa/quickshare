@@ -106,7 +106,8 @@ class AdminPanel extends React.PureComponent {
     this.log = logRef;
     this.log.info(
       <span>
-        Know more about <a href="https://github.com/ihexxa">Quickshare</a>
+        Know more about{" "}
+        <a href="https://github.com/ihexxa/quickshare">Quickshare</a>
       </span>
     );
   };
