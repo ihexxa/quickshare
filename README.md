@@ -22,18 +22,16 @@ Choose Language: English | [简体中文](./docs/README_zh-cn.md)
 
 ## Download
 
-* Linux: [Download](https://github.com/ihexxa/quickshare/releases/download/0.0.16/quickshare_0.0.16_linux_x86_64.zip)
-* Mac: [Download](https://github.com/ihexxa/quickshare/releases/download/0.0.16/quickshare_0.0.16_macos_x86_64.zip)
-* Windows: [Download](https://github.com/ihexxa/quickshare/releases/download/0.0.16/quickshare_0.0.16_windows_x86_64.zip)
+Visit [Release Page](https://github.com/ihexxa/quickshare/releases) to get Linux | Mac | Windows distribution(s).
 
 ## Features
 
-* Upload and download in browser, no client
-* Share files among desktop and mobile devices
-* Portable software
-* Add files from local
-* Add download limit for resource
-* Download from interrupted point
+- Upload and download in browser, no client
+- Share files among desktop and mobile devices
+- Portable software
+- Add files from local
+- Add download limit for resource
+- Download from interrupted point
 
 ## Installation
 
@@ -43,24 +41,24 @@ The first step, unzip and start quickshare
 
 ### Linux
 
-* Unzip the package: `unzip [package].` (`[package]` could be `quickshare_0.0.8_linux_x86_6 4.zip`)
-* Start quickshare `./quickshare`
+- Unzip the package: `unzip [package].` (`[package]` could be `quickshare_0.0.8_linux_x86_6 4.zip`)
+- Start quickshare `./quickshare`
 
 ### Mac
 
-* Unzip the package: `unzip [package].` (`[package]` could be `quickshare_0.0.8_macos_x86_64.zip`)
-* Start quickshare `./quickshare`
+- Unzip the package: `unzip [package].` (`[package]` could be `quickshare_0.0.8_macos_x86_64.zip`)
+- Start quickshare `./quickshare`
 
 ### Windows
 
-* Unzip the package
-* Go into folder and click `quickshare.exe`
+- Unzip the package
+- Go into folder and click `quickshare.exe`
 
 Last step, meet quickshare in browser
 
-* Quickshare will start and show `quickshare starts @ [URL]` in terminal (e.g. `URL` could be `192.168.0.1:8888`)
-* Open `URL` in browser and login with `admin` and `quicksh@re`
-* Enjoy (But don't forget to change password according to [FAQ document](./docs/FAQ_en-us.md))
+- Quickshare will start and show `quickshare starts @ [URL]` in terminal (e.g. `URL` could be `192.168.0.1:8888`)
+- Open `URL` in browser and login with `admin` and `quicksh@re`
+- Enjoy (But don't forget to change password according to [FAQ document](./docs/FAQ_en-us.md))
 
 ### FAQ
 
