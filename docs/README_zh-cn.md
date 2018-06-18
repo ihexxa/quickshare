@@ -22,9 +22,7 @@
 
 ## 下载
 
-- Linux: [Download](https://github.com/ihexxa/quickshare/releases/download/0.0.16/quickshare_0.0.16_linux_x86_64.zip)
-- Mac: [Download](https://github.com/ihexxa/quickshare/releases/download/0.0.16/quickshare_0.0.16_macos_x86_64.zip)
-- Windows: [Download](https://github.com/ihexxa/quickshare/releases/download/0.0.16/quickshare_0.0.16_windows_x86_64.zip)
+访问 [发布页](https://github.com/ihexxa/quickshare/releases) 获取 Linux | Mac | Windows 版本.
 
 ## 特点
 
