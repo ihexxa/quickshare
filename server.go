@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"time"
-)
 
-import (
+	_ "github.com/ihexxa/quickshare/server/libs/logutil"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/ihexxa/quickshare/server/apis"
 	"github.com/ihexxa/quickshare/server/libs/cfg"
 	"github.com/skratchdot/open-golang/open"
@@ -16,6 +16,7 @@ import (
 func main() {
 	config := cfg.NewConfigFrom("config.json")
 	srvShare := apis.NewSrvShare(config)
+	log.Infof("srvShare is: %v", srvShare)
 
 	// TODO: using httprouter instead
 	mux := http.NewServeMux()

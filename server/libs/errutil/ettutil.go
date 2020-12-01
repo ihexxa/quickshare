@@ -2,11 +2,8 @@ package errutil
 
 import (
 	"os"
-	"runtime/debug"
-)
 
-import (
-	"github.com/ihexxa/quickshare/server/libs/logutil"
+	log "github.com/sirupsen/logrus"
 )
 
 type ErrUtil interface {
@@ -15,22 +12,17 @@ type ErrUtil interface {
 	RecoverPanic()
 }
 
-func NewErrChecker(logStack bool, logger logutil.LogUtil) ErrUtil {
-	return &ErrChecker{logStack: logStack, log: logger}
+func NewErrChecker() ErrUtil {
+	return &ErrChecker{}
 }
 
 type ErrChecker struct {
-	log      logutil.LogUtil
-	logStack bool
 }
 
 // IsErr checks if error occurs
 func (e *ErrChecker) IsErr(err error) bool {
 	if err != nil {
-		e.log.Printf("Error:%q\n", err)
-		if e.logStack {
-			e.log.Println(debug.Stack())
-		}
+		log.Printf("Error:%q\n", err)
 		return true
 	}
 	return false
@@ -39,10 +31,7 @@ func (e *ErrChecker) IsErr(err error) bool {
 // IsFatalPanic should be used with defer
 func (e *ErrChecker) IsFatalErr(fe error) bool {
 	if fe != nil {
-		e.log.Printf("Panic:%q", fe)
-		if e.logStack {
-			e.log.Println(debug.Stack())
-		}
+		log.Printf("Panic:%q", fe)
 		os.Exit(1)
 	}
 	return false
@@ -51,9 +40,6 @@ func (e *ErrChecker) IsFatalErr(fe error) bool {
 // RecoverPanic catchs the panic and logs panic information
 func (e *ErrChecker) RecoverPanic() {
 	if r := recover(); r != nil {
-		e.log.Printf("Recovered:%v", r)
-		if e.logStack {
-			e.log.Println(debug.Stack())
-		}
+		log.Printf("Recovered:%v", r)
 	}
 }

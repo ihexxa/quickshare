@@ -5,10 +5,8 @@ import (
 	"net/http"
 	"runtime/debug"
 	"time"
-)
 
-import (
-	"github.com/ihexxa/quickshare/server/libs/logutil"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -34,10 +32,9 @@ type WorkerPool struct {
 	queue   chan *Task
 	size    int
 	workers []*Worker
-	log     logutil.LogUtil // TODO: should not pass log here
 }
 
-func NewWorkerPool(poolSize int, queueSize int, log logutil.LogUtil) Workers {
+func NewWorkerPool(poolSize int, queueSize int) Workers {
 	queue := make(chan *Task, queueSize)
 	workers := make([]*Worker, 0, poolSize)
 
@@ -45,7 +42,6 @@ func NewWorkerPool(poolSize int, queueSize int, log logutil.LogUtil) Workers {
 		worker := &Worker{
 			Id:    uint64(i),
 			queue: queue,
-			log:   log,
 		}
 
 		go worker.Start()
@@ -56,7 +52,6 @@ func NewWorkerPool(poolSize int, queueSize int, log logutil.LogUtil) Workers {
 		queue:   queue,
 		size:    poolSize,
 		workers: workers,
-		log:     log,
 	}
 }
 
@@ -81,19 +76,19 @@ func (pool *WorkerPool) IsInTime(ack chan error, msec time.Duration) error {
 	select {
 	case err := <-ack:
 		if err == nil {
-			pool.log.Printf(
+			log.Printf(
 				"finish cost: %d usec",
 				(time.Now().UnixNano()-start)/1000,
 			)
 		} else {
-			pool.log.Printf(
+			log.Printf(
 				"finish with error cost: %d usec",
 				(time.Now().UnixNano()-start)/1000,
 			)
 		}
 		return err
 	case errTimeout := <-timeout:
-		pool.log.Printf("timeout cost: %d usec", (time.Now().UnixNano()-start)/1000)
+		log.Printf("timeout cost: %d usec", (time.Now().UnixNano()-start)/1000)
 		return errTimeout
 	}
 }
@@ -101,12 +96,11 @@ func (pool *WorkerPool) IsInTime(ack chan error, msec time.Duration) error {
 type Worker struct {
 	Id    uint64
 	queue chan *Task
-	log   logutil.LogUtil
 }
 
 func (worker *Worker) RecoverPanic() {
 	if r := recover(); r != nil {
-		worker.log.Printf("Recovered:%v stack: %v", r, debug.Stack())
+		log.Printf("Recovered:%v stack: %v", r, debug.Stack())
 		// restart worker and IsInTime will return timeout error for last task
 		worker.Start()
 	}

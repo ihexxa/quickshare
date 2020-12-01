@@ -1,13 +1,10 @@
 package apis
 
 import (
-	"log"
 	"net/http"
 	"os"
 	"strings"
-)
 
-import (
 	"github.com/ihexxa/quickshare/server/libs/cfg"
 	"github.com/ihexxa/quickshare/server/libs/encrypt"
 	"github.com/ihexxa/quickshare/server/libs/errutil"
@@ -16,20 +13,17 @@ import (
 	"github.com/ihexxa/quickshare/server/libs/httputil"
 	"github.com/ihexxa/quickshare/server/libs/httpworker"
 	"github.com/ihexxa/quickshare/server/libs/limiter"
-	"github.com/ihexxa/quickshare/server/libs/logutil"
 	"github.com/ihexxa/quickshare/server/libs/qtube"
 	"github.com/ihexxa/quickshare/server/libs/walls"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type AddDep func(*SrvShare)
 
 func NewSrvShare(config *cfg.Config) *SrvShare {
-	logger := logutil.NewSlog(os.Stdout, config.AppName)
-	setLog := func(srv *SrvShare) {
-		srv.Log = logger
-	}
+	errChecker := errutil.NewErrChecker()
 
-	errChecker := errutil.NewErrChecker(!config.Production, logger)
 	setErr := func(srv *SrvShare) {
 		srv.Err = errChecker
 	}
@@ -37,7 +31,7 @@ func NewSrvShare(config *cfg.Config) *SrvShare {
 	setWorkerPool := func(srv *SrvShare) {
 		workerPoolSize := config.WorkerPoolSize
 		taskQueueSize := config.TaskQueueSize
-		srv.WorkerPool = httpworker.NewWorkerPool(workerPoolSize, taskQueueSize, logger)
+		srv.WorkerPool = httpworker.NewWorkerPool(workerPoolSize, taskQueueSize)
 	}
 
 	setWalls := func(srv *SrvShare) {
@@ -92,7 +86,7 @@ func NewSrvShare(config *cfg.Config) *SrvShare {
 		}
 	}
 
-	return InitSrvShare(config, setIndex, setWalls, setWorkerPool, setFs, setDownloader, setEncryptor, setLog, setErr, setHttp)
+	return InitSrvShare(config, setIndex, setWalls, setWorkerPool, setFs, setDownloader, setEncryptor, setErr, setHttp)
 }
 
 func InitSrvShare(config *cfg.Config, addDeps ...AddDep) *SrvShare {
@@ -121,7 +115,6 @@ type SrvShare struct {
 	Http       httputil.HttpUtil
 	Index      fileidx.FileIndex
 	Fs         fsutil.FsUtil
-	Log        logutil.LogUtil
 	Walls      walls.Walls
 	WorkerPool httpworker.Workers
 }

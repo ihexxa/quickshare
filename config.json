@@ -4,7 +4,7 @@
   "AdminPwd": "quicksh@re",
   "SecretKey": "qs",
   "Production": true,
-  "HostName": "",
+  "HostName": "0.0.0.0",
   "Port": 8888,
   "MaxUpBytesPerSec": 10000000,
   "MaxDownBytesPerSec": 10000000,

@@ -4,9 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"time"
-)
 
-import (
 	"github.com/ihexxa/quickshare/server/libs/errutil"
 )
 
