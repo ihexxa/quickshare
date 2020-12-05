@@ -6,6 +6,7 @@ var ErrLocked = errors.New("already locked")
 var ErrNoLock = errors.New("no lock to unlock")
 
 type IKVStore interface {
+	AddNamespace(nsName string) error
 	GetBool(key string) (bool, bool)
 	SetBool(key string, val bool) error
 	DelBool(key string) error
@@ -19,8 +20,10 @@ type IKVStore interface {
 	SetFloat(key string, val float64) error
 	DelFloat(key string) error
 	GetString(key string) (string, bool)
-	SetString(key string, val string) error
+	SetString(key, val string) error
 	DelString(key string) error
+	GetStringIn(namespace, key string) (string, bool)
+	SetStringIn(namespace, key, val string) error
 	TryLock(key string) error
 	Unlock(key string) error
 }

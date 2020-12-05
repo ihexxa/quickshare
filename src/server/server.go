@@ -43,7 +43,7 @@ func NewServer(cfg gocfg.ICfg) (*Server, error) {
 
 	srv := &http.Server{
 		// TODO: set more options
-		Addr:           cfg.GrabString("Server.Addr"),
+		Addr:           fmt.Sprintf("%s:%d", cfg.GrabString("Server.Host"), cfg.GrabInt("Server.Port")),
 		Handler:        router,
 		ReadTimeout:    time.Duration(cfg.GrabInt("Server.ReadTimeout")) * time.Millisecond,
 		WriteTimeout:   time.Duration(cfg.GrabInt("Server.WriteTimeout")) * time.Millisecond,
@@ -84,11 +84,17 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	opensLimit := cfg.GrabInt("Fs.OpensLimit")
 	openTTL := cfg.GrabInt("Fs.OpenTTL")
 
+	ider := simpleidgen.New()
 	filesystem := local.NewLocalFS(rootPath, 0660, opensLimit, openTTL)
 	jwtEncDec := jwt.NewJWTEncDec(secret)
 	logger := simplelog.NewSimpleLogger()
 	kv := boltdbpvd.New(".", 1024)
-	ider := simpleidgen.New()
+	if err := kv.AddNamespace(singleuserhdr.UsersNamespace); err != nil {
+		panic(err)
+	}
+	if err := kv.AddNamespace(singleuserhdr.RolesNamespace); err != nil {
+		panic(err)
+	}
 
 	deps := depidx.NewDeps(cfg)
 	deps.SetFS(filesystem)
@@ -107,15 +113,19 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 }
 
 func addHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.Engine, error) {
+	userHdrs := singleuserhdr.NewSimpleUserHandlers(cfg, deps)
+	fileHdrs, err := fileshdr.NewFileHandlers(cfg, deps)
+
+	// middleware
+	router.Use(userHdrs.Auth())
+
 	v1 := router.Group("/v1")
 
 	users := v1.Group("/users")
-	userHdrs := singleuserhdr.NewSimpleUserHandlers(cfg, deps)
 	users.POST("/login", userHdrs.Login)
 	users.POST("/logout", userHdrs.Logout)
 
 	filesSvc := v1.Group("/fs")
-	fileHdrs, err := fileshdr.NewFileHandlers(cfg, deps)
 	if err != nil {
 		panic(err)
 	}

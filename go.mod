@@ -12,6 +12,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/robbert229/jwt v2.0.0+incompatible
 	github.com/skratchdot/open-golang v0.0.0-20160302144031-75fb7ed4208c
+	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/net v0.0.0-20201202161906-c7110b5ffcbb // indirect
 	moul.io/http2curl v1.0.0 // indirect
 )
@@ -19,4 +20,3 @@ require (
 replace github.com/ihexxa/gocfg => /home/hexxa/ws/github.com/ihexxa/gocfg
 
 replace github.com/ihexxa/multipart => /home/hexxa/ws/github.com/ihexxa/multipart
-

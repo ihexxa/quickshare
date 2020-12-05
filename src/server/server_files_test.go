@@ -36,11 +36,14 @@ func TestFileHandlers(t *testing.T) {
 	root := "./testData"
 	chunkSize := 2
 	config := `{
-		"Server": {
-			"Debug": true
+		"users": {
+			"enableAuth": false
 		},
-		"FS": {
-			"Root": "./testData"
+		"server": {
+			"debug": true
+		},
+		"fs": {
+			"root": "./testData"
 		}
 	}`
 

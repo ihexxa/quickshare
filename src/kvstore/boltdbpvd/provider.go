@@ -27,6 +27,7 @@ func New(dbPath string, maxStrLen int) *BoltPvd {
 
 	buckets := []string{"bools", "ints", "int64s", "floats", "strings", "locks"}
 	for _, bucketName := range buckets {
+		// TODO: should return err
 		db.Update(func(tx *bolt.Tx) error {
 			b := tx.Bucket([]byte(bucketName))
 			if b != nil {
@@ -46,6 +47,18 @@ func New(dbPath string, maxStrLen int) *BoltPvd {
 		db:        db,
 		maxStrLen: maxStrLen,
 	}
+}
+
+func (bp *BoltPvd) AddNamespace(nsName string) error {
+	return bp.db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(nsName))
+		if b != nil {
+			return nil
+		}
+
+		_, err := tx.CreateBucket([]byte(nsName))
+		return err
+	})
 }
 
 func (bp *BoltPvd) Close() error {
@@ -221,5 +234,28 @@ func (bp *BoltPvd) Unlock(key string) error {
 			return b.Delete([]byte(key))
 		}
 		return kvstore.ErrNoLock
+	})
+}
+
+func (bp *BoltPvd) GetStringIn(namespace, key string) (string, bool) {
+	buf, ok, length := make([]byte, bp.maxStrLen), false, bp.maxStrLen
+	bp.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(namespace))
+		v := b.Get([]byte(key))
+		length = copy(buf, v)
+		ok = v != nil
+		return nil
+	})
+	return string(buf[:length]), ok
+}
+
+func (bp *BoltPvd) SetStringIn(namespace, key, val string) error {
+	if len(val) > bp.maxStrLen {
+		return fmt.Errorf("can not set string value longer than %d", bp.maxStrLen)
+	}
+
+	return bp.db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(namespace))
+		return b.Put([]byte(key), []byte(val))
 	})
 }
