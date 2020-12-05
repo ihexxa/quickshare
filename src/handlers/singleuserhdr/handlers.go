@@ -18,6 +18,7 @@ var (
 	ErrInvalidConfig = errors.New("invalid user config")
 	UserParam        = "user"
 	PwdParam         = "pwd"
+	NewPwdParam      = "newpwd"
 	RoleParam        = "role"
 	ExpireParam      = "expire"
 	TokenCookie      = "tk"
@@ -86,5 +87,40 @@ func (h *SimpleUserHandlers) Login(c *gin.Context) {
 func (h *SimpleUserHandlers) Logout(c *gin.Context) {
 	// token alreay verified in the authn middleware
 	c.SetCookie(TokenCookie, "", 0, "/", "nohost", false, true)
+	c.JSON(q.Resp(200))
+}
+
+func (h *SimpleUserHandlers) SetPwd(c *gin.Context) {
+	user, ok1 := c.GetPostForm(UserParam)
+	pwd1, ok2 := c.GetPostForm(PwdParam)
+	pwd2, ok3 := c.GetPostForm(NewPwdParam)
+	if !ok1 || !ok2 || !ok3 {
+		c.JSON(q.ErrResp(c, 401, ErrInvalidUser))
+		return
+	}
+
+	expectedHash, ok := h.deps.KV().GetStringIn(UsersNamespace, user)
+	if !ok {
+		c.JSON(q.ErrResp(c, 500, ErrInvalidConfig))
+		return
+	}
+
+	err := bcrypt.CompareHashAndPassword([]byte(expectedHash), []byte(pwd1))
+	if err != nil {
+		c.JSON(q.ErrResp(c, 401, ErrInvalidUser))
+		return
+	}
+
+	newHash, err := bcrypt.GenerateFromPassword([]byte(pwd2), 10)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, errors.New("fail to set password")))
+		return
+	}
+	err = h.deps.KV().SetStringIn(UsersNamespace, user, string(newHash))
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, ErrInvalidConfig))
+		return
+	}
+
 	c.JSON(q.Resp(200))
 }
