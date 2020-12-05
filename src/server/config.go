@@ -11,7 +11,7 @@ type Secrets struct {
 }
 
 type ServerCfg struct {
-	ProdMode       bool   `json:"prodMode"`
+	Debug          bool   `json:"debug"`
 	Addr           string `json:"addr"`
 	ReadTimeout    int    `json:"readTimeout"`
 	WriteTimeout   int    `json:"writeTimeout"`
@@ -39,7 +39,7 @@ func NewDefaultConfig() *Config {
 			TokenSecret: "",
 		},
 		Server: &ServerCfg{
-			ProdMode:       true,
+			Debug:          false,
 			Addr:           "127.0.0.1:8888",
 			ReadTimeout:    2000,
 			WriteTimeout:   2000,

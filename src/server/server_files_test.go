@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/ihexxa/gocfg"
+
 	"github.com/ihexxa/quickshare/src/client"
 	"github.com/ihexxa/quickshare/src/handlers/fileshdr"
 )
@@ -36,7 +37,7 @@ func TestFileHandlers(t *testing.T) {
 	chunkSize := 2
 	config := `{
 		"Server": {
-			"ProdMode": false
+			"Debug": true
 		},
 		"FS": {
 			"Root": "./testData"

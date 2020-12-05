@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/ihexxa/gocfg"
+
 	"github.com/ihexxa/quickshare/src/cryptoutil/jwt"
 	"github.com/ihexxa/quickshare/src/depidx"
 	"github.com/ihexxa/quickshare/src/fs"
@@ -30,7 +31,7 @@ type Server struct {
 func NewServer(cfg gocfg.ICfg) (*Server, error) {
 	deps := initDeps(cfg)
 
-	if cfg.BoolOr("Server.ProdMode", true) {
+	if cfg.BoolOr("Server.Debug", false) {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
