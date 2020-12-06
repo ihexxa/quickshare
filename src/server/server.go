@@ -97,6 +97,7 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 	if cfg.BoolOr("Users.EnableAuth", true) && !userHdrs.IsInited() {
 		adminName, ok := cfg.String("ENV.DEFAULTADMIN")
 		if !ok || adminName == "" {
+			// only write to stdout
 			fmt.Print("Please input admin name: ")
 			fmt.Scanf("%s", &adminName)
 		}
@@ -107,6 +108,7 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 			if err != nil {
 				return nil, err
 			}
+			// only write to stdout
 			fmt.Printf("password is generated: %s, please update it after login\n", adminPwd)
 		}
 		adminPwd, err := userHdrs.Init(adminName, adminPwd)
