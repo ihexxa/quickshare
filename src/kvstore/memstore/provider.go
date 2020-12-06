@@ -1,6 +1,7 @@
 package memstore
 
 import (
+	"errors"
 	"sync"
 
 	"github.com/ihexxa/quickshare/src/kvstore"
@@ -163,4 +164,17 @@ func (st *MemStore) Unlock(key string) error {
 	}
 	delete(st.locks, key)
 	return nil
+}
+
+func (st *MemStore) AddNamespace(nsName string) error {
+	return errors.New("not implemented")
+}
+
+func (st *MemStore) GetStringIn(namespace, key string) (string, bool) {
+	panic("not implemented")
+	return "", false
+}
+
+func (st *MemStore) SetStringIn(namespace, key, val string) error {
+	return errors.New("not implemented")
 }

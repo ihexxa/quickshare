@@ -20,8 +20,6 @@ import (
 	"github.com/ihexxa/quickshare/src/idgen/simpleidgen"
 	"github.com/ihexxa/quickshare/src/kvstore"
 	"github.com/ihexxa/quickshare/src/kvstore/boltdbpvd"
-	"github.com/ihexxa/quickshare/src/logging/simplelog"
-	"github.com/ihexxa/quickshare/src/uploadmgr"
 )
 
 type Server struct {
@@ -70,21 +68,13 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	ider := simpleidgen.New()
 	filesystem := local.NewLocalFS(rootPath, 0660, opensLimit, openTTL)
 	jwtEncDec := jwt.NewJWTEncDec(secret)
-	logger := simplelog.NewSimpleLogger()
 	kv := boltdbpvd.New(rootPath, 1024)
 
 	deps := depidx.NewDeps(cfg)
 	deps.SetFS(filesystem)
 	deps.SetToken(jwtEncDec)
-	deps.SetLog(logger)
 	deps.SetKV(kv)
 	deps.SetID(ider)
-
-	uploadMgr, err := uploadmgr.NewUploadMgr(deps)
-	if err != nil {
-		panic(err)
-	}
-	deps.SetUploader(uploadMgr)
 
 	return deps
 }
