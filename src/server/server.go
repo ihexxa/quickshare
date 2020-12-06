@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"crypto/rand"
+	"crypto/sha1"
 	"fmt"
 	"net/http"
 	"time"
@@ -96,18 +97,24 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 	if cfg.BoolOr("Users.EnableAuth", true) && !userHdrs.IsInited() {
 		adminName, ok := cfg.String("ENV.DEFAULTADMIN")
 		if !ok || adminName == "" {
-			// TODO: print sceen only
-			fmt.Println("Please input admin name:")
+			fmt.Print("Please input admin name: ")
 			fmt.Scanf("%s", &adminName)
 		}
 
 		adminPwd, _ := cfg.String("ENV.DEFAULTADMINPWD")
+		if adminPwd == "" {
+			adminPwd, err = generatePwd()
+			if err != nil {
+				return nil, err
+			}
+			fmt.Printf("password is generated: %s, please update it after login\n", adminPwd)
+		}
 		adminPwd, err := userHdrs.Init(adminName, adminPwd)
 		if err != nil {
 			return nil, err
 		}
 
-		fmt.Printf("%s is created, its password is %s, please update it after login\n", adminName, adminPwd)
+		fmt.Printf("user (%s) is created\n", adminName)
 	}
 
 	fileHdrs, err := fileshdr.NewFileHandlers(cfg, deps)
@@ -172,4 +179,15 @@ func makeRandToken() string {
 		panic(err)
 	}
 	return string(b)
+}
+
+func generatePwd() (string, error) {
+	size := 10
+	buf := make([]byte, size)
+	size, err := rand.Read(buf)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%x", sha1.Sum(buf[:size]))[:6], nil
 }

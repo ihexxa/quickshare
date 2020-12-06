@@ -1,8 +1,6 @@
 package singleuserhdr
 
 import (
-	"crypto/rand"
-	"crypto/sha1"
 	"errors"
 	"fmt"
 	"time"
@@ -60,30 +58,11 @@ func (h *SimpleUserHandlers) IsInited() bool {
 	return ok
 }
 
-func generatePwd() (string, error) {
-	size := 10
-	buf := make([]byte, size)
-	size, err := rand.Read(buf)
-	if err != nil {
-		return "", err
-	}
-
-	return fmt.Sprintf("%x", sha1.Sum(buf[:size]))[:8], nil
-}
-
 func (h *SimpleUserHandlers) Init(userName, pwd string) (string, error) {
 	if userName == "" {
 		return "", errors.New("user name can not be empty")
 	}
 
-	var err error
-	if pwd == "" {
-		tmpPwd, err := generatePwd()
-		if err != nil {
-			return "", err
-		}
-		pwd = tmpPwd
-	}
 	pwdHash, err := bcrypt.GenerateFromPassword([]byte(pwd), 10)
 	if err != nil {
 		return "", err
