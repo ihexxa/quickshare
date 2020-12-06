@@ -1,5 +1,7 @@
 package server
 
+import "encoding/json"
+
 type FSConfig struct {
 	Root       string `json:"root"`
 	OpensLimit int    `json:"opensLimit"`
@@ -7,10 +9,11 @@ type FSConfig struct {
 }
 
 type UsersCfg struct {
-	EnableAuth     bool `json:"enableAuth"`
-	CookieTTL      int  `json:"cookieTTL"`
-	CookieSecure   bool `json:"cookieSecure"`
-	CookieHttpOnly bool `json:"cookieHttpOnly"`
+	EnableAuth     bool   `json:"enableAuth"`
+	DefaultAdmin   string `json:"defaultAdmin" cfg:"env"`
+	CookieTTL      int    `json:"cookieTTL"`
+	CookieSecure   bool   `json:"cookieSecure"`
+	CookieHttpOnly bool   `json:"cookieHttpOnly"`
 }
 
 type Secrets struct {
@@ -33,12 +36,12 @@ type Config struct {
 	Users   *UsersCfg  `json:"users"`
 }
 
-func NewEmptyConfig() *Config {
+func NewConfig() *Config {
 	return &Config{}
 }
 
-func NewDefaultConfig() *Config {
-	return &Config{
+func DefaultConfig() (string, error) {
+	defaultCfg := &Config{
 		Fs: &FSConfig{
 			Root:       ".",
 			OpensLimit: 128,
@@ -46,6 +49,7 @@ func NewDefaultConfig() *Config {
 		},
 		Users: &UsersCfg{
 			EnableAuth:     true,
+			DefaultAdmin:   "",
 			CookieTTL:      3600 * 24 * 7, // 1 week
 			CookieSecure:   false,
 			CookieHttpOnly: true,
@@ -62,4 +66,7 @@ func NewDefaultConfig() *Config {
 			MaxHeaderBytes: 512,
 		},
 	}
+
+	cfgBytes, err := json.Marshal(defaultCfg)
+	return string(cfgBytes), err
 }

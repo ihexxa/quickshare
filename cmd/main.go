@@ -8,9 +8,10 @@ import (
 )
 
 var opts struct {
-	host    string   `short:"h" long:"host" description:"server hostname"`
-	port    string   `short:"f" long:"file" description:"A file"`
-	configs []string `short:"c" description:"config path"`
+	Host    string   `short:"h" long:"host" description:"server hostname"`
+	Port    int      `short:"p" long:"port" description:"server port"`
+	Debug   bool     `short:"d" long:"debug" description:"debug mode"`
+	Configs []string `short:"c" description:"config path"`
 }
 
 func main() {
@@ -18,15 +19,32 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defaultCfg, err := server.DefaultConfig()
+	if err != nil {
+		panic(err)
+	}
 
-	cfg := gocfg.New(server.NewDefaultConfig())
-	if len(opts.configs) > 0 {
-		for _, configPath := range opts.configs {
+	cfg, err := gocfg.New(server.NewConfig()).Load(gocfg.JSONStr(defaultCfg))
+	if err != nil {
+		panic(err)
+	}
+	if len(opts.Configs) > 0 {
+		for _, configPath := range opts.Configs {
 			cfg, err = cfg.Load(gocfg.JSON(configPath))
 			if err != nil {
 				panic(err)
 			}
 		}
+	}
+
+	if opts.Host != "" {
+		cfg.SetString("Server.Host", opts.Host)
+	}
+	if opts.Port != 0 {
+		cfg.SetInt("Server.Port", opts.Port)
+	}
+	if opts.Debug {
+		cfg.SetBool("Server.Debug", opts.Debug)
 	}
 
 	srv, err := server.NewServer(cfg)

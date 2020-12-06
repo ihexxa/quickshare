@@ -16,8 +16,16 @@ import (
 )
 
 func startTestServer(config string) *Server {
-	cfg, err := gocfg.New(NewDefaultConfig()).
-		Load(gocfg.JSONStr(config))
+	defaultCfg, err := DefaultConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	cfg, err := gocfg.New(NewConfig()).
+		Load(
+			gocfg.JSONStr(defaultCfg),
+			gocfg.JSONStr(config),
+		)
 	if err != nil {
 		panic(err)
 	}

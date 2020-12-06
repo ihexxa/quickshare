@@ -31,18 +31,17 @@ type Server struct {
 func NewServer(cfg gocfg.ICfg) (*Server, error) {
 	deps := initDeps(cfg)
 
-	if cfg.BoolOr("Server.Debug", false) {
+	if !cfg.BoolOr("Server.Debug", false) {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
 	router := gin.Default()
-	router, err := addHandlers(router, cfg, deps)
+	router, err := initHandlers(router, cfg, deps)
 	if err != nil {
 		return nil, err
 	}
 
 	srv := &http.Server{
-		// TODO: set more options
 		Addr:           fmt.Sprintf("%s:%d", cfg.GrabString("Server.Host"), cfg.GrabInt("Server.Port")),
 		Handler:        router,
 		ReadTimeout:    time.Duration(cfg.GrabInt("Server.ReadTimeout")) * time.Millisecond,
@@ -54,23 +53,6 @@ func NewServer(cfg gocfg.ICfg) (*Server, error) {
 		server: srv,
 		deps:   deps,
 	}, nil
-}
-
-func (s *Server) depsFS() fs.ISimpleFS {
-	return s.deps.FS()
-}
-
-func (s *Server) depsKVStore() kvstore.IKVStore {
-	return s.deps.KV()
-}
-
-func makeRandToken() string {
-	b := make([]byte, 32)
-	_, err := rand.Read(b)
-	if err != nil {
-		panic(err)
-	}
-	return string(b)
 }
 
 func initDeps(cfg gocfg.ICfg) *depidx.Deps {
@@ -89,12 +71,6 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	jwtEncDec := jwt.NewJWTEncDec(secret)
 	logger := simplelog.NewSimpleLogger()
 	kv := boltdbpvd.New(".", 1024)
-	if err := kv.AddNamespace(singleuserhdr.UsersNamespace); err != nil {
-		panic(err)
-	}
-	if err := kv.AddNamespace(singleuserhdr.RolesNamespace); err != nil {
-		panic(err)
-	}
 
 	deps := depidx.NewDeps(cfg)
 	deps.SetFS(filesystem)
@@ -112,13 +88,35 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	return deps
 }
 
-func addHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.Engine, error) {
-	userHdrs := singleuserhdr.NewSimpleUserHandlers(cfg, deps)
+func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.Engine, error) {
+	userHdrs, err := singleuserhdr.NewSimpleUserHandlers(cfg, deps)
+	if err != nil {
+		return nil, err
+	}
+	if cfg.BoolOr("Users.EnableAuth", true) && !userHdrs.IsInited() {
+		adminName, ok := cfg.String("ENV.DEFAULTADMIN")
+		if !ok || adminName == "" {
+			// TODO: print sceen only
+			fmt.Println("Please input admin name:")
+			fmt.Scanf("%s", &adminName)
+		}
+
+		adminTmpPwd, err := userHdrs.Init(adminName)
+		if err != nil {
+			return nil, err
+		}
+		fmt.Printf("%s is created, its password is %s, please update it after login\n", adminName, adminTmpPwd)
+	}
+
 	fileHdrs, err := fileshdr.NewFileHandlers(cfg, deps)
+	if err != nil {
+		return nil, err
+	}
 
 	// middleware
 	router.Use(userHdrs.Auth())
 
+	// handler
 	v1 := router.Group("/v1")
 
 	users := v1.Group("/users")
@@ -126,9 +124,6 @@ func addHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.En
 	users.POST("/logout", userHdrs.Logout)
 
 	filesSvc := v1.Group("/fs")
-	if err != nil {
-		panic(err)
-	}
 	filesSvc.POST("/files", fileHdrs.Create)
 	filesSvc.DELETE("/files", fileHdrs.Delete)
 	filesSvc.GET("/files", fileHdrs.Download)
@@ -157,4 +152,21 @@ func (s *Server) Start() error {
 func (s *Server) Shutdown() error {
 	// TODO: add timeout
 	return s.server.Shutdown(context.Background())
+}
+
+func (s *Server) depsFS() fs.ISimpleFS {
+	return s.deps.FS()
+}
+
+func (s *Server) depsKVStore() kvstore.IKVStore {
+	return s.deps.KV()
+}
+
+func makeRandToken() string {
+	b := make([]byte, 32)
+	_, err := rand.Read(b)
+	if err != nil {
+		panic(err)
+	}
+	return string(b)
 }

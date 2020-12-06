@@ -1,6 +1,8 @@
 package singleuserhdr
 
 import (
+	"crypto/rand"
+	"crypto/sha1"
 	"errors"
 	"fmt"
 	"time"
@@ -21,11 +23,13 @@ var (
 	NewPwdParam      = "newpwd"
 	RoleParam        = "role"
 	ExpireParam      = "expire"
+	InitTimeParam    = "initTime"
 	TokenCookie      = "tk"
 	AdminRole        = "admin"
 	VisitorRole      = "visitor"
-	UsersNamespace   = "users"
-	RolesNamespace   = "roles"
+	InitNs           = "usersInit"
+	UsersNs          = "users"
+	RolesNs          = "roles"
 )
 
 type SimpleUserHandlers struct {
@@ -33,11 +37,65 @@ type SimpleUserHandlers struct {
 	deps *depidx.Deps
 }
 
-func NewSimpleUserHandlers(cfg gocfg.ICfg, deps *depidx.Deps) *SimpleUserHandlers {
+func NewSimpleUserHandlers(cfg gocfg.ICfg, deps *depidx.Deps) (*SimpleUserHandlers, error) {
+	var err error
+	if err = deps.KV().AddNamespace(InitNs); err != nil {
+		return nil, err
+	}
+	if err = deps.KV().AddNamespace(UsersNs); err != nil {
+		return nil, err
+	}
+	if err = deps.KV().AddNamespace(RolesNs); err != nil {
+		return nil, err
+	}
+
 	return &SimpleUserHandlers{
 		cfg:  cfg,
 		deps: deps,
+	}, nil
+}
+
+func (h *SimpleUserHandlers) IsInited() bool {
+	_, ok := h.deps.KV().GetStringIn(InitNs, InitTimeParam)
+	return ok
+}
+
+func generatePwd() (string, error) {
+	size := 10
+	buf := make([]byte, size)
+	size, err := rand.Read(buf)
+	if err != nil {
+		return "", err
 	}
+
+	return fmt.Sprintf("%x", sha1.Sum(buf[:size]))[:8], nil
+}
+
+func (h *SimpleUserHandlers) Init(userName string) (string, error) {
+	if userName == "" {
+		return "", errors.New("user name can not be empty")
+	}
+
+	var err error
+	tmpPwd, err := generatePwd()
+	if err != nil {
+		return "", err
+	}
+
+	err = h.deps.KV().SetStringIn(UsersNs, userName, tmpPwd)
+	if err != nil {
+		return "", err
+	}
+	err = h.deps.KV().SetStringIn(RolesNs, RoleParam, AdminRole)
+	if err != nil {
+		return "", err
+	}
+	err = h.deps.KV().SetStringIn(InitNs, InitTimeParam, fmt.Sprintf("%d", time.Now().Unix()))
+	if err != nil {
+		return "", err
+	}
+
+	return tmpPwd, nil
 }
 
 func (h *SimpleUserHandlers) Login(c *gin.Context) {
@@ -48,7 +106,7 @@ func (h *SimpleUserHandlers) Login(c *gin.Context) {
 		return
 	}
 
-	expectedHash, ok := h.deps.KV().GetStringIn(UsersNamespace, user)
+	expectedHash, ok := h.deps.KV().GetStringIn(UsersNs, user)
 	if !ok {
 		c.JSON(q.ErrResp(c, 500, ErrInvalidConfig))
 		return
@@ -60,7 +118,7 @@ func (h *SimpleUserHandlers) Login(c *gin.Context) {
 		return
 	}
 
-	role, ok := h.deps.KV().GetStringIn(RolesNamespace, user)
+	role, ok := h.deps.KV().GetStringIn(RolesNs, user)
 	if !ok {
 		c.JSON(q.ErrResp(c, 500, ErrInvalidConfig))
 		return
@@ -99,7 +157,7 @@ func (h *SimpleUserHandlers) SetPwd(c *gin.Context) {
 		return
 	}
 
-	expectedHash, ok := h.deps.KV().GetStringIn(UsersNamespace, user)
+	expectedHash, ok := h.deps.KV().GetStringIn(UsersNs, user)
 	if !ok {
 		c.JSON(q.ErrResp(c, 500, ErrInvalidConfig))
 		return
@@ -116,7 +174,7 @@ func (h *SimpleUserHandlers) SetPwd(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 500, errors.New("fail to set password")))
 		return
 	}
-	err = h.deps.KV().SetStringIn(UsersNamespace, user, string(newHash))
+	err = h.deps.KV().SetStringIn(UsersNs, user, string(newHash))
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, ErrInvalidConfig))
 		return
