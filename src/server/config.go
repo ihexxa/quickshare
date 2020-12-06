@@ -9,11 +9,12 @@ type FSConfig struct {
 }
 
 type UsersCfg struct {
-	EnableAuth     bool   `json:"enableAuth"`
-	DefaultAdmin   string `json:"defaultAdmin" cfg:"env"`
-	CookieTTL      int    `json:"cookieTTL"`
-	CookieSecure   bool   `json:"cookieSecure"`
-	CookieHttpOnly bool   `json:"cookieHttpOnly"`
+	EnableAuth      bool   `json:"enableAuth"`
+	DefaultAdmin    string `json:"defaultAdmin" cfg:"env"`
+	DefaultAdminPwd string `json:"defaultAdminPwd" cfg:"env"`
+	CookieTTL       int    `json:"cookieTTL"`
+	CookieSecure    bool   `json:"cookieSecure"`
+	CookieHttpOnly  bool   `json:"cookieHttpOnly"`
 }
 
 type Secrets struct {
@@ -48,11 +49,12 @@ func DefaultConfig() (string, error) {
 			OpenTTL:    60, // 1 min
 		},
 		Users: &UsersCfg{
-			EnableAuth:     true,
-			DefaultAdmin:   "",
-			CookieTTL:      3600 * 24 * 7, // 1 week
-			CookieSecure:   false,
-			CookieHttpOnly: true,
+			EnableAuth:      true,
+			DefaultAdmin:    "",
+			DefaultAdminPwd: "",
+			CookieTTL:       3600 * 24 * 7, // 1 week
+			CookieSecure:    false,
+			CookieHttpOnly:  true,
 		},
 		Secrets: &Secrets{
 			TokenSecret: "",

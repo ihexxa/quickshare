@@ -40,6 +40,7 @@ func (h *SimpleUserHandlers) Auth() gin.HandlerFunc {
 				RoleParam:   "",
 				ExpireParam: "",
 			}
+
 			_, err = h.deps.Token().FromToken(token, claims)
 			if err != nil {
 				c.JSON(q.ErrResp(c, 401, err))
@@ -54,8 +55,8 @@ func (h *SimpleUserHandlers) Auth() gin.HandlerFunc {
 			}
 
 			// visitor is only allowed to download
-			if claims[UserParam] != AdminRole && handlerName != "Download-fm" {
-				c.JSON(q.ErrResp(c, 401, err))
+			if claims[RoleParam] != AdminRole && handlerName != "Download-fm" {
+				c.JSON(q.Resp(401))
 				return
 			}
 		}

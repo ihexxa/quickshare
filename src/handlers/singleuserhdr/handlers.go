@@ -71,22 +71,29 @@ func generatePwd() (string, error) {
 	return fmt.Sprintf("%x", sha1.Sum(buf[:size]))[:8], nil
 }
 
-func (h *SimpleUserHandlers) Init(userName string) (string, error) {
+func (h *SimpleUserHandlers) Init(userName, pwd string) (string, error) {
 	if userName == "" {
 		return "", errors.New("user name can not be empty")
 	}
 
 	var err error
-	tmpPwd, err := generatePwd()
+	if pwd == "" {
+		tmpPwd, err := generatePwd()
+		if err != nil {
+			return "", err
+		}
+		pwd = tmpPwd
+	}
+	pwdHash, err := bcrypt.GenerateFromPassword([]byte(pwd), 10)
 	if err != nil {
 		return "", err
 	}
 
-	err = h.deps.KV().SetStringIn(UsersNs, userName, tmpPwd)
+	err = h.deps.KV().SetStringIn(UsersNs, userName, string(pwdHash))
 	if err != nil {
 		return "", err
 	}
-	err = h.deps.KV().SetStringIn(RolesNs, RoleParam, AdminRole)
+	err = h.deps.KV().SetStringIn(RolesNs, userName, AdminRole)
 	if err != nil {
 		return "", err
 	}
@@ -95,37 +102,41 @@ func (h *SimpleUserHandlers) Init(userName string) (string, error) {
 		return "", err
 	}
 
-	return tmpPwd, nil
+	return pwd, nil
+}
+
+type LoginReq struct {
+	User string `json:"user"`
+	Pwd  string `json:"pwd"`
 }
 
 func (h *SimpleUserHandlers) Login(c *gin.Context) {
-	user, ok1 := c.GetPostForm(UserParam)
-	pwd, ok2 := c.GetPostForm(PwdParam)
-	if !ok1 || !ok2 {
-		c.JSON(q.ErrResp(c, 401, ErrInvalidUser))
+	req := &LoginReq{}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
 
-	expectedHash, ok := h.deps.KV().GetStringIn(UsersNs, user)
+	expectedHash, ok := h.deps.KV().GetStringIn(UsersNs, req.User)
 	if !ok {
 		c.JSON(q.ErrResp(c, 500, ErrInvalidConfig))
 		return
 	}
 
-	err := bcrypt.CompareHashAndPassword([]byte(expectedHash), []byte(pwd))
+	err := bcrypt.CompareHashAndPassword([]byte(expectedHash), []byte(req.Pwd))
 	if err != nil {
-		c.JSON(q.ErrResp(c, 401, ErrInvalidUser))
+		c.JSON(q.ErrResp(c, 401, err))
 		return
 	}
 
-	role, ok := h.deps.KV().GetStringIn(RolesNs, user)
+	role, ok := h.deps.KV().GetStringIn(RolesNs, req.User)
 	if !ok {
-		c.JSON(q.ErrResp(c, 500, ErrInvalidConfig))
+		c.JSON(q.ErrResp(c, 501, ErrInvalidConfig))
 		return
 	}
 	ttl := h.cfg.GrabInt("Users.CookieTTL")
 	token, err := h.deps.Token().ToToken(map[string]string{
-		UserParam:   user,
+		UserParam:   req.User,
 		RoleParam:   role,
 		ExpireParam: fmt.Sprintf("%d", time.Now().Unix()+int64(ttl)),
 	})
@@ -142,39 +153,53 @@ func (h *SimpleUserHandlers) Login(c *gin.Context) {
 	c.JSON(q.Resp(200))
 }
 
+type LogoutReq struct {
+	User string `json:"user"`
+}
+
 func (h *SimpleUserHandlers) Logout(c *gin.Context) {
+	req := &LogoutReq{}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
 	// token alreay verified in the authn middleware
 	c.SetCookie(TokenCookie, "", 0, "/", "nohost", false, true)
 	c.JSON(q.Resp(200))
 }
 
+type SetPwdReq struct {
+	User   string `json:"user"`
+	OldPwd string `json:"oldPwd"`
+	NewPwd string `json:"newPwd"`
+}
+
 func (h *SimpleUserHandlers) SetPwd(c *gin.Context) {
-	user, ok1 := c.GetPostForm(UserParam)
-	pwd1, ok2 := c.GetPostForm(PwdParam)
-	pwd2, ok3 := c.GetPostForm(NewPwdParam)
-	if !ok1 || !ok2 || !ok3 {
-		c.JSON(q.ErrResp(c, 401, ErrInvalidUser))
+	req := &SetPwdReq{}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(q.ErrResp(c, 400, err))
 		return
 	}
 
-	expectedHash, ok := h.deps.KV().GetStringIn(UsersNs, user)
+	expectedHash, ok := h.deps.KV().GetStringIn(UsersNs, req.User)
 	if !ok {
 		c.JSON(q.ErrResp(c, 500, ErrInvalidConfig))
 		return
 	}
 
-	err := bcrypt.CompareHashAndPassword([]byte(expectedHash), []byte(pwd1))
+	err := bcrypt.CompareHashAndPassword([]byte(expectedHash), []byte(req.OldPwd))
 	if err != nil {
 		c.JSON(q.ErrResp(c, 401, ErrInvalidUser))
 		return
 	}
 
-	newHash, err := bcrypt.GenerateFromPassword([]byte(pwd2), 10)
+	newHash, err := bcrypt.GenerateFromPassword([]byte(req.NewPwd), 10)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, errors.New("fail to set password")))
 		return
 	}
-	err = h.deps.KV().SetStringIn(UsersNs, user, string(newHash))
+	err = h.deps.KV().SetStringIn(UsersNs, req.User, string(newHash))
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, ErrInvalidConfig))
 		return

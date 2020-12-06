@@ -70,7 +70,7 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	filesystem := local.NewLocalFS(rootPath, 0660, opensLimit, openTTL)
 	jwtEncDec := jwt.NewJWTEncDec(secret)
 	logger := simplelog.NewSimpleLogger()
-	kv := boltdbpvd.New(".", 1024)
+	kv := boltdbpvd.New(rootPath, 1024)
 
 	deps := depidx.NewDeps(cfg)
 	deps.SetFS(filesystem)
@@ -101,11 +101,13 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 			fmt.Scanf("%s", &adminName)
 		}
 
-		adminTmpPwd, err := userHdrs.Init(adminName)
+		adminPwd, _ := cfg.String("ENV.DEFAULTADMINPWD")
+		adminPwd, err := userHdrs.Init(adminName, adminPwd)
 		if err != nil {
 			return nil, err
 		}
-		fmt.Printf("%s is created, its password is %s, please update it after login\n", adminName, adminTmpPwd)
+
+		fmt.Printf("%s is created, its password is %s, please update it after login\n", adminName, adminPwd)
 	}
 
 	fileHdrs, err := fileshdr.NewFileHandlers(cfg, deps)
@@ -122,6 +124,7 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 	users := v1.Group("/users")
 	users.POST("/login", userHdrs.Login)
 	users.POST("/logout", userHdrs.Logout)
+	users.PATCH("/pwd", userHdrs.SetPwd)
 
 	filesSvc := v1.Group("/fs")
 	filesSvc.POST("/files", fileHdrs.Create)

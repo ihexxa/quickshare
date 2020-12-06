@@ -9,39 +9,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ihexxa/gocfg"
-
 	"github.com/ihexxa/quickshare/src/client"
 	"github.com/ihexxa/quickshare/src/handlers/fileshdr"
 )
 
-func startTestServer(config string) *Server {
-	defaultCfg, err := DefaultConfig()
-	if err != nil {
-		panic(err)
-	}
-
-	cfg, err := gocfg.New(NewConfig()).
-		Load(
-			gocfg.JSONStr(defaultCfg),
-			gocfg.JSONStr(config),
-		)
-	if err != nil {
-		panic(err)
-	}
-
-	srv, err := NewServer(cfg)
-	if err != nil {
-		panic(err)
-	}
-
-	go srv.Start()
-	return srv
-}
-
 func TestFileHandlers(t *testing.T) {
 	addr := "http://127.0.0.1:8888"
-	root := "./testData"
+	root := "testData"
 	chunkSize := 2
 	config := `{
 		"users": {
@@ -51,16 +25,21 @@ func TestFileHandlers(t *testing.T) {
 			"debug": true
 		},
 		"fs": {
-			"root": "./testData"
+			"root": "testData"
 		}
 	}`
+
+	err := os.MkdirAll(root, 0700)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(root)
 
 	srv := startTestServer(config)
 	defer srv.Shutdown()
 	// kv := srv.depsKVStore()
 	fs := srv.depsFS()
-	defer os.RemoveAll(root)
-	cl := client.NewQSClient(addr)
+	cl := client.NewFilesClient(addr)
 
 	// TODO: remove this
 	time.Sleep(500)

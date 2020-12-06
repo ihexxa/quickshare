@@ -37,6 +37,7 @@ func NewLocalFS(root string, defaultPerm uint32, opensLimit, openTTL int) *Local
 	if root == "" {
 		root = "."
 	}
+
 	return &LocalFS{
 		root:           root,
 		defaultPerm:    os.FileMode(defaultPerm),
