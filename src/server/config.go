@@ -49,7 +49,7 @@ func DefaultConfig() (string, error) {
 			OpenTTL:    60, // 1 min
 		},
 		Users: &UsersCfg{
-			EnableAuth:      true,
+			EnableAuth:      false,
 			DefaultAdmin:    "",
 			DefaultAdminPwd: "",
 			CookieTTL:       3600 * 24 * 7, // 1 week

@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/ihexxa/quickshare/src/handlers/fileshdr"
 	"github.com/parnurzeal/gorequest"
@@ -25,7 +26,7 @@ func (cl *FilesClient) url(urlpath string) string {
 	return fmt.Sprintf("%s%s", cl.addr, urlpath)
 }
 
-func (cl *FilesClient) Create(filepath string, size int64) (gorequest.Response, string, []error) {
+func (cl *FilesClient) Create(filepath string, size int64) (*http.Response, string, []error) {
 	return cl.r.Post(cl.url("/v1/fs/files")).
 		Send(fileshdr.CreateReq{
 			Path:     filepath,
@@ -34,13 +35,13 @@ func (cl *FilesClient) Create(filepath string, size int64) (gorequest.Response, 
 		End()
 }
 
-func (cl *FilesClient) Delete(filepath string) (gorequest.Response, string, []error) {
+func (cl *FilesClient) Delete(filepath string) (*http.Response, string, []error) {
 	return cl.r.Delete(cl.url("/v1/fs/files")).
 		Param(fileshdr.FilePathQuery, filepath).
 		End()
 }
 
-func (cl *FilesClient) Metadata(filepath string) (gorequest.Response, *fileshdr.MetadataResp, []error) {
+func (cl *FilesClient) Metadata(filepath string) (*http.Response, *fileshdr.MetadataResp, []error) {
 	resp, body, errs := cl.r.Get(cl.url("/v1/fs/metadata")).
 		Param(fileshdr.FilePathQuery, filepath).
 		End()
@@ -54,13 +55,13 @@ func (cl *FilesClient) Metadata(filepath string) (gorequest.Response, *fileshdr.
 	return resp, mResp, nil
 }
 
-func (cl *FilesClient) Mkdir(dirpath string) (gorequest.Response, string, []error) {
+func (cl *FilesClient) Mkdir(dirpath string) (*http.Response, string, []error) {
 	return cl.r.Post(cl.url("/v1/fs/dirs")).
 		Send(fileshdr.MkdirReq{Path: dirpath}).
 		End()
 }
 
-func (cl *FilesClient) Move(oldpath, newpath string) (gorequest.Response, string, []error) {
+func (cl *FilesClient) Move(oldpath, newpath string) (*http.Response, string, []error) {
 	return cl.r.Patch(cl.url("/v1/fs/files/move")).
 		Send(fileshdr.MoveReq{
 			OldPath: oldpath,
@@ -69,7 +70,7 @@ func (cl *FilesClient) Move(oldpath, newpath string) (gorequest.Response, string
 		End()
 }
 
-func (cl *FilesClient) UploadChunk(filepath string, content string, offset int64) (gorequest.Response, string, []error) {
+func (cl *FilesClient) UploadChunk(filepath string, content string, offset int64) (*http.Response, string, []error) {
 	return cl.r.Patch(cl.url("/v1/fs/files/chunks")).
 		Send(fileshdr.UploadChunkReq{
 			Path:    filepath,
@@ -79,7 +80,7 @@ func (cl *FilesClient) UploadChunk(filepath string, content string, offset int64
 		End()
 }
 
-func (cl *FilesClient) UploadStatus(filepath string) (gorequest.Response, *fileshdr.UploadStatusResp, []error) {
+func (cl *FilesClient) UploadStatus(filepath string) (*http.Response, *fileshdr.UploadStatusResp, []error) {
 	resp, body, errs := cl.r.Get(cl.url("/v1/fs/files/chunks")).
 		Param(fileshdr.FilePathQuery, filepath).
 		End()
@@ -93,8 +94,8 @@ func (cl *FilesClient) UploadStatus(filepath string) (gorequest.Response, *files
 	return resp, uResp, nil
 }
 
-func (cl *FilesClient) Download(filepath string, headers map[string]string) (gorequest.Response, string, []error) {
-	r := cl.r.Get(cl.url("/v1/fs/files/chunks")).
+func (cl *FilesClient) Download(filepath string, headers map[string]string) (*http.Response, string, []error) {
+	r := cl.r.Get(cl.url("/v1/fs/files")).
 		Param(fileshdr.FilePathQuery, filepath)
 	for key, val := range headers {
 		r = r.Set(key, val)
@@ -102,7 +103,7 @@ func (cl *FilesClient) Download(filepath string, headers map[string]string) (gor
 	return r.End()
 }
 
-func (cl *FilesClient) List(dirPath string) (gorequest.Response, *fileshdr.ListResp, []error) {
+func (cl *FilesClient) List(dirPath string) (*http.Response, *fileshdr.ListResp, []error) {
 	resp, body, errs := cl.r.Get(cl.url("/v1/fs/dirs")).
 		Param(fileshdr.ListDirQuery, dirPath).
 		End()

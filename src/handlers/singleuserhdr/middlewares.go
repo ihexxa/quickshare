@@ -10,6 +10,11 @@ import (
 	q "github.com/ihexxa/quickshare/src/handlers"
 )
 
+var exposedAPIs = map[string]bool{
+	"Login-fm":  true,
+	"Health-fm": true,
+}
+
 func GetHandlerName(fullname string) (string, error) {
 	parts := strings.Split(fullname, ".")
 	if len(parts) == 0 {
@@ -28,7 +33,7 @@ func (h *SimpleUserHandlers) Auth() gin.HandlerFunc {
 
 		// TODO: may also check the path
 		enableAuth := h.cfg.GrabBool("Users.EnableAuth")
-		if enableAuth && handlerName != "Login-fm" {
+		if enableAuth && !exposedAPIs[handlerName] {
 			token, err := c.Cookie(TokenCookie)
 			if err != nil {
 				c.JSON(q.ErrResp(c, 401, err))

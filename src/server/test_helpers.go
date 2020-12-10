@@ -1,6 +1,11 @@
 package server
 
-import "github.com/ihexxa/gocfg"
+import (
+	"time"
+
+	"github.com/ihexxa/gocfg"
+	"github.com/ihexxa/quickshare/src/client"
+)
 
 func startTestServer(config string) *Server {
 	defaultCfg, err := DefaultConfig()
@@ -24,4 +29,21 @@ func startTestServer(config string) *Server {
 
 	go srv.Start()
 	return srv
+}
+
+func waitForReady(addr string) bool {
+	retry := 10
+	setCl := client.NewSettingsClient(addr)
+
+	for retry > 0 {
+		_, _, errs := setCl.Health()
+		if len(errs) > 0 {
+			time.Sleep(100)
+		} else {
+			return true
+		}
+		retry--
+	}
+
+	return false
 }

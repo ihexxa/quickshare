@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/ihexxa/gocfg"
 
@@ -16,6 +17,7 @@ import (
 	"github.com/ihexxa/quickshare/src/fs"
 	"github.com/ihexxa/quickshare/src/fs/local"
 	"github.com/ihexxa/quickshare/src/handlers/fileshdr"
+	"github.com/ihexxa/quickshare/src/handlers/settings"
 	"github.com/ihexxa/quickshare/src/handlers/singleuserhdr"
 	"github.com/ihexxa/quickshare/src/idgen/simpleidgen"
 	"github.com/ihexxa/quickshare/src/kvstore"
@@ -114,31 +116,41 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 		return nil, err
 	}
 
+	settingsSvc, err := settings.NewSettingsSvc(cfg, deps)
+	if err != nil {
+		return nil, err
+	}
+
 	// middleware
 	router.Use(userHdrs.Auth())
+	// tmp static server
+	router.Use(static.Serve("/", static.LocalFile("../static", false)))
 
 	// handler
 	v1 := router.Group("/v1")
 
-	users := v1.Group("/users")
-	users.POST("/login", userHdrs.Login)
-	users.POST("/logout", userHdrs.Logout)
-	users.PATCH("/pwd", userHdrs.SetPwd)
+	usersAPI := v1.Group("/users")
+	usersAPI.POST("/login", userHdrs.Login)
+	usersAPI.POST("/logout", userHdrs.Logout)
+	usersAPI.PATCH("/pwd", userHdrs.SetPwd)
 
-	filesSvc := v1.Group("/fs")
-	filesSvc.POST("/files", fileHdrs.Create)
-	filesSvc.DELETE("/files", fileHdrs.Delete)
-	filesSvc.GET("/files", fileHdrs.Download)
-	filesSvc.PATCH("/files/chunks", fileHdrs.UploadChunk)
-	filesSvc.GET("/files/chunks", fileHdrs.UploadStatus)
-	filesSvc.PATCH("/files/copy", fileHdrs.Copy)
-	filesSvc.PATCH("/files/move", fileHdrs.Move)
+	filesAPI := v1.Group("/fs")
+	filesAPI.POST("/files", fileHdrs.Create)
+	filesAPI.DELETE("/files", fileHdrs.Delete)
+	filesAPI.GET("/files", fileHdrs.Download)
+	filesAPI.PATCH("/files/chunks", fileHdrs.UploadChunk)
+	filesAPI.GET("/files/chunks", fileHdrs.UploadStatus)
+	filesAPI.PATCH("/files/copy", fileHdrs.Copy)
+	filesAPI.PATCH("/files/move", fileHdrs.Move)
 
-	filesSvc.GET("/dirs", fileHdrs.List)
-	filesSvc.POST("/dirs", fileHdrs.Mkdir)
+	filesAPI.GET("/dirs", fileHdrs.List)
+	filesAPI.POST("/dirs", fileHdrs.Mkdir)
 	// files.POST("/dirs/copy", fileHdrs.CopyDir)
 
-	filesSvc.GET("/metadata", fileHdrs.Metadata)
+	filesAPI.GET("/metadata", fileHdrs.Metadata)
+
+	settingsAPI := v1.Group("/settings")
+	settingsAPI.OPTIONS("/health", settingsSvc.Health)
 
 	return router, nil
 }

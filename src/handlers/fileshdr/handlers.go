@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"path"
 	"path/filepath"
@@ -270,7 +271,7 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 			fsFilePath := h.FsPath(req.Path)
 			err = h.deps.FS().Rename(tmpFilePath, fsFilePath)
 			if err != nil {
-				c.JSON(q.ErrResp(c, 500, err))
+				c.JSON(q.ErrResp(c, 500, fmt.Errorf("%s error: %w", req.Path, err)))
 				return
 			}
 			err = h.uploadMgr.DelInfo(tmpFilePath)
@@ -328,43 +329,75 @@ func (h *FileHandlers) Download(c *gin.Context) {
 	filePath := c.Query(FilePathQuery)
 	if filePath == "" {
 		c.JSON(q.ErrResp(c, 400, errors.New("invalid file name")))
+		return
 	}
 
-	// concurrency relies on os's mechanism
+	// concurrently file accessing is managed by os
 	filePath = h.FsPath(filePath)
 	info, err := h.deps.FS().Stat(filePath)
 	if err != nil {
-		c.JSON(q.ErrResp(c, 400, err))
+		if os.IsNotExist(err) {
+			c.JSON(q.ErrResp(c, 400, os.ErrNotExist))
+		} else {
+			c.JSON(q.ErrResp(c, 500, err))
+		}
 		return
 	} else if info.IsDir() {
-		c.JSON(q.ErrResp(c, 501, errors.New("downloading a folder is not supported")))
+		c.JSON(q.ErrResp(c, 400, errors.New("downloading a folder is not supported")))
+		return
 	}
+
+	// https://golang.google.cn/pkg/net/http/#DetectContentType
+	// DetectContentType considers at most the first 512 bytes of data.
+	fileHeadBuf := make([]byte, 512)
+	read, err := h.deps.FS().ReadAt(filePath, fileHeadBuf, 0)
+	if err != nil && err != io.EOF {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+	contentType := http.DetectContentType(fileHeadBuf[:read])
 
 	r, err := h.deps.FS().GetFileReader(filePath)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
+		return
 	}
+	// defer r.Close()
+	//  :=	r.(*os.File)
 
 	// respond to normal requests
+	fmt.Println(ifRangeVal, rangeVal)
 	if ifRangeVal != "" || rangeVal == "" {
-		c.DataFromReader(200, info.Size(), "application/octet-stream", r, map[string]string{})
+		c.DataFromReader(200, info.Size(), contentType, r, map[string]string{})
 		return
 	}
 
 	// respond to range requests
-	parts, err := multipart.RangeToParts(rangeVal, "application/octet-stream", fmt.Sprintf("%d", info.Size()))
+	parts, err := multipart.RangeToParts(rangeVal, contentType, fmt.Sprintf("%d", info.Size()))
 	if err != nil {
-		c.JSON(q.ErrResp(c, 400, err))
+		c.JSON(q.ErrResp(c, 401, err))
+		return
 	}
-	pr, pw := io.Pipe()
-	err = multipart.WriteResponse(r, pw, filePath, parts)
+
+	// pr, pw := io.Pipe()
+	mw, contentLength, err := multipart.NewResponseWriter(r, parts, false)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
+		return
 	}
+
+	go mw.Write()
+	// WriteResponse(r, pw, filePath, parts)
+	// if err != nil {
+	// 	c.JSON(q.ErrResp(c, 500, err))
+	// 	return
+	// }
+
 	extraHeaders := map[string]string{
-		"Content-Disposition": fmt.Sprintf(`attachment; filename="%s"`, filePath),
+		// "Content-Disposition": fmt.Sprintf(`attachment; filename="%s"`, filePath),
 	}
-	c.DataFromReader(206, info.Size(), "application/octet-stream", pr, extraHeaders)
+	// it takes the \r\n before body into account, so contentLength+2
+	c.DataFromReader(206, contentLength+2, contentType, mw, extraHeaders)
 }
 
 type ListResp struct {
@@ -374,7 +407,7 @@ type ListResp struct {
 func (h *FileHandlers) List(c *gin.Context) {
 	dirPath := c.Query(ListDirQuery)
 	if dirPath == "" {
-		c.JSON(q.ErrResp(c, 400, errors.New("incorrect path name")))
+		c.JSON(q.ErrResp(c, 402, errors.New("incorrect path name")))
 		return
 	}
 

@@ -3,7 +3,6 @@ package server
 import (
 	"os"
 	"testing"
-	"time"
 
 	"github.com/ihexxa/quickshare/src/client"
 	su "github.com/ihexxa/quickshare/src/handlers/singleuserhdr"
@@ -29,6 +28,7 @@ func TestSingleUserHandlers(t *testing.T) {
 	os.Setenv("DEFAULTADMIN", adminName)
 	os.Setenv("DEFAULTADMINPWD", adminPwd)
 
+	os.RemoveAll(root)
 	err := os.MkdirAll(root, 0700)
 	if err != nil {
 		t.Fatal(err)
@@ -39,10 +39,10 @@ func TestSingleUserHandlers(t *testing.T) {
 	defer srv.Shutdown()
 
 	suCl := client.NewSingleUserClient(addr)
-	// fCl := client.NewFilesClient(addr)
 
-	// TODO: remove this
-	time.Sleep(1000)
+	if !waitForReady(addr) {
+		t.Fatal("fail to start server")
+	}
 
 	t.Run("test single user APIs: Login-SetPwd-Logout-Login", func(t *testing.T) {
 		resp, _, errs := suCl.Login(adminName, adminPwd)

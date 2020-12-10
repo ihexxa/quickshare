@@ -56,12 +56,16 @@ func (fs *LocalFS) Root() string {
 }
 
 // closeOpens assumes that it is called after opensMtx.Lock()
-func (fs *LocalFS) closeOpens(closeAll bool) error {
+func (fs *LocalFS) closeOpens(closeAll bool, exclude map[string]bool) error {
 	batch := fs.opensCleanSize
 
 	var err error
 	for key, info := range fs.opens {
-		if batch <= 0 && !closeAll {
+		if exclude[key] {
+			continue
+		}
+
+		if !closeAll && batch <= 0 {
 			break
 		}
 		batch--
@@ -83,7 +87,7 @@ func (fs *LocalFS) closeOpens(closeAll bool) error {
 func (fs *LocalFS) Sync() error {
 	fs.opensMtx.Lock()
 	defer fs.opensMtx.Unlock()
-	return fs.closeOpens(true)
+	return fs.closeOpens(true, map[string]bool{})
 }
 
 // check refers implementation of Dir.Open() in http package
@@ -176,6 +180,7 @@ func (fs *LocalFS) ReadAt(path string, b []byte, off int64) (int, error) {
 				return nil, ErrTooManyOpens
 			}
 
+			// because the fd may be for other usage, its flag is not set as os.O_RDONLY
 			fd, err := os.OpenFile(fullpath, os.O_RDWR|os.O_APPEND, fs.defaultPerm)
 			if err != nil {
 				return nil, err
@@ -185,7 +190,7 @@ func (fs *LocalFS) ReadAt(path string, b []byte, off int64) (int, error) {
 				lastAccess: time.Now(),
 			}
 			fs.opens[fullpath] = info
-			fs.closeOpens(false)
+			fs.closeOpens(false, map[string]bool{fullpath: true})
 		}
 
 		return info, nil
@@ -231,7 +236,7 @@ func (fs *LocalFS) WriteAt(path string, b []byte, off int64) (int, error) {
 				lastAccess: time.Now(),
 			}
 			fs.opens[fullpath] = info
-			fs.closeOpens(false)
+			fs.closeOpens(false, map[string]bool{fullpath: true})
 		}
 
 		return info, nil
