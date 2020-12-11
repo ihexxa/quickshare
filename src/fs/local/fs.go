@@ -253,6 +253,7 @@ func (fs *LocalFS) WriteAt(path string, b []byte, off int64) (int, error) {
 		return 0, fmt.Errorf("seek offset (%d) != required(%d)", newOffset, off)
 	}
 
+	fmt.Println("lengthb", len(b))
 	return info.fd.WriteAt(b, off)
 }
 

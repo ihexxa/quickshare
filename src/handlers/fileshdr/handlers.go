@@ -2,6 +2,7 @@ package fileshdr
 
 import (
 	"crypto/sha1"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -32,6 +33,8 @@ var (
 	rangeHeader       = "Range"
 	acceptRangeHeader = "Accept-Range"
 	ifRangeHeader     = "If-Range"
+	keepAliveHeader   = "Keep-Alive"
+	connectionHeader  = "Connection"
 )
 
 type FileHandlers struct {
@@ -255,11 +258,18 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 			return
 		}
 
-		wrote, err := h.deps.FS().WriteAt(tmpFilePath, []byte(req.Content), req.Offset)
+		content, err := base64.StdEncoding.DecodeString(req.Content)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
 		}
+
+		wrote, err := h.deps.FS().WriteAt(tmpFilePath, []byte(content), req.Offset)
+		if err != nil {
+			c.JSON(q.ErrResp(c, 500, err))
+			return
+		}
+
 		err = h.uploadMgr.IncreUploaded(tmpFilePath, int64(wrote))
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
