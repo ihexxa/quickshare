@@ -1,0 +1,87 @@
+@charset "utf-8";
+
+html,
+body,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  outline: 0;
+  padding: 0;
+  border: 0;
+}
+html {
+  background-color: #ecf0f1;
+  /* background: url("bg.jpg") no-repeat left center fixed;
+    background-size: auto 100%; */
+  font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  font-size: 62.5%;
+}
+body {
+  line-height: 200%;
+}
+
+a,
+a:link,
+a:visited,
+a:hover,
+a:active,
+button,
+img {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
+}
+a {
+  color: #16a085;
+  opacity: 100%;
+  text-decoration: none;
+  transition: color 1s 1 linear;
+}
+a:hover {
+  color: #2ecc71;
+}
+a:active {
+}
+a::selection {
+  background: transparent;
+}
+
+button {
+  background-color: transparent;
+  border: none;
+  outline: none;
+}
+button:active {
+  /* animation: fade 0.1s 1 linear; */
+}
+button:hover {
+  /* animation: fade 0.1s 1 linear; */
+}
+
+img {
+  max-width: 100%;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  text-align: left;
+  padding: 1rem 0;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}

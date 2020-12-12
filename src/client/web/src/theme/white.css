@@ -1,0 +1,43 @@
+.theme-white .bg {
+  background-color: #ecf0f1;
+}
+
+.theme-white .text-color {
+  color: #34495e;
+}
+
+.theme-white .bg-img {
+  background: url("/static/img/textured_paper.png") repeat fixed;
+}
+
+.theme-white .win {
+  background-color: #ccc;
+}
+
+.theme-white .win-head {
+  background-color: white;
+}
+
+.theme-white .win-body {
+  background-color: #fafafa;
+  color: #34495e;
+}
+
+.theme-white .nav-bar {
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #7f8c8d;
+  fill: black;
+}
+
+.theme-white .news .title {
+  color: #34495e;
+}
+
+.theme-white .border {
+  background-color: #e0e0e0;
+}
+
+.theme-white .wide-btn {
+  color: white;
+  background-color: #16a085;
+}
