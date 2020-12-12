@@ -43,10 +43,9 @@ func (cl *SingleUserClient) Logout(user string, token *http.Cookie) (*http.Respo
 		End()
 }
 
-func (cl *SingleUserClient) SetPwd(user, oldPwd, newPwd string, token *http.Cookie) (*http.Response, string, []error) {
+func (cl *SingleUserClient) SetPwd(oldPwd, newPwd string, token *http.Cookie) (*http.Response, string, []error) {
 	return cl.r.Patch(cl.url("/v1/users/pwd")).
 		Send(su.SetPwdReq{
-			User:   user,
 			OldPwd: oldPwd,
 			NewPwd: newPwd,
 		}).

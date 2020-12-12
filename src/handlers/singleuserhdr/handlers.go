@@ -149,7 +149,6 @@ func (h *SimpleUserHandlers) Logout(c *gin.Context) {
 }
 
 type SetPwdReq struct {
-	User   string `json:"user"`
 	OldPwd string `json:"oldPwd"`
 	NewPwd string `json:"newPwd"`
 }
@@ -161,13 +160,30 @@ func (h *SimpleUserHandlers) SetPwd(c *gin.Context) {
 		return
 	}
 
-	expectedHash, ok := h.deps.KV().GetStringIn(UsersNs, req.User)
+	tokenStr, err := c.Cookie(TokenCookie)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 401, err))
+		return
+	}
+	claims, err := h.deps.Token().FromToken(
+		tokenStr,
+		map[string]string{UserParam: ""},
+	)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	} else if claims[UserParam] == "" {
+		c.JSON(q.ErrResp(c, 401, ErrInvalidConfig))
+		return
+	}
+
+	expectedHash, ok := h.deps.KV().GetStringIn(UsersNs, claims[UserParam])
 	if !ok {
 		c.JSON(q.ErrResp(c, 500, ErrInvalidConfig))
 		return
 	}
 
-	err := bcrypt.CompareHashAndPassword([]byte(expectedHash), []byte(req.OldPwd))
+	err = bcrypt.CompareHashAndPassword([]byte(expectedHash), []byte(req.OldPwd))
 	if err != nil {
 		c.JSON(q.ErrResp(c, 401, ErrInvalidUser))
 		return
@@ -178,7 +194,7 @@ func (h *SimpleUserHandlers) SetPwd(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 500, errors.New("fail to set password")))
 		return
 	}
-	err = h.deps.KV().SetStringIn(UsersNs, req.User, string(newHash))
+	err = h.deps.KV().SetStringIn(UsersNs, claims[UserParam], string(newHash))
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, ErrInvalidConfig))
 		return
