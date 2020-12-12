@@ -133,18 +133,14 @@ func (h *SimpleUserHandlers) Login(c *gin.Context) {
 }
 
 type LogoutReq struct {
-	User string `json:"user"`
 }
 
 func (h *SimpleUserHandlers) Logout(c *gin.Context) {
-	req := &LogoutReq{}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(q.ErrResp(c, 500, err))
-		return
-	}
-
 	// token alreay verified in the authn middleware
-	c.SetCookie(TokenCookie, "", 0, "/", "nohost", false, true)
+	hostname := h.cfg.GrabString("Server.Host")
+	secure := h.cfg.GrabBool("Users.CookieSecure")
+	httpOnly := h.cfg.GrabBool("Users.CookieHttpOnly")
+	c.SetCookie(TokenCookie, "", 0, "/", hostname, secure, httpOnly)
 	c.JSON(q.Resp(200))
 }
 
@@ -158,22 +154,14 @@ func (h *SimpleUserHandlers) SetPwd(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(q.ErrResp(c, 400, err))
 		return
+	} else if req.OldPwd == req.NewPwd {
+		c.JSON(q.ErrResp(c, 400, errors.New("password is not updated")))
+		return
 	}
 
-	tokenStr, err := c.Cookie(TokenCookie)
+	claims, err := h.getUserInfo(c)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 401, err))
-		return
-	}
-	claims, err := h.deps.Token().FromToken(
-		tokenStr,
-		map[string]string{UserParam: ""},
-	)
-	if err != nil {
-		c.JSON(q.ErrResp(c, 500, err))
-		return
-	} else if claims[UserParam] == "" {
-		c.JSON(q.ErrResp(c, 401, ErrInvalidConfig))
 		return
 	}
 
@@ -201,4 +189,26 @@ func (h *SimpleUserHandlers) SetPwd(c *gin.Context) {
 	}
 
 	c.JSON(q.Resp(200))
+}
+
+func (h *SimpleUserHandlers) getUserInfo(c *gin.Context) (map[string]string, error) {
+	tokenStr, err := c.Cookie(TokenCookie)
+	if err != nil {
+		return nil, err
+	}
+	claims, err := h.deps.Token().FromToken(
+		tokenStr,
+		map[string]string{
+			UserParam:   "",
+			RoleParam:   "",
+			ExpireParam: "",
+		},
+	)
+	if err != nil {
+		return nil, err
+	} else if claims[UserParam] == "" {
+		return nil, ErrInvalidConfig
+	}
+
+	return claims, nil
 }
