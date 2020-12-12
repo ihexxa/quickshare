@@ -34,11 +34,8 @@ func (cl *SingleUserClient) Login(user, pwd string) (*http.Response, string, []e
 		End()
 }
 
-func (cl *SingleUserClient) Logout(user string, token *http.Cookie) (*http.Response, string, []error) {
+func (cl *SingleUserClient) Logout(token *http.Cookie) (*http.Response, string, []error) {
 	return cl.r.Post(cl.url("/v1/users/logout")).
-		Send(su.LogoutReq{
-			User: user,
-		}).
 		AddCookie(token).
 		End()
 }
