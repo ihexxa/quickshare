@@ -8,7 +8,7 @@ import (
 	su "github.com/ihexxa/quickshare/src/handlers/singleuserhdr"
 )
 
-func xTestSingleUserHandlers(t *testing.T) {
+func TestSingleUserHandlers(t *testing.T) {
 	addr := "http://127.0.0.1:8888"
 	root := "testData"
 	config := `{
@@ -61,7 +61,7 @@ func xTestSingleUserHandlers(t *testing.T) {
 			t.Fatal(resp.StatusCode)
 		}
 
-		resp, _, errs = suCl.Logout(adminName, token)
+		resp, _, errs = suCl.Logout(token)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {

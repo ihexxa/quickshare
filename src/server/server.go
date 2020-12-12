@@ -124,7 +124,7 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 	// middleware
 	router.Use(userHdrs.Auth())
 	// tmp static server
-	router.Use(static.Serve("/", static.LocalFile("../static", false)))
+	router.Use(static.Serve("/", static.LocalFile("../public", false)))
 
 	// handler
 	v1 := router.Group("/v1")
