@@ -63,7 +63,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
       oldPwd: "",
       newPwd1: "",
       newPwd2: "",
-    }
+    };
   }
 
   changeUser = (ev: React.ChangeEvent<HTMLInputElement>) => {
@@ -141,39 +141,54 @@ export class AuthPane extends React.Component<Props, State, {}> {
             type="text"
             onChange={this.changeUser}
             value={this.state.user}
+            className="margin-r-m black0-font"
           />
           <input
             name="pwd"
-            type="text"
+            type="password"
             onChange={this.changePwd}
             value={this.state.pwd}
+            className="margin-r-m black0-font"
           />
-          <button onClick={this.login}>Log in</button>
+          <button onClick={this.login} className="green0-bg white-font">
+            Log in
+          </button>
         </div>
-        <div style={{ display: this.props.authed ? "none" : "inherit" }}>
-          <button onClick={this.logout}>Log out</button>
-
-          <button onClick={this.showPane}>show</button>
+        <div style={{ display: this.props.authed ? "inherit" : "none" }}>
+          <button
+            onClick={this.logout}
+            className="grey1-bg white-font margin-r-m"
+          >
+            Log out
+          </button>
+          <button onClick={this.showPane} className="grey1-bg white-font">
+            Settings
+          </button>
           <div style={{ display: this.state.show ? "inherit" : "none" }}>
             <input
               name="old_pwd"
-              type="text"
+              type="password"
               onChange={this.changeOldPwd}
               value={this.state.oldPwd}
+              className="margin-r-m black0-font"
             />
             <input
               name="new_pwd1"
-              type="text"
+              type="password"
               onChange={this.changeNewPwd1}
               value={this.state.newPwd1}
+              className="margin-r-m black0-font"
             />
             <input
               name="new_pwd2"
-              type="text"
+              type="password"
               onChange={this.changeNewPwd2}
               value={this.state.newPwd2}
+              className="margin-r-m black0-font"
             />
-            <button onClick={this.setPwd}>Update</button>
+            <button onClick={this.setPwd} className="grey1-bg white-font">
+              Update
+            </button>
           </div>
         </div>
       </div>

@@ -224,70 +224,88 @@ export class Browser extends React.Component<Props, State, {}> {
     const breadcrumb = this.props.dirPath.map(
       (pathPart: string, key: number) => {
         return (
-          <div key={pathPart}>
+          <span key={pathPart}>
             <button
               type="button"
               onClick={() => this.chdir(this.props.dirPath.slice(0, key + 1))}
+              className="grey1-bg white-font margin-r-m"
             >
               {pathPart}
             </button>
-          </div>
+          </span>
         );
       }
     );
     const ops = (
       <div>
-        <button type="button" onClick={() => this.moveHere()}>
+        <button
+          type="button"
+          onClick={() => this.moveHere()}
+          className="grey1-bg white-font margin-r-m"
+        >
           Move here
         </button>
-      </div>
-    );
-    const itemList = this.props.items.map((item: MetadataResp) => {
-      return (
-        <div key={item.name}>
-          {item.name}
-          <button type="button" onClick={() => this.delete(item.name)}>
-            Del
-          </button>
-          <button type="button" onClick={() => this.select(item.name)}>
-            Select
-          </button>
-          {item.isDir ? (
-            <button type="button" onClick={() => this.goto(item.name)}>
-              goto
-            </button>
-          ) : null}
-        </div>
-      );
-    });
-    const uploader = (
-      <div>
+        <input
+          type="text"
+          onChange={this.onInputChange}
+          value={this.state.inputValue}
+          className="margin-r-m black0-font"
+        />
+        <button
+          onClick={this.onMkDir}
+          className="grey1-bg white-font margin-r-m"
+        >
+          MkDir
+        </button>
         <input
           type="file"
           onChange={this.onUpload}
           multiple={true}
           value={this.props.uploadValue}
+          className="black0-font"
         />
       </div>
     );
-    const mkdir = (
-      <div>
-        <input
-          type="text"
-          onChange={this.onInputChange}
-          value={this.state.inputValue}
-        />
-        <button onClick={this.onMkDir}>MkDir</button>
-      </div>
-    );
-
+    const itemList = this.props.items.map((item: MetadataResp) => {
+      return (
+        <span key={item.name} className="grid margin-r-m margin-t-m white0-bg">
+          <span className="dot margin-r-m green0-bg"></span>
+          <span className="margin-r-m">
+            {item.name}
+          </span>
+          <button
+            type="button"
+            onClick={() => this.delete(item.name)}
+            className="grey1-bg white-font margin-r-m"
+          >
+            Del
+          </button>
+          <button
+            type="button"
+            onClick={() => this.select(item.name)}
+            className="grey1-bg white-font margin-r-m"
+          >
+            Select
+          </button>
+          {item.isDir ? (
+            <button
+              type="button"
+              onClick={() => this.goto(item.name)}
+              className="grey1-bg white-font margin-r-m"
+            >
+              goto
+            </button>
+          ) : null}
+        </span>
+      );
+    });
     return (
       <div>
-        <div>{mkdir}</div>
-        <div>{ops}</div>
-        <div>{breadcrumb}</div>
-        <div>{uploader}</div>
-        <div>{itemList}</div>
+        <div className="flex-2col-parent padding-l">
+          <div className="flex-2col">{breadcrumb}</div>
+          <div className="flex-2col text-right ">{ops}</div>
+        </div>
+        <div className="padding-l">{itemList}</div>
       </div>
     );
   }

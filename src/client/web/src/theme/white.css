@@ -10,16 +10,23 @@
   background: url("/static/img/textured_paper.png") repeat fixed;
 }
 
-.theme-white .win {
+.theme-white .panel {
   background-color: #ccc;
 }
 
-.theme-white .win-head {
-  background-color: white;
+.theme-white .panel-head {
+  /* background-color: white; */
+  border-bottom: solid 1px #ecf0f1;
 }
 
-.theme-white .win-body {
-  background-color: #fafafa;
+.theme-white .panel-head-menu {
+  background-color: white;
+  color: #34495e;
+  border-bottom: solid 1px #ecf0f1;
+}
+
+.theme-white .panel-body {
+  /* background-color: #fafafa; */
   color: #34495e;
 }
 

@@ -85,3 +85,18 @@ table {
   border-collapse: collapse;
   border-spacing: 0;
 }
+
+input {
+  font-weight: bold;
+  border: none;
+  border-radius: 1rem;
+  padding: 0.8rem 1rem;
+  background-color: #ecf0f1;
+}
+
+button {
+  font-weight: bold;
+  border: none;
+  border-radius: 1rem;
+  padding: 0.8rem 1rem;
+}

@@ -5,33 +5,38 @@
   bottom: 0;
   left: 0;
 }
-#win {
+#panel {
   position: fixed;
-  top: 0.5rem;
+  top: 4rem;
   right: 0.5rem;
-  bottom: 0.5rem;
+  bottom: 6rem;
   left: 0.5rem;
 
-  max-width: 48rem;
+  width: 80%;
   margin: auto;
+  border-radius: 1.4rem;
+  background-color: white;
 }
-#win-head {
-  text-align: center;
-  box-shadow: 0 0.2rem 3rem rgba(0, 0, 0, 0.1);
+#panel-head {
+  text-align: left;
+  /* box-shadow: 0 0.2rem 3rem rgba(0, 0, 0, 0.1); */
 
-  padding: 0 2rem 0 2rem;
+  padding: 1rem 2rem 1rem 2rem;
 
   position: absolute;
   top: 0;
   right: 0;
   bottom: auto;
   left: 0;
+
+  font-size: 2.0rem;
+  line-height: 3.9rem;
 }
 
-#win-head-menu {
-  text-align: center;
+#panel-head-menu {
+  text-align: right;
 
-  height: 3rem;
+  /* height: 3rem; */
 
   position: absolute;
   top: 4rem;
@@ -41,7 +46,8 @@
   /* display: flex;
   justify-content: space-between; */
   padding: 1rem 2rem;
-  background-color: rgba(255, 255, 255, 0.6);
+  line-height: 4rem;
+  /* background-color: rgba(255, 255, 255, 0.6); */
 }
 .text-header {
   font-size: 1.8rem;
@@ -50,16 +56,16 @@
   margin: auto;
   line-height: 4rem;
 }
-#win-body {
-  text-align: center;
+#panel-body {
+  text-align: left;
   overflow: hidden;
 
   position: absolute;
-  top: 0.5rem;
+  top: 6rem;
   right: 0;
   bottom: 0.5rem;
   left: 0;
-  box-shadow: 0 0.2rem 0.6rem rgba(0, 0, 0, 0.1);
+  /* box-shadow: 0 0.2rem 0.6rem rgba(0, 0, 0, 0.1); */
 }
 #nav-bar {
   text-align: center;
@@ -364,12 +370,20 @@ select {
   margin-top: 1.5rem;
   line-height: 3rem;
 }
+
 input.white-square {
   border: solid 2px #fff;
   background: transparent;
   padding: 0.4rem 0.8rem;
   color: #fff;
 }
+
+.grid {
+  display: inline-block;
+  padding: 1rem 2rem;
+  border-radius: 1rem;
+}
+
 /* 
 .tag {
   display: inline-block;

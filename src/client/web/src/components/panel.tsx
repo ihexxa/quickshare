@@ -35,16 +35,22 @@ export class Panel extends React.Component<Props, State, {}> {
 
   render() {
     return (
-      <div className="theme-white">
-        <div id="bg" className="bg">
-          <div id="win" className="win">
-            <div id="win-head" className="win-head" >
-              Quickshare
+      <div className="theme-white desktop">
+        <div id="bg" className="bg font-m">
+          <div id="panel" className="panel">
+            <div id="panel-head" className="panel-head cyan1-font">
+              <div className="flex-2col-parent">
+                <div className="flex-2col">Quickshare</div>
+                <div className="flex-2col text-right">
+                  <AuthPane
+                    authed={this.props.authPane.authed}
+                    update={this.update}
+                  />
+                </div>
+              </div>
             </div>
-            <div id="win-head-menu"className="win-head-menu">
-              <AuthPane authed={this.props.authPane.authed} />
-            </div>
-            <div id="win-body"className="win-body">
+            {/* <div id="panel-head-menu" className="panel-head-menu"></div> */}
+            <div id="panel-body" className="panel-body">
               <Browser
                 dirPath={this.props.browser.dirPath}
                 items={this.props.browser.items}
