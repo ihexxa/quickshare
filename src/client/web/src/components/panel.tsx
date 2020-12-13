@@ -36,29 +36,30 @@ export class Panel extends React.Component<Props, State, {}> {
   render() {
     return (
       <div className="theme-white desktop">
-        <div id="bg" className="bg font-m">
-          <div id="panel" className="panel">
-            <div id="panel-head" className="panel-head cyan1-font">
-              <div className="flex-2col-parent">
-                <div className="flex-2col">Quickshare</div>
-                <div className="flex-2col text-right">
-                  <AuthPane
-                    authed={this.props.authPane.authed}
-                    update={this.update}
-                  />
-                </div>
+        <div id="bg" className="bg bg-img font-m">
+          <div
+            id="top-bar"
+            className="top-bar cyan1-font padding-t-m padding-b-m padding-l-l padding-r-l"
+          >
+            <div className="flex-2col-parent">
+              <div className="flex-2col h5">Quickshare</div>
+              <div className="flex-2col text-right">
+                <AuthPane
+                  authed={this.props.authPane.authed}
+                  update={this.update}
+                />
               </div>
             </div>
-            {/* <div id="panel-head-menu" className="panel-head-menu"></div> */}
-            <div id="panel-body" className="panel-body">
-              <Browser
-                dirPath={this.props.browser.dirPath}
-                items={this.props.browser.items}
-                update={this.update}
-                uploadFiles={this.props.browser.uploadFiles}
-                uploadValue={this.props.browser.uploadValue}
-              />
-            </div>
+          </div>
+
+          <div id="container-center">
+            <Browser
+              dirPath={this.props.browser.dirPath}
+              items={this.props.browser.items}
+              update={this.update}
+              uploadFiles={this.props.browser.uploadFiles}
+              uploadValue={this.props.browser.uploadValue}
+            />
           </div>
         </div>
       </div>

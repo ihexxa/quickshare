@@ -36,6 +36,14 @@ export class UsersClient {
     return resp != null ? resp.status : 500;
   }
 
+  async isAuthed(): Promise<number> {
+    const resp = await this.do({
+      method: "get",
+      url: `${this.url}/v1/users/isauthed`,
+    });
+    return resp != null ? resp.status : 500;
+  }
+
   // token cookie is set by browser
   async setPwd(oldPwd: string, newPwd: string): Promise<number> {
     const resp = await this.do({

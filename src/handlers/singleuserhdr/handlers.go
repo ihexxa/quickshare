@@ -144,6 +144,11 @@ func (h *SimpleUserHandlers) Logout(c *gin.Context) {
 	c.JSON(q.Resp(200))
 }
 
+func (h *SimpleUserHandlers) IsAuthed(c *gin.Context) {
+	// token alreay verified in the authn middleware
+	c.JSON(q.Resp(200))
+}
+
 type SetPwdReq struct {
 	OldPwd string `json:"oldPwd"`
 	NewPwd string `json:"newPwd"`

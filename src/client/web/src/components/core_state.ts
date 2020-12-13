@@ -1,8 +1,8 @@
 import { List } from "immutable";
 
 import { Props as PanelProps } from "./panel";
+import { Item } from "./browser";
 
-import { MetadataResp } from "../client/files";
 
 export interface IContext {
   update: (targetStatePatch: any) => void;
@@ -23,7 +23,7 @@ export function init(): ICoreState {
       },
       browser: {
         dirPath: List<string>(["/"]),
-        items: List<MetadataResp>([]),
+        items: List<Item>([]),
         uploadValue: "",
         uploadFiles: List<File>([]),
       },

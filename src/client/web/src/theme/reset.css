@@ -24,6 +24,9 @@ html {
 body {
   line-height: 200%;
 }
+*:focus {
+  outline: none;
+}
 
 a,
 a:link,
@@ -87,16 +90,29 @@ table {
 }
 
 input {
+  font-size: 1.4rem;
+  line-height: 1.4rem;
+  height: 1.4rem;
   font-weight: bold;
   border: none;
-  border-radius: 1rem;
   padding: 0.8rem 1rem;
-  background-color: #ecf0f1;
+  width: 10rem;
+
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 0.5rem;
+}
+
+input:focus {
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
 button {
-  font-weight: bold;
   border: none;
-  border-radius: 1rem;
+  border-radius: 0.5rem;
   padding: 0.8rem 1rem;
+  
+  background-color: rgba(0, 0, 0, 0.3);
+
+  font-weight: bold;
+  border-radius: 0.5rem;
 }

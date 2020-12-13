@@ -61,7 +61,7 @@ func DefaultConfig() (string, error) {
 		},
 		Server: &ServerCfg{
 			Debug:          false,
-			Host:           "127.0.0.1",
+			Host:           "0.0.0.0",
 			Port:           8888,
 			ReadTimeout:    2000,
 			WriteTimeout:   2000,
