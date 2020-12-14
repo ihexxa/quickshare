@@ -1,7 +1,7 @@
 import { filesClient } from "../client";
 import { UploadStatusResp } from "./files";
 
-const chunkLen = 1024 * 1024 * 10;
+const chunkLen = 1024 * 500;
 
 export class FileUploader {
   private reader = new FileReader();

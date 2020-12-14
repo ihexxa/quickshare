@@ -13,12 +13,12 @@
 
 #container-center {
   margin: 5rem auto auto auto;
-  width: 100%;
+  width: 96%;
   max-width: 960px;
 }
 
 #op-bar {
-  width: 100%;
+  width: 96%;
   max-width: 960px;
 
   position: fixed;
@@ -31,9 +31,7 @@
 }
 
 #item-list {
-  width: 100%;
-  max-width: 960px;
-  margin-top: 10rem;
+  margin-top: 12rem;
 }
 
 #item-list table {
@@ -41,17 +39,24 @@
   color: #34495e;
   font-size: 1.4rem;
   line-height: 4rem;
-  background-color: transparent;
+  background-color: white;
+  border-radius: 0.8rem;
 }
 
 #item-list tr {
   border-top: solid 1px transparent;
-  background-color: white;
+}
+
+#item-list .item-name {
+  display: block;
+  max-width: 8rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 #item-list tr:hover {
-  background-color: #e8e8e8;
-  color: black;
+  opacity: 0.8;
 }
 
 #panel {
@@ -191,6 +196,16 @@
   flex-grow: 0;
   flex-shrink: 0;
   flex-basis: 50%;
+}
+.flex-23col {
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: 66%;
+}
+.flex-13col {
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: 31%;
 }
 .flex-col-parent {
   display: flex;

@@ -65,7 +65,8 @@
   },
   "jest": {
     "testMatch": [
-      "**/src/**/__test__/**/*.test.ts"
+      "**/src/**/__test__/**/*.test.ts",
+      "**/src/**/__test__/**/*.test.tsx"
     ],
     "transform": {
       "\\.(ts|tsx)$": "ts-jest"

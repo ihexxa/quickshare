@@ -42,13 +42,13 @@ export class Panel extends React.Component<Props, State, {}> {
             className="top-bar cyan1-font padding-t-m padding-b-m padding-l-l padding-r-l"
           >
             <div className="flex-2col-parent">
-              <div className="flex-2col h5">Quickshare</div>
-              <div className="flex-2col text-right">
+              <span className="flex-13col h5">Quickshare</span>
+              <span className="flex-23col text-right">
                 <AuthPane
                   authed={this.props.authPane.authed}
-                  update={this.update}
+                  update={this.update}                  
                 />
-              </div>
+              </span>
             </div>
           </div>
 

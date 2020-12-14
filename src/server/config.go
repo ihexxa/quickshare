@@ -63,8 +63,8 @@ func DefaultConfig() (string, error) {
 			Debug:          false,
 			Host:           "0.0.0.0",
 			Port:           8888,
-			ReadTimeout:    2000,
-			WriteTimeout:   2000,
+			ReadTimeout:    5000,
+			WriteTimeout:   5000,
 			MaxHeaderBytes: 512,
 		},
 	}

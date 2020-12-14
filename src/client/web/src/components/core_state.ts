@@ -22,7 +22,7 @@ export function init(): ICoreState {
         authed: false,
       },
       browser: {
-        dirPath: List<string>(["/"]),
+        dirPath: List<string>(["."]),
         items: List<Item>([]),
         uploadValue: "",
         uploadFiles: List<File>([]),

@@ -124,10 +124,10 @@ func (h *SimpleUserHandlers) Login(c *gin.Context) {
 		return
 	}
 
-	hostname := h.cfg.GrabString("Server.Host")
+	// hostname := h.cfg.GrabString("Server.Host")
 	secure := h.cfg.GrabBool("Users.CookieSecure")
 	httpOnly := h.cfg.GrabBool("Users.CookieHttpOnly")
-	c.SetCookie(TokenCookie, token, ttl, "/", hostname, secure, httpOnly)
+	c.SetCookie(TokenCookie, token, ttl, "/", "", secure, httpOnly)
 
 	c.JSON(q.Resp(200))
 }
@@ -137,10 +137,10 @@ type LogoutReq struct {
 
 func (h *SimpleUserHandlers) Logout(c *gin.Context) {
 	// token alreay verified in the authn middleware
-	hostname := h.cfg.GrabString("Server.Host")
+	// hostname := h.cfg.GrabString("Server.Host")
 	secure := h.cfg.GrabBool("Users.CookieSecure")
 	httpOnly := h.cfg.GrabBool("Users.CookieHttpOnly")
-	c.SetCookie(TokenCookie, "", 0, "/", hostname, secure, httpOnly)
+	c.SetCookie(TokenCookie, "", 0, "/", "", secure, httpOnly)
 	c.JSON(q.Resp(200))
 }
 

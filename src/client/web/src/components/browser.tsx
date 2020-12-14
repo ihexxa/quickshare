@@ -3,7 +3,12 @@ import * as ReactDOM from "react-dom";
 import { List, Map } from "immutable";
 
 import { ICoreState } from "./core_state";
-import { filesClient, usersClient } from "../client";
+import {
+  IUsersClient,
+  IFilesClient,
+  usersClient,
+  filesClient,
+} from "../client";
 import { MetadataResp } from "../client/files";
 import { FileUploader } from "../client/uploader";
 
@@ -26,14 +31,26 @@ export interface Props {
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
+function getItemPath(dirPath: string, itemName: string): string {
+  return dirPath.endsWith("/")
+    ? `${dirPath}${itemName}`
+    : `${dirPath}/${itemName}`;
+}
+
 export class Updater {
   private static props: Props;
+  private static usersClient: IUsersClient;
+  private static filesClient: IFilesClient;
 
   static init = (props: Props) => (Updater.props = { ...props });
+  static setClients(usersClient: IUsersClient, filesClient: IFilesClient) {
+    Updater.usersClient = usersClient;
+    Updater.filesClient = filesClient;
+  }
 
   static setItems = async (dirParts: List<string>): Promise<void> => {
     let dirPath = dirParts.join("/");
-    let listResp = await filesClient.list(dirPath);
+    let listResp = await Updater.filesClient.list(dirPath);
 
     Updater.props.dirPath = dirParts;
     Updater.props.items =
@@ -43,33 +60,75 @@ export class Updater {
   };
 
   static mkDir = async (dirPath: string): Promise<void> => {
-    let status = await filesClient.mkdir(dirPath);
+    let status = await Updater.filesClient.mkdir(dirPath);
     if (status != 200) {
-      // set err
+      alert(`failed to make dir ${dirPath}`);
     }
   };
 
-  static delete = async (itemPath: string): Promise<void> => {
-    let status = await filesClient.delete(itemPath);
-    if (status != 200) {
-      // set err
-    }
+  static delete = async (
+    dirParts: List<string>,
+    items: List<MetadataResp>,
+    selectedItems: Map<string, boolean>
+  ): Promise<void> => {
+    const delRequests = items
+      .filter((item) => {
+        return selectedItems.has(item.name);
+      })
+      .map(
+        async (selectedItem: MetadataResp): Promise<string> => {
+          const itemPath = getItemPath(dirParts.join("/"), selectedItem.name);
+          const status = await Updater.filesClient.delete(itemPath);
+          return status === 200 ? "" : selectedItem.name;
+        }
+      );
+
+    const failedFiles = await Promise.all(delRequests);
+    failedFiles.forEach((failedFile) => {
+      if (failedFile !== "") {
+        alert(`failed to delete ${failedFile}`);
+      }
+    });
+    return Updater.setItems(dirParts);
   };
 
-  static move = async (oldPath: string, newPath: string): Promise<void> => {
-    let status = await filesClient.move(oldPath, newPath);
-    if (status != 200) {
-      // set err
-    }
+  static moveHere = async (
+    srcDir: string,
+    dstDir: string,
+    selectedItems: Map<string, boolean>
+  ): Promise<void> => {
+    const moveRequests = List<string>(selectedItems.keys()).map(
+      async (itemName: string): Promise<string> => {
+        const oldPath = getItemPath(srcDir, itemName);
+        const newPath = getItemPath(dstDir, itemName);
+
+        const status = await Updater.filesClient.move(oldPath, newPath);
+        return status == 200 ? "" : itemName;
+      }
+    );
+
+    const failedFiles = await Promise.all(moveRequests);
+    failedFiles.forEach((failedItem) => {
+      if (failedItem !== "") {
+        alert(`failed to move ${failedItem}`);
+      }
+    });
+
+    return Updater.setItems(List<string>(dstDir.split("/")));
   };
 
   static setPwd = async (oldPwd: string, newPwd: string): Promise<boolean> => {
-    const status = await usersClient.setPwd(oldPwd, newPwd);
+    const status = await Updater.usersClient.setPwd(oldPwd, newPwd);
     return status == 200;
   };
 
-  static addUploadFiles = (uploadFiles: List<File>) => {
-    Updater.props.uploadFiles = Updater.props.uploadFiles.concat(uploadFiles);
+  static addUploadFiles = (fileList: FileList, len: number) => {
+    let newUploads = List<File>([]);
+    for (let i = 0; i < len; i++) {
+      newUploads = newUploads.push(fileList.item(i));
+    }
+
+    Updater.props.uploadFiles = Updater.props.uploadFiles.concat(newUploads);
   };
 
   static setUploadFiles = (uploadFiles: List<File>) => {
@@ -97,10 +156,12 @@ export class Browser extends React.Component<Props, State, {}> {
   private update: (updater: (prevState: ICoreState) => ICoreState) => void;
   private uploadInput: Element | Text;
   private assignInput: (input: Element) => void;
+  private onClickUpload: () => void;
 
   constructor(p: Props) {
     super(p);
     Updater.init(p);
+    Updater.setClients(usersClient, filesClient);
     this.update = p.update;
     this.state = {
       inputValue: "",
@@ -116,6 +177,10 @@ export class Browser extends React.Component<Props, State, {}> {
     this.assignInput = (input) => {
       this.uploadInput = ReactDOM.findDOMNode(input);
     };
+    this.onClickUpload = () => {
+      const uploadInput = this.uploadInput as HTMLButtonElement;
+      uploadInput.click();
+    };
 
     Updater.setItems(p.dirPath).then(() => {
       this.update(Updater.setBrowser);
@@ -129,7 +194,7 @@ export class Browser extends React.Component<Props, State, {}> {
   startUploadWorker = () => {
     if (this.props.uploadFiles.size > 0) {
       const file = this.props.uploadFiles.get(0);
-      Updater.setUploadFiles(this.props.uploadFiles.slice(0, -1));
+      Updater.setUploadFiles(this.props.uploadFiles.slice(1));
       this.update(Updater.setBrowser);
 
       const uploader = new FileUploader(
@@ -149,166 +214,9 @@ export class Browser extends React.Component<Props, State, {}> {
     }
   };
 
-  onClickUpload = () => {
-    const uploadInput = this.uploadInput as HTMLButtonElement;
-    uploadInput.click();
-  };
-
-  onUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files == null || event.target.files.length === 0) {
-      // TODO: prompt an alert
-    } else {
-      let newUploads = List<File>([]);
-      for (let i = 0; i < event.target.files.length; i++) {
-        newUploads = newUploads.push(event.target.files.item(i));
-      }
-
-      Updater.addUploadFiles(newUploads);
-      this.update(Updater.setBrowser);
-    }
-  };
-
-  onInputChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
-    const val = ev.target.value;
-    this.setState((prevState: State, _: Props) => {
-      return { ...prevState, inputValue: val };
-    });
-  };
-
-  onMkDir = () => {
-    Updater.mkDir(this.state.inputValue)
-      .then(() => {
-        return Updater.setItems(this.props.dirPath);
-      })
-      .then(() => {
-        this.update(Updater.setBrowser);
-      });
-  };
-
-  delete = () => {
-    // TODO: Add checks and clean selected when change the dir
-    const delPromises = this.props.items
-      .filter((item) => {
-        return this.state.selectedItems.has(item.name);
-      })
-      .map(
-        (selectedItem: MetadataResp): Promise<void> => {
-          const dirPath = this.props.dirPath.join("/");
-          const itemPath = dirPath.endsWith("/")
-            ? `${dirPath}${selectedItem.name}`
-            : `${dirPath}/${selectedItem.name}`;
-
-          return Updater.delete(itemPath);
-        }
-      );
-
-    // TODO: clean selected
-    Promise.all(delPromises)
-      .then(() => {
-        return Updater.setItems(this.props.dirPath);
-      })
-      .then(() => {
-        this.update(Updater.setBrowser);
-        this.setState({
-          selectedSrc: "",
-          selectedItems: Map<string, boolean>(),
-        });
-      });
-  };
-
-  goto = (childDirName: string) => {
-    const dirPath = this.props.dirPath.push(childDirName);
-    Updater.setItems(dirPath).then(() => {
-      this.update(Updater.setBrowser);
-    });
-  };
-
-  chdir = (dirPath: List<string>) => {
-    Updater.setItems(dirPath).then(() => {
-      this.update(Updater.setBrowser);
-    });
-  };
-
-  select = (itemName: string) => {
-    const selectedItems = this.state.selectedItems.has(itemName)
-      ? this.state.selectedItems.delete(itemName)
-      : this.state.selectedItems.set(itemName, true);
-
-    this.setState((prevState: State, _: Props) => {
-      return {
-        ...prevState,
-        selectedSrc: this.props.dirPath.join("/"),
-        selectedItems: selectedItems,
-      };
-    });
-  };
-
-  moveHere = () => {
-    // TODO: Add checks and clean selected when change the dir
-    const movePromises = this.props.items
-      .filter((item) => {
-        return this.state.selectedItems.has(item.name);
-      })
-      .map(
-        (selectedItem: MetadataResp): Promise<void> => {
-          const itemName = selectedItem.name;
-          const oldPath = this.state.selectedSrc.endsWith("/")
-            ? `${this.state.selectedSrc}${itemName}`
-            : `${this.state.selectedSrc}/${itemName}`;
-          const newPath = this.props.dirPath.join("/").endsWith("/")
-            ? `${this.props.dirPath.join("/")}${itemName}`
-            : `${this.props.dirPath.join("/")}/${itemName}`;
-          return Updater.move(oldPath, newPath);
-        }
-      );
-
-    // TODO: clean selected
-    Promise.all(movePromises)
-      .then(() => {
-        return Updater.setItems(this.props.dirPath);
-      })
-      .then(() => {
-        this.update(Updater.setBrowser);
-        this.setState({
-          selectedSrc: "",
-          selectedItems: Map<string, boolean>(),
-        });
-      });
-  };
-
-  // copyHere = () => {};
-
-  setPwd = () => {
-    if (this.state.newPwd1 !== this.state.newPwd2) {
-      // alert
-      alert("new pwds not same");
-      return;
-    }
-    if (this.state.newPwd1 == "") {
-      alert("new pwds can not be empty");
-      return;
-    }
-    if (this.state.oldPwd == this.state.newPwd1) {
-      // alert
-      alert("old and new pwds are same");
-      return;
-    }
-    Updater.setPwd(this.state.oldPwd, this.state.newPwd1).then(
-      (ok: boolean) => {
-        if (ok) {
-          // hint
-          alert("ok");
-        } else {
-          // alert
-        }
-      }
-    );
-  };
-
   showPane = () => {
     this.setState({ show: !this.state.show });
   };
-
   changeOldPwd = (ev: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ oldPwd: ev.target.value });
   };
@@ -317,6 +225,115 @@ export class Browser extends React.Component<Props, State, {}> {
   };
   changeNewPwd2 = (ev: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ newPwd2: ev.target.value });
+  };
+  onInputChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ inputValue: ev.target.value });
+  };
+
+  addUploadFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+    Updater.addUploadFiles(event.target.files, event.target.files.length);
+    this.update(Updater.setBrowser);
+  };
+
+  select = (itemName: string) => {
+    const selectedItems = this.state.selectedItems.has(itemName)
+      ? this.state.selectedItems.delete(itemName)
+      : this.state.selectedItems.set(itemName, true);
+
+    this.setState({
+      selectedSrc: this.props.dirPath.join("/"),
+      selectedItems: selectedItems,
+    });
+  };
+
+  onMkDir = () => {
+    Updater.mkDir(this.state.inputValue)
+      .then(() => {
+        this.setState({ inputValue: "" });
+        return Updater.setItems(this.props.dirPath);
+      })
+      .then(() => {
+        this.update(Updater.setBrowser);
+      });
+  };
+
+  delete = () => {
+    if (this.props.dirPath.join("/") !== this.state.selectedSrc) {
+      alert("please select file or folder to delete at first");
+      this.setState({
+        selectedSrc: this.props.dirPath.join("/"),
+        selectedItems: Map<string, boolean>(),
+      });
+      return;
+    }
+
+    Updater.delete(
+      this.props.dirPath,
+      this.props.items,
+      this.state.selectedItems
+    ).then(() => {
+      this.update(Updater.setBrowser);
+      this.setState({
+        selectedSrc: "",
+        selectedItems: Map<string, boolean>(),
+      });
+    });
+  };
+
+  gotoChild = (childDirName: string) => {
+    this.chdir(this.props.dirPath.push(childDirName));
+  };
+
+  chdir = (dirPath: List<string>) => {
+    Updater.setItems(dirPath).then(() => {
+      this.update(Updater.setBrowser);
+    });
+  };
+
+  moveHere = () => {
+    const oldDir = this.state.selectedSrc;
+    const newDir = this.props.dirPath.join("/");
+    if (oldDir === newDir) {
+      alert("source directory is same as destination directory");
+      return;
+    }
+
+    Updater.moveHere(
+      this.state.selectedSrc,
+      this.props.dirPath.join("/"),
+      this.state.selectedItems
+    ).then(() => {
+      this.update(Updater.setBrowser);
+      this.setState({
+        selectedSrc: "",
+        selectedItems: Map<string, boolean>(),
+      });
+    });
+  };
+
+  setPwd = () => {
+    if (this.state.newPwd1 !== this.state.newPwd2) {
+      alert("new passwords are not same");
+    } else if (this.state.newPwd1 == "") {
+      alert("new passwords can not be empty");
+    } else if (this.state.oldPwd == this.state.newPwd1) {
+      alert("old and new passwords are same");
+    } else {
+      Updater.setPwd(this.state.oldPwd, this.state.newPwd1).then(
+        (ok: boolean) => {
+          if (ok) {
+            alert("Password is updated");
+          } else {
+            alert("fail to update password");
+          }
+          this.setState({
+            oldPwd: "",
+            newPwd1: "",
+            newPwd2: "",
+          });
+        }
+      );
+    }
   };
 
   render() {
@@ -343,43 +360,51 @@ export class Browser extends React.Component<Props, State, {}> {
           <button
             type="button"
             onClick={() => this.delete()}
-            className="red0-bg white-font"
+            className="red0-bg white-font margin-m"
           >
             Delete Selected
           </button>
-          <span className="margin-l-l margin-r-l">/</span>
+          <span className="margin-s">-</span>
           <button
             type="button"
             onClick={() => this.moveHere()}
-            className="grey1-bg white-font"
+            className="grey1-bg white-font margin-m"
           >
             Paste
           </button>
-          <span className="margin-l-l margin-r-l">/</span>
-          <input
-            type="text"
-            onChange={this.onInputChange}
-            value={this.state.inputValue}
-            className="margin-r-m black0-font"
-            placeholder="folder name"
-          />
-          <button onClick={this.onMkDir} className="grey1-bg white-font">
-            Create Folder
-          </button>
-          <span className="margin-l-l margin-r-l">/</span>
-          <button onClick={this.onClickUpload} className="green0-bg white-font">
+          <span className="margin-s">-</span>
+          <button
+            onClick={this.onClickUpload}
+            className="green0-bg white-font margin-m"
+          >
             Upload Files
           </button>
+          <span className="margin-s">-</span>
+          <span className="margin-m">
+            <input
+              type="text"
+              onChange={this.onInputChange}
+              value={this.state.inputValue}
+              className="margin-r-m black0-font"
+              placeholder="folder name"
+            />
+            <button onClick={this.onMkDir} className="grey1-bg white-font">
+              Create Folder
+            </button>
+          </span>
           <input
             type="file"
-            onChange={this.onUpload}
+            onChange={this.addUploadFile}
             multiple={true}
             value={this.props.uploadValue}
             ref={this.assignInput}
-            className="black0-font hidden"
+            className="black0-font hidden margin-m"
           />
-          <span className="margin-l-l margin-r-l">/</span>
-          <button onClick={this.showPane} className="grey1-bg white-font">
+          <span className="margin-s">-</span>
+          <button
+            onClick={this.showPane}
+            className="grey1-bg white-font margin-m"
+          >
             Settings
           </button>
         </div>
@@ -394,7 +419,7 @@ export class Browser extends React.Component<Props, State, {}> {
               type="password"
               onChange={this.changeOldPwd}
               value={this.state.oldPwd}
-              className="margin-r-m black0-font"
+              className="margin-m black0-font"
               placeholder="old password"
             />
             <input
@@ -402,7 +427,7 @@ export class Browser extends React.Component<Props, State, {}> {
               type="password"
               onChange={this.changeNewPwd1}
               value={this.state.newPwd1}
-              className="margin-r-m black0-font"
+              className="margin-m black0-font"
               placeholder="new password"
             />
             <input
@@ -410,7 +435,7 @@ export class Browser extends React.Component<Props, State, {}> {
               type="password"
               onChange={this.changeNewPwd2}
               value={this.state.newPwd2}
-              className="margin-r-m black0-font"
+              className="margin-m black0-font"
               placeholder="new password again"
             />
             <button onClick={this.setPwd} className="grey1-bg white-font">
@@ -429,60 +454,87 @@ export class Browser extends React.Component<Props, State, {}> {
         : `${dirPath}/${item.name}`;
 
       return item.isDir ? (
-        <tr
-          key={item.name}
-          className={`${isSelected ? "green0-bg white-font" : "white0-bg"}`}
-          onClick={() => this.select(item.name)}
-        >
-          <td className="padding-l-l" style={{width: "3rem"}}>
-            <span className="dot green0-bg" ></span>
+        <tr key={item.name} className={`${isSelected ? "green0-bg" : ""}`}>
+          <td className="padding-l-l" style={{ width: "3rem" }}>
+            <span className="dot yellow0-bg"></span>
           </td>
           <td>
-            <span onClick={() => this.goto(item.name)}>{item.name}</span>
+            <span className="item-name" onClick={() => this.gotoChild(item.name)}>
+              {item.name}
+            </span>
           </td>
           <td>N/A</td>
           <td>{item.modTime.slice(0, item.modTime.indexOf("T"))}</td>
-          <td>Folder</td>
+          
+          <td>
+            <button
+              type="button"
+              onClick={() => this.select(item.name)}
+              className="grey1-bg white-font margin-t-m margin-b-m"
+            >
+              Select
+            </button>
+          </td>
         </tr>
       ) : (
         <tr
           key={item.name}
-          className={`${isSelected ? "green0-bg white-font" : "white0-bg"}`}
-          onClick={() => this.select(item.name)}
+          className={`${isSelected ? "green0-bg" : "white0-bg"}`}
         >
-          <td className="padding-l-l" style={{width: "3rem"}}>
-            <span className="dot green0-bg" ></span>
+          <td className="padding-l-l" style={{ width: "3rem" }}>
+            <span className="dot green0-bg"></span>
           </td>
           <td>
-            <a href={`/v1/fs/files?fp=${itemPath}`} target="_blank">
-              {item.name}
-            </a>
+              <a className="item-name" href={`/v1/fs/files?fp=${itemPath}`} target="_blank">
+                {item.name}
+              </a>
           </td>
           <td>{item.size}</td>
           <td>{item.modTime.slice(0, item.modTime.indexOf("T"))}</td>
-          <td>Regular File</td>
+          
+          <td>
+            <button
+              type="button"
+              onClick={() => this.select(item.name)}
+              className="grey1-bg white-font margin-t-m margin-b-m"
+            >
+              Select
+            </button>
+          </td>
         </tr>
       );
     });
+
     return (
       <div>
-        <div id="op-bar" className="op-bar padding-t-m padding-b-m">
+        <div id="op-bar" className="op-bar">
           <div className="margin-l-m margin-r-m">{ops}</div>
         </div>
 
         <div id="item-list" className="">
           <div className="margin-b-l">{breadcrumb}</div>
           <table>
-            <thead style={{fontWeight:"bold"}}>
+            <thead style={{ fontWeight: "bold" }}>
               <tr>
-                <td></td>
-                <td>Entry Name</td>
+                <td className="padding-l-l" style={{ width: "3rem" }}>
+                  <span className="dot black-bg"></span>
+                </td>
+                <td>Name</td>
                 <td>File Size</td>
                 <td>Mod Time</td>
-                <td>Type</td>
+                <td>Op</td>
               </tr>
             </thead>
             <tbody>{itemList}</tbody>
+            <tfoot>
+              <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       </div>

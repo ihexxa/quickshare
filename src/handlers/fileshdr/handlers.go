@@ -121,9 +121,9 @@ func (h *FileHandlers) Create(c *gin.Context) {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
 		}
-	})
 
-	c.JSON(q.Resp(200))
+		c.JSON(q.Resp(200))
+	})
 }
 
 func (h *FileHandlers) Delete(c *gin.Context) {
