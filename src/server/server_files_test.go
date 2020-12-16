@@ -197,6 +197,11 @@ func TestFileHandlers(t *testing.T) {
 				}
 			}
 
+			err = fs.Sync()
+			if err != nil {
+				t.Fatal(err)
+			}
+
 			// check uploaded file
 			fsFilePath := filepath.Join(fileshdr.FsDir, filePath)
 			info, err = fs.Stat(fsFilePath)
@@ -249,6 +254,11 @@ func TestFileHandlers(t *testing.T) {
 				assertUploadOK(t, filePath, content)
 			}
 
+			err = fs.Sync()
+			if err != nil {
+				t.Fatal(err)
+			}
+
 			_, lResp, errs := cl.List(dirPath)
 			if len(errs) > 0 {
 				t.Fatal(errs)
@@ -294,6 +304,11 @@ func TestFileHandlers(t *testing.T) {
 			} else if res.StatusCode != 200 {
 				t.Fatal(res.StatusCode)
 			}
+		}
+
+		err = fs.Sync()
+		if err != nil {
+			t.Fatal(err)
 		}
 
 		_, lResp, errs := cl.List(dstDir)
