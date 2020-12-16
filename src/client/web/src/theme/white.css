@@ -1,0 +1,69 @@
+.theme-white .bg {
+  background-color: #ecf0f1;
+}
+
+.theme-white .text-color {
+  color: #34495e;
+}
+
+.theme-white .bg-img {
+  background: url("/static/img/textured_paper.png") repeat fixed center;
+  /* background: url("/static/img/huangpu.jpg") repeat fixed center; */
+}
+
+.theme-white .top-bar {
+  background: rgba( 255, 255, 255, 0.9 );
+  box-shadow: 0 5px 30px 0 rgba( 31, 38, 135, 0.1 );
+  backdrop-filter: blur( 9.5px );
+  -webkit-backdrop-filter: blur( 9.5px );
+}
+
+.theme-white div.hr {
+  background-color: white;
+}
+
+.theme-white .op-bar {
+  background: rgba( 255, 255, 255, 0.9 );
+  box-shadow: 0 5px 30px 0 rgba( 31, 38, 135, 0.1 );
+  backdrop-filter: blur( 9.5px );
+  -webkit-backdrop-filter: blur( 9.5px );
+}
+
+.theme-white .panel {
+  background-color: #ccc;
+}
+
+.theme-white .panel-head {
+  /* background-color: white; */
+  border-bottom: solid 1px #ecf0f1;
+}
+
+.theme-white .panel-head-menu {
+  background-color: white;
+  color: #34495e;
+  border-bottom: solid 1px #ecf0f1;
+}
+
+.theme-white .panel-body {
+  /* background-color: #fafafa; */
+  color: #34495e;
+}
+
+.theme-white .nav-bar {
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #7f8c8d;
+  fill: black;
+}
+
+.theme-white .news .title {
+  color: #34495e;
+}
+
+.theme-white .border {
+  background-color: #e0e0e0;
+}
+
+.theme-white .wide-btn {
+  color: white;
+  background-color: #16a085;
+}

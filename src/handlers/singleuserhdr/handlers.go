@@ -89,6 +89,15 @@ type LoginReq struct {
 	Pwd  string `json:"pwd"`
 }
 
+func (h *SimpleUserHandlers) checkPwd(user, pwd string) error {
+	expectedHash, ok := h.deps.KV().GetStringIn(UsersNs, user)
+	if !ok {
+		return ErrInvalidConfig
+	}
+
+	return bcrypt.CompareHashAndPassword([]byte(expectedHash), []byte(pwd))
+}
+
 func (h *SimpleUserHandlers) Login(c *gin.Context) {
 	req := &LoginReq{}
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -96,15 +105,8 @@ func (h *SimpleUserHandlers) Login(c *gin.Context) {
 		return
 	}
 
-	expectedHash, ok := h.deps.KV().GetStringIn(UsersNs, req.User)
-	if !ok {
-		c.JSON(q.ErrResp(c, 500, ErrInvalidConfig))
-		return
-	}
-
-	err := bcrypt.CompareHashAndPassword([]byte(expectedHash), []byte(req.Pwd))
-	if err != nil {
-		c.JSON(q.ErrResp(c, 401, err))
+	if err := h.checkPwd(req.User, req.Pwd); err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
 
@@ -124,32 +126,30 @@ func (h *SimpleUserHandlers) Login(c *gin.Context) {
 		return
 	}
 
-	hostname := h.cfg.GrabString("Server.Host")
 	secure := h.cfg.GrabBool("Users.CookieSecure")
 	httpOnly := h.cfg.GrabBool("Users.CookieHttpOnly")
-	c.SetCookie(TokenCookie, token, ttl, "/", hostname, secure, httpOnly)
+	c.SetCookie(TokenCookie, token, ttl, "/", "", secure, httpOnly)
 
 	c.JSON(q.Resp(200))
 }
 
 type LogoutReq struct {
-	User string `json:"user"`
 }
 
 func (h *SimpleUserHandlers) Logout(c *gin.Context) {
-	req := &LogoutReq{}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(q.ErrResp(c, 500, err))
-		return
-	}
-
 	// token alreay verified in the authn middleware
-	c.SetCookie(TokenCookie, "", 0, "/", "nohost", false, true)
+	secure := h.cfg.GrabBool("Users.CookieSecure")
+	httpOnly := h.cfg.GrabBool("Users.CookieHttpOnly")
+	c.SetCookie(TokenCookie, "", 0, "/", "", secure, httpOnly)
+	c.JSON(q.Resp(200))
+}
+
+func (h *SimpleUserHandlers) IsAuthed(c *gin.Context) {
+	// token alreay verified in the authn middleware
 	c.JSON(q.Resp(200))
 }
 
 type SetPwdReq struct {
-	User   string `json:"user"`
 	OldPwd string `json:"oldPwd"`
 	NewPwd string `json:"newPwd"`
 }
@@ -159,15 +159,24 @@ func (h *SimpleUserHandlers) SetPwd(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(q.ErrResp(c, 400, err))
 		return
+	} else if req.OldPwd == req.NewPwd {
+		c.JSON(q.ErrResp(c, 400, errors.New("password is not updated")))
+		return
 	}
 
-	expectedHash, ok := h.deps.KV().GetStringIn(UsersNs, req.User)
+	claims, err := h.getUserInfo(c)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 401, err))
+		return
+	}
+
+	expectedHash, ok := h.deps.KV().GetStringIn(UsersNs, claims[UserParam])
 	if !ok {
 		c.JSON(q.ErrResp(c, 500, ErrInvalidConfig))
 		return
 	}
 
-	err := bcrypt.CompareHashAndPassword([]byte(expectedHash), []byte(req.OldPwd))
+	err = bcrypt.CompareHashAndPassword([]byte(expectedHash), []byte(req.OldPwd))
 	if err != nil {
 		c.JSON(q.ErrResp(c, 401, ErrInvalidUser))
 		return
@@ -178,11 +187,33 @@ func (h *SimpleUserHandlers) SetPwd(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 500, errors.New("fail to set password")))
 		return
 	}
-	err = h.deps.KV().SetStringIn(UsersNs, req.User, string(newHash))
+	err = h.deps.KV().SetStringIn(UsersNs, claims[UserParam], string(newHash))
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, ErrInvalidConfig))
 		return
 	}
 
 	c.JSON(q.Resp(200))
+}
+
+func (h *SimpleUserHandlers) getUserInfo(c *gin.Context) (map[string]string, error) {
+	tokenStr, err := c.Cookie(TokenCookie)
+	if err != nil {
+		return nil, err
+	}
+	claims, err := h.deps.Token().FromToken(
+		tokenStr,
+		map[string]string{
+			UserParam:   "",
+			RoleParam:   "",
+			ExpireParam: "",
+		},
+	)
+	if err != nil {
+		return nil, err
+	} else if claims[UserParam] == "" {
+		return nil, ErrInvalidConfig
+	}
+
+	return claims, nil
 }

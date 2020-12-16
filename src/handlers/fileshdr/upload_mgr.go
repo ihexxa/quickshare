@@ -37,17 +37,13 @@ func (um *UploadMgr) AddInfo(fileName, tmpName string, fileSize int64, isDir boo
 	return um.kv.SetString(infoKey(tmpName, filePathKey), fileName)
 }
 
-func (um *UploadMgr) IncreUploaded(fileName string, newUploaded int64) error {
+func (um *UploadMgr) SetUploaded(fileName string, newUploaded int64) error {
 	fileSize, ok := um.kv.GetInt64(infoKey(fileName, fileSizeKey))
 	if !ok {
 		return fmt.Errorf("file size %s not found", fileName)
 	}
-	preUploaded, ok := um.kv.GetInt64(infoKey(fileName, uploadedKey))
-	if !ok {
-		return fmt.Errorf("file uploaded %s not found", fileName)
-	}
-	if newUploaded+preUploaded <= fileSize {
-		um.kv.SetInt64(infoKey(fileName, uploadedKey), newUploaded+preUploaded)
+	if newUploaded <= fileSize {
+		um.kv.SetInt64(infoKey(fileName, uploadedKey), newUploaded)
 		return nil
 	}
 	return errors.New("uploaded is greater than file size")

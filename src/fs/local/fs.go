@@ -135,7 +135,7 @@ func (fs *LocalFS) Remove(entryPath string) error {
 	if err != nil {
 		return err
 	}
-	return os.Remove(fullpath)
+	return os.RemoveAll(fullpath)
 }
 
 func (fs *LocalFS) Rename(oldpath, newpath string) error {

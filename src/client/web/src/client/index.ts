@@ -1,0 +1,110 @@
+import axios, { AxiosRequestConfig } from "axios";
+
+export const defaultTimeout = 10000;
+
+export interface MetadataResp {
+  name: string;
+  size: number;
+  modTime: string;
+  isDir: boolean;
+}
+
+export interface UploadStatusResp {
+  path: string;
+  isDir: boolean;
+  fileSize: number;
+  uploaded: number;
+}
+
+export interface ListResp {
+  metadatas: MetadataResp[];
+}
+
+export interface IUsersClient {
+  login: (user: string, pwd: string) => Promise<Response>
+  logout: () => Promise<Response>
+  isAuthed: () => Promise<Response>
+  setPwd: (oldPwd: string, newPwd: string) => Promise<Response>
+}
+
+export interface IFilesClient {
+  create: (filePath: string, fileSize: number) => Promise<Response>;
+  delete: (filePath: string) => Promise<Response>;
+  metadata: (filePath: string) => Promise<Response>;
+  mkdir: (dirpath: string) => Promise<Response>;
+  move: (oldPath: string, newPath: string) => Promise<Response>;
+  uploadChunk: (
+    filePath: string,
+    content: string | ArrayBuffer,
+    offset: number
+  ) => Promise<Response<UploadStatusResp>>;
+  uploadStatus: (filePath: string) => Promise<Response<UploadStatusResp>>;
+  list: (dirPath: string) => Promise<Response<ListResp>>;
+}
+
+export interface Response<T = any> {
+  status: number;
+  statusText: string;
+  data: T;
+}
+
+export const TimeoutResp: Response<any> = {
+  status: 408,
+  data: {},
+  statusText: "Request Timeout",
+};
+
+// 6xx are custom errors for expressing errors which can not be expressed by http status code
+export const EmptyBodyResp: Response<any> = {
+  status: 601,
+  data: {},
+  statusText: "Empty Response Body",
+};
+
+export const UnknownErrResp = (errMsg: string): Response<any> => {
+  return {
+    status: 600,
+    data: {},
+    statusText: errMsg,
+  };
+};
+
+export class BaseClient {
+  protected url: string;
+
+  constructor(url: string) {
+    this.url = url;
+  }
+
+  async do(config: AxiosRequestConfig): Promise<Response> {
+    let returned = false;
+    const src = axios.CancelToken.source();
+
+    return new Promise((resolve: (ret: Response) => void) => {
+      setTimeout(() => {
+        if (!returned) {
+          src.cancel("request timeout");
+          // resolve(TimeoutResp);
+        }
+      }, defaultTimeout);
+
+      axios({ ...config, cancelToken: src.token })
+        .then((resp) => {
+          returned = true;
+          resolve(resp);
+        })
+        .catch((e) => {
+          const errMsg = e.toString();
+          console.log(e);
+
+          if (errMsg.includes("i/o timeput")) {
+            resolve(TimeoutResp);
+          } else if (errMsg.includes("ERR_EMPTY")) {
+            resolve(EmptyBodyResp);
+          } else {
+            resolve(UnknownErrResp(errMsg));
+          }
+        });
+    });
+  }
+}

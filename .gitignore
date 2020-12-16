@@ -6,3 +6,5 @@
 **/dist
 **/vendor
 **/yarn-error
+**/public/static/*/*.js
+**/public/static/**/*.js

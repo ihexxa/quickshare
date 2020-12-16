@@ -49,7 +49,7 @@ func DefaultConfig() (string, error) {
 			OpenTTL:    60, // 1 min
 		},
 		Users: &UsersCfg{
-			EnableAuth:      false,
+			EnableAuth:      true,
 			DefaultAdmin:    "",
 			DefaultAdminPwd: "",
 			CookieTTL:       3600 * 24 * 7, // 1 week
@@ -61,10 +61,10 @@ func DefaultConfig() (string, error) {
 		},
 		Server: &ServerCfg{
 			Debug:          false,
-			Host:           "127.0.0.1",
+			Host:           "0.0.0.0",
 			Port:           8888,
 			ReadTimeout:    2000,
-			WriteTimeout:   2000,
+			WriteTimeout:   1000 * 3600 * 24, // 1 day
 			MaxHeaderBytes: 512,
 		},
 	}

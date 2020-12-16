@@ -2,6 +2,7 @@ package server
 
 import (
 	"crypto/sha1"
+	"encoding/base64"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -60,7 +61,8 @@ func TestFileHandlers(t *testing.T) {
 			return false
 		}
 
-		res, _, errs = cl.UploadChunk(filePath, content, 0)
+		base64Content := base64.StdEncoding.EncodeToString([]byte(content))
+		res, _, errs = cl.UploadChunk(filePath, base64Content, 0)
 		if len(errs) > 0 {
 			t.Error(errs)
 			return false
@@ -172,7 +174,9 @@ func TestFileHandlers(t *testing.T) {
 					right = len(contentBytes)
 				}
 
-				res, _, errs = cl.UploadChunk(filePath, string(contentBytes[i:right]), int64(i))
+				chunk := contentBytes[i:right]
+				chunkBase64 := base64.StdEncoding.EncodeToString(chunk)
+				res, _, errs = cl.UploadChunk(filePath, chunkBase64, int64(i))
 				i = right
 				if len(errs) > 0 {
 					t.Fatal(errs)
@@ -191,6 +195,11 @@ func TestFileHandlers(t *testing.T) {
 						t.Fatal("incorrect uploadinfo info", statusResp)
 					}
 				}
+			}
+
+			err = fs.Sync()
+			if err != nil {
+				t.Fatal(err)
 			}
 
 			// check uploaded file
@@ -245,6 +254,11 @@ func TestFileHandlers(t *testing.T) {
 				assertUploadOK(t, filePath, content)
 			}
 
+			err = fs.Sync()
+			if err != nil {
+				t.Fatal(err)
+			}
+
 			_, lResp, errs := cl.List(dirPath)
 			if len(errs) > 0 {
 				t.Fatal(errs)
@@ -290,6 +304,11 @@ func TestFileHandlers(t *testing.T) {
 			} else if res.StatusCode != 200 {
 				t.Fatal(res.StatusCode)
 			}
+		}
+
+		err = fs.Sync()
+		if err != nil {
+			t.Fatal(err)
 		}
 
 		_, lResp, errs := cl.List(dstDir)

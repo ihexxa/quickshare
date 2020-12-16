@@ -54,14 +54,14 @@ func TestSingleUserHandlers(t *testing.T) {
 
 		token := client.GetCookie(resp.Cookies(), su.TokenCookie)
 
-		resp, _, errs = suCl.SetPwd(adminName, adminPwd, adminNewPwd, token)
+		resp, _, errs = suCl.SetPwd(adminPwd, adminNewPwd, token)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
 			t.Fatal(resp.StatusCode)
 		}
 
-		resp, _, errs = suCl.Logout(adminName, token)
+		resp, _, errs = suCl.Logout(token)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {

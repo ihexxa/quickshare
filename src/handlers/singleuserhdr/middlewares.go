@@ -15,6 +15,13 @@ var exposedAPIs = map[string]bool{
 	"Health-fm": true,
 }
 
+var publicRootPath = "/"
+var publicStaticPath = "/static"
+
+func IsPublicPath(accessPath string) bool {
+	return accessPath == publicRootPath || strings.HasPrefix(accessPath, publicStaticPath)
+}
+
 func GetHandlerName(fullname string) (string, error) {
 	parts := strings.Split(fullname, ".")
 	if len(parts) == 0 {
@@ -30,13 +37,13 @@ func (h *SimpleUserHandlers) Auth() gin.HandlerFunc {
 			c.JSON(q.ErrResp(c, 401, err))
 			return
 		}
+		accessPath := c.Request.URL.String()
 
-		// TODO: may also check the path
 		enableAuth := h.cfg.GrabBool("Users.EnableAuth")
-		if enableAuth && !exposedAPIs[handlerName] {
+		if enableAuth && !exposedAPIs[handlerName] && !IsPublicPath(accessPath) {
 			token, err := c.Cookie(TokenCookie)
 			if err != nil {
-				c.JSON(q.ErrResp(c, 401, err))
+				c.AbortWithStatusJSON(q.ErrResp(c, 401, err))
 				return
 			}
 
@@ -48,20 +55,20 @@ func (h *SimpleUserHandlers) Auth() gin.HandlerFunc {
 
 			_, err = h.deps.Token().FromToken(token, claims)
 			if err != nil {
-				c.JSON(q.ErrResp(c, 401, err))
+				c.AbortWithStatusJSON(q.ErrResp(c, 401, err))
 				return
 			}
 
 			now := time.Now().Unix()
 			expire, err := strconv.ParseInt(claims[ExpireParam], 10, 64)
 			if err != nil || expire <= now {
-				c.JSON(q.ErrResp(c, 401, err))
+				c.AbortWithStatusJSON(q.ErrResp(c, 401, err))
 				return
 			}
 
 			// visitor is only allowed to download
 			if claims[RoleParam] != AdminRole && handlerName != "Download-fm" {
-				c.JSON(q.Resp(401))
+				c.AbortWithStatusJSON(q.ErrResp(c, 401, errors.New("not allowed")))
 				return
 			}
 		}
