@@ -1,15 +1,12 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { List, Map } from "immutable";
+import * as Filesize from "filesize";
 
 import { ICoreState } from "./core_state";
-import {
-  IUsersClient,
-  IFilesClient,
-  usersClient,
-  filesClient,
-} from "../client";
-import { MetadataResp } from "../client/files";
+import { IUsersClient, IFilesClient, MetadataResp } from "../client";
+import { FilesClient } from "../client/files";
+import { UsersClient } from "../client/users";
 import { FileUploader } from "../client/uploader";
 
 export const uploadCheckCycle = 1000;
@@ -55,13 +52,13 @@ export class Updater {
     Updater.props.dirPath = dirParts;
     Updater.props.items =
       listResp != null
-        ? List<MetadataResp>(listResp.metadatas)
+        ? List<MetadataResp>(listResp.data.metadatas)
         : Updater.props.items;
   };
 
   static mkDir = async (dirPath: string): Promise<void> => {
-    let status = await Updater.filesClient.mkdir(dirPath);
-    if (status != 200) {
+    let resp = await Updater.filesClient.mkdir(dirPath);
+    if (resp.status !== 200) {
       alert(`failed to make dir ${dirPath}`);
     }
   };
@@ -78,8 +75,8 @@ export class Updater {
       .map(
         async (selectedItem: MetadataResp): Promise<string> => {
           const itemPath = getItemPath(dirParts.join("/"), selectedItem.name);
-          const status = await Updater.filesClient.delete(itemPath);
-          return status === 200 ? "" : selectedItem.name;
+          const resp = await Updater.filesClient.delete(itemPath);
+          return resp.status === 200 ? "" : selectedItem.name;
         }
       );
 
@@ -102,8 +99,8 @@ export class Updater {
         const oldPath = getItemPath(srcDir, itemName);
         const newPath = getItemPath(dstDir, itemName);
 
-        const status = await Updater.filesClient.move(oldPath, newPath);
-        return status == 200 ? "" : itemName;
+        const resp = await Updater.filesClient.move(oldPath, newPath);
+        return resp.status === 200 ? "" : itemName;
       }
     );
 
@@ -118,8 +115,8 @@ export class Updater {
   };
 
   static setPwd = async (oldPwd: string, newPwd: string): Promise<boolean> => {
-    const status = await Updater.usersClient.setPwd(oldPwd, newPwd);
-    return status == 200;
+    const resp = await Updater.usersClient.setPwd(oldPwd, newPwd);
+    return resp.status === 200;
   };
 
   static addUploadFiles = (fileList: FileList, len: number) => {
@@ -157,11 +154,12 @@ export class Browser extends React.Component<Props, State, {}> {
   private uploadInput: Element | Text;
   private assignInput: (input: Element) => void;
   private onClickUpload: () => void;
+  private uploading: boolean;
 
   constructor(p: Props) {
     super(p);
     Updater.init(p);
-    Updater.setClients(usersClient, filesClient);
+    Updater.setClients(new UsersClient(""), new FilesClient(""));
     this.update = p.update;
     this.state = {
       inputValue: "",
@@ -185,14 +183,13 @@ export class Browser extends React.Component<Props, State, {}> {
     Updater.setItems(p.dirPath).then(() => {
       this.update(Updater.setBrowser);
     });
-  }
 
-  componentDidMount() {
-    this.startUploadWorker();
-  }
+    setInterval(this.pollUploads, uploadCheckCycle);
+  } 
 
-  startUploadWorker = () => {
-    if (this.props.uploadFiles.size > 0) {
+  pollUploads = () => {
+    if (this.props.uploadFiles.size > 0 && !this.uploading) {
+      this.uploading = true;
       const file = this.props.uploadFiles.get(0);
       Updater.setUploadFiles(this.props.uploadFiles.slice(1));
       this.update(Updater.setBrowser);
@@ -200,18 +197,23 @@ export class Browser extends React.Component<Props, State, {}> {
       const uploader = new FileUploader(
         file,
         `${this.props.dirPath.join("/")}/${file.name}`,
-        this.startUploadWorker
+        this.updateProgress
       );
 
-      uploader.start().then(() => {
+      uploader.start().then((ok: boolean) => {
         Updater.setItems(this.props.dirPath).then(() => {
           this.update(Updater.setBrowser);
-          this.startUploadWorker();
         });
+        if (!ok) {
+          alert(`upload failed: ${uploader.err()}`);
+        }
+        this.uploading = false;
       });
-    } else {
-      setTimeout(this.startUploadWorker, uploadCheckCycle);
     }
+  };
+
+  updateProgress = (filePath: string, progress: number) => {
+    // update uploading progress in the core state
   };
 
   showPane = () => {
@@ -459,13 +461,16 @@ export class Browser extends React.Component<Props, State, {}> {
             <span className="dot yellow0-bg"></span>
           </td>
           <td>
-            <span className="item-name" onClick={() => this.gotoChild(item.name)}>
+            <span
+              className="item-name"
+              onClick={() => this.gotoChild(item.name)}
+            >
               {item.name}
             </span>
           </td>
           <td>N/A</td>
           <td>{item.modTime.slice(0, item.modTime.indexOf("T"))}</td>
-          
+
           <td>
             <button
               type="button"
@@ -477,21 +482,22 @@ export class Browser extends React.Component<Props, State, {}> {
           </td>
         </tr>
       ) : (
-        <tr
-          key={item.name}
-          className={`${isSelected ? "green0-bg" : "white0-bg"}`}
-        >
+        <tr key={item.name} className={`${isSelected ? "green0-bg" : ""}`}>
           <td className="padding-l-l" style={{ width: "3rem" }}>
             <span className="dot green0-bg"></span>
           </td>
           <td>
-              <a className="item-name" href={`/v1/fs/files?fp=${itemPath}`} target="_blank">
-                {item.name}
-              </a>
+            <a
+              className="item-name"
+              href={`/v1/fs/files?fp=${itemPath}`}
+              target="_blank"
+            >
+              {item.name}
+            </a>
           </td>
-          <td>{item.size}</td>
+          <td>{Filesize(item.size, {round: 0})}</td>
           <td>{item.modTime.slice(0, item.modTime.indexOf("T"))}</td>
-          
+
           <td>
             <button
               type="button"

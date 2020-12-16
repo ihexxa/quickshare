@@ -89,6 +89,15 @@ type LoginReq struct {
 	Pwd  string `json:"pwd"`
 }
 
+func (h *SimpleUserHandlers) checkPwd(user, pwd string) error {
+	expectedHash, ok := h.deps.KV().GetStringIn(UsersNs, user)
+	if !ok {
+		return ErrInvalidConfig
+	}
+
+	return bcrypt.CompareHashAndPassword([]byte(expectedHash), []byte(pwd))
+}
+
 func (h *SimpleUserHandlers) Login(c *gin.Context) {
 	req := &LoginReq{}
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -96,15 +105,8 @@ func (h *SimpleUserHandlers) Login(c *gin.Context) {
 		return
 	}
 
-	expectedHash, ok := h.deps.KV().GetStringIn(UsersNs, req.User)
-	if !ok {
-		c.JSON(q.ErrResp(c, 500, ErrInvalidConfig))
-		return
-	}
-
-	err := bcrypt.CompareHashAndPassword([]byte(expectedHash), []byte(req.Pwd))
-	if err != nil {
-		c.JSON(q.ErrResp(c, 401, err))
+	if err := h.checkPwd(req.User, req.Pwd); err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
 
@@ -124,7 +126,6 @@ func (h *SimpleUserHandlers) Login(c *gin.Context) {
 		return
 	}
 
-	// hostname := h.cfg.GrabString("Server.Host")
 	secure := h.cfg.GrabBool("Users.CookieSecure")
 	httpOnly := h.cfg.GrabBool("Users.CookieHttpOnly")
 	c.SetCookie(TokenCookie, token, ttl, "/", "", secure, httpOnly)
@@ -137,7 +138,6 @@ type LogoutReq struct {
 
 func (h *SimpleUserHandlers) Logout(c *gin.Context) {
 	// token alreay verified in the authn middleware
-	// hostname := h.cfg.GrabString("Server.Host")
 	secure := h.cfg.GrabBool("Users.CookieSecure")
 	httpOnly := h.cfg.GrabBool("Users.CookieHttpOnly")
 	c.SetCookie(TokenCookie, "", 0, "/", "", secure, httpOnly)

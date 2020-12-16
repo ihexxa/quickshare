@@ -76,17 +76,22 @@ func (h *FileHandlers) NewAutoLocker(c *gin.Context, key string) *AutoLocker {
 func (lk *AutoLocker) Exec(handler func()) {
 	var err error
 	kv := lk.h.deps.KV()
+
+	defer func() {
+		if p := recover(); p != nil {
+			fmt.Println(p)
+		}
+		if err = kv.Unlock(lk.key); err != nil {
+			fmt.Println(err)
+		}
+	}()
+
 	if err = kv.TryLock(lk.key); err != nil {
-		lk.c.JSON(q.Resp(500))
+		lk.c.JSON(q.ErrResp(lk.c, 500, errors.New("fail to lock the file")))
 		return
 	}
 
 	handler()
-
-	if err = kv.Unlock(lk.key); err != nil {
-		// TODO: use logger
-		fmt.Println(err)
-	}
 }
 
 type CreateReq struct {
@@ -264,13 +269,15 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 			return
 		}
 
+		fmt.Println("length", len([]byte(content)))
+
 		wrote, err := h.deps.FS().WriteAt(tmpFilePath, []byte(content), req.Offset)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
 		}
 
-		err = h.uploadMgr.IncreUploaded(tmpFilePath, int64(wrote))
+		err = h.uploadMgr.SetUploaded(tmpFilePath, req.Offset+int64(wrote))
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
@@ -318,7 +325,11 @@ func (h *FileHandlers) UploadStatus(c *gin.Context) {
 	locker.Exec(func() {
 		_, fileSize, uploaded, err := h.uploadMgr.GetInfo(tmpFilePath)
 		if err != nil {
-			c.JSON(q.ErrResp(c, 500, err))
+			if os.IsNotExist(err) {
+				c.JSON(q.ErrResp(c, 404, err))
+			} else {
+				c.JSON(q.ErrResp(c, 500, err))
+			}
 			return
 		}
 
@@ -347,7 +358,7 @@ func (h *FileHandlers) Download(c *gin.Context) {
 	info, err := h.deps.FS().Stat(filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			c.JSON(q.ErrResp(c, 400, os.ErrNotExist))
+			c.JSON(q.ErrResp(c, 404, os.ErrNotExist))
 		} else {
 			c.JSON(q.ErrResp(c, 500, err))
 		}

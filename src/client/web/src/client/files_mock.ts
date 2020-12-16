@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 
-import {MetadataResp, UploadStatusResp, ListResp} from "./files";
+import {MetadataResp, UploadStatusResp, ListResp} from "./";
 
 export class FilesClient {
   private url: string;

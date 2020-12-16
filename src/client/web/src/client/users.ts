@@ -1,22 +1,13 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import { BaseClient, Response } from "./";
 
-export class UsersClient {
-  private url: string;
 
+export class UsersClient extends BaseClient {
   constructor(url: string) {
-    this.url = url;
+    super(url);
   }
 
-  async do(config: AxiosRequestConfig): Promise<AxiosResponse<any> | null> {
-    try {
-      return await axios(config);
-    } catch (e) {
-      return null;
-    }
-  }
-
-  async login(user: string, pwd: string): Promise<number> {
-    const resp = await this.do({
+  login = (user: string, pwd: string): Promise<Response> => {
+    return this.do({
       method: "post",
       url: `${this.url}/v1/users/login`,
       data: {
@@ -24,29 +15,26 @@ export class UsersClient {
         pwd,
       },
     });
-    return resp != null ? resp.status : 500;
   }
 
   // token cookie is set by browser
-  async logout(): Promise<number> {
-    const resp = await this.do({
+  logout = (): Promise<Response> => {
+    return this.do({
       method: "post",
       url: `${this.url}/v1/users/logout`,
     });
-    return resp != null ? resp.status : 500;
   }
 
-  async isAuthed(): Promise<number> {
-    const resp = await this.do({
+  isAuthed = (): Promise<Response> => {
+    return this.do({
       method: "get",
       url: `${this.url}/v1/users/isauthed`,
     });
-    return resp != null ? resp.status : 500;
   }
 
   // token cookie is set by browser
-  async setPwd(oldPwd: string, newPwd: string): Promise<number> {
-    const resp = await this.do({
+  setPwd = (oldPwd: string, newPwd: string): Promise<Response> => {
+    return this.do({
       method: "patch",
       url: `${this.url}/v1/users/pwd`,
       data: {
@@ -54,6 +42,5 @@ export class UsersClient {
         newPwd,
       },
     });
-    return resp != null ? resp.status : 500;
   }
 }

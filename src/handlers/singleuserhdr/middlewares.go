@@ -2,7 +2,6 @@ package singleuserhdr
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -39,7 +38,6 @@ func (h *SimpleUserHandlers) Auth() gin.HandlerFunc {
 			return
 		}
 		accessPath := c.Request.URL.String()
-		fmt.Println("accessing", accessPath)
 
 		enableAuth := h.cfg.GrabBool("Users.EnableAuth")
 		if enableAuth && !exposedAPIs[handlerName] && !IsPublicPath(accessPath) {

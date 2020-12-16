@@ -1,7 +1,8 @@
 import * as React from "react";
 
 import { ICoreState } from "./core_state";
-import { usersClient, IUsersClient } from "../client";
+import { IUsersClient } from "../client";
+import { UsersClient } from "../client/users";
 
 export interface Props {
   authed: boolean;
@@ -19,20 +20,20 @@ export class Updater {
   };
 
   static login = async (user: string, pwd: string): Promise<boolean> => {
-    const status = await Updater.client.login(user, pwd);
-    Updater.setAuthed(status == 200);
-    return status == 200;
+    const resp = await Updater.client.login(user, pwd);
+    Updater.setAuthed(resp.status === 200);
+    return resp.status === 200;
   };
 
   static logout = async (): Promise<boolean> => {
-    const status = await Updater.client.logout();
+    const resp = await Updater.client.logout();
     Updater.setAuthed(false);
-    return status == 200;
+    return resp.status === 200;
   };
 
   static isAuthed = async (): Promise<boolean> => {
-    const status = await Updater.client.isAuthed();
-    return status == 200;
+    const resp = await Updater.client.isAuthed();
+    return resp.status === 200;
   };
 
   static initIsAuthed = async (): Promise<void> => {
@@ -64,7 +65,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
   constructor(p: Props) {
     super(p);
     Updater.init(p);
-    Updater.setClient(usersClient);
+    Updater.setClient(new UsersClient(""));
     this.update = p.update;
     this.state = {
       user: "",
@@ -92,7 +93,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
     Updater.login(this.state.user, this.state.pwd).then((ok: boolean) => {
       if (ok) {
         this.update(Updater.setAuthPane);
-        this.setState({user: "", pwd: ""});
+        this.setState({ user: "", pwd: "" });
       } else {
         alert("Failed to login.");
       }
@@ -103,7 +104,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
     Updater.logout().then((ok: boolean) => {
       if (ok) {
         this.update(Updater.setAuthPane);
-        this.setState({user: "", pwd: ""});
+        this.setState({ user: "", pwd: "" });
       } else {
         alert("Failed to login.");
       }
