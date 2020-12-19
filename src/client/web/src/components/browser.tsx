@@ -98,7 +98,6 @@ export class Updater {
       async (itemName: string): Promise<string> => {
         const oldPath = getItemPath(srcDir, itemName);
         const newPath = getItemPath(dstDir, itemName);
-
         const resp = await Updater.filesClient.move(oldPath, newPath);
         return resp.status === 200 ? "" : itemName;
       }

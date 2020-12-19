@@ -95,6 +95,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
         this.update(Updater.setAuthPane);
         this.setState({ user: "", pwd: "" });
       } else {
+        this.setState({ user: "", pwd: "" });
         alert("Failed to login.");
       }
     });
@@ -104,9 +105,8 @@ export class AuthPane extends React.Component<Props, State, {}> {
     Updater.logout().then((ok: boolean) => {
       if (ok) {
         this.update(Updater.setAuthPane);
-        this.setState({ user: "", pwd: "" });
       } else {
-        alert("Failed to login.");
+        alert("Failed to logout.");
       }
     });
   };
