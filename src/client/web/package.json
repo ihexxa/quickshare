@@ -62,8 +62,7 @@
     "react-copy-to-clipboard": "^5.0.1",
     "react-dom": "^16.8.6",
     "react-svg": "^8.0.6",
-    "throttle-debounce": "^2.1.0",
-    "ts-sinon": "^2.0.1"
+    "throttle-debounce": "^2.1.0"
   },
   "jest": {
     "testMatch": [
@@ -79,7 +78,9 @@
       "tsx",
       "js"
     ],
-    "setupFilesAfterEnv": ["./jest.setup.js"]
+    "setupFilesAfterEnv": [
+      "./jest.setup.js"
+    ]
   },
   "autoBump": {}
 }
