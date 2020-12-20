@@ -1,12 +1,12 @@
 <h1 align="center">
-  [WORKING IN PROGRESS] Quickshare
+  [WORKING IN PROGRESS!!!] Quickshare
 </h1>
 <p align="center">
-  A succinct file sharing server
+  Simple file sharing server built with Go/Golang, Typescript, Gin, React, Boltdb, etc.
 </p>
 <p align="center">
   <a href="https://travis-ci.org/ihexxa/quickshare">
-    <img src="https://travis-ci.org/ihexxa/quickshare.svg?branch=master" />
+    <img src="https://travis-ci.org/ihexxa/quickshare.svg?branch=main" />
   </a>
   <a href="https://goreportcard.com/report/github.com/ihexxa/quickshare">
     <img src="https://goreportcard.com/badge/github.com/ihexxa/quickshare" />
