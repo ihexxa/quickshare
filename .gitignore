@@ -6,4 +6,9 @@
 **/node_modules/*
 **/yarn-error
 **/public/static/**/*.js
-**/public/static/index.html
+**/public/index.html
+
+# backend
+**/*/quickshare.db
+**/*/files/
+**/*/uploadings/
