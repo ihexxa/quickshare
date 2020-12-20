@@ -287,6 +287,10 @@ export class Browser extends React.Component<Props, State, {}> {
   };
 
   chdir = (dirPath: List<string>) => {
+    if (dirPath === this.props.dirPath) {
+      return;
+    }
+
     Updater.setItems(dirPath).then(() => {
       this.update(Updater.setBrowser);
     });
@@ -456,33 +460,32 @@ export class Browser extends React.Component<Props, State, {}> {
         : `${dirPath}/${item.name}`;
 
       return item.isDir ? (
-        <tr key={item.name} className={`${isSelected ? "green0-bg" : ""}`}>
+        <tr key={item.name} className={`${isSelected ? "white0-bg selected" : ""}`}>
           <td className="padding-l-l" style={{ width: "3rem" }}>
             <span className="dot yellow0-bg"></span>
           </td>
           <td>
             <span
-              className="item-name"
+              className="item-name pointer"
               onClick={() => this.gotoChild(item.name)}
             >
               {item.name}
             </span>
           </td>
-          <td>N/A</td>
+          <td>--</td>
           <td>{item.modTime.slice(0, item.modTime.indexOf("T"))}</td>
 
           <td>
             <button
-              type="button"
               onClick={() => this.select(item.name)}
-              className="grey1-bg white-font margin-t-m margin-b-m"
+              className="white-font margin-t-m margin-b-m"
             >
-              Select
+              {isSelected ? "Unselect" : "Select"}
             </button>
           </td>
         </tr>
       ) : (
-        <tr key={item.name} className={`${isSelected ? "green0-bg" : ""}`}>
+        <tr key={item.name} className={`${isSelected ? "white0-bg selected" : ""}`}>
           <td className="padding-l-l" style={{ width: "3rem" }}>
             <span className="dot green0-bg"></span>
           </td>
@@ -502,9 +505,9 @@ export class Browser extends React.Component<Props, State, {}> {
             <button
               type="button"
               onClick={() => this.select(item.name)}
-              className="grey1-bg white-font margin-t-m margin-b-m"
+              className="white-font margin-t-m margin-b-m"
             >
-              Select
+              {isSelected ? "Unselect" : "Select"}
             </button>
           </td>
         </tr>
@@ -528,7 +531,7 @@ export class Browser extends React.Component<Props, State, {}> {
                 <td>Name</td>
                 <td>File Size</td>
                 <td>Mod Time</td>
-                <td>Op</td>
+                <td>Edit</td>
               </tr>
             </thead>
             <tbody>{itemList}</tbody>
