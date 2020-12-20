@@ -1,10 +1,9 @@
+# frontend
 **/*.bundle.js
 **/*.js.map
 **/coverage
 **/files
 **/node_modules/*
-**/dist
-**/vendor
 **/yarn-error
-**/public/static/*/*.js
 **/public/static/**/*.js
+**/public/static/index.html
