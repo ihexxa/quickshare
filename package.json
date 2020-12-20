@@ -1,4 +1,16 @@
 {
   "private": true,
-  "workspaces": ["src/client/web"]
+  "workspaces": [
+    "src/client/web"
+  ],
+  "scripts": {
+    "dev:setup": "yarn && yarn dev:copy-immutable && yarn dev:copy-react-dom && yarn dev:copy-react",
+    "dev:copy-immutable": "cp node_modules/immutable/dist/immutable.min.js public/static/js",
+    "dev:copy-react-dom": "cp node_modules/react-dom/umd/react-dom.development.js public/static/js",
+    "dev:copy-react": "cp node_modules/react/umd/react.development.js public/static/js",
+    "prod:setup": "yarn && yarn prod:copy-immutable && yarn prod:copy-react-dom && yarn prod:copy-react",
+    "prod:copy-immutable": "cp node_modules/immutable/dist/immutable.min.js public/static/js",
+    "prod:copy-react-dom": "cp node_modules/react-dom/umd/react-dom.production.min.js public/static/js",
+    "prod:copy-react": "cp node_modules/react/umd/react.production.min.js public/static/js"
+  }
 }
