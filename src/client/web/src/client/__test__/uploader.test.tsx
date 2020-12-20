@@ -1,20 +1,14 @@
-import * as React from "react";
-
 import { FileUploader } from "../uploader";
 import { FilesClient } from "../files_mock";
+import { makePromise } from "../../test/helpers";
 
-describe("Updater", () => {
+describe("Uploader", () => {
   const content = ["123456"];
   const filePath = "mock/file";
   const blob = new Blob(content);
   const fileSize = blob.size;
   const file = new File(content, filePath);
 
-  const makePromise = (ret: any): Promise<any> => {
-    return new Promise<any>((resolve) => {
-      resolve(ret);
-    });
-  };
   const makeCreateResp = (status: number): Promise<any> => {
     return makePromise({
       status: status,
@@ -25,6 +19,7 @@ describe("Updater", () => {
       },
     });
   };
+
   const makeStatusResp = (status: number, uploaded: number): Promise<any> => {
     return makePromise({
       status: status,
@@ -48,7 +43,7 @@ describe("Updater", () => {
     uploadStatusResps: Array<any>;
     result: boolean;
   }
-  test("Updater: start ok", async () => {
+  test("test start and upload method", async () => {
     const testCases: Array<TestCase> = [
       {
         // fail to create file 4 times

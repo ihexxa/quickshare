@@ -1,9 +1,7 @@
 import {
-  // BaseClient,
   Response,
   UploadStatusResp,
   ListResp,
-  // MetadataResp,
 } from "./";
 
 export class FilesClient {
@@ -24,10 +22,6 @@ export class FilesClient {
   constructor(url: string) {
     this.url = url;
   }
-
-  // setStatus = (status: number) => {
-  //   this.status = status;
-  // };
 
   createMock = (resps: Array<Promise<Response>>) => {
     this.createMockResps = resps;

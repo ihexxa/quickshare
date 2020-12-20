@@ -1,5 +1,3 @@
-import * as React from "react";
-
 import { init } from "../core_state";
 import { Updater } from "../auth_pane";
 import { MockUsersClient } from "../../client/users_mock";
@@ -38,7 +36,7 @@ describe("AuthPane", () => {
     ];
 
     const client = new MockUsersClient("");
-    for (let i=0; i<tests.length; i++) {
+    for (let i = 0; i < tests.length; i++) {
       const tc = tests[i];
 
       client.loginMock(makeNumberResponse(tc.loginStatus));

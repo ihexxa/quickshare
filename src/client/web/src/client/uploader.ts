@@ -1,5 +1,3 @@
-// import { List } from "immutable";
-
 import { IFilesClient } from "../client";
 import { FilesClient } from "../client/files";
 import { Response, UnknownErrResp, UploadStatusResp } from "./";
@@ -76,7 +74,7 @@ export class FileUploader {
       this.offset >= 0 &&
       this.offset < this.file.size
     ) {
-      let uploadPromise = new Promise<Response<UploadStatusResp>>(
+      const uploadPromise = new Promise<Response<UploadStatusResp>>(
         (resolve: (resp: Response<UploadStatusResp>) => void) => {
           this.reader.onerror = (ev: ProgressEvent<FileReader>) => {
             resolve(UnknownErrResp(this.reader.error.toString()));
