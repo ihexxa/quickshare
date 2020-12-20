@@ -1,12 +1,12 @@
 <h1 align="center">
-  Quickshare
+  [未完成!!!] Quickshare
 </h1>
 <p align="center">
-  一个小而美的文件共享服务器
+  简约的文件共享服务, 使用Go/Golang, Typescript, Gin, React, Boltdb等构建.
 </p>
 <p align="center">
   <a href="https://travis-ci.org/ihexxa/quickshare">
-    <img src="https://travis-ci.org/ihexxa/quickshare.svg?branch=master" />
+    <img src="https://travis-ci.org/ihexxa/quickshare.svg?branch=main" />
   </a>
   <a href="https://goreportcard.com/report/github.com/ihexxa/quickshare">
     <img src="https://goreportcard.com/badge/github.com/ihexxa/quickshare" />

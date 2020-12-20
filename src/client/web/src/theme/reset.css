@@ -107,6 +107,7 @@ input:focus {
 }
 
 button {
+  cursor: pointer;
   border: none;
   border-radius: 0.5rem;
   padding: 0.8rem 1rem;
@@ -115,4 +116,8 @@ button {
 
   font-weight: bold;
   border-radius: 0.5rem;
+}
+
+button:hover {
+  opacity: 0.9;
 }

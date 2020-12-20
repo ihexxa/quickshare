@@ -56,6 +56,14 @@
   text-overflow: ellipsis;
 }
 
+#item-list tr button  {
+  background-color: #95a5a6;
+}
+
+#item-list tr.selected button  {
+  background-color: #e74c3c;
+}
+
 #item-list tr:hover {
   opacity: 0.8;
 }
@@ -469,6 +477,10 @@ input.white-square {
 
 div.hr {
   height: 1px;
+}
+
+.pointer {
+  cursor: pointer;
 }
 
 /* 
