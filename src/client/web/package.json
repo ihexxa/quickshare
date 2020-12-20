@@ -77,6 +77,9 @@
       "ts",
       "tsx",
       "js"
+    ],
+    "setupFilesAfterEnv": [
+      "./jest.setup.js"
     ]
   },
   "autoBump": {}

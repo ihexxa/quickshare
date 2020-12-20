@@ -18,6 +18,7 @@ export interface Item {
   isDir: boolean;
   selected: boolean;
 }
+
 export interface Props {
   dirPath: List<string>;
   items: List<MetadataResp>;
@@ -51,7 +52,7 @@ export class Updater {
 
     Updater.props.dirPath = dirParts;
     Updater.props.items =
-      listResp != null
+      listResp.status === 200
         ? List<MetadataResp>(listResp.data.metadatas)
         : Updater.props.items;
   };
@@ -98,7 +99,6 @@ export class Updater {
       async (itemName: string): Promise<string> => {
         const oldPath = getItemPath(srcDir, itemName);
         const newPath = getItemPath(dstDir, itemName);
-
         const resp = await Updater.filesClient.move(oldPath, newPath);
         return resp.status === 200 ? "" : itemName;
       }

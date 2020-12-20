@@ -84,7 +84,7 @@ export class BaseClient {
       setTimeout(() => {
         if (!returned) {
           src.cancel("request timeout");
-          // resolve(TimeoutResp);
+          resolve(TimeoutResp);
         }
       }, defaultTimeout);
 
@@ -95,11 +95,8 @@ export class BaseClient {
         })
         .catch((e) => {
           const errMsg = e.toString();
-          console.log(e);
-
-          if (errMsg.includes("i/o timeput")) {
-            resolve(TimeoutResp);
-          } else if (errMsg.includes("ERR_EMPTY")) {
+          if (errMsg.includes("ERR_EMPTY")) {
+            // this means connection is eliminated by server because of timeout.
             resolve(EmptyBodyResp);
           } else {
             resolve(UnknownErrResp(errMsg));

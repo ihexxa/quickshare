@@ -1,82 +1,102 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-
-import {MetadataResp, UploadStatusResp, ListResp} from "./";
+import {
+  Response,
+  UploadStatusResp,
+  ListResp,
+} from "./";
 
 export class FilesClient {
   private url: string;
-  private createMockResp: number;
-  private deleteMockResp: number;
-  private metadataMockResp: MetadataResp | null;
-  private mkdirMockResp: number | null;
-  private moveMockResp: number;
-  private uploadChunkMockResp: UploadStatusResp | null;
-  private uploadStatusMockResp: UploadStatusResp | null;
-  private listMockResp: ListResp | null;
+
+  private createMockRespID: number = 0;
+  private createMockResps: Array<Promise<Response>>;
+  private deleteMockResp: Promise<Response>;
+  private metadataMockResp: Promise<Response>;
+  private mkdirMockResp: Promise<Response>;
+  private moveMockResp: Promise<Response>;
+  private uploadChunkMockResps: Array<Promise<Response<UploadStatusResp>>>;
+  private uploadChunkMockRespID: number = 0;
+  private uploadStatusMockResps: Array<Promise<Response<UploadStatusResp>>>;
+  private uploadStatusMockRespID: number = 0;
+  private listMockResp: Promise<Response<ListResp>>;
 
   constructor(url: string) {
     this.url = url;
   }
 
-  createMock = (resp: number) => {
-    this.createMockResp = resp;
-  }
-  deleteMock = (resp: number) => {
+  createMock = (resps: Array<Promise<Response>>) => {
+    this.createMockResps = resps;
+  };
+
+  deleteMock = (resp: Promise<Response>) => {
     this.deleteMockResp = resp;
-  }
-  metadataMock = (resp: MetadataResp | null) => {
+  };
+
+  metadataMock = (resp: Promise<Response>) => {
     this.metadataMockResp = resp;
-  }
-  mkdirMock = (resp: number | null) => {
+  };
+
+  mkdirMock = (resp: Promise<Response>) => {
     this.mkdirMockResp = resp;
-  }
-  moveMock = (resp: number) => {
+  };
+
+  moveMock = (resp: Promise<Response>) => {
     this.moveMockResp = resp;
-  }
-  uploadChunkMock = (resp: UploadStatusResp | null) => {
-    this.uploadChunkMockResp = resp;
-  }
+  };
 
-  uploadStatusMock = (resp: UploadStatusResp | null) => {
-    this.uploadStatusMockResp = resp;
-  }
+  uploadChunkMock = (resps: Array<Promise<Response<UploadStatusResp>>>) => {
+    this.uploadChunkMockResps = resps;
+  };
 
-  listMock = (resp: ListResp | null) => {
+  uploadStatusMock = (resps: Array<Promise<Response<UploadStatusResp>>>) => {
+    this.uploadStatusMockResps = resps;
+  };
+
+  listMock = (resp: Promise<Response<ListResp>>) => {
     this.listMockResp = resp;
-  }
+  };
 
-  async create(filePath: string, fileSize: number): Promise<number> {
-    return this.createMockResp;
-  }
+  create = (filePath: string, fileSize: number): Promise<Response> => {
+    if (this.createMockRespID < this.createMockResps.length) {
+      return this.createMockResps[this.createMockRespID++];
+    }
+    throw new Error(`this.createMockRespID (${this.createMockRespID}) out of bound: ${this.createMockResps.length}`);
+  };
 
-  async delete(filePath: string): Promise<number> {
+  delete = (filePath: string): Promise<Response> => {
     return this.deleteMockResp;
-  }
+  };
 
-  async metadata(filePath: string): Promise<MetadataResp | null> {
+  metadata = (filePath: string): Promise<Response> => {
     return this.metadataMockResp;
-  }
+  };
 
-  async mkdir(dirpath: string): Promise<number | null> {
+  mkdir = (dirpath: string): Promise<Response> => {
     return this.mkdirMockResp;
-  }
+  };
 
-  async move(oldPath: string, newPath: string): Promise<number> {
+  move = (oldPath: string, newPath: string): Promise<Response> => {
     return this.moveMockResp;
-  }
+  };
 
-  async uploadChunk(
+  uploadChunk = (
     filePath: string,
     content: string | ArrayBuffer,
     offset: number
-  ): Promise<UploadStatusResp | null> {
-    return this.uploadChunkMockResp;
-  }
+  ): Promise<Response<UploadStatusResp>> => {
+    if (this.uploadChunkMockRespID < this.uploadChunkMockResps.length) {
+      return this.uploadChunkMockResps[this.uploadChunkMockRespID++];
+    }
+    throw new Error(`this.uploadChunkMockRespID (${this.uploadChunkMockRespID}) out of bound: ${this.uploadChunkMockResps.length}`);
+  };
 
-  async uploadStatus(filePath: string): Promise<UploadStatusResp | null> {
-    return this.uploadStatusMockResp;
-  }
+  uploadStatus = (filePath: string): Promise<Response<UploadStatusResp>> => {
+    if (this.uploadStatusMockRespID < this.uploadStatusMockResps.length) {
+      return this.uploadStatusMockResps[this.uploadStatusMockRespID++];
+    }
+    throw new Error(`this.uploadStatusMockRespID (${this.uploadStatusMockRespID}) out of bound: ${this.uploadStatusMockResps.length}`);
+  };
 
-  async list(dirPath: string): Promise<ListResp | null> {
+  list = (dirPath: string): Promise<Response<ListResp>> => {
     return this.listMockResp;
-  }
+  };
 }

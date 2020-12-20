@@ -1,45 +1,44 @@
-// import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-
 // TODO: replace this with jest mocks
+import { Response } from "./";
+
 export class MockUsersClient {
   private url: string;
-  private loginResp: number;
-  private logoutResp: number;
-  private isAuthedResp: number;
-  private setPwdResp: number;
+  private loginMockResp: Promise<Response>;
+  private logoutMockResp: Promise<Response>;
+  private isAuthedMockResp: Promise<Response>;
+  private setPwdMockResp: Promise<Response>;
 
   constructor(url: string) {
     this.url = url;
   }
 
-  mockLoginResp(status: number) {
-    this.loginResp = status;
+  loginMock = (resp: Promise<Response>) => {
+    this.loginMockResp = resp;
   }
-  mocklogoutResp(status: number) {
-    this.logoutResp = status;
+  logoutMock = (resp: Promise<Response>) => {
+    this.logoutMockResp = resp;
   }
-  mockisAuthedResp(status: number) {
-    this.isAuthedResp = status;
+  isAuthedMock = (resp: Promise<Response>) => {
+    this.isAuthedMockResp = resp;
   }
-  mocksetPwdResp(status: number) {
-    this.setPwdResp = status;
-  }
-  
-  async login(user: string, pwd: string): Promise<number> {
-    return this.loginResp
+  setPwdMock = (resp: Promise<Response>) => {
+    this.setPwdMockResp = resp;
   }
 
-  // token cookie is set by browser
-  async logout(): Promise<number> {
-    return this.logoutResp
+  login = (user: string, pwd: string): Promise<Response> => {
+    return this.loginMockResp;
   }
 
-  async isAuthed(): Promise<number> {
-    return this.isAuthedResp
+  logout = (): Promise<Response> => {
+    return this.logoutMockResp;
   }
 
-  // token cookie is set by browser
-  async setPwd(oldPwd: string, newPwd: string): Promise<number> {
-    return this.setPwdResp
+  isAuthed = (): Promise<Response> => {
+    return this.isAuthedMockResp;
   }
+
+  setPwd = (oldPwd: string, newPwd: string): Promise<Response> => {
+    return this.setPwdMockResp;
+  }
+
 }
