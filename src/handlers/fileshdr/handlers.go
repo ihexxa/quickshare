@@ -76,13 +76,16 @@ func (h *FileHandlers) NewAutoLocker(c *gin.Context, key string) *AutoLocker {
 func (lk *AutoLocker) Exec(handler func()) {
 	var err error
 	kv := lk.h.deps.KV()
+	locked := false
 
 	defer func() {
 		if p := recover(); p != nil {
 			fmt.Println(p)
 		}
-		if err = kv.Unlock(lk.key); err != nil {
-			fmt.Println(err)
+		if locked {
+			if err = kv.Unlock(lk.key); err != nil {
+				fmt.Println(err)
+			}
 		}
 	}()
 
@@ -91,6 +94,7 @@ func (lk *AutoLocker) Exec(handler func()) {
 		return
 	}
 
+	locked = true
 	handler()
 }
 

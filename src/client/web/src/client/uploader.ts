@@ -109,19 +109,33 @@ export class FileUploader {
       } else {
         this.errMsg = uploadResp.statusText;
         this.chunkLen = Math.ceil(this.chunkLen * speedDownRatio);
-        const uploadStatusResp = await this.uploadStatus(this.filePath);
+
+        let uploadStatusResp: Response<UploadStatusResp> = undefined;
+        try {
+          uploadStatusResp = await this.uploadStatus(this.filePath);
+        } catch (e) {
+          if (uploadStatusResp.status === 500) {
+            if (
+              !uploadStatusResp.statusText.includes("fail to lock the file") &&
+              uploadStatusResp.statusText !== ""
+            ) {
+              this.errMsg = `${this.errMsg}; unknown error: ${uploadStatusResp.statusText}`;
+              break;
+            }
+          } else if (uploadStatusResp.status === 600) {
+            this.errMsg = `${this.errMsg}; unknown error: ${uploadStatusResp.statusText}`;
+            break;
+          } else {
+            // ignore error and retry
+          }
+        }
 
         if (uploadStatusResp.status === 200) {
           this.offset = uploadStatusResp.data.uploaded;
-        } else if (uploadStatusResp.status === 600) {
-          this.errMsg = "unknown error";
-          break;
-        } else {
-          // do nothing and retry
         }
       }
 
-      if (this.progressCb != null)  {
+      if (this.progressCb != null) {
         this.progressCb(this.filePath, Math.ceil(this.offset / this.file.size));
       }
     }
