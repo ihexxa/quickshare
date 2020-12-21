@@ -234,11 +234,11 @@ func TestFileHandlers(t *testing.T) {
 
 	t.Run("test dirs APIs: Mkdir-Create-UploadChunk-List", func(t *testing.T) {
 		for dirPath, files := range map[string]map[string]string{
-			"dir/path1/": map[string]string{
+			"dir/path1": map[string]string{
 				"f1.md": "11111",
 				"f2.md": "22222222222",
 			},
-			"dir/path1/path2": map[string]string{
+			"dir/path2/path2": map[string]string{
 				"f3.md": "3333333",
 			},
 		} {
