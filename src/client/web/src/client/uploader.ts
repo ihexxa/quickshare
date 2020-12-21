@@ -114,7 +114,10 @@ export class FileUploader {
         try {
           uploadStatusResp = await this.uploadStatus(this.filePath);
         } catch (e) {
-          if (uploadStatusResp.status === 500) {
+          if (uploadStatusResp == null) {
+            this.errMsg = `${this.errMsg}; unknown error: empty uploadStatus response`;
+            break;          
+          } else if (uploadStatusResp.status === 500) {
             if (
               !uploadStatusResp.statusText.includes("fail to lock the file") &&
               uploadStatusResp.statusText !== ""
