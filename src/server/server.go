@@ -148,6 +148,9 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 	filesAPI.POST("/dirs", fileHdrs.Mkdir)
 	// files.POST("/dirs/copy", fileHdrs.CopyDir)
 
+	filesAPI.GET("/uploadings", fileHdrs.ListUploadings)
+	filesAPI.DELETE("/uploadings", fileHdrs.DelUploading)
+
 	filesAPI.GET("/metadata", fileHdrs.Metadata)
 
 	settingsAPI := v1.Group("/settings")
