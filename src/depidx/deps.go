@@ -2,6 +2,7 @@ package depidx
 
 import (
 	"github.com/ihexxa/gocfg"
+
 	"github.com/ihexxa/quickshare/src/cryptoutil"
 	"github.com/ihexxa/quickshare/src/fs"
 	"github.com/ihexxa/quickshare/src/idgen"

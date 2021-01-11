@@ -118,3 +118,24 @@ func (cl *FilesClient) List(dirPath string) (*http.Response, *fileshdr.ListResp,
 	}
 	return resp, lResp, nil
 }
+
+func (cl *FilesClient) ListUploadings() (*http.Response, *fileshdr.ListUploadingsResp, []error) {
+	resp, body, errs := cl.r.Get(cl.url("/v1/fs/uploadings")).
+		End()
+	if len(errs) > 0 {
+		return nil, nil, errs
+	}
+
+	lResp := &fileshdr.ListUploadingsResp{}
+	err := json.Unmarshal([]byte(body), lResp)
+	if err != nil {
+		return nil, nil, append(errs, err)
+	}
+	return resp, lResp, nil
+}
+
+func (cl *FilesClient) DelUploading(filepath string) (*http.Response, string, []error) {
+	return cl.r.Delete(cl.url("/v1/fs/uploadings")).
+		Param(fileshdr.FilePathQuery, filepath).
+		End()
+}
