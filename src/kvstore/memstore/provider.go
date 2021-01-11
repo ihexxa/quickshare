@@ -170,11 +170,26 @@ func (st *MemStore) AddNamespace(nsName string) error {
 	return errors.New("not implemented")
 }
 
+func (st *MemStore) GetInt64In(namespace, key string) (int64, bool) {
+	panic("not implemented")
+}
+
+func (st *MemStore) SetInt64In(namespace, key string, val int64) error {
+	panic("not implemented")
+}
+
+func (st *MemStore) ListInt64sIn(namespace, key string) (map[string]int64, error) {
+	panic("not implemented")
+}
+
 func (st *MemStore) GetStringIn(namespace, key string) (string, bool) {
 	panic("not implemented")
-	return "", false
 }
 
 func (st *MemStore) SetStringIn(namespace, key, val string) error {
-	return errors.New("not implemented")
+	panic("not implemented")
+}
+
+func (st *MemStore) ListStringsIn(namespace, key string) (map[string]string, error) {
+	panic("not implemented")
 }

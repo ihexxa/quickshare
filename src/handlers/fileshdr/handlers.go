@@ -18,6 +18,7 @@ import (
 
 	"github.com/ihexxa/quickshare/src/depidx"
 	q "github.com/ihexxa/quickshare/src/handlers"
+	"github.com/ihexxa/quickshare/src/handlers/singleuserhdr"
 )
 
 var (
@@ -93,8 +94,8 @@ func (lk *AutoLocker) Exec(handler func()) {
 		lk.c.JSON(q.ErrResp(lk.c, 500, errors.New("fail to lock the file")))
 		return
 	}
-
 	locked = true
+
 	handler()
 }
 
@@ -109,16 +110,17 @@ func (h *FileHandlers) Create(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
+	userName := c.MustGet(singleuserhdr.UserParam).(string)
 
-	tmpFilePath := h.GetTmpPath(req.Path)
-	locker := h.NewAutoLocker(c, tmpFilePath)
+	tmpFilePath := getTmpPath(req.Path)
+	locker := h.NewAutoLocker(c, lockName(userName, tmpFilePath))
 	locker.Exec(func() {
 		err := h.deps.FS().Create(tmpFilePath)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
 		}
-		err = h.uploadMgr.AddInfo(req.Path, tmpFilePath, req.FileSize, false)
+		err = h.uploadMgr.AddInfo(userName, req.Path, tmpFilePath, req.FileSize)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
@@ -252,13 +254,14 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
+	userName := c.MustGet(singleuserhdr.UserParam).(string)
 
-	tmpFilePath := h.GetTmpPath(req.Path)
-	locker := h.NewAutoLocker(c, tmpFilePath)
+	tmpFilePath := getTmpPath(req.Path)
+	locker := h.NewAutoLocker(c, lockName(userName, tmpFilePath))
 	locker.Exec(func() {
 		var err error
 
-		_, fileSize, uploaded, err := h.uploadMgr.GetInfo(tmpFilePath)
+		_, fileSize, uploaded, err := h.uploadMgr.GetInfo(userName, tmpFilePath)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
@@ -273,15 +276,13 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 			return
 		}
 
-		fmt.Println("length", len([]byte(content)))
-
 		wrote, err := h.deps.FS().WriteAt(tmpFilePath, []byte(content), req.Offset)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
 		}
 
-		err = h.uploadMgr.SetUploaded(tmpFilePath, req.Offset+int64(wrote))
+		err = h.uploadMgr.SetInfo(userName, tmpFilePath, req.Offset+int64(wrote))
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
@@ -295,7 +296,7 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 				c.JSON(q.ErrResp(c, 500, fmt.Errorf("%s error: %w", req.Path, err)))
 				return
 			}
-			err = h.uploadMgr.DelInfo(tmpFilePath)
+			err = h.uploadMgr.DelInfo(userName, tmpFilePath)
 			if err != nil {
 				c.JSON(q.ErrResp(c, 500, err))
 				return
@@ -323,11 +324,12 @@ func (h *FileHandlers) UploadStatus(c *gin.Context) {
 	if filePath == "" {
 		c.JSON(q.ErrResp(c, 400, errors.New("invalid file name")))
 	}
+	userName := c.MustGet(singleuserhdr.UserParam).(string)
 
-	tmpFilePath := h.GetTmpPath(filePath)
-	locker := h.NewAutoLocker(c, tmpFilePath)
+	tmpFilePath := getTmpPath(filePath)
+	locker := h.NewAutoLocker(c, lockName(userName, tmpFilePath))
 	locker.Exec(func() {
-		_, fileSize, uploaded, err := h.uploadMgr.GetInfo(tmpFilePath)
+		_, fileSize, uploaded, err := h.uploadMgr.GetInfo(userName, tmpFilePath)
 		if err != nil {
 			if os.IsNotExist(err) {
 				c.JSON(q.ErrResp(c, 404, err))
@@ -347,7 +349,6 @@ func (h *FileHandlers) UploadStatus(c *gin.Context) {
 }
 
 // TODO: support ETag
-// TODO: use correct content type
 func (h *FileHandlers) Download(c *gin.Context) {
 	rangeVal := c.GetHeader(rangeHeader)
 	ifRangeVal := c.GetHeader(ifRangeHeader)
@@ -391,7 +392,6 @@ func (h *FileHandlers) Download(c *gin.Context) {
 	//  :=	r.(*os.File)
 
 	// respond to normal requests
-	fmt.Println(ifRangeVal, rangeVal)
 	if ifRangeVal != "" || rangeVal == "" {
 		c.DataFromReader(200, info.Size(), contentType, r, map[string]string{})
 		return
@@ -463,10 +463,56 @@ func (h *FileHandlers) CopyDir(c *gin.Context) {
 	c.JSON(q.NewMsgResp(501, "Not Implemented"))
 }
 
-func (h *FileHandlers) GetTmpPath(filePath string) string {
+func getTmpPath(filePath string) string {
 	return path.Join(UploadDir, fmt.Sprintf("%x", sha1.Sum([]byte(filePath))))
+}
+
+func lockName(user, filePath string) string {
+	return fmt.Sprintf("%s/%s", user, filePath)
 }
 
 func (h *FileHandlers) FsPath(filePath string) string {
 	return path.Join(FsDir, filePath)
+}
+
+type ListUploadingsResp struct {
+	UploadInfos []*UploadInfo `json:"uploadInfos"`
+}
+
+func (h *FileHandlers) ListUploadings(c *gin.Context) {
+	userName := c.MustGet(singleuserhdr.UserParam).(string)
+
+	infos, err := h.uploadMgr.ListInfo(userName)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+	c.JSON(200, &ListUploadingsResp{UploadInfos: infos})
+}
+
+func (h *FileHandlers) DelUploading(c *gin.Context) {
+	filePath := c.Query(FilePathQuery)
+	if filePath == "" {
+		c.JSON(q.ErrResp(c, 400, errors.New("invalid file path")))
+		return
+	}
+	userName := c.MustGet(singleuserhdr.UserParam).(string)
+
+	var err error
+	tmpFilePath := getTmpPath(filePath)
+	locker := h.NewAutoLocker(c, lockName(userName, tmpFilePath))
+	locker.Exec(func() {
+		err = h.deps.FS().Remove(tmpFilePath)
+		if err != nil {
+			c.JSON(q.ErrResp(c, 500, err))
+			return
+		}
+
+		err = h.uploadMgr.DelInfo(userName, tmpFilePath)
+		if err != nil {
+			c.JSON(q.ErrResp(c, 500, err))
+			return
+		}
+		c.JSON(q.Resp(200))
+	})
 }

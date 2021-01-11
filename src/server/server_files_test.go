@@ -389,4 +389,61 @@ func TestFileHandlers(t *testing.T) {
 
 		wg.Wait()
 	})
+
+	t.Run("test uploading APIs: Create, ListUploadings, DelUploading)", func(t *testing.T) {
+		files := map[string]string{
+			"uploadings/path1/f1":    "123456",
+			"uploadings/path1/path2": "12345678",
+		}
+
+		for filePath, content := range files {
+			fileSize := int64(len([]byte(content)))
+			res, _, errs := cl.Create(filePath, fileSize)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if res.StatusCode != 200 {
+				t.Fatal(res.StatusCode)
+			}
+		}
+
+		res, lResp, errs := cl.ListUploadings()
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if res.StatusCode != 200 {
+			t.Fatal(res.StatusCode)
+		}
+
+		gotInfos := map[string]*fileshdr.UploadInfo{}
+		for _, info := range lResp.UploadInfos {
+			gotInfos[info.RealFilePath] = info
+		}
+		for filePath, content := range files {
+			info, ok := gotInfos[filePath]
+			if !ok {
+				t.Fatalf("uploading(%s) not found", filePath)
+			} else if info.Uploaded != 0 {
+				t.Fatalf("uploading(%s) uploaded is not correct", filePath)
+			} else if info.Size != int64(len([]byte(content))) {
+				t.Fatalf("uploading(%s) size is not correct", filePath)
+			}
+		}
+
+		for filePath := range files {
+			res, _, errs := cl.DelUploading(filePath)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if res.StatusCode != 200 {
+				t.Fatal(res.StatusCode)
+			}
+		}
+
+		res, lResp, errs = cl.ListUploadings()
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if res.StatusCode != 200 {
+			t.Fatal(res.StatusCode)
+		} else if len(lResp.UploadInfos) != 0 {
+			t.Fatalf("info is not deleted, info len(%d)", len(lResp.UploadInfos))
+		}
+	})
 }
