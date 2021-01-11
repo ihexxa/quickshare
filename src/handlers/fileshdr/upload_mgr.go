@@ -1,22 +1,33 @@
 package fileshdr
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/ihexxa/quickshare/src/kvstore"
 )
 
 var (
-	isDirKey    = "isDir"
-	fileSizeKey = "fileSize"
-	uploadedKey = "uploaded"
-	filePathKey = "fileName"
+	ErrCreateExisting  = errors.New("create upload info which already exists")
+	ErrGreaterThanSize = errors.New("uploaded is greater than file size")
+	ErrNotFound        = errors.New("upload info not found")
+
+	uploadsPrefix = "uploads"
 )
+
+type UploadInfo struct {
+	RealFilePath string `json:"realFilePath"`
+	Size         int64  `json:"size"`
+	Uploaded     int64  `json:"uploaded"`
+}
 
 type UploadMgr struct {
 	kv kvstore.IKVStore
+}
+
+func UploadNS(user string) string {
+	return fmt.Sprintf("%s/%s", uploadsPrefix, user)
 }
 
 func NewUploadMgr(kv kvstore.IKVStore) *UploadMgr {
@@ -25,57 +36,86 @@ func NewUploadMgr(kv kvstore.IKVStore) *UploadMgr {
 	}
 }
 
-func (um *UploadMgr) AddInfo(fileName, tmpName string, fileSize int64, isDir bool) error {
-	err := um.kv.SetInt64(infoKey(tmpName, fileSizeKey), fileSize)
+func (um *UploadMgr) AddInfo(user, filePath, tmpPath string, fileSize int64) error {
+	ns := UploadNS(user)
+	err := um.kv.AddNamespace(ns)
 	if err != nil {
 		return err
 	}
-	err = um.kv.SetInt64(infoKey(tmpName, uploadedKey), 0)
+
+	_, ok := um.kv.GetStringIn(ns, tmpPath)
+	if ok {
+		return ErrCreateExisting
+	}
+
+	info := &UploadInfo{
+		RealFilePath: filePath,
+		Size:         fileSize,
+		Uploaded:     0,
+	}
+	infoBytes, err := json.Marshal(info)
 	if err != nil {
 		return err
 	}
-	return um.kv.SetString(infoKey(tmpName, filePathKey), fileName)
+
+	return um.kv.SetStringIn(ns, tmpPath, string(infoBytes))
 }
 
-func (um *UploadMgr) SetUploaded(fileName string, newUploaded int64) error {
-	fileSize, ok := um.kv.GetInt64(infoKey(fileName, fileSizeKey))
-	if !ok {
-		return fmt.Errorf("file size %s not found", fileName)
-	}
-	if newUploaded <= fileSize {
-		um.kv.SetInt64(infoKey(fileName, uploadedKey), newUploaded)
-		return nil
-	}
-	return errors.New("uploaded is greater than file size")
-}
-
-func (um *UploadMgr) GetInfo(fileName string) (string, int64, int64, error) {
-	realFilePath, ok := um.kv.GetString(infoKey(fileName, filePathKey))
-	if !ok {
-		return "", 0, 0, os.ErrNotExist
-	}
-	fileSize, ok := um.kv.GetInt64(infoKey(fileName, fileSizeKey))
-	if !ok {
-		return "", 0, 0, os.ErrNotExist
-	}
-	uploaded, ok := um.kv.GetInt64(infoKey(fileName, uploadedKey))
-	if !ok {
-		return "", 0, 0, os.ErrNotExist
+func (um *UploadMgr) SetInfo(user, filePath string, newUploaded int64) error {
+	realFilePath, fileSize, _, err := um.GetInfo(user, filePath)
+	if err != nil {
+		return err
+	} else if newUploaded > fileSize {
+		return ErrGreaterThanSize
 	}
 
-	return realFilePath, fileSize, uploaded, nil
-}
-
-func (um *UploadMgr) DelInfo(fileName string) error {
-	if err := um.kv.DelInt64(infoKey(fileName, fileSizeKey)); err != nil {
+	newInfo := &UploadInfo{
+		RealFilePath: realFilePath,
+		Size:         fileSize,
+		Uploaded:     newUploaded,
+	}
+	newInfoBytes, err := json.Marshal(newInfo)
+	if err != nil {
 		return err
 	}
-	if err := um.kv.DelInt64(infoKey(fileName, uploadedKey)); err != nil {
-		return err
-	}
-	return um.kv.DelString(infoKey(fileName, filePathKey))
+	return um.kv.SetStringIn(UploadNS(user), filePath, string(newInfoBytes))
 }
 
-func infoKey(fileName, key string) string {
-	return fmt.Sprintf("%s:%s", fileName, key)
+func (um *UploadMgr) GetInfo(user, filePath string) (string, int64, int64, error) {
+	ns := UploadNS(user)
+	infoBytes, ok := um.kv.GetStringIn(ns, filePath)
+	if !ok {
+		return "", 0, 0, ErrNotFound
+	}
+
+	info := &UploadInfo{}
+	err := json.Unmarshal([]byte(infoBytes), info)
+	if err != nil {
+		return "", 0, 0, err
+	}
+
+	return info.RealFilePath, info.Size, info.Uploaded, nil
+}
+
+func (um *UploadMgr) DelInfo(user, filePath string) error {
+	return um.kv.DelInt64In(UploadNS(user), filePath)
+}
+
+func (um *UploadMgr) ListInfo(user string) ([]*UploadInfo, error) {
+	infoMap, err := um.kv.ListStringsIn(UploadNS(user))
+	if err != nil {
+		return nil, err
+	}
+
+	infos := []*UploadInfo{}
+	for _, infoStr := range infoMap {
+		info := &UploadInfo{}
+		err = json.Unmarshal([]byte(infoStr), info)
+		if err != nil {
+			return nil, err
+		}
+		infos = append(infos, info)
+	}
+
+	return infos, nil
 }

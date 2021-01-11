@@ -53,10 +53,13 @@ func (h *SimpleUserHandlers) Auth() gin.HandlerFunc {
 				ExpireParam: "",
 			}
 
-			_, err = h.deps.Token().FromToken(token, claims)
+			claims, err = h.deps.Token().FromToken(token, claims)
 			if err != nil {
 				c.AbortWithStatusJSON(q.ErrResp(c, 401, err))
 				return
+			}
+			for key, val := range claims {
+				c.Set(key, val)
 			}
 
 			now := time.Now().Unix()
@@ -71,6 +74,9 @@ func (h *SimpleUserHandlers) Auth() gin.HandlerFunc {
 				c.AbortWithStatusJSON(q.ErrResp(c, 401, errors.New("not allowed")))
 				return
 			}
+		} else {
+			// this is for UploadMgr to get user info to get related namespace
+			c.Set(UserParam, "quickshare_anonymous")
 		}
 
 		c.Next()

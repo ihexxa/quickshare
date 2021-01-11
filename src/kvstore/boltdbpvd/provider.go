@@ -2,6 +2,7 @@ package boltdbpvd
 
 import (
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"math"
 	"path"
@@ -10,6 +11,10 @@ import (
 	"github.com/boltdb/bolt"
 
 	"github.com/ihexxa/quickshare/src/kvstore"
+)
+
+var (
+	ErrBucketNotFound = errors.New("bucket not found")
 )
 
 type BoltPvd struct {
@@ -58,6 +63,12 @@ func (bp *BoltPvd) AddNamespace(nsName string) error {
 
 		_, err := tx.CreateBucket([]byte(nsName))
 		return err
+	})
+}
+
+func (bp *BoltPvd) DelNamespace(nsName string) error {
+	return bp.db.Update(func(tx *bolt.Tx) error {
+		return tx.DeleteBucket([]byte(nsName))
 	})
 }
 
@@ -112,10 +123,18 @@ func (bp *BoltPvd) DelInt(key string) error {
 }
 
 func (bp *BoltPvd) GetInt64(key string) (int64, bool) {
+	return bp.GetInt64In("int64s", key)
+}
+
+func (bp *BoltPvd) GetInt64In(ns, key string) (int64, bool) {
 	buf, ok := make([]byte, binary.MaxVarintLen64), false
 
 	bp.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("int64s"))
+		b := tx.Bucket([]byte(ns))
+		if b == nil {
+			return nil
+		}
+
 		v := b.Get([]byte(key))
 		copy(buf, v)
 		ok = v != nil
@@ -133,19 +152,55 @@ func (bp *BoltPvd) GetInt64(key string) (int64, bool) {
 }
 
 func (bp *BoltPvd) SetInt64(key string, val int64) error {
+	return bp.SetInt64In("int64s", key, val)
+}
+
+func (bp *BoltPvd) SetInt64In(ns, key string, val int64) error {
 	buf := make([]byte, binary.MaxVarintLen64)
 	n := binary.PutVarint(buf, val)
 
 	return bp.db.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("int64s"))
+		b := tx.Bucket([]byte(ns))
+		if b == nil {
+			return ErrBucketNotFound
+		}
 		return b.Put([]byte(key), buf[:n])
 	})
 }
+
 func (bp *BoltPvd) DelInt64(key string) error {
+	return bp.DelInt64In("int64s", key)
+}
+
+func (bp *BoltPvd) DelInt64In(ns, key string) error {
 	return bp.db.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("int64s"))
+		b := tx.Bucket([]byte(ns))
+		if b == nil {
+			return ErrBucketNotFound
+		}
 		return b.Delete([]byte(key))
 	})
+}
+
+func (bp *BoltPvd) ListInt64sIn(ns string) (map[string]int64, error) {
+	list := map[string]int64{}
+	err := bp.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(ns))
+		if b == nil {
+			return ErrBucketNotFound
+		}
+
+		b.ForEach(func(k, v []byte) error {
+			x, n := binary.Varint(v)
+			if n < 0 {
+				return fmt.Errorf("fail to parse int64 for key (%s)", k)
+			}
+			list[fmt.Sprintf("%s", k)] = x
+			return nil
+		})
+		return nil
+	})
+	return list, err
 }
 
 func float64ToBytes(num float64) []byte {
@@ -211,8 +266,15 @@ func (bp *BoltPvd) SetString(key string, val string) error {
 }
 
 func (bp *BoltPvd) DelString(key string) error {
+	return bp.DelStringIn("strings", key)
+}
+
+func (bp *BoltPvd) DelStringIn(ns, key string) error {
 	return bp.db.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("strings"))
+		b := tx.Bucket([]byte(ns))
+		if b == nil {
+			return ErrBucketNotFound
+		}
 		return b.Delete([]byte(key))
 	})
 }
@@ -237,25 +299,52 @@ func (bp *BoltPvd) Unlock(key string) error {
 	})
 }
 
-func (bp *BoltPvd) GetStringIn(namespace, key string) (string, bool) {
+func (bp *BoltPvd) GetStringIn(ns, key string) (string, bool) {
 	buf, ok, length := make([]byte, bp.maxStrLen), false, bp.maxStrLen
 	bp.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(namespace))
+		b := tx.Bucket([]byte(ns))
+		if b == nil {
+			return nil
+		}
+
 		v := b.Get([]byte(key))
 		length = copy(buf, v)
 		ok = v != nil
 		return nil
 	})
+
 	return string(buf[:length]), ok
 }
 
-func (bp *BoltPvd) SetStringIn(namespace, key, val string) error {
+func (bp *BoltPvd) SetStringIn(ns, key, val string) error {
 	if len(val) > bp.maxStrLen {
 		return fmt.Errorf("can not set string value longer than %d", bp.maxStrLen)
 	}
 
 	return bp.db.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(namespace))
+		b := tx.Bucket([]byte(ns))
+		if b == nil {
+			return ErrBucketNotFound
+		}
+
 		return b.Put([]byte(key), []byte(val))
 	})
+}
+
+func (bp *BoltPvd) ListStringsIn(ns string) (map[string]string, error) {
+	kv := map[string]string{}
+	err := bp.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(ns))
+		if b == nil {
+			return ErrBucketNotFound
+		}
+
+		b.ForEach(func(k, v []byte) error {
+			kv[fmt.Sprintf("%s", k)] = fmt.Sprintf("%s", v)
+			return nil
+		})
+		return nil
+	})
+
+	return kv, err
 }
