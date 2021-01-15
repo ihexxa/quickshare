@@ -20,11 +20,21 @@ export interface ListResp {
   metadatas: MetadataResp[];
 }
 
+export interface UploadInfo {
+  realFilePath: string;
+  size: number;
+  uploaded: number; // TODO: use string instead
+}
+
+export interface ListUploadingsResp {
+  uploadInfos: UploadInfo[];
+}
+
 export interface IUsersClient {
-  login: (user: string, pwd: string) => Promise<Response>
-  logout: () => Promise<Response>
-  isAuthed: () => Promise<Response>
-  setPwd: (oldPwd: string, newPwd: string) => Promise<Response>
+  login: (user: string, pwd: string) => Promise<Response>;
+  logout: () => Promise<Response>;
+  isAuthed: () => Promise<Response>;
+  setPwd: (oldPwd: string, newPwd: string) => Promise<Response>;
 }
 
 export interface IFilesClient {
@@ -40,6 +50,8 @@ export interface IFilesClient {
   ) => Promise<Response<UploadStatusResp>>;
   uploadStatus: (filePath: string) => Promise<Response<UploadStatusResp>>;
   list: (dirPath: string) => Promise<Response<ListResp>>;
+  listUploadings: () => Promise<Response<ListUploadingsResp>>;
+  deleteUploading: (filePath: string) => Promise<Response>;
 }
 
 export interface Response<T = any> {

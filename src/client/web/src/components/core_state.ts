@@ -2,6 +2,7 @@ import { List } from "immutable";
 
 import { Props as PanelProps } from "./panel";
 import { Item } from "./browser";
+import { UploadInfo } from "../client";
 
 
 export interface IContext {
@@ -24,6 +25,7 @@ export function init(): ICoreState {
       browser: {
         dirPath: List<string>(["."]),
         items: List<Item>([]),
+        uploadings: List<UploadInfo>([]),
         uploadValue: "",
         uploadFiles: List<File>([]),
       },

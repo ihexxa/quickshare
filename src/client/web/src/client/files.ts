@@ -3,6 +3,7 @@ import {
   Response,
   UploadStatusResp,
   ListResp,
+  ListUploadingsResp,
 } from "./";
 
 const filePathQuery = "fp";
@@ -98,6 +99,23 @@ export class FilesClient extends BaseClient {
       url: `${this.url}/v1/fs/dirs`,
       params: {
         [listDirQuery]: dirPath,
+      },
+    });
+  };
+
+  listUploadings = (): Promise<Response<ListUploadingsResp>> => {
+    return this.do({
+      method: "get",
+      url: `${this.url}/v1/fs/uploadings`,
+    });
+  };
+
+  deleteUploading = (filePath: string): Promise<Response> => {
+    return this.do({
+      method: "delete",
+      url: `${this.url}/v1/fs/uploadings`,
+      params: {
+        [filePathQuery]: filePath,
       },
     });
   };

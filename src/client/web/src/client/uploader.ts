@@ -3,10 +3,27 @@ import { FilesClient } from "../client/files";
 import { Response, UnknownErrResp, UploadStatusResp } from "./";
 
 // TODO: get settings from server
-const defaultChunkLen = 1024 * 1024 * 30; // 15MB/s
+// TODO: move chunk copying to worker
+const defaultChunkLen = 1024 * 512;
 const speedDownRatio = 0.5;
 const speedUpRatio = 1.1;
 const retryLimit = 4;
+
+export interface IFileUploader {
+  stop: () => void;
+  err: () => string | null;
+  setClient: (client: IFilesClient) => void;
+  create: (filePath: string, fileSize: number) => Promise<Response>;
+  start: () => Promise<boolean>;
+  upload: () => Promise<boolean>;
+  uploadChunk: (
+    filePath: string,
+    base64Chunk: string,
+    offset: number
+  ) => Promise<Response<UploadStatusResp>>;
+
+  uploadStatus: (filePath: string) => Promise<Response<UploadStatusResp>>;
+}
 
 export class FileUploader {
   private reader = new FileReader();
@@ -16,18 +33,24 @@ export class FileUploader {
   private offset: number;
   private filePath: string;
   private errMsg: string | null;
-  private progressCb: (filePath: string, progress: number) => void;
+  private shouldStop: boolean;
+  private progressCb: (filePath: string, uploaded: number) => void;
 
   constructor(
     file: File,
     filePath: string,
-    progressCb?: (filePath: string, progress: number) => void
+    progressCb?: (filePath: string, uploaded: number) => void
   ) {
     this.file = file;
     this.filePath = filePath;
     this.progressCb = progressCb;
     this.offset = 0;
+    this.shouldStop = false;
   }
+
+  stop = () => {
+    this.shouldStop = true;
+  };
 
   err = (): string | null => {
     return this.errMsg;
@@ -72,7 +95,8 @@ export class FileUploader {
     while (
       this.chunkLen > 0 &&
       this.offset >= 0 &&
-      this.offset < this.file.size
+      this.offset < this.file.size &&
+      !this.shouldStop
     ) {
       const uploadPromise = new Promise<Response<UploadStatusResp>>(
         (resolve: (resp: Response<UploadStatusResp>) => void) => {
@@ -116,7 +140,7 @@ export class FileUploader {
         } catch (e) {
           if (uploadStatusResp == null) {
             this.errMsg = `${this.errMsg}; unknown error: empty uploadStatus response`;
-            break;          
+            break;
           } else if (uploadStatusResp.status === 500) {
             if (
               !uploadStatusResp.statusText.includes("fail to lock the file") &&
@@ -139,12 +163,14 @@ export class FileUploader {
       }
 
       if (this.progressCb != null) {
-        this.progressCb(this.filePath, Math.ceil(this.offset / this.file.size));
+        this.progressCb(this.filePath, this.offset);
       }
     }
 
     if (this.chunkLen === 0) {
-      this.errMsg = "network is bad, please retry later.";
+      this.errMsg = "network is poor, please retry later.";
+    } else if (this.shouldStop) {
+      this.errMsg = "uploading is stopped";
     }
     return this.offset === this.file.size;
   };
