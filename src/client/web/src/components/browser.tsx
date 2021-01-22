@@ -12,7 +12,7 @@ import {
 } from "../client";
 import { FilesClient } from "../client/files";
 import { UsersClient } from "../client/users";
-import { UploadMgr } from "../client/upload_mgr";
+import { UploadMgr, UploadEntry } from "../client/upload_mgr";
 
 export const uploadCheckCycle = 1000;
 
@@ -149,7 +149,13 @@ export class Updater {
       // do not wait for the promise
       UploadMgr.start(fileList[i], fileList[i].name);
     }
-    Updater.setUploadings(UploadMgr.list());
+    Updater.setUploadings(UploadMgr.list().map((entry:UploadEntry) => {
+      return {
+        realFilePath: entry.filePath,
+        size: entry.size,
+        uploaded: entry.uploaded,
+      }
+    }));
   };
 
   static setBrowser = (prevState: ICoreState): ICoreState => {
@@ -200,7 +206,7 @@ export class Browser extends React.Component<Props, State, {}> {
       uploadInput.click();
     };
 
-    UploadMgr.setStatusCb(this.updateProgress);
+    // UploadMgr.setStatusCb(this.updateProgress);
     Updater.setItems(p.dirPath)
       .then(() => {
         return Updater.refreshUploadings();

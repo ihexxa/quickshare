@@ -37,12 +37,14 @@ describe("Uploader", () => {
     status: number;
     uploaded: number;
   }
+
   interface TestCase {
     createResps: Array<number>;
     uploadChunkResps: Array<any>;
     uploadStatusResps: Array<any>;
     result: boolean;
   }
+
   test("test start and upload method", async () => {
     const testCases: Array<TestCase> = [
       {
@@ -114,8 +116,15 @@ describe("Uploader", () => {
     ];
 
     for (let i = 0; i < testCases.length; i++) {
+      console.log(i);
       const tc = testCases[i];
-      const uploader = new FileUploader(file, filePath);
+      const mockCb = (
+        filePath: string,
+        uploaded: number,
+        done: boolean,
+        err: string
+      ):void => {}; 
+      const uploader = new FileUploader(file, filePath, mockCb);
       const mockClient = new FilesClient("");
 
       const createResps = tc.createResps.map((resp) => makeCreateResp(resp));

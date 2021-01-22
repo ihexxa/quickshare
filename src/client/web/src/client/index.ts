@@ -73,12 +73,16 @@ export const EmptyBodyResp: Response<any> = {
   statusText: "Empty Response Body",
 };
 
-export const UnknownErrResp = (errMsg: string): Response<any> => {
+export const FatalErrResp = (errMsg: string): Response<any> => {
   return {
     status: 600,
     data: {},
     statusText: errMsg,
   };
+};
+
+export const isFatalErr = (resp: Response<any>): boolean => {
+  return resp.status === 600;
 };
 
 export class BaseClient {
@@ -107,11 +111,15 @@ export class BaseClient {
         })
         .catch((e) => {
           const errMsg = e.toString();
+
           if (errMsg.includes("ERR_EMPTY")) {
-            // this means connection is eliminated by server because of timeout.
+            // this means connection is eliminated by server, it may be caused by timeout.
             resolve(EmptyBodyResp);
+          } else if (e.response != null) {
+            resolve(e.response);
           } else {
-            resolve(UnknownErrResp(errMsg));
+            // TODO: check e.request to get more friendly error message
+            resolve(FatalErrResp(errMsg));
           }
         });
     });

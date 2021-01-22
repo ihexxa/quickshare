@@ -51,11 +51,16 @@ module.exports = {
           filename: "[name].bundle.js"
         },
         commons: {
-          test: /[\\/]node_modules[\\/]/,
           name: "vendors",
+          test: /[\\/]node_modules[\\/]/,
           chunks: "all",
           minChunks: 2,
           reuseExistingChunk: true
+        },
+        worker: {
+          name: "worker",
+          test: /[\\/]worker[\\/]/,
+          filename: "[name].bundle.js"
         }
       }
     }

@@ -6,8 +6,16 @@
     "module": "commonjs",
     "target": "es5",
     "jsx": "react",
-    "lib": ["es2015", "dom"]
+    "lib": ["es2015", "dom", "webworker"]
   },
   "include": ["./src/**/*", "webpack.config.js", "webpack..js"],
-  "exclude": ["**/*.test.ts", "**/*.test.tsx"]
+  "exclude": ["**/*.test.ts", "**/*.test.tsx"],
+  "types": [
+    "node",
+    "custom"
+  ],
+  "typeRoots": [
+    "node_modules/@types",
+    "./typings"
+  ]
 }

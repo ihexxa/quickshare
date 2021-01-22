@@ -4,7 +4,10 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const prod = require("./webpack.prod.js");
 
 module.exports = merge(prod, {
-  entry: "./src/app.tsx",
+  entry: [
+    "./src/app.tsx",
+    "./src/worker/uploader.worker.ts",
+  ],
   context: `${__dirname}`,
   output: {
     path: `${__dirname}/../../../public/static`,

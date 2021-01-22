@@ -29,6 +29,7 @@
     "@types/deep-diff": "^1.0.0",
     "@types/jest": "^24.0.12",
     "assert": "^2.0.0",
+    "babel-loader": "^8.2.2",
     "css-loader": "^2.1.1",
     "deep-diff": "^1.0.2",
     "html-webpack-plugin": "^4.0.0-beta.5",
@@ -45,7 +46,8 @@
     "webpack": "^5.0.0-rc.6",
     "webpack-bundle-analyzer": "^3.3.2",
     "webpack-cli": "^4.2.0",
-    "webpack-merge": "^4.2.1"
+    "webpack-merge": "^4.2.1",
+    "worker-loader": "^3.0.7"
   },
   "dependencies": {
     "@types/axios": "^0.14.0",
@@ -62,7 +64,8 @@
     "react-copy-to-clipboard": "^5.0.1",
     "react-dom": "^16.8.6",
     "react-svg": "^8.0.6",
-    "throttle-debounce": "^2.1.0"
+    "throttle-debounce": "^2.1.0",
+    "worker-loader": "^3.0.7"
   },
   "jest": {
     "testMatch": [

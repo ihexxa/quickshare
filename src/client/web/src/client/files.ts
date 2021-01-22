@@ -1,5 +1,6 @@
 import {
   BaseClient,
+  FatalErrResp,
   Response,
   UploadStatusResp,
   ListResp,
@@ -9,6 +10,21 @@ import {
 const filePathQuery = "fp";
 const listDirQuery = "dp";
 // TODO: get timeout from server
+
+function translateResp(resp: Response<any>): Response<any> {
+  if (resp.status === 500) {
+    if (
+      !resp.statusText.includes("fail to lock the file") &&
+      resp.statusText !== ""
+    ) {
+      return FatalErrResp(resp.statusText);
+    }
+  } else if (resp.status === 404) {
+    return FatalErrResp(resp.statusText);
+  }
+
+  return resp;
+}
 
 export class FilesClient extends BaseClient {
   constructor(url: string) {
@@ -80,7 +96,13 @@ export class FilesClient extends BaseClient {
         content,
         offset,
       },
-    });
+    })
+      .then((resp) => {
+        return translateResp(resp);
+      })
+      .catch((e) => {
+        return FatalErrResp(`unknow uploadStatus error ${e.toString()}`);
+      });
   };
 
   uploadStatus = (filePath: string): Promise<Response<UploadStatusResp>> => {
@@ -90,7 +112,13 @@ export class FilesClient extends BaseClient {
       params: {
         [filePathQuery]: filePath,
       },
-    });
+    })
+      .then((resp) => {
+        return translateResp(resp);
+      })
+      .catch((e) => {
+        return FatalErrResp(`unknow uploadStatus error ${e.toString()}`);
+      });
   };
 
   list = (dirPath: string): Promise<Response<ListResp>> => {
