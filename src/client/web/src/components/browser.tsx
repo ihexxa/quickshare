@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { List, Map } from "immutable";
-import * as Filesize from "filesize";
+import FileSize from "filesize";
 
 import { ICoreState } from "./core_state";
 import {
@@ -12,7 +12,9 @@ import {
 } from "../client";
 import { FilesClient } from "../client/files";
 import { UsersClient } from "../client/users";
-import { UploadMgr, UploadEntry } from "../client/upload_mgr";
+import { UploadMgr } from "../worker/upload_mgr";
+import { UploadEntry } from "../worker/interface";
+import { FileUploader } from "../worker/uploader";
 
 export const uploadCheckCycle = 1000;
 
@@ -78,8 +80,13 @@ export class Updater {
   };
 
   static deleteUploading = async (filePath: string): Promise<boolean> => {
+    UploadMgr.delete(filePath);
     const resp = await Updater.filesClient.deleteUploading(filePath);
     return resp.status === 200;
+  };
+
+  static stopUploading = (filePath: string) => {
+    UploadMgr.stop(filePath);
   };
 
   static mkDir = async (dirPath: string): Promise<void> => {
@@ -147,15 +154,17 @@ export class Updater {
   static addUploadFiles = (fileList: FileList, len: number) => {
     for (let i = 0; i < len; i++) {
       // do not wait for the promise
-      UploadMgr.start(fileList[i], fileList[i].name);
+      UploadMgr.add(fileList[i], fileList[i].name);
     }
-    Updater.setUploadings(UploadMgr.list().map((entry:UploadEntry) => {
-      return {
-        realFilePath: entry.filePath,
-        size: entry.size,
-        uploaded: entry.uploaded,
-      }
-    }));
+    Updater.setUploadings(
+      UploadMgr.list().map((entry: UploadEntry) => {
+        return {
+          realFilePath: entry.filePath,
+          size: entry.size,
+          uploaded: entry.uploaded,
+        };
+      })
+    );
   };
 
   static setBrowser = (prevState: ICoreState): ICoreState => {
@@ -276,6 +285,11 @@ export class Browser extends React.Component<Props, State, {}> {
       .then(() => {
         this.update(Updater.setBrowser);
       });
+  };
+
+  stopUploading = (filePath: string) => {
+    Updater.stopUploading(filePath);
+    this.update(Updater.setBrowser);
   };
 
   delete = () => {
@@ -523,7 +537,7 @@ export class Browser extends React.Component<Props, State, {}> {
               {item.name}
             </a>
           </td>
-          <td>{Filesize(item.size, { round: 0 })}</td>
+          <td>{FileSize(item.size, { round: 0 })}</td>
           <td>{item.modTime.slice(0, item.modTime.indexOf("T"))}</td>
 
           <td>
@@ -551,20 +565,20 @@ export class Browser extends React.Component<Props, State, {}> {
           <td>
             <span className="item-name pointer">{fileName}</span>
           </td>
-          <td>{Filesize(uploading.uploaded, { round: 0 })}</td>
-          <td>{Filesize(uploading.size, { round: 0 })}</td>
+          <td>{FileSize(uploading.uploaded, { round: 0 })}</td>
+          <td>{FileSize(uploading.size, { round: 0 })}</td>
           <td>
+            <button
+              onClick={() => this.stopUploading(uploading.realFilePath)}
+              className="white-font margin-m"
+            >
+              Stop
+            </button>
             <button
               onClick={() => this.deleteUploading(uploading.realFilePath)}
               className="white-font margin-m"
             >
               Delete
-            </button>
-            <button
-              onClick={this.onClickUpload}
-              className="white-font margin-m"
-            >
-              Restart
             </button>
           </td>
         </tr>

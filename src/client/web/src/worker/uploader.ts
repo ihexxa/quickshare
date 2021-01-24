@@ -1,6 +1,5 @@
-import { IFilesClient } from "../client";
 import { FilesClient } from "../client/files";
-import { Response, FatalErrResp, UploadStatusResp, isFatalErr } from "../client";
+import { IFilesClient, Response, isFatalErr } from "../client";
 
 // TODO: get settings from server
 // TODO: move chunk copying to worker
@@ -37,7 +36,7 @@ export class FileUploader {
   private progressCb: (
     filePath: string,
     uploaded: number,
-    done: boolean,
+    runnable: boolean,
     err: string
   ) => void;
 
@@ -47,7 +46,7 @@ export class FileUploader {
     progressCb: (
       filePath: string,
       uploaded: number,
-      done: boolean,
+      runnable: boolean,
       err: string
     ) => void
   ) {
@@ -160,9 +159,7 @@ export class FileUploader {
         break;
       }
 
-      if (this.progressCb != null) {
-        this.progressCb(this.filePath, this.offset, false, this.err());
-      }
+      this.progressCb(this.filePath, this.offset, true, this.err());
     }
 
     if (this.chunkLen === 0) {
@@ -173,7 +170,7 @@ export class FileUploader {
       this.errMsgs.push("uploading is stopped");
     }
 
-    this.progressCb(this.filePath, this.offset, true, this.err());
+    this.progressCb(this.filePath, this.offset, false, this.err());
     return this.offset === this.file.size;
   };
 }

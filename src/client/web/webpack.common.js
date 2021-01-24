@@ -13,7 +13,10 @@ module.exports = {
         test: /\.ts|tsx$/,
         loader: "ts-loader",
         include: [path.resolve(__dirname, "src")],
-        exclude: /\.test\.(ts|tsx)$/
+        exclude: [
+          /node_modules/,
+          /\.test\.(ts|tsx)$/
+        ]
       },
       {
         test: /\.css$/,
@@ -56,12 +59,12 @@ module.exports = {
           chunks: "all",
           minChunks: 2,
           reuseExistingChunk: true
-        },
-        worker: {
-          name: "worker",
-          test: /[\\/]worker[\\/]/,
-          filename: "[name].bundle.js"
         }
+        // worker: {
+        //   name: "worker",
+        //   test: /[\\/]worker[\\/]/,
+        //   filename: "[name].bundle.js"
+        // }
       }
     }
   }

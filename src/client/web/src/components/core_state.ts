@@ -3,7 +3,7 @@ import { List } from "immutable";
 import { Props as PanelProps } from "./panel";
 import { Item } from "./browser";
 import { UploadInfo } from "../client";
-
+import { UploadMgr, IWorker } from "../worker/upload_mgr";
 
 export interface IContext {
   update: (targetStatePatch: any) => void;
@@ -14,7 +14,32 @@ export interface ICoreState {
   panel: PanelProps;
 }
 
+export function initWithWorker(worker: IWorker): ICoreState {
+  UploadMgr.init(worker);
+  return initState();
+}
+
 export function init(): ICoreState {
+  const scripts = Array.from(document.querySelectorAll("script"));
+  let workerScriptName = "";
+  for (let i = 0; i < scripts.length; i++) {
+    if (scripts[i].getAttribute("src").startsWith("static/worker.bundle.js")) {
+      console.log(scripts[i].src);
+      workerScriptName = scripts[i].src;
+      break;
+    }
+  }
+
+  if (workerScriptName === "") {
+    alert("worker script not found");
+  }
+  const worker = new Worker(workerScriptName, { name: "uploader" });
+  UploadMgr.init(worker);
+  worker.postMessage({hey: "hello"});
+  return initState();
+}
+
+export function initState(): ICoreState {
   return {
     ctx: null,
     panel: {

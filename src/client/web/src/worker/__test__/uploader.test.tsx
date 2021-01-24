@@ -1,5 +1,5 @@
 import { FileUploader } from "../uploader";
-import { FilesClient } from "../files_mock";
+import { FilesClient } from "../../client/files_mock";
 import { makePromise } from "../../test/helpers";
 
 describe("Uploader", () => {
@@ -85,7 +85,14 @@ describe("Uploader", () => {
       },
       {
         // fail twice
-        createResps: [500, 500, 500, 200],
+        createResps: [500, 500],
+        uploadChunkResps: [],
+        uploadStatusResps: [],
+        result: false,
+      },
+      {
+        // fail twice
+        createResps: [500, 200],
         uploadChunkResps: [
           { status: 200, uploaded: 0 },
           { status: 500, uploaded: 1 },
@@ -116,7 +123,6 @@ describe("Uploader", () => {
     ];
 
     for (let i = 0; i < testCases.length; i++) {
-      console.log(i);
       const tc = testCases[i];
       const mockCb = (
         filePath: string,
