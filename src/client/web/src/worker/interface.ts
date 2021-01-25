@@ -1,5 +1,3 @@
-import { Map } from "immutable";
-
 export interface UploadEntry {
   file: File;
   filePath: string;
@@ -19,7 +17,7 @@ export const syncReqKind: SyncReqKind = "worker.req.sync";
 
 export interface SyncReq extends WorkerEvent {
   kind: SyncReqKind;
-  infos: Map<string, UploadEntry>;
+  infos: Array<UploadEntry>;
 }
 
 export type FileWorkerReq = SyncReq;

@@ -14,7 +14,7 @@ import { FilesClient } from "../client/files";
 import { UsersClient } from "../client/users";
 import { UploadMgr } from "../worker/upload_mgr";
 import { UploadEntry } from "../worker/interface";
-import { FileUploader } from "../worker/uploader";
+// import { FileUploader } from "../worker/uploader";
 
 export const uploadCheckCycle = 1000;
 
@@ -54,8 +54,18 @@ export class Updater {
     Updater.filesClient = filesClient;
   }
 
-  static setUploadings = (infos: Map<string, UploadInfo>) => {
-    Updater.props.uploadings = List<UploadInfo>(infos.values());
+  static setUploadings = (infos: Map<string, UploadEntry>) => {
+    Updater.props.uploadings = List<UploadInfo>(
+      infos.valueSeq().map(
+        (v: UploadEntry): UploadInfo => {
+          return {
+            realFilePath: v.filePath,
+            size: v.size,
+            uploaded: v.uploaded,
+          };
+        }
+      )
+    );
   };
 
   static setItems = async (dirParts: List<string>): Promise<void> => {
@@ -156,15 +166,7 @@ export class Updater {
       // do not wait for the promise
       UploadMgr.add(fileList[i], fileList[i].name);
     }
-    Updater.setUploadings(
-      UploadMgr.list().map((entry: UploadEntry) => {
-        return {
-          realFilePath: entry.filePath,
-          size: entry.size,
-          uploaded: entry.uploaded,
-        };
-      })
-    );
+    Updater.setUploadings(UploadMgr.list());
   };
 
   static setBrowser = (prevState: ICoreState): ICoreState => {
@@ -215,7 +217,7 @@ export class Browser extends React.Component<Props, State, {}> {
       uploadInput.click();
     };
 
-    // UploadMgr.setStatusCb(this.updateProgress);
+    UploadMgr.setStatusCb(this.updateProgress);
     Updater.setItems(p.dirPath)
       .then(() => {
         return Updater.refreshUploadings();
@@ -256,7 +258,7 @@ export class Browser extends React.Component<Props, State, {}> {
     this.update(Updater.setBrowser);
   };
 
-  updateProgress = (infos: Map<string, UploadInfo>) => {
+  updateProgress = (infos: Map<string, UploadEntry>) => {
     Updater.setUploadings(infos);
     Updater.setItems(this.props.dirPath).then(() => {
       this.update(Updater.setBrowser);

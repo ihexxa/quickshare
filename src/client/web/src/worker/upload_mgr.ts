@@ -11,6 +11,8 @@ import {
   uploadInfoKind,
 } from "./interface";
 
+const win = self as any;
+
 export interface IWorker {
   onmessage: (event: MessageEvent) => void;
   postMessage: (event: FileWorkerReq) => void;
@@ -21,6 +23,7 @@ export class UploadMgr {
   private static worker: IWorker;
   private static intervalID: NodeJS.Timeout;
   private static cycle: number = 500;
+  private static statusCb: (infos: Map<string, UploadEntry>) => void;
 
   static _setInfos = (infos: Map<string, UploadEntry>) => {
     UploadMgr.infos = infos;
@@ -34,28 +37,32 @@ export class UploadMgr {
     return UploadMgr.cycle;
   };
 
+  static setStatusCb = (cb: (infos: Map<string, UploadEntry>) => void) => {
+    UploadMgr.statusCb = cb;
+  }
+
   static init = (worker: IWorker) => {
     UploadMgr.worker = worker;
     // TODO: fallback to normal if Web Worker is not available
     UploadMgr.worker.onmessage = UploadMgr.respHandler;
 
     const syncing = () => {
-      console.log("syncing");
       UploadMgr.worker.postMessage({
         kind: syncReqKind,
-        infos: UploadMgr.infos,
+        infos: UploadMgr.infos.valueSeq().toArray(),
       });
     };
-    UploadMgr.intervalID = setInterval(syncing, UploadMgr.cycle);
+    UploadMgr.intervalID = win.setInterval(syncing, UploadMgr.cycle);
   };
 
   static destory = () => {
-    clearInterval(UploadMgr.intervalID);
+    win.clearInterval(UploadMgr.intervalID);
   };
 
   static add = (file: File, filePath: string) => {
     const entry = UploadMgr.infos.get(filePath);
     if (entry == null) {
+      // new uploading
       UploadMgr.infos = UploadMgr.infos.set(filePath, {
         file: file,
         filePath: filePath,
@@ -65,7 +72,11 @@ export class UploadMgr {
         err: "",
       });
     } else {
-      alert(`${filePath} is already in the uploading list`);
+      // restart the uploading
+      UploadMgr.infos = UploadMgr.infos.set(filePath, {
+        ...entry,
+        runnable: true,
+      });
     }
   };
 
@@ -76,6 +87,7 @@ export class UploadMgr {
         ...entry,
         runnable: false,
       });
+      console.log("stopped", filePath);
     } else {
       alert(`failed to stop uploading ${filePath}: not found`);
     }
@@ -102,8 +114,10 @@ export class UploadMgr {
       case uploadInfoKind:
         const infoResp = resp as UploadInfoResp;
         const entry = UploadMgr.infos.get(infoResp.filePath);
+
         if (entry != null) {
           if (infoResp.uploaded === entry.size) {
+            console.log("deleting", entry, infoResp.uploaded);
             UploadMgr.infos = UploadMgr.infos.delete(infoResp.filePath);
           } else {
             UploadMgr.infos = UploadMgr.infos.set(infoResp.filePath, {
@@ -113,9 +127,16 @@ export class UploadMgr {
               err: infoResp.err,
             });
           }
+
+          // call back to update the info
+          UploadMgr.statusCb(UploadMgr.infos);
         } else {
           // TODO: refine this
-          console.error(`respHandler: fail to found: ${infoResp.filePath}`);
+          console.error(
+            `respHandler: fail to found: file(${
+              infoResp.filePath
+            }) infos(${UploadMgr.infos.toObject()})`
+          );
         }
         break;
       default:

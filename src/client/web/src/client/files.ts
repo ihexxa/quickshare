@@ -14,8 +14,12 @@ const listDirQuery = "dp";
 function translateResp(resp: Response<any>): Response<any> {
   if (resp.status === 500) {
     if (
-      !resp.statusText.includes("fail to lock the file") &&
-      resp.statusText !== ""
+      (resp.data == null || resp.data === "") ||
+      (
+        resp.data.error != null &&
+        !resp.data.error.includes("fail to lock the file") &&
+        !resp.data.error.includes("offset != uploaded")
+      )
     ) {
       return FatalErrResp(resp.statusText);
     }

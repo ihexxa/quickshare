@@ -1,5 +1,9 @@
 import { List } from "immutable";
 
+// import UploadWorker = require("worker-loader!../worker/uploader.worker");
+import UploadWorker from "../worker/uploader.worker";
+
+
 import { Props as PanelProps } from "./panel";
 import { Item } from "./browser";
 import { UploadInfo } from "../client";
@@ -21,21 +25,21 @@ export function initWithWorker(worker: IWorker): ICoreState {
 
 export function init(): ICoreState {
   const scripts = Array.from(document.querySelectorAll("script"));
-  let workerScriptName = "";
-  for (let i = 0; i < scripts.length; i++) {
-    if (scripts[i].getAttribute("src").startsWith("static/worker.bundle.js")) {
-      console.log(scripts[i].src);
-      workerScriptName = scripts[i].src;
-      break;
-    }
-  }
+  // let workerScriptName = "";
+  // for (let i = 0; i < scripts.length; i++) {
+  //   if (scripts[i].getAttribute("src").startsWith("static/worker.bundle.js")) {
+  //     console.log(scripts[i].src);
+  //     workerScriptName = scripts[i].src;
+  //     break;
+  //   }
+  // }
+  // if (workerScriptName === "") {
+  //   alert("worker script not found");
+  // }
+  // const worker = new Worker(workerScriptName, { name: "uploader" });
 
-  if (workerScriptName === "") {
-    alert("worker script not found");
-  }
-  const worker = new Worker(workerScriptName, { name: "uploader" });
+  const worker = new UploadWorker();
   UploadMgr.init(worker);
-  worker.postMessage({hey: "hello"});
   return initState();
 }
 
