@@ -23,7 +23,7 @@ export class UploadMgr {
   private static worker: IWorker;
   private static intervalID: NodeJS.Timeout;
   private static cycle: number = 500;
-  private static statusCb: (infos: Map<string, UploadEntry>) => void;
+  private static statusCb = (infos: Map<string, UploadEntry>):void => {};
 
   static _setInfos = (infos: Map<string, UploadEntry>) => {
     UploadMgr.infos = infos;
@@ -117,7 +117,6 @@ export class UploadMgr {
 
         if (entry != null) {
           if (infoResp.uploaded === entry.size) {
-            console.log("deleting", entry, infoResp.uploaded);
             UploadMgr.infos = UploadMgr.infos.delete(infoResp.filePath);
           } else {
             UploadMgr.infos = UploadMgr.infos.set(infoResp.filePath, {

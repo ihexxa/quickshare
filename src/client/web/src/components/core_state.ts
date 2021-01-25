@@ -38,6 +38,10 @@ export function init(): ICoreState {
   // }
   // const worker = new Worker(workerScriptName, { name: "uploader" });
 
+  if (!Worker) {
+    alert("web worker is not supported");
+  }
+
   const worker = new UploadWorker();
   UploadMgr.init(worker);
   return initState();

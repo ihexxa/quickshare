@@ -59,7 +59,7 @@ describe("UploadMgr", () => {
           case syncReqKind:
             const syncReq = req as SyncReq;
             // find the first qualified task
-            const infoArray = syncReq.infos.valueSeq().toArray().reverse();
+            const infoArray = syncReq.infos;
             for (let i = 0; i < infoArray.length; i++) {
               if (
                 infoArray[i].runnable &&
