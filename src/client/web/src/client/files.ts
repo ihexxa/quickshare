@@ -1,13 +1,35 @@
 import {
   BaseClient,
+  FatalErrResp,
   Response,
   UploadStatusResp,
   ListResp,
+  ListUploadingsResp,
 } from "./";
 
 const filePathQuery = "fp";
 const listDirQuery = "dp";
 // TODO: get timeout from server
+
+function translateResp(resp: Response<any>): Response<any> {
+  if (resp.status === 500) {
+    if (
+      (resp.data == null || resp.data === "") ||
+      (
+        resp.data.error != null &&
+        !resp.data.error.includes("fail to lock the file") &&
+        !resp.data.error.includes("offset != uploaded") &&
+        !resp.data.error.includes("i/o timeout")
+      )
+    ) {
+      return FatalErrResp(resp.statusText);
+    }
+  } else if (resp.status === 404) {
+    return FatalErrResp(resp.statusText);
+  }
+
+  return resp;
+}
 
 export class FilesClient extends BaseClient {
   constructor(url: string) {
@@ -79,7 +101,13 @@ export class FilesClient extends BaseClient {
         content,
         offset,
       },
-    });
+    })
+      .then((resp) => {
+        return translateResp(resp);
+      })
+      .catch((e) => {
+        return FatalErrResp(`unknow uploadStatus error ${e.toString()}`);
+      });
   };
 
   uploadStatus = (filePath: string): Promise<Response<UploadStatusResp>> => {
@@ -89,7 +117,13 @@ export class FilesClient extends BaseClient {
       params: {
         [filePathQuery]: filePath,
       },
-    });
+    })
+      .then((resp) => {
+        return translateResp(resp);
+      })
+      .catch((e) => {
+        return FatalErrResp(`unknow uploadStatus error ${e.toString()}`);
+      });
   };
 
   list = (dirPath: string): Promise<Response<ListResp>> => {
@@ -98,6 +132,23 @@ export class FilesClient extends BaseClient {
       url: `${this.url}/v1/fs/dirs`,
       params: {
         [listDirQuery]: dirPath,
+      },
+    });
+  };
+
+  listUploadings = (): Promise<Response<ListUploadingsResp>> => {
+    return this.do({
+      method: "get",
+      url: `${this.url}/v1/fs/uploadings`,
+    });
+  };
+
+  deleteUploading = (filePath: string): Promise<Response> => {
+    return this.do({
+      method: "delete",
+      url: `${this.url}/v1/fs/uploadings`,
+      params: {
+        [filePathQuery]: filePath,
       },
     });
   };

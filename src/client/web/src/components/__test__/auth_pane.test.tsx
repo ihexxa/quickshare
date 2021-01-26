@@ -1,9 +1,15 @@
-import { init } from "../core_state";
+import { mock, instance } from "ts-mockito";
+
+import { initWithWorker } from "../core_state";
 import { Updater } from "../auth_pane";
 import { MockUsersClient } from "../../client/users_mock";
 import { Response } from "../../client";
+import { MockWorker } from "../../worker/interface";
 
 describe("AuthPane", () => {
+  const mockWorkerClass = mock(MockWorker);
+  const mockWorker = instance(mockWorkerClass);
+
   const makePromise = (ret: any): Promise<any> => {
     return new Promise<any>((resolve) => {
       resolve(ret);
@@ -44,7 +50,7 @@ describe("AuthPane", () => {
       client.isAuthedMock(makeNumberResponse(tc.isAuthedStatus));
       client.setPwdMock(makeNumberResponse(tc.setPwdStatus));
 
-      const coreState = init();
+      const coreState = initWithWorker(mockWorker);
       Updater.setClient(client);
       Updater.init(coreState.panel.authPane);
       await Updater.initIsAuthed();

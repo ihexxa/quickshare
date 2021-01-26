@@ -10,10 +10,19 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.worker\.ts$/,
+        use: {
+          loader: "worker-loader",
+          options: {
+            // inline: "fallback",
+          },
+        },
+      },
+      {
         test: /\.ts|tsx$/,
         loader: "ts-loader",
         include: [path.resolve(__dirname, "src")],
-        exclude: /\.test\.(ts|tsx)$/
+        exclude: [/node_modules/, /\.test\.(ts|tsx)$/],
       },
       {
         test: /\.css$/,
@@ -22,15 +31,15 @@ module.exports = {
           {
             loader: "css-loader",
             options: {
-              url: false
-            }
-          }
-        ]
-      }
-    ]
+              url: false,
+            },
+          },
+        ],
+      },
+    ],
   },
   resolve: {
-    extensions: [".ts", ".tsx", ".js", ".json"]
+    extensions: [".ts", ".tsx", ".js", ".json"],
   },
   plugins: [
     // new BundleAnalyzerPlugin()
@@ -38,7 +47,7 @@ module.exports = {
   externals: {
     react: "React",
     "react-dom": "ReactDOM",
-    immutable: "Immutable"
+    immutable: "Immutable",
   },
   optimization: {
     minimizer: [new TerserPlugin()],
@@ -48,16 +57,21 @@ module.exports = {
       cacheGroups: {
         default: {
           name: "main",
-          filename: "[name].bundle.js"
+          filename: "[name].bundle.js",
         },
         commons: {
-          test: /[\\/]node_modules[\\/]/,
           name: "vendors",
+          test: /[\\/]node_modules[\\/]/,
           chunks: "all",
           minChunks: 2,
-          reuseExistingChunk: true
-        }
-      }
-    }
-  }
+          reuseExistingChunk: true,
+        },
+        // worker: {
+        //   name: "worker",
+        //   test: /[\\/]worker[\\/]/,
+        //   filename: "[name].bundle.js"
+        // }
+      },
+    },
+  },
 };

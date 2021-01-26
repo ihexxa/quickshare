@@ -56,6 +56,7 @@ export class Panel extends React.Component<Props, State, {}> {
             <Browser
               dirPath={this.props.browser.dirPath}
               items={this.props.browser.items}
+              uploadings={this.props.browser.uploadings}
               update={this.update}
               uploadFiles={this.props.browser.uploadFiles}
               uploadValue={this.props.browser.uploadValue}

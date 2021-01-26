@@ -1,5 +1,5 @@
 import { FileUploader } from "../uploader";
-import { FilesClient } from "../files_mock";
+import { FilesClient } from "../../client/files_mock";
 import { makePromise } from "../../test/helpers";
 
 describe("Uploader", () => {
@@ -37,12 +37,14 @@ describe("Uploader", () => {
     status: number;
     uploaded: number;
   }
+
   interface TestCase {
     createResps: Array<number>;
     uploadChunkResps: Array<any>;
     uploadStatusResps: Array<any>;
     result: boolean;
   }
+
   test("test start and upload method", async () => {
     const testCases: Array<TestCase> = [
       {
@@ -83,7 +85,14 @@ describe("Uploader", () => {
       },
       {
         // fail twice
-        createResps: [500, 500, 500, 200],
+        createResps: [500, 500],
+        uploadChunkResps: [],
+        uploadStatusResps: [],
+        result: false,
+      },
+      {
+        // fail twice
+        createResps: [500, 200],
         uploadChunkResps: [
           { status: 200, uploaded: 0 },
           { status: 500, uploaded: 1 },
@@ -115,7 +124,13 @@ describe("Uploader", () => {
 
     for (let i = 0; i < testCases.length; i++) {
       const tc = testCases[i];
-      const uploader = new FileUploader(file, filePath);
+      const mockCb = (
+        filePath: string,
+        uploaded: number,
+        done: boolean,
+        err: string
+      ):void => {}; 
+      const uploader = new FileUploader(file, filePath, mockCb);
       const mockClient = new FilesClient("");
 
       const createResps = tc.createResps.map((resp) => makeCreateResp(resp));

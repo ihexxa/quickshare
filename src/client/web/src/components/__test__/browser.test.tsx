@@ -1,13 +1,18 @@
 import { List, Map } from "immutable";
+import { mock, instance } from "ts-mockito";
 
-import { init } from "../core_state";
+import { initWithWorker } from "../core_state";
 import { makePromise, makeNumberResponse } from "../../test/helpers";
 import { Updater } from "../browser";
 import { MockUsersClient } from "../../client/users_mock";
 import { FilesClient } from "../../client/files_mock";
 import { MetadataResp } from "../../client";
+import { MockWorker } from "../../worker/interface";
 
 describe("Browser", () => {
+  const mockWorkerClass = mock(MockWorker);
+  const mockWorker = instance(mockWorkerClass);
+
   test("Updater: setPwd", async () => {
     const tests = [
       {
@@ -43,7 +48,7 @@ describe("Browser", () => {
       filesClient.listMock(makePromise(tc.listResp));
       Updater.setClients(usersClient, filesClient);
 
-      const coreState = init();
+      const coreState = initWithWorker(mockWorker);
       Updater.init(coreState.panel.browser);
       await Updater.setItems(List<string>(tc.filePath.split("/")));
       const newState = Updater.setBrowser(coreState);
@@ -105,7 +110,7 @@ describe("Browser", () => {
       filesClient.deleteMock(makeNumberResponse(200));
       Updater.setClients(usersClient, filesClient);
 
-      const coreState = init();
+      const coreState = initWithWorker(mockWorker);
       Updater.init(coreState.panel.browser);
       await Updater.delete(
         List<string>(tc.dirPath.split("/")),
@@ -166,7 +171,7 @@ describe("Browser", () => {
       filesClient.moveMock(makeNumberResponse(200));
       Updater.setClients(usersClient, filesClient);
 
-      const coreState = init();
+      const coreState = initWithWorker(mockWorker);
       Updater.init(coreState.panel.browser);
       await Updater.moveHere(
         tc.dirPath1,

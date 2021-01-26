@@ -20,11 +20,21 @@ export interface ListResp {
   metadatas: MetadataResp[];
 }
 
+export interface UploadInfo {
+  realFilePath: string;
+  size: number;
+  uploaded: number; // TODO: use string instead
+}
+
+export interface ListUploadingsResp {
+  uploadInfos: UploadInfo[];
+}
+
 export interface IUsersClient {
-  login: (user: string, pwd: string) => Promise<Response>
-  logout: () => Promise<Response>
-  isAuthed: () => Promise<Response>
-  setPwd: (oldPwd: string, newPwd: string) => Promise<Response>
+  login: (user: string, pwd: string) => Promise<Response>;
+  logout: () => Promise<Response>;
+  isAuthed: () => Promise<Response>;
+  setPwd: (oldPwd: string, newPwd: string) => Promise<Response>;
 }
 
 export interface IFilesClient {
@@ -40,6 +50,8 @@ export interface IFilesClient {
   ) => Promise<Response<UploadStatusResp>>;
   uploadStatus: (filePath: string) => Promise<Response<UploadStatusResp>>;
   list: (dirPath: string) => Promise<Response<ListResp>>;
+  listUploadings: () => Promise<Response<ListUploadingsResp>>;
+  deleteUploading: (filePath: string) => Promise<Response>;
 }
 
 export interface Response<T = any> {
@@ -61,12 +73,16 @@ export const EmptyBodyResp: Response<any> = {
   statusText: "Empty Response Body",
 };
 
-export const UnknownErrResp = (errMsg: string): Response<any> => {
+export const FatalErrResp = (errMsg: string): Response<any> => {
   return {
     status: 600,
     data: {},
     statusText: errMsg,
   };
+};
+
+export const isFatalErr = (resp: Response<any>): boolean => {
+  return resp.status === 600;
 };
 
 export class BaseClient {
@@ -95,11 +111,15 @@ export class BaseClient {
         })
         .catch((e) => {
           const errMsg = e.toString();
+
           if (errMsg.includes("ERR_EMPTY")) {
-            // this means connection is eliminated by server because of timeout.
+            // this means connection is eliminated by server, it may be caused by timeout.
             resolve(EmptyBodyResp);
+          } else if (e.response != null) {
+            resolve(e.response);
           } else {
-            resolve(UnknownErrResp(errMsg));
+            // TODO: check e.request to get more friendly error message
+            resolve(FatalErrResp(errMsg));
           }
         });
     });

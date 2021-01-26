@@ -6,8 +6,10 @@
     "module": "commonjs",
     "target": "es5",
     "jsx": "react",
-    "lib": ["es2015", "dom"]
+    "esModuleInterop": true,
+    "allowJs": true,
+    "lib": ["es5", "dom", "scripthost", "es2015.symbol"]
   },
-  "include": ["./src/**/*", "webpack.config.js", "webpack..js"],
-  "exclude": ["**/*.test.ts", "**/*.test.tsx"]
+  "include": ["./src/**/*"],
+  "exclude": ["**/*.test.ts*"]
 }

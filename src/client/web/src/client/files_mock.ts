@@ -2,6 +2,7 @@ import {
   Response,
   UploadStatusResp,
   ListResp,
+  ListUploadingsResp,
 } from "./";
 
 export class FilesClient {
@@ -18,6 +19,8 @@ export class FilesClient {
   private uploadStatusMockResps: Array<Promise<Response<UploadStatusResp>>>;
   private uploadStatusMockRespID: number = 0;
   private listMockResp: Promise<Response<ListResp>>;
+  private listUploadingsMockResp: Promise<Response<ListUploadingsResp>>;
+  private deleteUploadingMockResp: Promise<Response>;
 
   constructor(url: string) {
     this.url = url;
@@ -54,6 +57,14 @@ export class FilesClient {
   listMock = (resp: Promise<Response<ListResp>>) => {
     this.listMockResp = resp;
   };
+
+  listUploadingsMock = (resp: Promise<Response<ListUploadingsResp>>) => {
+    this.listUploadingsMockResp = resp;
+  }
+
+  deleteUploadingMock = (resp: Promise<Response>) => {
+    this.deleteUploadingMockResp = resp;
+  }
 
   create = (filePath: string, fileSize: number): Promise<Response> => {
     if (this.createMockRespID < this.createMockResps.length) {
@@ -98,5 +109,13 @@ export class FilesClient {
 
   list = (dirPath: string): Promise<Response<ListResp>> => {
     return this.listMockResp;
+  };
+
+  listUploadings = (): Promise<Response<ListUploadingsResp>> => {
+    return this.listUploadingsMockResp;
+  };
+
+  deleteUploading = (filePath:string): Promise<Response<Response>> => {
+    return this.deleteUploadingMockResp;
   };
 }

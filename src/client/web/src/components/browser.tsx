@@ -1,13 +1,20 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { List, Map } from "immutable";
-import * as Filesize from "filesize";
+import FileSize from "filesize";
 
 import { ICoreState } from "./core_state";
-import { IUsersClient, IFilesClient, MetadataResp } from "../client";
+import {
+  IUsersClient,
+  IFilesClient,
+  MetadataResp,
+  UploadInfo,
+} from "../client";
 import { FilesClient } from "../client/files";
 import { UsersClient } from "../client/users";
-import { FileUploader } from "../client/uploader";
+import { UploadMgr } from "../worker/upload_mgr";
+import { UploadEntry } from "../worker/interface";
+// import { FileUploader } from "../worker/uploader";
 
 export const uploadCheckCycle = 1000;
 
@@ -22,6 +29,7 @@ export interface Item {
 export interface Props {
   dirPath: List<string>;
   items: List<MetadataResp>;
+  uploadings: List<UploadInfo>;
 
   uploadFiles: List<File>;
   uploadValue: string;
@@ -46,15 +54,49 @@ export class Updater {
     Updater.filesClient = filesClient;
   }
 
+  static setUploadings = (infos: Map<string, UploadEntry>) => {
+    Updater.props.uploadings = List<UploadInfo>(
+      infos.valueSeq().map(
+        (v: UploadEntry): UploadInfo => {
+          return {
+            realFilePath: v.filePath,
+            size: v.size,
+            uploaded: v.uploaded,
+          };
+        }
+      )
+    );
+  };
+
   static setItems = async (dirParts: List<string>): Promise<void> => {
-    let dirPath = dirParts.join("/");
-    let listResp = await Updater.filesClient.list(dirPath);
+    const dirPath = dirParts.join("/");
+    const listResp = await Updater.filesClient.list(dirPath);
 
     Updater.props.dirPath = dirParts;
     Updater.props.items =
       listResp.status === 200
         ? List<MetadataResp>(listResp.data.metadatas)
         : Updater.props.items;
+  };
+
+  static refreshUploadings = async (): Promise<boolean> => {
+    const luResp = await Updater.filesClient.listUploadings();
+
+    Updater.props.uploadings =
+      luResp.status === 200
+        ? List<UploadInfo>(luResp.data.uploadInfos)
+        : Updater.props.uploadings;
+    return luResp.status === 200;
+  };
+
+  static deleteUploading = async (filePath: string): Promise<boolean> => {
+    UploadMgr.delete(filePath);
+    const resp = await Updater.filesClient.deleteUploading(filePath);
+    return resp.status === 200;
+  };
+
+  static stopUploading = (filePath: string) => {
+    UploadMgr.stop(filePath);
   };
 
   static mkDir = async (dirPath: string): Promise<void> => {
@@ -120,16 +162,11 @@ export class Updater {
   };
 
   static addUploadFiles = (fileList: FileList, len: number) => {
-    let newUploads = List<File>([]);
     for (let i = 0; i < len; i++) {
-      newUploads = newUploads.push(fileList.item(i));
+      // do not wait for the promise
+      UploadMgr.add(fileList[i], fileList[i].name);
     }
-
-    Updater.props.uploadFiles = Updater.props.uploadFiles.concat(newUploads);
-  };
-
-  static setUploadFiles = (uploadFiles: List<File>) => {
-    Updater.props.uploadFiles = uploadFiles;
+    Updater.setUploadings(UploadMgr.list());
   };
 
   static setBrowser = (prevState: ICoreState): ICoreState => {
@@ -154,7 +191,6 @@ export class Browser extends React.Component<Props, State, {}> {
   private uploadInput: Element | Text;
   private assignInput: (input: Element) => void;
   private onClickUpload: () => void;
-  private uploading: boolean;
 
   constructor(p: Props) {
     super(p);
@@ -176,45 +212,20 @@ export class Browser extends React.Component<Props, State, {}> {
       this.uploadInput = ReactDOM.findDOMNode(input);
     };
     this.onClickUpload = () => {
+      // TODO: check if the re-upload file is same as previous upload
       const uploadInput = this.uploadInput as HTMLButtonElement;
       uploadInput.click();
     };
 
-    Updater.setItems(p.dirPath).then(() => {
-      this.update(Updater.setBrowser);
-    });
-
-    setInterval(this.pollUploads, uploadCheckCycle);
-  } 
-
-  pollUploads = () => {
-    if (this.props.uploadFiles.size > 0 && !this.uploading) {
-      this.uploading = true;
-      const file = this.props.uploadFiles.get(0);
-      Updater.setUploadFiles(this.props.uploadFiles.slice(1));
-      this.update(Updater.setBrowser);
-
-      const uploader = new FileUploader(
-        file,
-        `${this.props.dirPath.join("/")}/${file.name}`,
-        this.updateProgress
-      );
-
-      uploader.start().then((ok: boolean) => {
-        Updater.setItems(this.props.dirPath).then(() => {
-          this.update(Updater.setBrowser);
-        });
-        if (!ok) {
-          alert(`upload failed: ${uploader.err()}`);
-        }
-        this.uploading = false;
+    UploadMgr.setStatusCb(this.updateProgress);
+    Updater.setItems(p.dirPath)
+      .then(() => {
+        return Updater.refreshUploadings();
+      })
+      .then((_: boolean) => {
+        this.update(Updater.setBrowser);
       });
-    }
-  };
-
-  updateProgress = (filePath: string, progress: number) => {
-    // update uploading progress in the core state
-  };
+  }
 
   showPane = () => {
     this.setState({ show: !this.state.show });
@@ -231,12 +242,6 @@ export class Browser extends React.Component<Props, State, {}> {
   onInputChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ inputValue: ev.target.value });
   };
-
-  addUploadFile = (event: React.ChangeEvent<HTMLInputElement>) => {
-    Updater.addUploadFiles(event.target.files, event.target.files.length);
-    this.update(Updater.setBrowser);
-  };
-
   select = (itemName: string) => {
     const selectedItems = this.state.selectedItems.has(itemName)
       ? this.state.selectedItems.delete(itemName)
@@ -245,6 +250,18 @@ export class Browser extends React.Component<Props, State, {}> {
     this.setState({
       selectedSrc: this.props.dirPath.join("/"),
       selectedItems: selectedItems,
+    });
+  };
+
+  addUploadFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+    Updater.addUploadFiles(event.target.files, event.target.files.length);
+    this.update(Updater.setBrowser);
+  };
+
+  updateProgress = (infos: Map<string, UploadEntry>) => {
+    Updater.setUploadings(infos);
+    Updater.setItems(this.props.dirPath).then(() => {
+      this.update(Updater.setBrowser);
     });
   };
 
@@ -257,6 +274,24 @@ export class Browser extends React.Component<Props, State, {}> {
       .then(() => {
         this.update(Updater.setBrowser);
       });
+  };
+
+  deleteUploading = (filePath: string) => {
+    Updater.deleteUploading(filePath)
+      .then((ok: boolean) => {
+        if (!ok) {
+          alert(`Failed to delete uploading ${filePath}`);
+        }
+        return Updater.refreshUploadings();
+      })
+      .then(() => {
+        this.update(Updater.setBrowser);
+      });
+  };
+
+  stopUploading = (filePath: string) => {
+    Updater.stopUploading(filePath);
+    this.update(Updater.setBrowser);
   };
 
   delete = () => {
@@ -460,7 +495,10 @@ export class Browser extends React.Component<Props, State, {}> {
         : `${dirPath}/${item.name}`;
 
       return item.isDir ? (
-        <tr key={item.name} className={`${isSelected ? "white0-bg selected" : ""}`}>
+        <tr
+          key={item.name}
+          className={`${isSelected ? "white0-bg selected" : ""}`}
+        >
           <td className="padding-l-l" style={{ width: "3rem" }}>
             <span className="dot yellow0-bg"></span>
           </td>
@@ -485,7 +523,10 @@ export class Browser extends React.Component<Props, State, {}> {
           </td>
         </tr>
       ) : (
-        <tr key={item.name} className={`${isSelected ? "white0-bg selected" : ""}`}>
+        <tr
+          key={item.name}
+          className={`${isSelected ? "white0-bg selected" : ""}`}
+        >
           <td className="padding-l-l" style={{ width: "3rem" }}>
             <span className="dot green0-bg"></span>
           </td>
@@ -498,7 +539,7 @@ export class Browser extends React.Component<Props, State, {}> {
               {item.name}
             </a>
           </td>
-          <td>{Filesize(item.size, {round: 0})}</td>
+          <td>{FileSize(item.size, { round: 0 })}</td>
           <td>{item.modTime.slice(0, item.modTime.indexOf("T"))}</td>
 
           <td>
@@ -514,6 +555,38 @@ export class Browser extends React.Component<Props, State, {}> {
       );
     });
 
+    const uploadingList = this.props.uploadings.map((uploading: UploadInfo) => {
+      const pathParts = uploading.realFilePath.split("/");
+      const fileName = pathParts[pathParts.length - 1];
+
+      return (
+        <tr key={fileName}>
+          <td className="padding-l-l" style={{ width: "3rem" }}>
+            <span className="dot blue0-bg"></span>
+          </td>
+          <td>
+            <span className="item-name pointer">{fileName}</span>
+          </td>
+          <td>{FileSize(uploading.uploaded, { round: 0 })}</td>
+          <td>{FileSize(uploading.size, { round: 0 })}</td>
+          <td>
+            <button
+              onClick={() => this.stopUploading(uploading.realFilePath)}
+              className="white-font margin-m"
+            >
+              Stop
+            </button>
+            <button
+              onClick={() => this.deleteUploading(uploading.realFilePath)}
+              className="white-font margin-m"
+            >
+              Delete
+            </button>
+          </td>
+        </tr>
+      );
+    });
+
     return (
       <div>
         <div id="op-bar" className="op-bar">
@@ -522,6 +595,31 @@ export class Browser extends React.Component<Props, State, {}> {
 
         <div id="item-list" className="">
           <div className="margin-b-l">{breadcrumb}</div>
+
+          <table>
+            <thead style={{ fontWeight: "bold" }}>
+              <tr>
+                <td className="padding-l-l" style={{ width: "3rem" }}>
+                  <span className="dot black-bg"></span>
+                </td>
+                <td>Name</td>
+                <td>Uploaded</td>
+                <td>Size</td>
+                <td>Action</td>
+              </tr>
+            </thead>
+            <tbody>{uploadingList}</tbody>
+            <tfoot>
+              <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+
           <table>
             <thead style={{ fontWeight: "bold" }}>
               <tr>

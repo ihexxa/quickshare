@@ -118,7 +118,11 @@ func (h *FileHandlers) Create(c *gin.Context) {
 	locker.Exec(func() {
 		err := h.deps.FS().Create(tmpFilePath)
 		if err != nil {
-			c.JSON(q.ErrResp(c, 500, err))
+			if os.IsExist(err) {
+				c.JSON(q.ErrResp(c, 304, err))
+			} else {
+				c.JSON(q.ErrResp(c, 500, err))
+			}
 			return
 		}
 		err = h.uploadMgr.AddInfo(userName, req.Path, tmpFilePath, req.FileSize)
