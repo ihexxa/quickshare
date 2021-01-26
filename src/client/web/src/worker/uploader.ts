@@ -5,7 +5,7 @@ import { IFilesClient, Response, isFatalErr } from "../client";
 // TODO: move chunk copying to worker
 const defaultChunkLen = 1024 * 1024 * 1;
 const speedDownRatio = 0.5;
-const speedUpRatio = 1.1;
+const speedUpRatio = 1.05;
 const createRetryLimit = 2;
 const uploadRetryLimit = 1024;
 
