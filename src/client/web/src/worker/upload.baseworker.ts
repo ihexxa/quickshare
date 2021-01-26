@@ -10,48 +10,40 @@ import {
   FileWorkerResp,
 } from "./interface";
 
-const ctx: Worker = self as any;
-
 export class UploadWorker {
   private file: File = undefined;
   private filePath: string = undefined;
   private uploader: FileUploader = undefined;
-  public sendEvent: (resp: FileWorkerResp) => void;
-  public makeUploader: (file: File, filePath: string) => FileUploader;
-  public startUploader: (file: File, filePath: string) => void;
-  public stopUploader: () => void;
-
-  constructor() {
-    this.sendEvent = (resp: FileWorkerResp) => {
-      ctx.postMessage(resp);
-    };
-    this.makeUploader = (file: File, filePath: string): FileUploader => {
-      return new FileUploader(file, filePath, this.onCb);
-    };
-    this.startUploader = (file: File, filePath: string) => {
-      this.file = file;
-      this.filePath = filePath;
-      this.uploader = this.makeUploader(file, filePath);
-      this.uploader.start();
-    };
-    this.stopUploader = () => {
-      if (this.uploader != null) {
-        this.uploader.stop();
-      }
-    };
-  }
-
+  sendEvent = (resp: FileWorkerResp):void => {
+    // TODO: make this abstract
+    throw new Error("not implemented");
+  };
+  makeUploader = (file: File, filePath: string): FileUploader => {
+    return new FileUploader(file, filePath, this.onCb);
+  };
+  startUploader = (file: File, filePath: string) => {
+    this.file = file;
+    this.filePath = filePath;
+    this.uploader = this.makeUploader(file, filePath);
+    this.uploader.start();
+  };
+  stopUploader = () => {
+    if (this.uploader != null) {
+      this.uploader.stop();
+    }
+  };
   getFilePath = (): string => {
     return this.filePath;
   };
 
-  setFilePath = (fp: string)=> {
+  setFilePath = (fp: string) => {
     this.filePath = fp;
   };
 
-  onMsg = (ev: MessageEvent) => {
-    const req = ev.data as FileWorkerReq;
+  constructor() {}
 
+  onMsg = (event: MessageEvent) => {
+    const req = event.data as FileWorkerReq;
     switch (req.kind) {
       case syncReqKind:
         // find the first qualified task
@@ -99,9 +91,3 @@ export class UploadWorker {
     this.sendEvent(uploadInfoResp);
   };
 }
-
-const uploadWorker = new UploadWorker();
-ctx.addEventListener("message", uploadWorker.onMsg);
-ctx.addEventListener("error", uploadWorker.onError);
-
-export default null as any;

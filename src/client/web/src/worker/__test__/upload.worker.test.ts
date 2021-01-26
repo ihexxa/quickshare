@@ -1,10 +1,10 @@
 import { mock, instance, when } from "ts-mockito";
 
-import { UploadWorker } from "../upload.worker";
+import { UploadWorker } from "../upload.baseworker";
 import { FileUploader } from "../uploader";
 import { FileWorkerResp, UploadEntry, syncReqKind } from "../interface";
 
-describe("uploader.worker", () => {
+describe("upload.worker", () => {
   const content = ["123456"];
   const filePath = "mock/file";
   const blob = new Blob(content);
@@ -22,7 +22,7 @@ describe("uploader.worker", () => {
     };
   };
 
-  test("msgHandler: handle syncReqKind: filter list and start uploading correct file", async () => {
+  test("onMsg:syncReqKind: filter list and start uploading correct file", async () => {
     const mockUploaderClass = mock(FileUploader);
     when(mockUploaderClass.start()).thenCall(
       (): Promise<boolean> => {
@@ -80,14 +80,16 @@ describe("uploader.worker", () => {
       if (tcs[i].currentFilePath !== "") {
         uploadWorker.setFilePath(tcs[i].currentFilePath);
       }
-      const msg = new MessageEvent("worker", {
-        data: {
-          kind: syncReqKind,
-          infos: tcs[i].infos,
-        },
-      });
+      const req = {
+        kind: syncReqKind,
+        infos: tcs[i].infos,
+      };
 
-      uploadWorker.onMsg(msg);
+      uploadWorker.onMsg(
+        new MessageEvent("worker", {
+          data: req,
+        })
+      );
       expect(uploadWorker.getFilePath()).toEqual(tcs[i].expectedUploadingFile);
       expect(uploaderFilePath).toEqual(tcs[i].expectedUploaderStartInput);
     }

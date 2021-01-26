@@ -14,7 +14,7 @@ module.exports = {
         use: {
           loader: "worker-loader",
           options: {
-            inline: "fallback",
+            // inline: "fallback",
           },
         },
       },

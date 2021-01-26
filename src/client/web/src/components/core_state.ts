@@ -1,7 +1,7 @@
 import { List } from "immutable";
 
-import UploadWorker from "../worker/upload.worker";
-
+import BgWorker from "../worker/upload.bg.worker";
+import { FgWorker } from "../worker/upload.fgworker";
 
 import { Props as PanelProps } from "./panel";
 import { Item } from "./browser";
@@ -24,24 +24,11 @@ export function initWithWorker(worker: IWorker): ICoreState {
 
 export function init(): ICoreState {
   const scripts = Array.from(document.querySelectorAll("script"));
-  // let workerScriptName = "";
-  // for (let i = 0; i < scripts.length; i++) {
-  //   if (scripts[i].getAttribute("src").startsWith("static/worker.bundle.js")) {
-  //     console.log(scripts[i].src);
-  //     workerScriptName = scripts[i].src;
-  //     break;
-  //   }
-  // }
-  // if (workerScriptName === "") {
-  //   alert("worker script not found");
-  // }
-  // const worker = new Worker(workerScriptName, { name: "uploader" });
-
   if (!Worker) {
     alert("web worker is not supported");
   }
 
-  const worker = new UploadWorker();
+  const worker = new BgWorker();
   UploadMgr.init(worker);
   return initState();
 }
