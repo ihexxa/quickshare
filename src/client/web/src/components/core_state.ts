@@ -1,7 +1,6 @@
 import { List } from "immutable";
 
-// import UploadWorker = require("worker-loader!../worker/uploader.worker");
-import UploadWorker from "../worker/uploader.worker";
+import UploadWorker from "../worker/upload.worker";
 
 
 import { Props as PanelProps } from "./panel";
