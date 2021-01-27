@@ -3,6 +3,7 @@ import * as ReactDOM from "react-dom";
 import { List, Map } from "immutable";
 import FileSize from "filesize";
 
+import { Layouter } from "./layouter";
 import { ICoreState } from "./core_state";
 import {
   IUsersClient,
@@ -395,96 +396,95 @@ export class Browser extends React.Component<Props, State, {}> {
       }
     );
 
+    const layoutChildren = [
+      <button
+        type="button"
+        onClick={() => this.delete()}
+        className="red0-bg white-font margin-t-m margin-b-m"
+      >
+        Delete Selected
+      </button>,
+      <button
+        type="button"
+        onClick={() => this.moveHere()}
+        className="grey1-bg white-font margin-t-m margin-b-m"
+      >
+        Paste
+      </button>,
+      <span className="inline-block margin-t-m margin-b-m">
+        <input
+          type="text"
+          onChange={this.onInputChange}
+          value={this.state.inputValue}
+          className="black0-font margin-r-m"
+          placeholder="folder name"
+        />
+        <button onClick={this.onMkDir} className="grey1-bg white-font">
+          Create Folder
+        </button>
+      </span>,
+      <span className="inline-block margin-t-m margin-b-m">
+        <button onClick={this.onClickUpload} className="green0-bg white-font">
+          Upload Files
+        </button>
+        <input
+          type="file"
+          onChange={this.addUploadFile}
+          multiple={true}
+          value={this.props.uploadValue}
+          ref={this.assignInput}
+          className="black0-font hidden"
+        />
+      </span>,
+    ];
+
+    //   <div className="grey0-font">
+    //   <span className="margin-s">-</span>
+    //   <button
+    //     onClick={this.showPane}
+    //     className="grey1-bg white-font margin-m"
+    //   >
+    //     Settings
+    //   </button>
+    // </div>
+    // <div>
+    //   <div
+    //     style={{ display: this.state.show ? "inherit" : "none" }}
+    //     className="margin-t-m"
+    //   >
+    //     <h3 className="padding-l-s grey0-font">Update Password</h3>
+    //     <input
+    //       name="old_pwd"
+    //       type="password"
+    //       onChange={this.changeOldPwd}
+    //       value={this.state.oldPwd}
+    //       className="margin-m black0-font"
+    //       placeholder="old password"
+    //     />
+    //     <input
+    //       name="new_pwd1"
+    //       type="password"
+    //       onChange={this.changeNewPwd1}
+    //       value={this.state.newPwd1}
+    //       className="margin-m black0-font"
+    //       placeholder="new password"
+    //     />
+    //     <input
+    //       name="new_pwd2"
+    //       type="password"
+    //       onChange={this.changeNewPwd2}
+    //       value={this.state.newPwd2}
+    //       className="margin-m black0-font"
+    //       placeholder="new password again"
+    //     />
+    //     <button onClick={this.setPwd} className="grey1-bg white-font">
+    //       Update
+    //     </button>
+    //   </div>
+    // </div>
+
     const ops = (
-      <div>
-        <div className="grey0-font">
-          <button
-            type="button"
-            onClick={() => this.delete()}
-            className="red0-bg white-font margin-m"
-          >
-            Delete Selected
-          </button>
-          <span className="margin-s">-</span>
-          <button
-            type="button"
-            onClick={() => this.moveHere()}
-            className="grey1-bg white-font margin-m"
-          >
-            Paste
-          </button>
-          <span className="margin-s">-</span>
-          <button
-            onClick={this.onClickUpload}
-            className="green0-bg white-font margin-m"
-          >
-            Upload Files
-          </button>
-          <span className="margin-s">-</span>
-          <span className="margin-m">
-            <input
-              type="text"
-              onChange={this.onInputChange}
-              value={this.state.inputValue}
-              className="margin-r-m black0-font"
-              placeholder="folder name"
-            />
-            <button onClick={this.onMkDir} className="grey1-bg white-font">
-              Create Folder
-            </button>
-          </span>
-          <input
-            type="file"
-            onChange={this.addUploadFile}
-            multiple={true}
-            value={this.props.uploadValue}
-            ref={this.assignInput}
-            className="black0-font hidden margin-m"
-          />
-          <span className="margin-s">-</span>
-          <button
-            onClick={this.showPane}
-            className="grey1-bg white-font margin-m"
-          >
-            Settings
-          </button>
-        </div>
-        <div>
-          <div
-            style={{ display: this.state.show ? "inherit" : "none" }}
-            className="margin-t-m"
-          >
-            <h3 className="padding-l-s grey0-font">Update Password</h3>
-            <input
-              name="old_pwd"
-              type="password"
-              onChange={this.changeOldPwd}
-              value={this.state.oldPwd}
-              className="margin-m black0-font"
-              placeholder="old password"
-            />
-            <input
-              name="new_pwd1"
-              type="password"
-              onChange={this.changeNewPwd1}
-              value={this.state.newPwd1}
-              className="margin-m black0-font"
-              placeholder="new password"
-            />
-            <input
-              name="new_pwd2"
-              type="password"
-              onChange={this.changeNewPwd2}
-              value={this.state.newPwd2}
-              className="margin-m black0-font"
-              placeholder="new password again"
-            />
-            <button onClick={this.setPwd} className="grey1-bg white-font">
-              Update
-            </button>
-          </div>
-        </div>
-      </div>
+      <Layouter isHorizontal={false} elements={layoutChildren}></Layouter>
     );
 
     const itemList = this.props.items.map((item: MetadataResp) => {
@@ -555,6 +555,8 @@ export class Browser extends React.Component<Props, State, {}> {
       );
     });
 
+    console.log("uploadings", this.props.uploadings);
+
     const uploadingList = this.props.uploadings.map((uploading: UploadInfo) => {
       const pathParts = uploading.realFilePath.split("/");
       const fileName = pathParts[pathParts.length - 1];
@@ -596,29 +598,31 @@ export class Browser extends React.Component<Props, State, {}> {
         <div id="item-list" className="">
           <div className="margin-b-l">{breadcrumb}</div>
 
-          <table>
-            <thead style={{ fontWeight: "bold" }}>
-              <tr>
-                <td className="padding-l-l" style={{ width: "3rem" }}>
-                  <span className="dot black-bg"></span>
-                </td>
-                <td>Name</td>
-                <td>Uploaded</td>
-                <td>Size</td>
-                <td>Action</td>
-              </tr>
-            </thead>
-            <tbody>{uploadingList}</tbody>
-            <tfoot>
-              <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-            </tfoot>
-          </table>
+          {this.props.uploadings.size === 0 ? null : (
+            <table>
+              <thead style={{ fontWeight: "bold" }}>
+                <tr>
+                  <td className="padding-l-l" style={{ width: "3rem" }}>
+                    <span className="dot black-bg"></span>
+                  </td>
+                  <td>Name</td>
+                  <td>Uploaded</td>
+                  <td>Size</td>
+                  <td>Action</td>
+                </tr>
+              </thead>
+              <tbody>{uploadingList}</tbody>
+              <tfoot>
+                <tr>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          )}
 
           <table>
             <thead style={{ fontWeight: "bold" }}>
