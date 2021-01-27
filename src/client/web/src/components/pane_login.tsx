@@ -3,6 +3,7 @@ import * as React from "react";
 import { ICoreState } from "./core_state";
 import { IUsersClient } from "../client";
 import { UsersClient } from "../client/users";
+import { Updater as PanesUpdater } from "./panes";
 
 export interface Props {
   authed: boolean;
@@ -94,6 +95,9 @@ export class AuthPane extends React.Component<Props, State, {}> {
       if (ok) {
         this.update(Updater.setAuthPane);
         this.setState({ user: "", pwd: "" });
+        // close all the panes
+        PanesUpdater.displayPane("");
+        this.update(PanesUpdater.updateState);
       } else {
         this.setState({ user: "", pwd: "" });
         alert("Failed to login.");
@@ -114,6 +118,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
   render() {
     return (
       <span>
+        <h4 className="grey0-font">Login</h4>
         <span style={{ display: this.props.authed ? "none" : "inherit" }}>
           <input
             name="user"
@@ -121,7 +126,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
             onChange={this.changeUser}
             value={this.state.user}
             className="margin-r-m black0-font"
-            style={{ width: "6rem" }}
+            style={{ width: "12rem" }}
             placeholder="user name"
           />
           <input
@@ -130,7 +135,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
             onChange={this.changePwd}
             value={this.state.pwd}
             className="margin-r-m black0-font"
-            style={{ width: "6rem" }}
+            style={{ width: "12rem" }}
             placeholder="password"
           />
           <button onClick={this.login} className="green0-bg white-font">

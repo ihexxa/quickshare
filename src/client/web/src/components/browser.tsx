@@ -157,11 +157,6 @@ export class Updater {
     return Updater.setItems(List<string>(dstDir.split("/")));
   };
 
-  static setPwd = async (oldPwd: string, newPwd: string): Promise<boolean> => {
-    const resp = await Updater.usersClient.setPwd(oldPwd, newPwd);
-    return resp.status === 200;
-  };
-
   static addUploadFiles = (fileList: FileList, len: number) => {
     for (let i = 0; i < len; i++) {
       // do not wait for the promise
@@ -181,10 +176,10 @@ export interface State {
   selectedSrc: string;
   selectedItems: Map<string, boolean>;
 
-  show: boolean;
-  oldPwd: string;
-  newPwd1: string;
-  newPwd2: string;
+  // show: boolean;
+  // oldPwd: string;
+  // newPwd1: string;
+  // newPwd2: string;
 }
 
 export class Browser extends React.Component<Props, State, {}> {
@@ -202,10 +197,6 @@ export class Browser extends React.Component<Props, State, {}> {
       inputValue: "",
       selectedSrc: "",
       selectedItems: Map<string, boolean>(),
-      show: false,
-      oldPwd: "",
-      newPwd1: "",
-      newPwd2: "",
     };
 
     this.uploadInput = undefined;
@@ -228,18 +219,9 @@ export class Browser extends React.Component<Props, State, {}> {
       });
   }
 
-  showPane = () => {
-    this.setState({ show: !this.state.show });
-  };
-  changeOldPwd = (ev: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ oldPwd: ev.target.value });
-  };
-  changeNewPwd1 = (ev: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ newPwd1: ev.target.value });
-  };
-  changeNewPwd2 = (ev: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ newPwd2: ev.target.value });
-  };
+  // showPane = () => {
+  //   this.setState({ show: !this.state.show });
+  // };
   onInputChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ inputValue: ev.target.value });
   };
@@ -353,31 +335,6 @@ export class Browser extends React.Component<Props, State, {}> {
     });
   };
 
-  setPwd = () => {
-    if (this.state.newPwd1 !== this.state.newPwd2) {
-      alert("new passwords are not same");
-    } else if (this.state.newPwd1 == "") {
-      alert("new passwords can not be empty");
-    } else if (this.state.oldPwd == this.state.newPwd1) {
-      alert("old and new passwords are same");
-    } else {
-      Updater.setPwd(this.state.oldPwd, this.state.newPwd1).then(
-        (ok: boolean) => {
-          if (ok) {
-            alert("Password is updated");
-          } else {
-            alert("fail to update password");
-          }
-          this.setState({
-            oldPwd: "",
-            newPwd1: "",
-            newPwd2: "",
-          });
-        }
-      );
-    }
-  };
-
   render() {
     const breadcrumb = this.props.dirPath.map(
       (pathPart: string, key: number) => {
@@ -437,51 +394,6 @@ export class Browser extends React.Component<Props, State, {}> {
         />
       </span>,
     ];
-
-    //   <div className="grey0-font">
-    //   <span className="margin-s">-</span>
-    //   <button
-    //     onClick={this.showPane}
-    //     className="grey1-bg white-font margin-m"
-    //   >
-    //     Settings
-    //   </button>
-    // </div>
-    // <div>
-    //   <div
-    //     style={{ display: this.state.show ? "inherit" : "none" }}
-    //     className="margin-t-m"
-    //   >
-    //     <h3 className="padding-l-s grey0-font">Update Password</h3>
-    //     <input
-    //       name="old_pwd"
-    //       type="password"
-    //       onChange={this.changeOldPwd}
-    //       value={this.state.oldPwd}
-    //       className="margin-m black0-font"
-    //       placeholder="old password"
-    //     />
-    //     <input
-    //       name="new_pwd1"
-    //       type="password"
-    //       onChange={this.changeNewPwd1}
-    //       value={this.state.newPwd1}
-    //       className="margin-m black0-font"
-    //       placeholder="new password"
-    //     />
-    //     <input
-    //       name="new_pwd2"
-    //       type="password"
-    //       onChange={this.changeNewPwd2}
-    //       value={this.state.newPwd2}
-    //       className="margin-m black0-font"
-    //       placeholder="new password again"
-    //     />
-    //     <button onClick={this.setPwd} className="grey1-bg white-font">
-    //       Update
-    //     </button>
-    //   </div>
-    // </div>
 
     const ops = (
       <Layouter isHorizontal={false} elements={layoutChildren}></Layouter>

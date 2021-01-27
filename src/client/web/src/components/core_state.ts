@@ -1,4 +1,4 @@
-import { List } from "immutable";
+import { List, Set } from "immutable";
 
 import BgWorker from "../worker/upload.bg.worker";
 import { FgWorker } from "../worker/upload.fgworker";
@@ -47,6 +47,13 @@ export function initState(): ICoreState {
         uploadings: List<UploadInfo>([]),
         uploadValue: "",
         uploadFiles: List<File>([]),
+      },
+      panes: {
+        displaying: "",
+        paneNames: Set<string>(["settings", "login"]),
+        login: {
+          authed: false,
+        },
       },
     },
   };
