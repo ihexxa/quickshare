@@ -118,7 +118,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
   render() {
     return (
       <span>
-        <h4 className="grey0-font">Login</h4>
+        <h5 className="grey0-font">Login</h5>
         <span style={{ display: this.props.authed ? "none" : "inherit" }}>
           <input
             name="user"

@@ -119,7 +119,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
 
     return (
       <div>
-        <h4 className="grey0-font">Update Password</h4>
+        <h5 className="grey0-font">Update Password</h5>
         <Layouter isHorizontal={false} elements={inputs}></Layouter>
         <div className="hr"></div>
 

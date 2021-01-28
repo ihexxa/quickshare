@@ -52,8 +52,10 @@ export class Panes extends React.Component<Props, State, {}> {
   }
 
   closePane = () => {
-    Updater.displayPane("");
-    this.update(Updater.updateState);
+    if (this.props.displaying !== "login") {
+      Updater.displayPane("");
+      this.update(Updater.updateState);
+    }
   };
 
   render() {
@@ -79,16 +81,19 @@ export class Panes extends React.Component<Props, State, {}> {
       }
     );
 
-    const btnClass = `return-btn ${displaying === "login" ? "hidden" : ""}`;
+    const btnClass = displaying === "login" ? "hidden" : "";
     return (
       <div id="panes" className={displaying === "" ? "hidden" : ""}>
         <div className="container padding-m">
-          <div className="margin-m">{panes}</div>
-        </div>
-        <div className={btnClass}>
-          <button onClick={this.closePane} className="red0-bg white-font">
-            Return
-          </button>
+          <div className="margin-m">
+            <div className={btnClass}>
+              <button onClick={this.closePane} className="black0-bg white-font">
+                Return
+              </button>
+              <div className="hr"></div>
+            </div>
+            {panes}
+          </div>
         </div>
       </div>
     );

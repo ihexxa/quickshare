@@ -69,10 +69,6 @@ export class Panel extends React.Component<Props, State, {}> {
                 >
                   Settings
                 </button>
-                {/* <AuthPane
-                  authed={this.props.authPane.authed}
-                  update={this.update}
-                /> */}
               </span>
             </div>
           </div>
