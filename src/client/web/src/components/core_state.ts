@@ -15,6 +15,7 @@ export interface IContext {
 export interface ICoreState {
   ctx: IContext;
   panel: PanelProps;
+  isVertical: boolean;
 }
 
 export function initWithWorker(worker: IWorker): ICoreState {
@@ -33,15 +34,21 @@ export function init(): ICoreState {
   return initState();
 }
 
+export function isVertical(): boolean {
+  return window.innerWidth <= window.innerHeight;
+}
+
 export function initState(): ICoreState {
   return {
     ctx: null,
+    isVertical: isVertical(),
     panel: {
       displaying: "browser",
       authPane: {
         authed: false,
       },
       browser: {
+        isVertical: isVertical(),
         dirPath: List<string>(["."]),
         items: List<Item>([]),
         uploadings: List<UploadInfo>([]),

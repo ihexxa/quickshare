@@ -124,42 +124,6 @@ export class PaneSettings extends React.Component<Props, State, {}> {
         <div className="hr"></div>
 
         <AuthPane authed={this.props.login.authed} update={this.update} />
-        {/* <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br /> */}
       </div>
     );
   }

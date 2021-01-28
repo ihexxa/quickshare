@@ -38,7 +38,7 @@ export class Panel extends React.Component<Props, State, {}> {
   showSettings = () => {
     PanesUpdater.displayPane("settings");
     this.update(PanesUpdater.updateState);
-  }
+  };
 
   render() {
     return (
@@ -73,7 +73,7 @@ export class Panel extends React.Component<Props, State, {}> {
             </div>
           </div>
 
-          <div id="container-center">
+          <div className="container-center">
             <Browser
               dirPath={this.props.browser.dirPath}
               items={this.props.browser.items}
@@ -81,7 +81,12 @@ export class Panel extends React.Component<Props, State, {}> {
               update={this.update}
               uploadFiles={this.props.browser.uploadFiles}
               uploadValue={this.props.browser.uploadValue}
+              isVertical={this.props.browser.isVertical}
             />
+          </div>
+          <div className="container-center black0-font tail margin-t-xl margin-b-xl">
+            <a href="https://github.com/ihexxa/quickshare">Quickshare</a> -
+            sharing in simple way.
           </div>
         </div>
       </div>
