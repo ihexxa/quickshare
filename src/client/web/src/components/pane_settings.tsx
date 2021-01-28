@@ -4,6 +4,7 @@ import { ICoreState } from "./core_state";
 import { IUsersClient } from "../client";
 import { AuthPane, Props as LoginProps } from "./pane_login";
 import { Layouter } from "./layouter";
+import { UsersClient } from "../client/users";
 
 export interface Props {
   login: LoginProps;
@@ -52,7 +53,8 @@ export class PaneSettings extends React.Component<Props, State, {}> {
 
   constructor(p: Props) {
     super(p);
-    // Updater.init(p);
+    Updater.init(p);
+    Updater.setClient(new UsersClient(""));
     this.update = p.update;
     this.state = {
       oldPwd: "",

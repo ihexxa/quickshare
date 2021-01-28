@@ -1,9 +1,11 @@
 import * as React from "react";
+import { List } from "immutable";
 
 import { ICoreState } from "./core_state";
 import { IUsersClient } from "../client";
 import { UsersClient } from "../client/users";
 import { Updater as PanesUpdater } from "./panes";
+import { Updater as BrowserUpdater } from "./browser";
 import { Layouter } from "./layouter";
 
 export interface Props {
@@ -92,18 +94,30 @@ export class AuthPane extends React.Component<Props, State, {}> {
   };
 
   login = () => {
-    Updater.login(this.state.user, this.state.pwd).then((ok: boolean) => {
-      if (ok) {
-        this.update(Updater.setAuthPane);
-        this.setState({ user: "", pwd: "" });
-        // close all the panes
-        PanesUpdater.displayPane("");
-        this.update(PanesUpdater.updateState);
-      } else {
-        this.setState({ user: "", pwd: "" });
-        alert("Failed to login.");
-      }
-    });
+    Updater.login(this.state.user, this.state.pwd)
+      .then((ok: boolean) => {
+        if (ok) {
+          this.update(Updater.setAuthPane);
+          this.setState({ user: "", pwd: "" });
+          // close all the panes
+          PanesUpdater.displayPane("");
+          this.update(PanesUpdater.updateState);
+
+          // refresh
+          return BrowserUpdater.setItems(
+            List<string>(["."])
+          );
+        } else {
+          this.setState({ user: "", pwd: "" });
+          alert("Failed to login.");
+        }
+      })
+      .then(() => {
+        return BrowserUpdater.refreshUploadings();
+      })
+      .then((_: boolean) => {
+        this.update(BrowserUpdater.setBrowser);
+      });
   };
 
   logout = () => {
@@ -136,7 +150,10 @@ export class AuthPane extends React.Component<Props, State, {}> {
         // style={{ width: "80%" }}
         placeholder="password"
       />,
-      <button onClick={this.login} className="green0-bg white-font margin-t-m margin-b-m">
+      <button
+        onClick={this.login}
+        className="green0-bg white-font margin-t-m margin-b-m"
+      >
         Log in
       </button>,
     ];
