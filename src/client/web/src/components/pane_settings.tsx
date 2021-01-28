@@ -93,7 +93,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
         type="password"
         onChange={this.changeOldPwd}
         value={this.state.oldPwd}
-        className="black0-font"
+        className="black0-font margin-t-m margin-b-m"
         placeholder="old password"
       />,
       <input
@@ -101,7 +101,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
         type="password"
         onChange={this.changeNewPwd1}
         value={this.state.newPwd1}
-        className="black0-font"
+        className="black0-font margin-t-m margin-b-m"
         placeholder="new password"
       />,
       <input
@@ -109,7 +109,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
         type="password"
         onChange={this.changeNewPwd2}
         value={this.state.newPwd2}
-        className="black0-font"
+        className="black0-font margin-t-m margin-b-m"
         placeholder="new password again"
       />,
       <button onClick={this.setPwd} className="grey1-bg white-font">

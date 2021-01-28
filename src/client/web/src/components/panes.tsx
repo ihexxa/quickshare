@@ -84,8 +84,8 @@ export class Panes extends React.Component<Props, State, {}> {
     const btnClass = displaying === "login" ? "hidden" : "";
     return (
       <div id="panes" className={displaying === "" ? "hidden" : ""}>
-        <div className="container padding-m">
-          <div className="margin-m">
+        <div className="container">
+          <div className="padding-l">
             <div className={btnClass}>
               <button onClick={this.closePane} className="black0-bg white-font">
                 Return
