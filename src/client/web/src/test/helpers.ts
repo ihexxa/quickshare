@@ -1,4 +1,5 @@
 import { Response } from "../client";
+import { ICoreState } from "../components/core_state";
 
 export const makePromise = (ret: any): Promise<any> => {
   return new Promise<any>((resolve) => {
@@ -13,3 +14,5 @@ export const makeNumberResponse = (status: number): Promise<Response> => {
     data: {},
   });
 };
+
+export const mockUpdate = (apply: (prevState: ICoreState) => ICoreState): void => {};

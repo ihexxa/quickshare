@@ -46,7 +46,7 @@ function getItemPath(dirPath: string, itemName: string): string {
 }
 
 export class Updater {
-  private static props: Props;
+  static props: Props;
   private static usersClient: IUsersClient;
   private static filesClient: IFilesClient;
 

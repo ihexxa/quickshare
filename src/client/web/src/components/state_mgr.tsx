@@ -6,11 +6,6 @@ import { RootFrame } from "./root_frame";
 export interface Props {}
 export interface State extends ICoreState {}
 
-export class UpdaterBase {
-  protected static props: any;
-  public static init = (props: any) => (UpdaterBase.props = { ...props });
-}
-
 export class StateMgr extends React.Component<Props, State, {}> {
   constructor(p: Props) {
     super(p);

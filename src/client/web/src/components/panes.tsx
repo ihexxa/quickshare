@@ -44,17 +44,15 @@ export class Updater {
 
 export interface State {}
 export class Panes extends React.Component<Props, State, {}> {
-  private update: (updater: (prevState: ICoreState) => ICoreState) => void;
   constructor(p: Props) {
     super(p);
     Updater.init(p);
-    this.update = p.update;
   }
 
   closePane = () => {
     if (this.props.displaying !== "login") {
       Updater.displayPane("");
-      this.update(Updater.updateState);
+      this.props.update(Updater.updateState);
     }
   };
 
@@ -66,8 +64,8 @@ export class Panes extends React.Component<Props, State, {}> {
     }
 
     const panesMap: Map<string, JSX.Element> = Map({
-      settings: <PaneSettings login={this.props.login} update={this.update} />,
-      login: <AuthPane authed={this.props.login.authed} update={this.update} />,
+      settings: <PaneSettings login={this.props.login} update={this.props.update} />,
+      login: <AuthPane authed={this.props.login.authed} update={this.props.update} />,
     });
 
     const panes = panesMap.keySeq().map(
