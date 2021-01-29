@@ -3,6 +3,7 @@ import * as ReactDOM from "react-dom";
 import { List, Map } from "immutable";
 import FileSize from "filesize";
 
+import { Layouter } from "./layouter";
 import { ICoreState } from "./core_state";
 import {
   IUsersClient,
@@ -14,7 +15,6 @@ import { FilesClient } from "../client/files";
 import { UsersClient } from "../client/users";
 import { UploadMgr } from "../worker/upload_mgr";
 import { UploadEntry } from "../worker/interface";
-// import { FileUploader } from "../worker/uploader";
 
 export const uploadCheckCycle = 1000;
 
@@ -33,6 +33,8 @@ export interface Props {
 
   uploadFiles: List<File>;
   uploadValue: string;
+
+  isVertical: boolean;
 
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
@@ -156,11 +158,6 @@ export class Updater {
     return Updater.setItems(List<string>(dstDir.split("/")));
   };
 
-  static setPwd = async (oldPwd: string, newPwd: string): Promise<boolean> => {
-    const resp = await Updater.usersClient.setPwd(oldPwd, newPwd);
-    return resp.status === 200;
-  };
-
   static addUploadFiles = (fileList: FileList, len: number) => {
     for (let i = 0; i < len; i++) {
       // do not wait for the promise
@@ -179,11 +176,6 @@ export interface State {
   inputValue: string;
   selectedSrc: string;
   selectedItems: Map<string, boolean>;
-
-  show: boolean;
-  oldPwd: string;
-  newPwd1: string;
-  newPwd2: string;
 }
 
 export class Browser extends React.Component<Props, State, {}> {
@@ -201,10 +193,6 @@ export class Browser extends React.Component<Props, State, {}> {
       inputValue: "",
       selectedSrc: "",
       selectedItems: Map<string, boolean>(),
-      show: false,
-      oldPwd: "",
-      newPwd1: "",
-      newPwd2: "",
     };
 
     this.uploadInput = undefined;
@@ -227,18 +215,9 @@ export class Browser extends React.Component<Props, State, {}> {
       });
   }
 
-  showPane = () => {
-    this.setState({ show: !this.state.show });
-  };
-  changeOldPwd = (ev: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ oldPwd: ev.target.value });
-  };
-  changeNewPwd1 = (ev: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ newPwd1: ev.target.value });
-  };
-  changeNewPwd2 = (ev: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ newPwd2: ev.target.value });
-  };
+  // showPane = () => {
+  //   this.setState({ show: !this.state.show });
+  // };
   onInputChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ inputValue: ev.target.value });
   };
@@ -352,31 +331,6 @@ export class Browser extends React.Component<Props, State, {}> {
     });
   };
 
-  setPwd = () => {
-    if (this.state.newPwd1 !== this.state.newPwd2) {
-      alert("new passwords are not same");
-    } else if (this.state.newPwd1 == "") {
-      alert("new passwords can not be empty");
-    } else if (this.state.oldPwd == this.state.newPwd1) {
-      alert("old and new passwords are same");
-    } else {
-      Updater.setPwd(this.state.oldPwd, this.state.newPwd1).then(
-        (ok: boolean) => {
-          if (ok) {
-            alert("Password is updated");
-          } else {
-            alert("fail to update password");
-          }
-          this.setState({
-            oldPwd: "",
-            newPwd1: "",
-            newPwd2: "",
-          });
-        }
-      );
-    }
-  };
-
   render() {
     const breadcrumb = this.props.dirPath.map(
       (pathPart: string, key: number) => {
@@ -395,96 +349,56 @@ export class Browser extends React.Component<Props, State, {}> {
       }
     );
 
+    const nameCellClass = `item-name item-name-${
+      this.props.isVertical ? "vertical" : "horizontal"
+    } pointer`;
+    const sizeCellClass = this.props.isVertical ? `hidden margin-s` : ``;
+    const modTimeCellClass = this.props.isVertical ? `hidden margin-s` : ``;
+
+    const layoutChildren = [
+      <button
+        type="button"
+        onClick={() => this.delete()}
+        className="red0-bg white-font margin-t-m margin-b-m"
+      >
+        Delete Selected
+      </button>,
+      <button
+        type="button"
+        onClick={() => this.moveHere()}
+        className="grey1-bg white-font margin-t-m margin-b-m"
+      >
+        Paste
+      </button>,
+      <span className="inline-block margin-t-m margin-b-m">
+        <input
+          type="text"
+          onChange={this.onInputChange}
+          value={this.state.inputValue}
+          className="black0-font margin-r-m"
+          placeholder="folder name"
+        />
+        <button onClick={this.onMkDir} className="grey1-bg white-font">
+          Create Folder
+        </button>
+      </span>,
+      <span className="inline-block margin-t-m margin-b-m">
+        <button onClick={this.onClickUpload} className="green0-bg white-font">
+          Upload Files
+        </button>
+        <input
+          type="file"
+          onChange={this.addUploadFile}
+          multiple={true}
+          value={this.props.uploadValue}
+          ref={this.assignInput}
+          className="black0-font hidden"
+        />
+      </span>,
+    ];
+
     const ops = (
-      <div>
-        <div className="grey0-font">
-          <button
-            type="button"
-            onClick={() => this.delete()}
-            className="red0-bg white-font margin-m"
-          >
-            Delete Selected
-          </button>
-          <span className="margin-s">-</span>
-          <button
-            type="button"
-            onClick={() => this.moveHere()}
-            className="grey1-bg white-font margin-m"
-          >
-            Paste
-          </button>
-          <span className="margin-s">-</span>
-          <button
-            onClick={this.onClickUpload}
-            className="green0-bg white-font margin-m"
-          >
-            Upload Files
-          </button>
-          <span className="margin-s">-</span>
-          <span className="margin-m">
-            <input
-              type="text"
-              onChange={this.onInputChange}
-              value={this.state.inputValue}
-              className="margin-r-m black0-font"
-              placeholder="folder name"
-            />
-            <button onClick={this.onMkDir} className="grey1-bg white-font">
-              Create Folder
-            </button>
-          </span>
-          <input
-            type="file"
-            onChange={this.addUploadFile}
-            multiple={true}
-            value={this.props.uploadValue}
-            ref={this.assignInput}
-            className="black0-font hidden margin-m"
-          />
-          <span className="margin-s">-</span>
-          <button
-            onClick={this.showPane}
-            className="grey1-bg white-font margin-m"
-          >
-            Settings
-          </button>
-        </div>
-        <div>
-          <div
-            style={{ display: this.state.show ? "inherit" : "none" }}
-            className="margin-t-m"
-          >
-            <h3 className="padding-l-s grey0-font">Update Password</h3>
-            <input
-              name="old_pwd"
-              type="password"
-              onChange={this.changeOldPwd}
-              value={this.state.oldPwd}
-              className="margin-m black0-font"
-              placeholder="old password"
-            />
-            <input
-              name="new_pwd1"
-              type="password"
-              onChange={this.changeNewPwd1}
-              value={this.state.newPwd1}
-              className="margin-m black0-font"
-              placeholder="new password"
-            />
-            <input
-              name="new_pwd2"
-              type="password"
-              onChange={this.changeNewPwd2}
-              value={this.state.newPwd2}
-              className="margin-m black0-font"
-              placeholder="new password again"
-            />
-            <button onClick={this.setPwd} className="grey1-bg white-font">
-              Update
-            </button>
-          </div>
-        </div>
-      </div>
+      <Layouter isHorizontal={false} elements={layoutChildren}></Layouter>
     );
 
     const itemList = this.props.items.map((item: MetadataResp) => {
@@ -497,59 +411,67 @@ export class Browser extends React.Component<Props, State, {}> {
       return item.isDir ? (
         <tr
           key={item.name}
-          className={`${isSelected ? "white0-bg selected" : ""}`}
+          // className={`${isSelected ? "white0-bg selected" : ""}`}
         >
-          <td className="padding-l-l" style={{ width: "3rem" }}>
+          <td>
             <span className="dot yellow0-bg"></span>
           </td>
           <td>
             <span
-              className="item-name pointer"
+              className={nameCellClass}
               onClick={() => this.gotoChild(item.name)}
             >
               {item.name}
             </span>
           </td>
-          <td>--</td>
-          <td>{item.modTime.slice(0, item.modTime.indexOf("T"))}</td>
-
+          <td className={sizeCellClass}>--</td>
+          <td className={modTimeCellClass}>
+            {item.modTime.slice(0, item.modTime.indexOf("T"))}
+          </td>
           <td>
-            <button
-              onClick={() => this.select(item.name)}
-              className="white-font margin-t-m margin-b-m"
-            >
-              {isSelected ? "Unselect" : "Select"}
-            </button>
+            <span className="item-op">
+              <button
+                onClick={() => this.select(item.name)}
+                className={`white-font ${isSelected ? "blue0-bg" : ""}`}
+                style={{width: "8rem", display: "inline-block"}}
+              >
+                {isSelected ? "Deselect" : "Select"}
+              </button>
+            </span>
           </td>
         </tr>
       ) : (
         <tr
           key={item.name}
-          className={`${isSelected ? "white0-bg selected" : ""}`}
+          // className={`${isSelected ? "white0-bg selected" : ""}`}
         >
-          <td className="padding-l-l" style={{ width: "3rem" }}>
+          <td>
             <span className="dot green0-bg"></span>
           </td>
           <td>
             <a
-              className="item-name"
+              className={nameCellClass}
               href={`/v1/fs/files?fp=${itemPath}`}
               target="_blank"
             >
               {item.name}
             </a>
           </td>
-          <td>{FileSize(item.size, { round: 0 })}</td>
-          <td>{item.modTime.slice(0, item.modTime.indexOf("T"))}</td>
-
+          <td className={sizeCellClass}>{FileSize(item.size, { round: 0 })}</td>
+          <td className={modTimeCellClass}>
+            {item.modTime.slice(0, item.modTime.indexOf("T"))}
+          </td>
           <td>
-            <button
-              type="button"
-              onClick={() => this.select(item.name)}
-              className="white-font margin-t-m margin-b-m"
-            >
-              {isSelected ? "Unselect" : "Select"}
-            </button>
+            <span className="item-op">
+              <button
+                type="button"
+                onClick={() => this.select(item.name)}
+                className={`white-font ${isSelected ? "blue0-bg" : ""}`}
+                style={{width: "8rem", display: "inline-block"}}
+              >
+                {isSelected ? "Deselect" : "Select"}
+              </button>
+            </span>
           </td>
         </tr>
       );
@@ -561,28 +483,28 @@ export class Browser extends React.Component<Props, State, {}> {
 
       return (
         <tr key={fileName}>
-          <td className="padding-l-l" style={{ width: "3rem" }}>
+          <td>
             <span className="dot blue0-bg"></span>
           </td>
           <td>
-            <span className="item-name pointer">{fileName}</span>
+            <div className={nameCellClass}>{fileName}</div>
+            <div className="item-op">
+              <button
+                onClick={() => this.stopUploading(uploading.realFilePath)}
+                className="white-font margin-r-m"
+              >
+                Stop
+              </button>
+              <button
+                onClick={() => this.deleteUploading(uploading.realFilePath)}
+                className="white-font"
+              >
+                Delete
+              </button>
+            </div>
           </td>
           <td>{FileSize(uploading.uploaded, { round: 0 })}</td>
           <td>{FileSize(uploading.size, { round: 0 })}</td>
-          <td>
-            <button
-              onClick={() => this.stopUploading(uploading.realFilePath)}
-              className="white-font margin-m"
-            >
-              Stop
-            </button>
-            <button
-              onClick={() => this.deleteUploading(uploading.realFilePath)}
-              className="white-font margin-m"
-            >
-              Delete
-            </button>
-          </td>
         </tr>
       );
     });
@@ -593,56 +515,60 @@ export class Browser extends React.Component<Props, State, {}> {
           <div className="margin-l-m margin-r-m">{ops}</div>
         </div>
 
-        <div id="item-list" className="">
+        <div id="item-list">
           <div className="margin-b-l">{breadcrumb}</div>
 
-          <table>
-            <thead style={{ fontWeight: "bold" }}>
-              <tr>
-                <td className="padding-l-l" style={{ width: "3rem" }}>
-                  <span className="dot black-bg"></span>
-                </td>
-                <td>Name</td>
-                <td>Uploaded</td>
-                <td>Size</td>
-                <td>Action</td>
-              </tr>
-            </thead>
-            <tbody>{uploadingList}</tbody>
-            <tfoot>
-              <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-            </tfoot>
-          </table>
+          {this.props.uploadings.size === 0 ? null : (
+            <div className="container">
+              <table>
+                <thead style={{ fontWeight: "bold" }}>
+                  <tr>
+                    <td>
+                      <span className="dot black-bg"></span>
+                    </td>
+                    <td>Name</td>
+                    <td className={sizeCellClass}>Uploaded</td>
+                    <td className={modTimeCellClass}>Size</td>
+                  </tr>
+                </thead>
+                <tbody>{uploadingList}</tbody>
+                <tfoot>
+                  <tr>
+                    <td></td>
+                    <td></td>
+                    <td className={sizeCellClass}></td>
+                    <td className={modTimeCellClass}></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          )}
 
-          <table>
-            <thead style={{ fontWeight: "bold" }}>
-              <tr>
-                <td className="padding-l-l" style={{ width: "3rem" }}>
-                  <span className="dot black-bg"></span>
-                </td>
-                <td>Name</td>
-                <td>File Size</td>
-                <td>Mod Time</td>
-                <td>Edit</td>
-              </tr>
-            </thead>
-            <tbody>{itemList}</tbody>
-            <tfoot>
-              <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-            </tfoot>
-          </table>
+          <div className="container">
+            <table>
+              <thead style={{ fontWeight: "bold" }}>
+                <tr>
+                  <td>
+                    <span className="dot black-bg"></span>
+                  </td>
+                  <td>Name</td>
+                  <td className={sizeCellClass}>File Size</td>
+                  <td className={modTimeCellClass}>Mod Time</td>
+                  <td>Edit</td>
+                </tr>
+              </thead>
+              <tbody>{itemList}</tbody>
+              <tfoot>
+                <tr>
+                  <td></td>
+                  <td></td>
+                  <td className={sizeCellClass}></td>
+                  <td className={modTimeCellClass}></td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
         </div>
       </div>
     );

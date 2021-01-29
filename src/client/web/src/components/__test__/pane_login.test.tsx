@@ -1,7 +1,7 @@
 import { mock, instance } from "ts-mockito";
 
 import { initWithWorker } from "../core_state";
-import { Updater } from "../auth_pane";
+import { Updater } from "../pane_login";
 import { MockUsersClient } from "../../client/users_mock";
 import { Response } from "../../client";
 import { MockWorker } from "../../worker/interface";

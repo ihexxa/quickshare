@@ -1,8 +1,12 @@
 import * as React from "react";
+import { List } from "immutable";
 
 import { ICoreState } from "./core_state";
 import { IUsersClient } from "../client";
 import { UsersClient } from "../client/users";
+import { Updater as PanesUpdater } from "./panes";
+import { Updater as BrowserUpdater } from "./browser";
+import { Layouter } from "./layouter";
 
 export interface Props {
   authed: boolean;
@@ -90,15 +94,30 @@ export class AuthPane extends React.Component<Props, State, {}> {
   };
 
   login = () => {
-    Updater.login(this.state.user, this.state.pwd).then((ok: boolean) => {
-      if (ok) {
-        this.update(Updater.setAuthPane);
-        this.setState({ user: "", pwd: "" });
-      } else {
-        this.setState({ user: "", pwd: "" });
-        alert("Failed to login.");
-      }
-    });
+    Updater.login(this.state.user, this.state.pwd)
+      .then((ok: boolean) => {
+        if (ok) {
+          this.update(Updater.setAuthPane);
+          this.setState({ user: "", pwd: "" });
+          // close all the panes
+          PanesUpdater.displayPane("");
+          this.update(PanesUpdater.updateState);
+
+          // refresh
+          return BrowserUpdater.setItems(
+            List<string>(["."])
+          );
+        } else {
+          this.setState({ user: "", pwd: "" });
+          alert("Failed to login.");
+        }
+      })
+      .then(() => {
+        return BrowserUpdater.refreshUploadings();
+      })
+      .then((_: boolean) => {
+        this.update(BrowserUpdater.setBrowser);
+      });
   };
 
   logout = () => {
@@ -112,30 +131,38 @@ export class AuthPane extends React.Component<Props, State, {}> {
   };
 
   render() {
+    const elements: Array<JSX.Element> = [
+      <input
+        name="user"
+        type="text"
+        onChange={this.changeUser}
+        value={this.state.user}
+        className="black0-font margin-t-m margin-b-m"
+        // style={{ width: "80%" }}
+        placeholder="user name"
+      />,
+      <input
+        name="pwd"
+        type="password"
+        onChange={this.changePwd}
+        value={this.state.pwd}
+        className="black0-font margin-t-m margin-b-m"
+        // style={{ width: "80%" }}
+        placeholder="password"
+      />,
+      <button
+        onClick={this.login}
+        className="green0-bg white-font margin-t-m margin-b-m"
+      >
+        Log in
+      </button>,
+    ];
+
     return (
       <span>
         <span style={{ display: this.props.authed ? "none" : "inherit" }}>
-          <input
-            name="user"
-            type="text"
-            onChange={this.changeUser}
-            value={this.state.user}
-            className="margin-r-m black0-font"
-            style={{ width: "6rem" }}
-            placeholder="user name"
-          />
-          <input
-            name="pwd"
-            type="password"
-            onChange={this.changePwd}
-            value={this.state.pwd}
-            className="margin-r-m black0-font"
-            style={{ width: "6rem" }}
-            placeholder="password"
-          />
-          <button onClick={this.login} className="green0-bg white-font">
-            Log in
-          </button>
+          <h5 className="grey0-font">Login</h5>
+          <Layouter isHorizontal={false} elements={elements} />
         </span>
         <span style={{ display: this.props.authed ? "inherit" : "none" }}>
           <button

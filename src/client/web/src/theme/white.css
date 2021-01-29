@@ -18,9 +18,9 @@
   -webkit-backdrop-filter: blur( 9.5px );
 }
 
-.theme-white div.hr {
+/* .theme-white div.hr {
   background-color: white;
-}
+} */
 
 .theme-white .op-bar {
   background: rgba( 255, 255, 255, 0.9 );

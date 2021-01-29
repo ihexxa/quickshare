@@ -9,58 +9,127 @@
 
 #top-bar {
   line-height: 3rem;
+  z-index: 10;
 }
 
-#container-center {
-  margin: 5rem auto auto auto;
+.container-center {
+  margin: 2rem auto auto auto;
   width: 96%;
   max-width: 960px;
+  z-index: 9;
+}
+
+.layouter .vcell {
+  text-align: left;
+  padding: 0.5rem 2rem;
+  border-bottom: solid 1px #e8e8e8;
+}
+
+#panes {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  z-index: 100;
+  overflow: scroll;
+}
+
+#panes .container {
+  max-width: 960px;
+  width: 96%;
+  background-color: white;
+  z-index: 101;
+  text-align: left;
+  margin: 3rem auto 8rem auto;
+  border-radius: 0.6rem;
+}
+
+#panes .return-btn {
+  position: fixed;
+  max-width: 960px;
+  width: 96%;
+  margin: auto;
+  z-index: 101;
+  text-align: center;
+  left: 0;
+  right: 0;
+  bottom: 3rem;
+  height: 3rem;
+  border-radius: 0.6rem;
 }
 
 #op-bar {
-  width: 96%;
-  max-width: 960px;
+  /* width: 96%; */
+  /* max-width: 960px; */
 
-  position: fixed;
+  /* position: fixed;
   top: 6rem;
   right: auto;
   bottom: auto;
-  left: auto;
+  left: auto; */
   line-height: 3rem;
   border-radius: 0.6rem;
 }
 
 #item-list {
-  margin-top: 12rem;
+  margin-top: 2rem;
+}
+
+#item-list .container {
+  width: 100%;
+  color: #34495e;
+  font-size: 1.4rem;
+  line-height: 5rem;
+  background-color: white;
+  border-radius: 0.8rem;
+  margin-bottom: 2rem;
 }
 
 #item-list table {
   width: 100%;
-  color: #34495e;
-  font-size: 1.4rem;
-  line-height: 4rem;
-  background-color: white;
-  border-radius: 0.8rem;
-  margin-bottom: 8rem;
 }
 
 #item-list tr {
   border-top: solid 1px transparent;
 }
 
+#item-list .dot {
+  overflow: hidden;
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
+#item-list .item-name-cell {
+  max-width: 30%;
+}
+
+#item-list .item-name-vertical {
+  width: 14rem;
+}
+
+#item-list .item-name-horizontal {
+  width: 48rem;
+}
+
 #item-list .item-name {
-  display: block;
-  max-width: 8rem;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  overflow-wrap: break-word;
+  display: block;
 }
 
-#item-list tr button  {
+#item-list .item-op {
+  line-height: 4rem;
+}
+
+tr button {
   background-color: #95a5a6;
 }
 
-#item-list tr.selected button  {
+#item-list tr.selected button {
   background-color: #e74c3c;
 }
 
@@ -92,7 +161,7 @@
   bottom: auto;
   left: 0;
 
-  font-size: 2.0rem;
+  font-size: 2rem;
   line-height: 3.9rem;
 }
 
@@ -496,3 +565,18 @@ div.hr {
   text-align: left;
   padding: 1rem 0;
 } */
+
+.inline-block {
+  display: inline-block;
+}
+
+div.hr {
+  height: 1px;
+  background-color: #95a5a6;
+  margin: 1rem auto 1rem auto;
+}
+
+.tail {
+  font-size: 1.2rem;
+  text-align: center;
+}
