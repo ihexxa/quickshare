@@ -8,6 +8,7 @@ const speedDownRatio = 0.5;
 const speedUpRatio = 1.05;
 const createRetryLimit = 2;
 const uploadRetryLimit = 1024;
+const backoffMax = 2000;
 
 export interface IFileUploader {
   stop: () => void;
@@ -71,6 +72,13 @@ export class FileUploader {
     this.client = client;
   };
 
+  backOff = async (): Promise<void> => {
+    return new Promise((resolve) => {
+      const delay = Math.floor(Math.random() * backoffMax);
+      setTimeout(resolve, delay);
+    });
+  };
+
   start = async (): Promise<boolean> => {
     let resp: Response;
 
@@ -81,6 +89,7 @@ export class FileUploader {
           return await this.upload();
         }
       } catch (e) {
+        await this.backOff();
         console.error(e);
       }
     }
@@ -153,6 +162,8 @@ export class FileUploader {
             );
             break;
           }
+
+          await this.backOff();
         }
       } catch (e) {
         this.errMsgs.push(e.toString());

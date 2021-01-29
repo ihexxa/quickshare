@@ -13,7 +13,7 @@ export interface Props {
 }
 
 export class Updater {
-  private static props: Props;
+  static props: Props;
 
   static init = (props: Props) => (Updater.props = { ...props });
 
