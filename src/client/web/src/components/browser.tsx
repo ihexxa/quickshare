@@ -4,6 +4,7 @@ import { List, Map } from "immutable";
 import FileSize from "filesize";
 
 import { Layouter } from "./layouter";
+import { updater } from "./browser.updater";
 import { ICoreState } from "./core_state";
 import {
   IUsersClient,
@@ -39,141 +40,10 @@ export interface Props {
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
-function getItemPath(dirPath: string, itemName: string): string {
+export function getItemPath(dirPath: string, itemName: string): string {
   return dirPath.endsWith("/")
     ? `${dirPath}${itemName}`
     : `${dirPath}/${itemName}`;
-}
-
-export class Updater {
-  static props: Props;
-  private static usersClient: IUsersClient;
-  private static filesClient: IFilesClient;
-
-  static init = (props: Props) => (Updater.props = { ...props });
-  static setClients(usersClient: IUsersClient, filesClient: IFilesClient) {
-    Updater.usersClient = usersClient;
-    Updater.filesClient = filesClient;
-  }
-
-  static setUploadings = (infos: Map<string, UploadEntry>) => {
-    Updater.props.uploadings = List<UploadInfo>(
-      infos.valueSeq().map(
-        (v: UploadEntry): UploadInfo => {
-          return {
-            realFilePath: v.filePath,
-            size: v.size,
-            uploaded: v.uploaded,
-          };
-        }
-      )
-    );
-  };
-
-  static setItems = async (dirParts: List<string>): Promise<void> => {
-    const dirPath = dirParts.join("/");
-    const listResp = await Updater.filesClient.list(dirPath);
-
-    Updater.props.dirPath = dirParts;
-    Updater.props.items =
-      listResp.status === 200
-        ? List<MetadataResp>(listResp.data.metadatas)
-        : Updater.props.items;
-  };
-
-  static refreshUploadings = async (): Promise<boolean> => {
-    const luResp = await Updater.filesClient.listUploadings();
-
-    Updater.props.uploadings =
-      luResp.status === 200
-        ? List<UploadInfo>(luResp.data.uploadInfos)
-        : Updater.props.uploadings;
-    return luResp.status === 200;
-  };
-
-  static deleteUploading = async (filePath: string): Promise<boolean> => {
-    UploadMgr.delete(filePath);
-    const resp = await Updater.filesClient.deleteUploading(filePath);
-    return resp.status === 200;
-  };
-
-  static stopUploading = (filePath: string) => {
-    UploadMgr.stop(filePath);
-  };
-
-  static mkDir = async (dirPath: string): Promise<void> => {
-    let resp = await Updater.filesClient.mkdir(dirPath);
-    if (resp.status !== 200) {
-      alert(`failed to make dir ${dirPath}`);
-    }
-  };
-
-  static delete = async (
-    dirParts: List<string>,
-    items: List<MetadataResp>,
-    selectedItems: Map<string, boolean>
-  ): Promise<void> => {
-    const delRequests = items
-      .filter((item) => {
-        return selectedItems.has(item.name);
-      })
-      .map(
-        async (selectedItem: MetadataResp): Promise<string> => {
-          const itemPath = getItemPath(dirParts.join("/"), selectedItem.name);
-          const resp = await Updater.filesClient.delete(itemPath);
-          return resp.status === 200 ? "" : selectedItem.name;
-        }
-      );
-
-    const failedFiles = await Promise.all(delRequests);
-    failedFiles.forEach((failedFile) => {
-      if (failedFile !== "") {
-        alert(`failed to delete ${failedFile}`);
-      }
-    });
-    return Updater.setItems(dirParts);
-  };
-
-  static moveHere = async (
-    srcDir: string,
-    dstDir: string,
-    selectedItems: Map<string, boolean>
-  ): Promise<void> => {
-    const moveRequests = List<string>(selectedItems.keys()).map(
-      async (itemName: string): Promise<string> => {
-        const oldPath = getItemPath(srcDir, itemName);
-        const newPath = getItemPath(dstDir, itemName);
-        const resp = await Updater.filesClient.move(oldPath, newPath);
-        return resp.status === 200 ? "" : itemName;
-      }
-    );
-
-    const failedFiles = await Promise.all(moveRequests);
-    failedFiles.forEach((failedItem) => {
-      if (failedItem !== "") {
-        alert(`failed to move ${failedItem}`);
-      }
-    });
-
-    return Updater.setItems(List<string>(dstDir.split("/")));
-  };
-
-  static addUploadFiles = (fileList: FileList, len: number) => {
-    for (let i = 0; i < len; i++) {
-      const filePath = getItemPath(
-        Updater.props.dirPath.join("/"),
-        fileList[i].name
-      );
-      // do not wait for the promise
-      UploadMgr.add(fileList[i], filePath);
-    }
-    Updater.setUploadings(UploadMgr.list());
-  };
-
-  static setBrowser = (prevState: ICoreState): ICoreState => {
-    prevState.panel.browser = { ...prevState.panel, ...Updater.props };
-    return prevState;
-  };
 }
 
 export interface State {
@@ -190,8 +60,8 @@ export class Browser extends React.Component<Props, State, {}> {
 
   constructor(p: Props) {
     super(p);
-    Updater.init(p);
-    Updater.setClients(new UsersClient(""), new FilesClient(""));
+    updater().init(p);
+    updater().setClients(new UsersClient(""), new FilesClient(""));
     this.update = p.update;
     this.state = {
       inputValue: "",
@@ -210,12 +80,13 @@ export class Browser extends React.Component<Props, State, {}> {
     };
 
     UploadMgr.setStatusCb(this.updateProgress);
-    Updater.setItems(p.dirPath)
+    updater()
+      .setItems(p.dirPath)
       .then(() => {
-        return Updater.refreshUploadings();
+        return updater().refreshUploadings();
       })
       .then((_: boolean) => {
-        this.update(Updater.setBrowser);
+        this.update(updater().setBrowser);
       });
   }
 
@@ -234,52 +105,57 @@ export class Browser extends React.Component<Props, State, {}> {
   };
 
   addUploadFile = (event: React.ChangeEvent<HTMLInputElement>) => {
-    Updater.addUploadFiles(event.target.files, event.target.files.length);
-    this.update(Updater.setBrowser);
+    updater().addUploadFiles(event.target.files, event.target.files.length);
+    this.update(updater().setBrowser);
   };
 
   updateProgress = (infos: Map<string, UploadEntry>) => {
-    Updater.setUploadings(infos);
-    Updater.setItems(this.props.dirPath).then(() => {
-      this.update(Updater.setBrowser);
-    });
+    updater().setUploadings(infos);
+    updater()
+      .setItems(this.props.dirPath)
+      .then(() => {
+        this.update(updater().setBrowser);
+      });
   };
 
   onMkDir = () => {
     if (this.state.inputValue === "") {
       alert("folder name can not be empty");
+      return;
     }
 
     const dirPath = getItemPath(
       this.props.dirPath.join("/"),
       this.state.inputValue
     );
-    Updater.mkDir(dirPath)
+    updater()
+      .mkDir(dirPath)
       .then(() => {
         this.setState({ inputValue: "" });
-        return Updater.setItems(this.props.dirPath);
+        return updater().setItems(this.props.dirPath);
       })
       .then(() => {
-        this.update(Updater.setBrowser);
+        this.update(updater().setBrowser);
       });
   };
 
-  deleteUploading = (filePath: string) => {
-    Updater.deleteUploading(filePath)
+  deleteUploading = (filePath: string): Promise<void> => {
+    return updater()
+      .deleteUploading(filePath)
       .then((ok: boolean) => {
         if (!ok) {
           alert(`Failed to delete uploading ${filePath}`);
         }
-        return Updater.refreshUploadings();
+        return updater().refreshUploadings();
       })
       .then(() => {
-        this.update(Updater.setBrowser);
+        this.update(updater().setBrowser);
       });
   };
 
   stopUploading = (filePath: string) => {
-    Updater.stopUploading(filePath);
-    this.update(Updater.setBrowser);
+    updater().stopUploading(filePath);
+    this.update(updater().setBrowser);
   };
 
   delete = () => {
@@ -292,17 +168,15 @@ export class Browser extends React.Component<Props, State, {}> {
       return;
     }
 
-    Updater.delete(
-      this.props.dirPath,
-      this.props.items,
-      this.state.selectedItems
-    ).then(() => {
-      this.update(Updater.setBrowser);
-      this.setState({
-        selectedSrc: "",
-        selectedItems: Map<string, boolean>(),
+    updater()
+      .delete(this.props.dirPath, this.props.items, this.state.selectedItems)
+      .then(() => {
+        this.update(updater().setBrowser);
+        this.setState({
+          selectedSrc: "",
+          selectedItems: Map<string, boolean>(),
+        });
       });
-    });
   };
 
   gotoChild = (childDirName: string) => {
@@ -314,9 +188,11 @@ export class Browser extends React.Component<Props, State, {}> {
       return;
     }
 
-    Updater.setItems(dirPath).then(() => {
-      this.update(Updater.setBrowser);
-    });
+    updater()
+      .setItems(dirPath)
+      .then(() => {
+        this.update(updater().setBrowser);
+      });
   };
 
   moveHere = () => {
@@ -327,17 +203,19 @@ export class Browser extends React.Component<Props, State, {}> {
       return;
     }
 
-    Updater.moveHere(
-      this.state.selectedSrc,
-      this.props.dirPath.join("/"),
-      this.state.selectedItems
-    ).then(() => {
-      this.update(Updater.setBrowser);
-      this.setState({
-        selectedSrc: "",
-        selectedItems: Map<string, boolean>(),
+    updater()
+      .moveHere(
+        this.state.selectedSrc,
+        this.props.dirPath.join("/"),
+        this.state.selectedItems
+      )
+      .then(() => {
+        this.update(updater().setBrowser);
+        this.setState({
+          selectedSrc: "",
+          selectedItems: Map<string, boolean>(),
+        });
       });
-    });
   };
 
   render() {
