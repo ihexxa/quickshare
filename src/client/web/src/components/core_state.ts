@@ -6,7 +6,7 @@ import { FgWorker } from "../worker/upload.fgworker";
 import { Props as PanelProps } from "./root_frame";
 import { Item } from "./browser";
 import { UploadInfo } from "../client";
-import { UploadMgr, IWorker } from "../worker/upload_mgr";
+import { Up, initUploadMgr, IWorker } from "../worker/upload_mgr";
 
 export class BaseUpdater {
   public static props: any;
@@ -27,15 +27,15 @@ export interface ICoreState {
 }
 
 export function initWithWorker(worker: IWorker): ICoreState {
-  UploadMgr.init(worker);
+  initUploadMgr(worker);
   return initState();
 }
 
 export function init(): ICoreState {
   const scripts = Array.from(document.querySelectorAll("script"));
   const worker = Worker == null ? new FgWorker() : new BgWorker();
+  initUploadMgr(worker);
 
-  UploadMgr.init(worker);
   return initState();
 }
 
