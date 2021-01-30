@@ -88,7 +88,6 @@ export class UploadMgr {
         ...entry,
         runnable: false,
       });
-      console.log("stopped", filePath);
     } else {
       alert(`failed to stop uploading ${filePath}: not found`);
     }
@@ -153,6 +152,6 @@ export const initUploadMgr = (worker: IWorker): UploadMgr => {
 export const Up = (): UploadMgr => {
   return uploadMgr;
 };
-export const FgUp = (): UploadMgr => {
-  return new UploadMgr(new FgWorker());
+export const setUploadMgr = (up: UploadMgr) => {
+  uploadMgr = up;
 };

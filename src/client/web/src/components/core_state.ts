@@ -2,11 +2,15 @@ import { List, Set } from "immutable";
 
 import BgWorker from "../worker/upload.bg.worker";
 import { FgWorker } from "../worker/upload.fgworker";
+import { FilesClient } from "../client/files";
+import { UsersClient } from "../client/users";
 
 import { Props as PanelProps } from "./root_frame";
 import { Item } from "./browser";
 import { UploadInfo } from "../client";
 import { Up, initUploadMgr, IWorker } from "../worker/upload_mgr";
+
+import { updater as BrowserUpdater } from "./browser.updater";
 
 export class BaseUpdater {
   public static props: any;
@@ -36,7 +40,23 @@ export function init(): ICoreState {
   const worker = Worker == null ? new FgWorker() : new BgWorker();
   initUploadMgr(worker);
 
-  return initState();
+  const state = initState();
+  InitUpdaters(state);
+  return state;
+}
+
+export function InitUpdaters(state: ICoreState) {
+  BrowserUpdater().init(state.panel.browser);
+  BrowserUpdater().setClients(new UsersClient(""), new FilesClient(""));
+  BrowserUpdater()
+    .setItems(state.panel.browser.dirPath)
+    .then(() => {
+      return BrowserUpdater().refreshUploadings();
+    })
+    .then((_: boolean) => {
+      this.update(BrowserUpdater().setBrowser);
+    });
+
 }
 
 export function isVertical(): boolean {

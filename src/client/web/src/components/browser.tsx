@@ -4,6 +4,7 @@ import { List, Map } from "immutable";
 import FileSize from "filesize";
 
 import { Layouter } from "./layouter";
+import { alertMsg } from "../common/env";
 import { updater } from "./browser.updater";
 import { ICoreState } from "./core_state";
 import {
@@ -12,8 +13,6 @@ import {
   MetadataResp,
   UploadInfo,
 } from "../client";
-import { FilesClient } from "../client/files";
-import { UsersClient } from "../client/users";
 import { Up } from "../worker/upload_mgr";
 import { UploadEntry } from "../worker/interface";
 
@@ -60,8 +59,6 @@ export class Browser extends React.Component<Props, State, {}> {
 
   constructor(p: Props) {
     super(p);
-    updater().init(p);
-    updater().setClients(new UsersClient(""), new FilesClient(""));
     this.update = p.update;
     this.state = {
       inputValue: "",
@@ -69,6 +66,7 @@ export class Browser extends React.Component<Props, State, {}> {
       selectedItems: Map<string, boolean>(),
     };
 
+    Up().setStatusCb(this.updateProgress);
     this.uploadInput = undefined;
     this.assignInput = (input) => {
       this.uploadInput = ReactDOM.findDOMNode(input);
@@ -78,49 +76,43 @@ export class Browser extends React.Component<Props, State, {}> {
       const uploadInput = this.uploadInput as HTMLButtonElement;
       uploadInput.click();
     };
-
-    Up().setStatusCb(this.updateProgress);
-    updater()
-      .setItems(p.dirPath)
-      .then(() => {
-        return updater().refreshUploadings();
-      })
-      .then((_: boolean) => {
-        this.update(updater().setBrowser);
-      });
   }
 
   onInputChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ inputValue: ev.target.value });
   };
-  select = (itemName: string) => {
-    const selectedItems = this.state.selectedItems.has(itemName)
-      ? this.state.selectedItems.delete(itemName)
-      : this.state.selectedItems.set(itemName, true);
 
-    this.setState({
-      selectedSrc: this.props.dirPath.join("/"),
-      selectedItems: selectedItems,
-    });
-  };
-
-  addUploadFile = (event: React.ChangeEvent<HTMLInputElement>) => {
-    updater().addUploadFiles(event.target.files, event.target.files.length);
+  addUploads = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const fileList = List<File>();
+    for (let i = 0; i < event.target.files.length; i++) {
+      fileList.push(event.target.files[i]);
+    }
+    updater().addUploads(fileList);
     this.update(updater().setBrowser);
   };
 
-  updateProgress = (infos: Map<string, UploadEntry>) => {
-    updater().setUploadings(infos);
-    updater()
-      .setItems(this.props.dirPath)
+  deleteUpload = (filePath: string): Promise<void> => {
+    return updater()
+      .deleteUpload(filePath)
+      .then((ok: boolean) => {
+        if (!ok) {
+          alertMsg(`Failed to delete uploading ${filePath}`);
+        }
+        return updater().refreshUploadings();
+      })
       .then(() => {
         this.update(updater().setBrowser);
       });
   };
 
+  stopUploading = (filePath: string) => {
+    updater().stopUploading(filePath);
+    this.update(updater().setBrowser);
+  };
+
   onMkDir = () => {
     if (this.state.inputValue === "") {
-      alert("folder name can not be empty");
+      alertMsg("folder name can not be empty");
       return;
     }
 
@@ -139,28 +131,9 @@ export class Browser extends React.Component<Props, State, {}> {
       });
   };
 
-  deleteUploading = (filePath: string): Promise<void> => {
-    return updater()
-      .deleteUploading(filePath)
-      .then((ok: boolean) => {
-        if (!ok) {
-          alert(`Failed to delete uploading ${filePath}`);
-        }
-        return updater().refreshUploadings();
-      })
-      .then(() => {
-        this.update(updater().setBrowser);
-      });
-  };
-
-  stopUploading = (filePath: string) => {
-    updater().stopUploading(filePath);
-    this.update(updater().setBrowser);
-  };
-
   delete = () => {
     if (this.props.dirPath.join("/") !== this.state.selectedSrc) {
-      alert("please select file or folder to delete at first");
+      alertMsg("please select file or folder to delete at first");
       this.setState({
         selectedSrc: this.props.dirPath.join("/"),
         selectedItems: Map<string, boolean>(),
@@ -170,6 +143,29 @@ export class Browser extends React.Component<Props, State, {}> {
 
     updater()
       .delete(this.props.dirPath, this.props.items, this.state.selectedItems)
+      .then(() => {
+        this.update(updater().setBrowser);
+        this.setState({
+          selectedSrc: "",
+          selectedItems: Map<string, boolean>(),
+        });
+      });
+  };
+
+  moveHere = () => {
+    const oldDir = this.state.selectedSrc;
+    const newDir = this.props.dirPath.join("/");
+    if (oldDir === newDir) {
+      alertMsg("source directory is same as destination directory");
+      return;
+    }
+
+    updater()
+      .moveHere(
+        this.state.selectedSrc,
+        this.props.dirPath.join("/"),
+        this.state.selectedItems
+      )
       .then(() => {
         this.update(updater().setBrowser);
         this.setState({
@@ -195,27 +191,24 @@ export class Browser extends React.Component<Props, State, {}> {
       });
   };
 
-  moveHere = () => {
-    const oldDir = this.state.selectedSrc;
-    const newDir = this.props.dirPath.join("/");
-    if (oldDir === newDir) {
-      alert("source directory is same as destination directory");
-      return;
-    }
-
+  updateProgress = (infos: Map<string, UploadEntry>) => {
+    updater().setUploadings(infos);
     updater()
-      .moveHere(
-        this.state.selectedSrc,
-        this.props.dirPath.join("/"),
-        this.state.selectedItems
-      )
+      .setItems(this.props.dirPath)
       .then(() => {
         this.update(updater().setBrowser);
-        this.setState({
-          selectedSrc: "",
-          selectedItems: Map<string, boolean>(),
-        });
       });
+  };
+
+  select = (itemName: string) => {
+    const selectedItems = this.state.selectedItems.has(itemName)
+      ? this.state.selectedItems.delete(itemName)
+      : this.state.selectedItems.set(itemName, true);
+
+    this.setState({
+      selectedSrc: this.props.dirPath.join("/"),
+      selectedItems: selectedItems,
+    });
   };
 
   render() {
@@ -275,7 +268,7 @@ export class Browser extends React.Component<Props, State, {}> {
         </button>
         <input
           type="file"
-          onChange={this.addUploadFile}
+          onChange={this.addUploads}
           multiple={true}
           value={this.props.uploadValue}
           ref={this.assignInput}
@@ -383,7 +376,7 @@ export class Browser extends React.Component<Props, State, {}> {
                 Stop
               </button>
               <button
-                onClick={() => this.deleteUploading(uploading.realFilePath)}
+                onClick={() => this.deleteUpload(uploading.realFilePath)}
                 className="white-font"
               >
                 Delete
