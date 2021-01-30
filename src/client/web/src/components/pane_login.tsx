@@ -5,7 +5,7 @@ import { ICoreState } from "./core_state";
 import { IUsersClient } from "../client";
 import { UsersClient } from "../client/users";
 import { Updater as PanesUpdater } from "./panes";
-import { Updater as BrowserUpdater } from "./browser";
+import { updater as BrowserUpdater } from "./browser.updater";
 import { Layouter } from "./layouter";
 
 export interface Props {
@@ -104,7 +104,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
           this.update(PanesUpdater.updateState);
 
           // refresh
-          return BrowserUpdater.setItems(
+          return BrowserUpdater().setItems(
             List<string>(["."])
           );
         } else {
@@ -113,10 +113,10 @@ export class AuthPane extends React.Component<Props, State, {}> {
         }
       })
       .then(() => {
-        return BrowserUpdater.refreshUploadings();
+        return BrowserUpdater().refreshUploadings();
       })
       .then((_: boolean) => {
-        this.update(BrowserUpdater.setBrowser);
+        this.update(BrowserUpdater().setBrowser);
       });
   };
 

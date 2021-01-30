@@ -4,7 +4,7 @@ import { mock, instance, when, anything } from "ts-mockito";
 import { FilesClient } from "../../client/files_mock";
 import { makePromise } from "../../test/helpers";
 
-import { UploadMgr } from "../upload_mgr";
+import { Up, initUploadMgr } from "../upload_mgr";
 
 import {
   FileWorkerReq,
@@ -115,17 +115,18 @@ describe("UploadMgr", () => {
     ];
 
     const worker = new MockWorker();
-    UploadMgr.setCycle(100);
-
     for (let i = 0; i < tcs.length; i++) {
-      const infoMap = arraytoMap(tcs[i].inputInfos);
-      UploadMgr._setInfos(infoMap);
+      initUploadMgr(worker);
+      const up = Up();
+      up.setCycle(100);
 
-      UploadMgr.init(worker);
+      const infoMap = arraytoMap(tcs[i].inputInfos);
+      up._setInfos(infoMap);
+
       // polling needs several rounds to finish all the tasks
-      await delay(tcs.length * UploadMgr.getCycle() + 1000);
+      await delay(tcs.length * up.getCycle() + 1000);
       // TODO: find a better way to wait
-      const gotInfos = UploadMgr.list();
+      const gotInfos = up.list();
 
       const expectedInfoMap = arraytoMap(tcs[i].expectedInfos);
       gotInfos.keySeq().forEach((filePath) => {
@@ -135,7 +136,7 @@ describe("UploadMgr", () => {
         expect(expectedInfoMap.get(filePath)).toEqual(gotInfos.get(filePath));
       });
 
-      UploadMgr.destory();
+      up.destory();
     }
   });
 });

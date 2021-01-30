@@ -11,7 +11,7 @@ import {
 import { FilesClient } from "../client/files";
 import { UsersClient } from "../client/users";
 import { UploadEntry } from "../worker/interface";
-import { UploadMgr } from "../worker/upload_mgr";
+import { Up } from "../worker/upload_mgr";
 
 export class Updater {
   props: Props;
@@ -31,13 +31,13 @@ export class Updater {
         fileList[i].name
       );
       // do not wait for the promise
-      UploadMgr.add(fileList[i], filePath);
+      Up().add(fileList[i], filePath);
     }
-    this.setUploadings(UploadMgr.list());
+    this.setUploadings(Up().list());
   };
 
   deleteUploading = async (filePath: string): Promise<boolean> => {
-    UploadMgr.delete(filePath);
+    Up().delete(filePath);
     const resp = await this.filesClient.deleteUploading(filePath);
     return resp.status === 200;
   };
@@ -67,7 +67,7 @@ export class Updater {
   };
 
   stopUploading = (filePath: string) => {
-    UploadMgr.stop(filePath);
+    Up().stop(filePath);
   };
 
   mkDir = async (dirPath: string): Promise<void> => {
