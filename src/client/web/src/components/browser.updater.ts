@@ -24,19 +24,19 @@ export class Updater {
     this.filesClient = filesClient;
   }
 
-  addUploadFiles = (fileList: FileList, len: number) => {
-    for (let i = 0; i < len; i++) {
+  addUploads = (fileList: List<File>) => {
+    fileList.forEach(file => {
       const filePath = getItemPath(
         this.props.dirPath.join("/"),
-        fileList[i].name
+        file.name
       );
       // do not wait for the promise
-      Up().add(fileList[i], filePath);
-    }
+      Up().add(file, filePath);
+    })
     this.setUploadings(Up().list());
   };
 
-  deleteUploading = async (filePath: string): Promise<boolean> => {
+  deleteUpload = async (filePath: string): Promise<boolean> => {
     Up().delete(filePath);
     const resp = await this.filesClient.deleteUploading(filePath);
     return resp.status === 200;
@@ -144,7 +144,10 @@ export class Updater {
   };
 }
 
-export const browserUpdater = new Updater();
+export let browserUpdater = new Updater();
 export const updater = (): Updater => {
   return browserUpdater;
+};
+export const setUpdater = (updater: Updater) => {
+  browserUpdater = updater;
 };

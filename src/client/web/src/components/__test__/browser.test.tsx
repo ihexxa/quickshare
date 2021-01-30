@@ -1,74 +1,74 @@
+import * as React from "react";
 import { List, Map } from "immutable";
-import { mock, instance, anyString, when } from "ts-mockito";
+import { mock, instance, anyString, anything, when, verify } from "ts-mockito";
 
 import { ICoreState, initWithWorker, mockState } from "../core_state";
 import {
   makePromise,
   makeNumberResponse,
   mockUpdate,
+  addMockUpdate,
+  mockFileList,
 } from "../../test/helpers";
 import { Browser } from "../browser";
-import { Updater } from "../browser.updater";
+import { Updater, setUpdater } from "../browser.updater";
 import { MockUsersClient } from "../../client/users_mock";
 import { UsersClient } from "../../client/users";
 import { FilesClient } from "../../client/files";
 import { FilesClient as MockFilesClient } from "../../client/files_mock";
 import { MetadataResp, UploadInfo } from "../../client";
 import { MockWorker, UploadEntry } from "../../worker/interface";
-import { UploadMgr } from "../../worker/upload_mgr";
+import { UploadMgr, setUploadMgr } from "../../worker/upload_mgr";
 
 describe("Browser", () => {
   const mockWorkerClass = mock(MockWorker);
   const mockWorker = instance(mockWorkerClass);
 
-  test("Updater: setItems", async () => {
-    const tests = [
-      {
-        listResp: {
-          status: 200,
-          statusText: "",
-          data: {
-            metadatas: [
-              {
-                name: "file",
-                size: 1,
-                modTime: "1-1",
-                isDir: false,
-              },
-              {
-                name: "folder",
-                size: 0,
-                modTime: "1-1",
-                isDir: true,
-              },
-            ],
-          },
-        },
-        filePath: "path/file",
-      },
-    ];
+  test("Updater: addUploads: add each files to UploadMgr", async () => {
+    let coreState = mockState();
+    const UploadMgrClass = mock(UploadMgr);
+    const uploadMgr = instance(UploadMgrClass);
+    setUploadMgr(uploadMgr);
 
-    const usersClient = new MockUsersClient("");
-    const filesClient = new MockFilesClient("");
+    const filePaths = ["./file1", "./file2"];
+    const fileList = mockFileList(filePaths);
+    const updater = new Updater();
+    updater.setUploadings = (infos: Map<string, UploadEntry>) => {};
+    updater.init(coreState.panel.browser);
 
-    for (let i = 0; i < tests.length; i++) {
-      const tc = tests[i];
-      const updater = new Updater();
-      filesClient.listMock(makePromise(tc.listResp));
-      updater.setClients(usersClient, filesClient);
-      const coreState = initWithWorker(mockWorker);
-      updater.init(coreState.panel.browser);
+    updater.addUploads(fileList);
 
-      await updater.setItems(List<string>(tc.filePath.split("/")));
-      const newState = updater.setBrowser(coreState);
+    // it seems that new File will do some file path escaping, so just check call time here
+    verify(UploadMgrClass.add(anything(), anything())).times(filePaths.length);
+    // filePaths.forEach((filePath, i) => {
+    //   verify(UploadMgrClass.add(anything(), filePath)).once();
+    // });
+  });
 
-      newState.panel.browser.items.forEach((item, i) => {
-        expect(item.name).toEqual(tc.listResp.data.metadatas[i].name);
-        expect(item.size).toEqual(tc.listResp.data.metadatas[i].size);
-        expect(item.modTime).toEqual(tc.listResp.data.metadatas[i].modTime);
-        expect(item.isDir).toEqual(tc.listResp.data.metadatas[i].isDir);
-      });
-    }
+  test("Updater: deleteUploads: call UploadMgr and api to delete", async () => {
+    let coreState = mockState();
+    const UploadMgrClass = mock(UploadMgr);
+    const uploadMgr = instance(UploadMgrClass);
+    setUploadMgr(uploadMgr);
+
+    const updater = new Updater();
+    const filesClientClass = mock(FilesClient);
+    when(filesClientClass.deleteUploading(anyString())).thenResolve({
+      status: 200,
+      statusText: "",
+      data: "",
+    });
+    const filesClient = instance(filesClientClass);
+    const usersClientClass = mock(UsersClient);
+    const usersClient = instance(usersClientClass);
+    updater.init(coreState.panel.browser);
+    updater.setClients(usersClient, filesClient);
+
+    const filePath = "./path/file";
+    updater.deleteUpload(filePath);
+
+    verify(filesClientClass.deleteUploading(filePath)).once();
+    verify(UploadMgrClass.delete(filePath)).once();
   });
 
   test("Updater: delete", async () => {
@@ -139,6 +139,56 @@ describe("Browser", () => {
     }
   });
 
+  test("Updater: setItems", async () => {
+    const tests = [
+      {
+        listResp: {
+          status: 200,
+          statusText: "",
+          data: {
+            metadatas: [
+              {
+                name: "file",
+                size: 1,
+                modTime: "1-1",
+                isDir: false,
+              },
+              {
+                name: "folder",
+                size: 0,
+                modTime: "1-1",
+                isDir: true,
+              },
+            ],
+          },
+        },
+        filePath: "path/file",
+      },
+    ];
+
+    const usersClient = new MockUsersClient("");
+    const filesClient = new MockFilesClient("");
+
+    for (let i = 0; i < tests.length; i++) {
+      const tc = tests[i];
+      const updater = new Updater();
+      filesClient.listMock(makePromise(tc.listResp));
+      updater.setClients(usersClient, filesClient);
+      const coreState = initWithWorker(mockWorker);
+      updater.init(coreState.panel.browser);
+
+      await updater.setItems(List<string>(tc.filePath.split("/")));
+      const newState = updater.setBrowser(coreState);
+
+      newState.panel.browser.items.forEach((item, i) => {
+        expect(item.name).toEqual(tc.listResp.data.metadatas[i].name);
+        expect(item.size).toEqual(tc.listResp.data.metadatas[i].size);
+        expect(item.modTime).toEqual(tc.listResp.data.metadatas[i].modTime);
+        expect(item.isDir).toEqual(tc.listResp.data.metadatas[i].isDir);
+      });
+    }
+  });
+
   test("Updater: moveHere", async () => {
     const tests = [
       {
@@ -197,70 +247,36 @@ describe("Browser", () => {
     }
   });
 
-  xtest("Browser: deleteUploading", async () => {
-    interface TestCase {
-      deleteFile: string;
-      preState: ICoreState;
-      postState: ICoreState;
-    }
+  test("Browser: deleteUpload: tell uploader to deleteUpload and refreshUploadings", async () => {
+    let coreState = mockState();
+    addMockUpdate(coreState.panel.browser);
+    const component = new Browser(coreState.panel.browser);
+    const UpdaterClass = mock(Updater);
+    const mockUpdater = instance(UpdaterClass);
+    setUpdater(mockUpdater);
+    when(UpdaterClass.setItems(anything())).thenResolve();
+    when(UpdaterClass.deleteUpload(anyString())).thenResolve(true);
+    when(UpdaterClass.refreshUploadings()).thenResolve(true);
 
-    const tcs: any = [
-      {
-        deleteFile: "./path/file",
-        preState: {
-          browser: {
-            uploadings: List<UploadInfo>([
-              {
-                realFilePath: "./path/file",
-                size: 1,
-                uploaded: 0,
-              },
-            ]),
-            update: mockUpdate,
-          },
-        },
-        postState: {
-          browser: {
-            uploadings: List<UploadInfo>(),
-            update: mockUpdate,
-          },
-        },
-      },
-    ];
+    const filePath = "filePath";
+    await component.deleteUpload(filePath);
 
-    const setState = (patch: any, state: ICoreState): ICoreState => {
-      state.panel.browser = patch.browser;
-      return state;
-    };
+    verify(UpdaterClass.deleteUpload(filePath)).once();
+    verify(UpdaterClass.refreshUploadings()).once();
+  });
 
-    const mockFilesClientClass = mock(FilesClient);
-    when(mockFilesClientClass.deleteUploading(anyString())).thenResolve({
-      status: 200,
-      statusText: "",
-      data: "",
-    });
-    // TODO: the return should dpends on test case
-    when(mockFilesClientClass.listUploadings()).thenResolve({
-      status: 200,
-      statusText: "",
-      data: { uploadInfos: Array<UploadInfo>() },
-    });
+  test("Browser: stopUploading: tell updater to stopUploading", async () => {
+    let coreState = mockState();
+    addMockUpdate(coreState.panel.browser);
+    const component = new Browser(coreState.panel.browser);
+    const UpdaterClass = mock(Updater);
+    const mockUpdater = instance(UpdaterClass);
+    setUpdater(mockUpdater);
+    when(UpdaterClass.stopUploading(anyString())).thenReturn();
 
-    const mockUsersClientClass = mock(UsersClient);
+    const filePath = "filePath";
+    component.stopUploading(filePath);
 
-    // const mockFilesClient = instance(mockFilesClientClass);
-    // const mockUsersClient = instance(mockUsersClientClass);
-    // for (let tc of tcs) {
-    //   const preState = setState(tc.preState, mockState());
-    //   const postState = setState(tc.postState, mockState());
-    //   UploadMgr.delete = (filePath: string) => {};
-
-    //   const component = new Browser(preState.panel.browser);
-    //   Updater.init(preState.panel.browser);
-    //   Updater.setClients(mockUsersClient, mockFilesClient);
-
-    //   await component.deleteUploading(tc.deleteFile);
-    //   expect(Updater.props).toEqual(postState.panel.browser);
-    // }
+    verify(UpdaterClass.stopUploading(filePath)).once();
   });
 });
