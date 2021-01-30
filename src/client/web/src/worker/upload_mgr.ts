@@ -10,8 +10,9 @@ import {
   errKind,
   uploadInfoKind,
 } from "./interface";
+import { FgWorker } from "./upload.fgworker";
 
-const win = self as any;
+const win: Window = self as any;
 
 export interface IWorker {
   onmessage: (event: MessageEvent) => void;
@@ -19,51 +20,51 @@ export interface IWorker {
 }
 
 export class UploadMgr {
-  private static infos = Map<string, UploadEntry>();
-  private static worker: IWorker;
-  private static intervalID: NodeJS.Timeout;
-  private static cycle: number = 500;
-  private static statusCb = (infos: Map<string, UploadEntry>):void => {};
+  private infos = Map<string, UploadEntry>();
+  private worker: IWorker;
+  private intervalID: number;
+  private cycle: number = 500;
+  private statusCb = (infos: Map<string, UploadEntry>): void => {};
 
-  static _setInfos = (infos: Map<string, UploadEntry>) => {
-    UploadMgr.infos = infos;
-  };
-
-  static setCycle = (ms: number) => {
-    UploadMgr.cycle = ms;
-  };
-
-  static getCycle = (): number => {
-    return UploadMgr.cycle;
-  };
-
-  static setStatusCb = (cb: (infos: Map<string, UploadEntry>) => void) => {
-    UploadMgr.statusCb = cb;
-  }
-
-  static init = (worker: IWorker) => {
-    UploadMgr.worker = worker;
+  constructor(worker: IWorker) {
+    this.worker = worker;
     // TODO: fallback to normal if Web Worker is not available
-    UploadMgr.worker.onmessage = UploadMgr.respHandler;
+    this.worker.onmessage = this.respHandler;
 
     const syncing = () => {
-      UploadMgr.worker.postMessage({
+      this.worker.postMessage({
         kind: syncReqKind,
-        infos: UploadMgr.infos.valueSeq().toArray(),
+        infos: this.infos.valueSeq().toArray(),
       });
     };
-    UploadMgr.intervalID = win.setInterval(syncing, UploadMgr.cycle);
+    this.intervalID = win.setInterval(syncing, this.cycle);
+  }
+
+  destory = () => {
+    win.clearInterval(this.intervalID);
   };
 
-  static destory = () => {
-    win.clearInterval(UploadMgr.intervalID);
+  _setInfos = (infos: Map<string, UploadEntry>) => {
+    this.infos = infos;
   };
 
-  static add = (file: File, filePath: string) => {
-    const entry = UploadMgr.infos.get(filePath);
+  setCycle = (ms: number) => {
+    this.cycle = ms;
+  };
+
+  getCycle = (): number => {
+    return this.cycle;
+  };
+
+  setStatusCb = (cb: (infos: Map<string, UploadEntry>) => void) => {
+    this.statusCb = cb;
+  };
+
+  add = (file: File, filePath: string) => {
+    const entry = this.infos.get(filePath);
     if (entry == null) {
       // new uploading
-      UploadMgr.infos = UploadMgr.infos.set(filePath, {
+      this.infos = this.infos.set(filePath, {
         file: file,
         filePath: filePath,
         size: file.size,
@@ -73,17 +74,17 @@ export class UploadMgr {
       });
     } else {
       // restart the uploading
-      UploadMgr.infos = UploadMgr.infos.set(filePath, {
+      this.infos = this.infos.set(filePath, {
         ...entry,
         runnable: true,
       });
     }
   };
 
-  static stop = (filePath: string) => {
-    const entry = UploadMgr.infos.get(filePath);
+  stop = (filePath: string) => {
+    const entry = this.infos.get(filePath);
     if (entry != null) {
-      UploadMgr.infos = UploadMgr.infos.set(filePath, {
+      this.infos = this.infos.set(filePath, {
         ...entry,
         runnable: false,
       });
@@ -93,16 +94,16 @@ export class UploadMgr {
     }
   };
 
-  static delete = (filePath: string) => {
-    UploadMgr.stop(filePath);
-    UploadMgr.infos = UploadMgr.infos.delete(filePath);
+  delete = (filePath: string) => {
+    this.stop(filePath);
+    this.infos = this.infos.delete(filePath);
   };
 
-  static list = (): Map<string, UploadEntry> => {
-    return UploadMgr.infos;
+  list = (): Map<string, UploadEntry> => {
+    return this.infos;
   };
 
-  static respHandler = (event: MessageEvent) => {
+  respHandler = (event: MessageEvent) => {
     const resp = event.data as FileWorkerResp;
 
     switch (resp.kind) {
@@ -113,13 +114,13 @@ export class UploadMgr {
         break;
       case uploadInfoKind:
         const infoResp = resp as UploadInfoResp;
-        const entry = UploadMgr.infos.get(infoResp.filePath);
+        const entry = this.infos.get(infoResp.filePath);
 
         if (entry != null) {
           if (infoResp.uploaded === entry.size) {
-            UploadMgr.infos = UploadMgr.infos.delete(infoResp.filePath);
+            this.infos = this.infos.delete(infoResp.filePath);
           } else {
-            UploadMgr.infos = UploadMgr.infos.set(infoResp.filePath, {
+            this.infos = this.infos.set(infoResp.filePath, {
               ...entry,
               uploaded: infoResp.uploaded,
               runnable: infoResp.runnable,
@@ -128,13 +129,13 @@ export class UploadMgr {
           }
 
           // call back to update the info
-          UploadMgr.statusCb(UploadMgr.infos);
+          this.statusCb(this.infos);
         } else {
           // TODO: refine this
           console.error(
             `respHandler: fail to found: file(${
               infoResp.filePath
-            }) infos(${UploadMgr.infos.toObject()})`
+            }) infos(${this.infos.toObject()})`
           );
         }
         break;
@@ -143,3 +144,15 @@ export class UploadMgr {
     }
   };
 }
+
+export let uploadMgr = new UploadMgr(new FgWorker());
+export const initUploadMgr = (worker: IWorker): UploadMgr => {
+  uploadMgr = new UploadMgr(worker);
+  return uploadMgr;
+};
+export const Up = (): UploadMgr => {
+  return uploadMgr;
+};
+export const FgUp = (): UploadMgr => {
+  return new UploadMgr(new FgWorker());
+};

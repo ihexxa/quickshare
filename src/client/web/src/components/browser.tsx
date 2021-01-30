@@ -14,7 +14,7 @@ import {
 } from "../client";
 import { FilesClient } from "../client/files";
 import { UsersClient } from "../client/users";
-import { UploadMgr } from "../worker/upload_mgr";
+import { Up } from "../worker/upload_mgr";
 import { UploadEntry } from "../worker/interface";
 
 export const uploadCheckCycle = 1000;
@@ -79,7 +79,7 @@ export class Browser extends React.Component<Props, State, {}> {
       uploadInput.click();
     };
 
-    UploadMgr.setStatusCb(this.updateProgress);
+    Up().setStatusCb(this.updateProgress);
     updater()
       .setItems(p.dirPath)
       .then(() => {
