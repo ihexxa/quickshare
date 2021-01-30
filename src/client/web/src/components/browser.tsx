@@ -46,7 +46,7 @@ function getItemPath(dirPath: string, itemName: string): string {
 }
 
 export class Updater {
-  private static props: Props;
+  static props: Props;
   private static usersClient: IUsersClient;
   private static filesClient: IFilesClient;
 
@@ -160,8 +160,12 @@ export class Updater {
 
   static addUploadFiles = (fileList: FileList, len: number) => {
     for (let i = 0; i < len; i++) {
+      const filePath = getItemPath(
+        Updater.props.dirPath.join("/"),
+        fileList[i].name
+      );
       // do not wait for the promise
-      UploadMgr.add(fileList[i], fileList[i].name);
+      UploadMgr.add(fileList[i], filePath);
     }
     Updater.setUploadings(UploadMgr.list());
   };
@@ -215,9 +219,6 @@ export class Browser extends React.Component<Props, State, {}> {
       });
   }
 
-  // showPane = () => {
-  //   this.setState({ show: !this.state.show });
-  // };
   onInputChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ inputValue: ev.target.value });
   };
@@ -245,7 +246,15 @@ export class Browser extends React.Component<Props, State, {}> {
   };
 
   onMkDir = () => {
-    Updater.mkDir(this.state.inputValue)
+    if (this.state.inputValue === "") {
+      alert("folder name can not be empty");
+    }
+
+    const dirPath = getItemPath(
+      this.props.dirPath.join("/"),
+      this.state.inputValue
+    );
+    Updater.mkDir(dirPath)
       .then(() => {
         this.setState({ inputValue: "" });
         return Updater.setItems(this.props.dirPath);
@@ -433,7 +442,7 @@ export class Browser extends React.Component<Props, State, {}> {
               <button
                 onClick={() => this.select(item.name)}
                 className={`white-font ${isSelected ? "blue0-bg" : ""}`}
-                style={{width: "8rem", display: "inline-block"}}
+                style={{ width: "8rem", display: "inline-block" }}
               >
                 {isSelected ? "Deselect" : "Select"}
               </button>
@@ -467,7 +476,7 @@ export class Browser extends React.Component<Props, State, {}> {
                 type="button"
                 onClick={() => this.select(item.name)}
                 className={`white-font ${isSelected ? "blue0-bg" : ""}`}
-                style={{width: "8rem", display: "inline-block"}}
+                style={{ width: "8rem", display: "inline-block" }}
               >
                 {isSelected ? "Deselect" : "Select"}
               </button>

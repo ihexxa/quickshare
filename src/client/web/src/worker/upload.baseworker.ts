@@ -14,7 +14,7 @@ export class UploadWorker {
   private file: File = undefined;
   private filePath: string = undefined;
   private uploader: FileUploader = undefined;
-  sendEvent = (resp: FileWorkerResp):void => {
+  sendEvent = (resp: FileWorkerResp): void => {
     // TODO: make this abstract
     throw new Error("not implemented");
   };
@@ -30,6 +30,8 @@ export class UploadWorker {
   stopUploader = () => {
     if (this.uploader != null) {
       this.uploader.stop();
+      this.file = undefined;
+      this.filePath = undefined;
     }
   };
   getFilePath = (): string => {
@@ -49,6 +51,7 @@ export class UploadWorker {
         // find the first qualified task
         const syncReq = req as SyncReq;
         const infoArray = syncReq.infos;
+
         for (let i = 0; i < infoArray.length; i++) {
           if (
             infoArray[i].runnable &&
@@ -59,6 +62,11 @@ export class UploadWorker {
               this.startUploader(infoArray[i].file, infoArray[i].filePath);
             }
             break;
+          } else if (
+            !infoArray[i].runnable &&
+            infoArray[i].filePath == this.filePath
+          ) {
+            this.stopUploader();
           }
         }
         break;

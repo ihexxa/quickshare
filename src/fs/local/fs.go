@@ -99,6 +99,16 @@ func (fs *LocalFS) translate(name string) (string, error) {
 }
 
 func (fs *LocalFS) Create(path string) error {
+	fs.opensMtx.Lock()
+	defer fs.opensMtx.Unlock()
+	if len(fs.opens) > fs.opensLimit {
+		err := fs.closeOpens(true, map[string]bool{})
+		if err != nil {
+			return fmt.Errorf("too many opens and fail to clean: %w", err)
+		}
+		return ErrTooManyOpens
+	}
+
 	fullpath, err := fs.translate(path)
 	if err != nil {
 		return err
@@ -107,12 +117,6 @@ func (fs *LocalFS) Create(path string) error {
 	fd, err := os.OpenFile(fullpath, os.O_CREATE|os.O_RDWR|os.O_EXCL, fs.defaultPerm)
 	if err != nil {
 		return err
-	}
-
-	fs.opensMtx.Lock()
-	defer fs.opensMtx.Unlock()
-	if len(fs.opens) > fs.opensLimit {
-		return ErrTooManyOpens
 	}
 
 	fs.opens[fullpath] = &fileInfo{
