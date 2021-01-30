@@ -211,6 +211,25 @@ export class Browser extends React.Component<Props, State, {}> {
     });
   };
 
+  selectAll = () => {
+    let newSelected = Map<string, boolean>();
+    const someSelected = this.state.selectedItems.size === 0 ? true : false;
+    if (someSelected) {
+      this.props.items.forEach((item) => {
+        newSelected = newSelected.set(item.name, true);
+      });
+    } else {
+      this.props.items.forEach((item) => {
+        newSelected = newSelected.delete(item.name);
+      });
+    }
+
+    this.setState({
+      selectedSrc: this.props.dirPath.join("/"),
+      selectedItems: newSelected,
+    });
+  };
+
   render() {
     const breadcrumb = this.props.dirPath.map(
       (pathPart: string, key: number) => {
@@ -434,7 +453,15 @@ export class Browser extends React.Component<Props, State, {}> {
                   <td>Name</td>
                   <td className={sizeCellClass}>File Size</td>
                   <td className={modTimeCellClass}>Mod Time</td>
-                  <td>Edit</td>
+                  <td>
+                    <button
+                      onClick={() => this.selectAll()}
+                      className={`white-font`}
+                      style={{ width: "8rem", display: "inline-block" }}
+                    >
+                      Select All
+                    </button>
+                  </td>
                 </tr>
               </thead>
               <tbody>{itemList}</tbody>
