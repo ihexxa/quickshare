@@ -83,9 +83,9 @@ export class Browser extends React.Component<Props, State, {}> {
   };
 
   addUploads = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const fileList = List<File>();
+    let fileList = List<File>();
     for (let i = 0; i < event.target.files.length; i++) {
-      fileList.push(event.target.files[i]);
+      fileList = fileList.push(event.target.files[i]);
     }
     updater().addUploads(fileList);
     this.update(updater().setBrowser);

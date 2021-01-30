@@ -13,3 +13,6 @@
 **/*/quickshare.db
 **/*/files/
 **/*/uploadings/
+
+# misc
+dist
