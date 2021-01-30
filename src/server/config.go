@@ -62,7 +62,7 @@ func DefaultConfig() (string, error) {
 		Server: &ServerCfg{
 			Debug:          false,
 			Host:           "0.0.0.0",
-			Port:           8888,
+			Port:           8686,
 			ReadTimeout:    2000,
 			WriteTimeout:   1000 * 3600 * 24, // 1 day
 			MaxHeaderBytes: 512,

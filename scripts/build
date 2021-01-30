@@ -1,0 +1,8 @@
+export QSROOT=`pwd`
+rm -r dist && mkdir dist
+cd cmd
+go build -o $QSROOT/dist/quickshare
+cd $QSROOT/src/client/web
+yarn build
+cp -r $QSROOT/public $QSROOT/dist
+cd $QSROOT

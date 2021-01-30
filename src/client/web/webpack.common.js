@@ -65,12 +65,7 @@ module.exports = {
           chunks: "all",
           minChunks: 2,
           reuseExistingChunk: true,
-        },
-        // worker: {
-        //   name: "worker",
-        //   test: /[\\/]worker[\\/]/,
-        //   filename: "[name].bundle.js"
-        // }
+        }
       },
     },
   },

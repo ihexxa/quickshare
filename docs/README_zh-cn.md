@@ -1,12 +1,12 @@
 <h1 align="center">
-  [未完成!!!] Quickshare
+  Quickshare
 </h1>
 <p align="center">
-  简约的文件共享服务, 使用Go/Golang, Typescript, Gin, React, Boltdb等构建.
+  简单的文件共享服务, 使用Go/Golang, Typescript, Gin, React, Boltdb等构建.
 </p>
 <p align="center">
-  <a href="https://travis-ci.org/ihexxa/quickshare">
-    <img src="https://travis-ci.org/ihexxa/quickshare.svg?branch=main" />
+  <a href="https://github.com/ihexxa/quickshare/actions">
+    <img src="https://github.com/ihexxa/quickshare/workflows/quickshare-ci/badge.svg" />
   </a>
   <a href="https://goreportcard.com/report/github.com/ihexxa/quickshare">
     <img src="https://goreportcard.com/badge/github.com/ihexxa/quickshare" />
@@ -16,58 +16,35 @@
   </a>
 <p>
 
-![Quickshare 演示](../demo.jpg)
+![Quickshare on desktop](./imgs/desktop.jpeg)
+
+![Quickshare on mobile](./imgs/mobile.jpeg)
 
 选择语言: [English](../README.md) | 简体中文
 
-## 下载
+## 主要功能
 
-访问 [发布页](https://github.com/ihexxa/quickshare/releases) 获取 Linux | Mac | Windows 版本.
+- 在多个设备之间共享文件 (自适应 UI)
+- 兼容 Linux, Mac 和 Windows
+- 上传下载都支持断点续传
+- 在 Web 浏览器 中完成上传下载
 
-## 特点
+## 快速开始
 
-- 在浏览器中上传下载, 无需安装任何客户端
-- 在桌面电脑和移动设备件间共享文件
-- 绿色软件
-- 支持添加本地文件
-- 支持添加文件下载次数上限
-- 支持断点续传
+**下载**: 先下载最新版本 [发布页](https://github.com/ihexxa/quickshare/releases).
 
-## 安装
+**解压**: 将其解压, 并在运行命令 `./quickshare`. (你可能需要为它更新执行权限: 比如在 linux 上执行 `chmod u+x quickshare`)
 
-开始使用 quickshare 主要需要两步: 解压, 启动.
+**运行**: 在第一次运行时, Quickshare 会让你输入你的用户名 (这里输入的用户名是 quickshare), 并会为你生成密码. 它可能会输出类似下面内容 (这里密码是`2fdc98`):
 
-第一步, 解压下载包, 启动 quickshare.
+```
+Please input admin name: quickshare
+password is generated: 2fdc98, please update it after login
+user (quickshare) is created
+```
 
-### Linux
-
-- 解压包: `unzip [package].` (`[package]` 可以是`quickshare_0.0.8_linux_x86_6 4.zip`)
-- 进入文件夹, 启动 quickshare `./quickshare`
-
-### Mac
-
-- 解压包: `unzip [package].` (`[package]` 可以是`quickshare_0.0.8_macos_x86_6 4.zip`)
-- 进入文件夹, 启动 quickshare `./quickshare`
-
-### Windows
-
-- 解压包
-- 进入文件夹, 双击 `quickshare.exe` 启动 quickshare
-
-最后一步, 在浏览器中面基 quickshare.
-
-- Quickshare 会在启动后, 在命令中输出中显示 `quickshare starts @ [URL]` (举个栗子 `URL` 可以是 `192.168.0.1:8888`)
-- 在浏览器中打开 `URL` 并使用 `admin` 和 `quicksh@re` 登入
-- 开耍(不过别忘改密码[常见问题文档](./FAQ_zh-cn.md))
+**访问**: 最后, 打开你的浏览器并访问 `http://127.0.0.1:8686`.
 
 ### 常见问题
 
-请参考[常见问题文档](./FAQ_zh-cn.md)
-
-### 配置
-
-请参考[配置文档](./CONFIG_en-us.md)
-
-### 贡献代码
-
-待添加...
+敬请期待.
