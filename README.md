@@ -31,11 +31,11 @@ Choose Language: English | [简体中文](./docs/README_zh-cn.md)
 
 ## Quick Start
 
-Download last distribution(s) in [Release Page](https://github.com/ihexxa/quickshare/releases).
+**Downloading**: Download last distribution(s) in [Release Page](https://github.com/ihexxa/quickshare/releases).
 
-Unzip it and run following command `./quickshare`. (You may update its execution permission: e.g. run `chmod u+x quickshare` on Linux)
+**Unzipping**: Unzip it and run following command `./quickshare`. (You may update its execution permission: e.g. run `chmod u+x quickshare` on Linux)
 
-At the first run, Quickshare will let you input your user name and generate a random password for you (here `quickshare` is the user name). It may output something like following (password is `2fdc98`):
+**Starting**: At the first run, Quickshare will let you input your user name and generate a random password for you (here `quickshare` is the user name). It may output something like following (password is `2fdc98`):
 
 ```
 Please input admin name: quickshare
@@ -43,7 +43,7 @@ password is generated: 2fdc98, please update it after login
 user (quickshare) is created
 ```
 
-At last, open your browser and visit `http://127.0.0.1:8686`.
+**Accessing**: At last, open your browser and visit `http://127.0.0.1:8686`.
 
 ### FAQ
 

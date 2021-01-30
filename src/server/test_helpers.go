@@ -32,7 +32,7 @@ func startTestServer(config string) *Server {
 }
 
 func waitForReady(addr string) bool {
-	retry := 10
+	retry := 20
 	setCl := client.NewSettingsClient(addr)
 
 	for retry > 0 {

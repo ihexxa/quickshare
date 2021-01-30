@@ -9,7 +9,7 @@ import (
 )
 
 func TestSingleUserHandlers(t *testing.T) {
-	addr := "http://127.0.0.1:8888"
+	addr := "http://127.0.0.1:8686"
 	root := "testData"
 	config := `{
 		"users": {
