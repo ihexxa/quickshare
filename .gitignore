@@ -14,5 +14,6 @@
 **/*/files/
 **/*/uploadings/
 
-# misc
+# build
 dist
+tmp
