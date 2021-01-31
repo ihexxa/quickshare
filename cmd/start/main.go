@@ -27,8 +27,6 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println("cfg", opts.Configs)
-
 	cfg, err := gocfg.New(server.NewConfig()).Load(gocfg.JSONStr(defaultCfg))
 	if err != nil {
 		panic(err)

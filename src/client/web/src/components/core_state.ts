@@ -32,7 +32,6 @@ export function initWithWorker(worker: IWorker): ICoreState {
 }
 
 export function init(): ICoreState {
-  const scripts = Array.from(document.querySelectorAll("script"));
   const worker = Worker == null ? new FgWorker() : new BgWorker();
   initUploadMgr(worker);
 

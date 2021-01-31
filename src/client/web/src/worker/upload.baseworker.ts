@@ -57,10 +57,10 @@ export class UploadWorker {
             infoArray[i].runnable &&
             infoArray[i].uploaded < infoArray[i].size
           ) {
-            if (infoArray[i].filePath !== this.filePath) {
-              this.stopUploader();
-              this.startUploader(infoArray[i].file, infoArray[i].filePath);
-            }
+            // infoArray[i].filePath !== this.filePath, it may re-uploading a deleted file
+            // and it will stuck or the file will be renamed in the future
+            this.stopUploader();
+            this.startUploader(infoArray[i].file, infoArray[i].filePath);
             break;
           } else if (
             !infoArray[i].runnable &&

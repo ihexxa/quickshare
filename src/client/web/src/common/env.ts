@@ -5,3 +5,7 @@ export function alertMsg(msg: string) {
     console.log(msg);
   }
 }
+
+export function comfirmMsg(msg: string): boolean {
+  return confirm(msg);
+}
