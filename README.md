@@ -2,7 +2,7 @@
   Quickshare
 </h1>
 <p align="center">
-  Simple file sharing service built with Go/Golang, Typescript, Gin, React, Boltdb, etc.
+  Quick and simple file sharing between different devices.
 </p>
 <p align="center">
   <a href="https://github.com/ihexxa/quickshare/actions">
@@ -24,26 +24,55 @@ Choose Language: English | [简体中文](./docs/README_zh-cn.md)
 
 ## Main Features
 
-- Sharing files among different devices (Adaptive UI)
+- Sharing and accessing from different devices (Adaptive UI)
 - Be compatible with Linux, Mac and Windows
 - Stopping and resuming uploading/downloading
 - Do uploading and downloading in web browser
+- Manage files in browser or in OS
 
 ## Quick Start
 
-**Downloading**: Download last distribution(s) in [Release Page](https://github.com/ihexxa/quickshare/releases).
+### Run in docker
 
-**Unzipping**: Unzip it and run following command `./quickshare`. (You may update its execution permission: e.g. run `chmod u+x quickshare` on Linux)
+Following will start a `quickshare` docker and listen to `8686` port.
 
-**Starting**: At the first run, Quickshare will let you input your user name and generate a random password for you (here `quickshare` is the user name). It may output something like following (password is `2fdc98`):
+Then you can open `http://127.0.0.1:8686` and log in with user name `qs` and password `1234`:
 
 ```
-Please input admin name: quickshare
-password is generated: 2fdc98, please update it after login
-user (quickshare) is created
+docker run \
+    --name quickshare \
+    -d -p :8686:8686 \
+    -v `pwd`/quickshare/root:/quickshare/root \
+    -e DEFAULTADMIN=qs \
+    -e DEFAULTADMINPWD=1234 \
+    hexxa/quickshare:0.3.0 
 ```
 
-**Accessing**: At last, open your browser and visit `http://127.0.0.1:8686`.
+- `DEFAULTADMIN` is the default user name
+- `DEFAULTADMINPWD` is the default user password
+- `/quickshare/root` is where Quickshare stores files and directories.
+
+### Run from source code
+
+Before start, please ensure go/golang (>1.15), node.js and yarn are installed on your machine.
+
+```
+# clone this repo
+git clone git@github.com:ihexxa/quickshare.git
+
+# go to repo's folder
+cd quickshare
+
+DEFAULTADMIN=qs DEFAULTADMINPWD=1234 yarn start
+```
+
+OK! Open `http://127.0.0.1:8686` in browser, and log in with user name `qs` and password `1234`.
+
+### Run executable file
+
+- **Downloading**: Download last distribution(s) in [Release Page](https://github.com/ihexxa/quickshare/releases).
+- **Unzipping**: Unzip it and run following command `DEFAULTADMIN=qs DEFAULTADMINPWD=1234 ./quickshare`. (You may update its execution permission: e.g. run `chmod u+x quickshare`)
+- **Accessing**: At last, open `http://127.0.0.1:8686` in browser, and log in with user name `qs` and password `1234`.
 
 ### FAQ
 

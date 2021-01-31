@@ -46,6 +46,7 @@ type FileHandlers struct {
 
 func NewFileHandlers(cfg gocfg.ICfg, deps *depidx.Deps) (*FileHandlers, error) {
 	var err error
+
 	if err = deps.FS().MkdirAll(UploadDir); err != nil {
 		return nil, err
 	}
@@ -113,7 +114,7 @@ func (h *FileHandlers) Create(c *gin.Context) {
 	}
 	userName := c.MustGet(singleuserhdr.UserParam).(string)
 
-	tmpFilePath := getTmpPath(req.Path)
+	tmpFilePath := h.getTmpPath(req.Path)
 	locker := h.NewAutoLocker(c, lockName(userName, tmpFilePath))
 	locker.Exec(func() {
 		err := h.deps.FS().Create(tmpFilePath)
@@ -261,7 +262,7 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 	}
 	userName := c.MustGet(singleuserhdr.UserParam).(string)
 
-	tmpFilePath := getTmpPath(req.Path)
+	tmpFilePath := h.getTmpPath(req.Path)
 	locker := h.NewAutoLocker(c, lockName(userName, tmpFilePath))
 	locker.Exec(func() {
 		var err error
@@ -331,7 +332,7 @@ func (h *FileHandlers) UploadStatus(c *gin.Context) {
 	}
 	userName := c.MustGet(singleuserhdr.UserParam).(string)
 
-	tmpFilePath := getTmpPath(filePath)
+	tmpFilePath := h.getTmpPath(filePath)
 	locker := h.NewAutoLocker(c, lockName(userName, tmpFilePath))
 	locker.Exec(func() {
 		_, fileSize, uploaded, err := h.uploadMgr.GetInfo(userName, tmpFilePath)
@@ -468,7 +469,7 @@ func (h *FileHandlers) CopyDir(c *gin.Context) {
 	c.JSON(q.NewMsgResp(501, "Not Implemented"))
 }
 
-func getTmpPath(filePath string) string {
+func (h *FileHandlers) getTmpPath(filePath string) string {
 	return path.Join(UploadDir, fmt.Sprintf("%x", sha1.Sum([]byte(filePath))))
 }
 
@@ -504,7 +505,7 @@ func (h *FileHandlers) DelUploading(c *gin.Context) {
 	userName := c.MustGet(singleuserhdr.UserParam).(string)
 
 	var err error
-	tmpFilePath := getTmpPath(filePath)
+	tmpFilePath := h.getTmpPath(filePath)
 	locker := h.NewAutoLocker(c, lockName(userName, tmpFilePath))
 	locker.Exec(func() {
 		err = h.deps.FS().Remove(tmpFilePath)

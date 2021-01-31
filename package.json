@@ -4,7 +4,7 @@
     "src/client/web"
   ],
   "scripts": {
-    "build": "scripts/build",
-    "start": "go run cmd/start/main.go -c `pwd`/configs/dev.yml"
+    "build": "scripts/build.sh",
+    "start": "cd src/client/web/ && yarn && yarn build && cd ../../.. && go run cmd/start/main.go -c `pwd`/configs/dev.yml"
   }
 }
