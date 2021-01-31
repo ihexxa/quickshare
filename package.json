@@ -4,6 +4,7 @@
     "src/client/web"
   ],
   "scripts": {
-    "build": "scripts/build"
+    "build": "scripts/build",
+    "start": "go run cmd/start/main.go -c `pwd`/configs/dev.yml"
   }
 }

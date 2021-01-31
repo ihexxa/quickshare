@@ -28,6 +28,7 @@ type ServerCfg struct {
 	ReadTimeout    int    `json:"readTimeout"`
 	WriteTimeout   int    `json:"writeTimeout"`
 	MaxHeaderBytes int    `json:"maxHeaderBytes"`
+	PublicPath     string `json:"publicPath"`
 }
 
 type Config struct {
@@ -66,6 +67,7 @@ func DefaultConfig() (string, error) {
 			ReadTimeout:    2000,
 			WriteTimeout:   1000 * 3600 * 24, // 1 day
 			MaxHeaderBytes: 512,
+			PublicPath:     "public",
 		},
 	}
 

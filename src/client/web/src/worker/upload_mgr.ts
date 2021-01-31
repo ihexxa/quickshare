@@ -144,7 +144,7 @@ export class UploadMgr {
   };
 }
 
-export let uploadMgr = new UploadMgr(new FgWorker());
+export let uploadMgr: UploadMgr = undefined;
 export const initUploadMgr = (worker: IWorker): UploadMgr => {
   uploadMgr = new UploadMgr(worker);
   return uploadMgr;

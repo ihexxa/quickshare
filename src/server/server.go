@@ -4,8 +4,10 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/sha1"
+	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-contrib/static"
@@ -56,6 +58,22 @@ func NewServer(cfg gocfg.ICfg) (*Server, error) {
 	}, nil
 }
 
+func mkRoot(rootPath string) {
+	info, err := os.Stat(rootPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			err = os.MkdirAll(rootPath, 0760)
+			if err != nil {
+				panic(err)
+			}
+		} else {
+			panic(err)
+		}
+	} else if !info.IsDir() {
+		panic(fmt.Sprintf("can not create %s folder: there is a file with same name", rootPath))
+	}
+}
+
 func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	secret, ok := cfg.String("ENV.TOKENSECRET")
 	if !ok {
@@ -64,6 +82,7 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	}
 
 	rootPath := cfg.GrabString("Fs.Root")
+	mkRoot(rootPath)
 	opensLimit := cfg.GrabInt("Fs.OpensLimit")
 	openTTL := cfg.GrabInt("Fs.OpenTTL")
 
@@ -121,10 +140,15 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 		return nil, err
 	}
 
+	publicPath, ok := cfg.String("Server.PublicPath")
+	if !ok || publicPath == "" {
+		return nil, errors.New("publicPath not found or empty")
+	}
+
 	// middleware
 	router.Use(userHdrs.Auth())
 	// tmp static server
-	router.Use(static.Serve("/", static.LocalFile("../public", false)))
+	router.Use(static.Serve("/", static.LocalFile(publicPath, false)))
 
 	// handler
 	v1 := router.Group("/v1")

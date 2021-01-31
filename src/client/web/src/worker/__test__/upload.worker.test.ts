@@ -62,6 +62,12 @@ describe("upload.worker", () => {
         expectedUploaderStartInput: "file1",
         currentFilePath: "file0",
       },
+      {
+        infos: [makeEntry("file1", true)],
+        expectedUploadingFile: "file1",
+        expectedUploaderStartInput: "file1",
+        currentFilePath: "file1",
+      },
     ];
 
     for (let i = 0; i < tcs.length; i++) {

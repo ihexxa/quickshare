@@ -4,7 +4,7 @@ import { List, Map } from "immutable";
 import FileSize from "filesize";
 
 import { Layouter } from "./layouter";
-import { alertMsg } from "../common/env";
+import { alertMsg, comfirmMsg } from "../common/env";
 import { updater } from "./browser.updater";
 import { ICoreState } from "./core_state";
 import {
@@ -139,6 +139,11 @@ export class Browser extends React.Component<Props, State, {}> {
         selectedItems: Map<string, boolean>(),
       });
       return;
+    } else {
+      const filesToDel = this.state.selectedItems.keySeq().join(", ");
+      if (!comfirmMsg(`do you want to delete ${filesToDel}?`)) {
+        return;
+      }
     }
 
     updater()
