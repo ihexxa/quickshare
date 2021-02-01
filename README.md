@@ -32,7 +32,7 @@ Choose Language: English | [简体中文](./docs/README_zh-cn.md)
 
 ## Quick Start
 
-### Run in docker
+### Run in Docker
 
 Following will start a `quickshare` docker and listen to `8686` port.
 
@@ -54,7 +54,7 @@ docker run \
 
 ### Run from source code
 
-Before start, please ensure go/golang (>1.15), node.js and yarn are installed on your machine.
+Before start, please ensure Go/Golang (>1.15), Node.js and Yarn are installed on your machine.
 
 ```
 # clone this repo

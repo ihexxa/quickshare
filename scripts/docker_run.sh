@@ -4,4 +4,4 @@ docker run \
     -v `pwd`/quickshare/root:/quickshare/root \
     -e DEFAULTADMIN=qs \
     -e DEFAULTADMINPWD=1234 \
-    hexxa/quickshare:0.3.0 
+    hexxa/quickshare:0.3.0
