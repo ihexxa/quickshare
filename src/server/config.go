@@ -9,33 +9,33 @@ type FSConfig struct {
 }
 
 type UsersCfg struct {
-	EnableAuth      bool   `json:"enableAuth"`
-	DefaultAdmin    string `json:"defaultAdmin" cfg:"env"`
-	DefaultAdminPwd string `json:"defaultAdminPwd" cfg:"env"`
-	CookieTTL       int    `json:"cookieTTL"`
-	CookieSecure    bool   `json:"cookieSecure"`
-	CookieHttpOnly  bool   `json:"cookieHttpOnly"`
+	EnableAuth      bool   `json:"enableAuth" yaml:"enableAuth"`
+	DefaultAdmin    string `json:"defaultAdmin" yaml:"defaultAdmin" cfg:"env"`
+	DefaultAdminPwd string `json:"defaultAdminPwd" yaml:"defaultAdminPwd" cfg:"env"`
+	CookieTTL       int    `json:"cookieTTL" yaml:"cookieTTL"`
+	CookieSecure    bool   `json:"cookieSecure" yaml:"cookieSecure"`
+	CookieHttpOnly  bool   `json:"cookieHttpOnly" yaml:"cookieHttpOnly"`
 }
 
 type Secrets struct {
-	TokenSecret string `json:"tokenSecret" cfg:"env"`
+	TokenSecret string `json:"tokenSecret" yaml:"tokenSecret" cfg:"env"`
 }
 
 type ServerCfg struct {
-	Debug          bool   `json:"debug"`
-	Host           string `json:"host"`
-	Port           int    `json:"port"`
-	ReadTimeout    int    `json:"readTimeout"`
-	WriteTimeout   int    `json:"writeTimeout"`
-	MaxHeaderBytes int    `json:"maxHeaderBytes"`
-	PublicPath     string `json:"publicPath"`
+	Debug          bool   `json:"debug" yaml:"debug"`
+	Host           string `json:"host" yaml:"host"`
+	Port           int    `json:"port" yaml:"port"`
+	ReadTimeout    int    `json:"readTimeout" yaml:"readTimeout"`
+	WriteTimeout   int    `json:"writeTimeout" yaml:"writeTimeout"`
+	MaxHeaderBytes int    `json:"maxHeaderBytes" yaml:"maxHeaderBytes"`
+	PublicPath     string `json:"publicPath" yaml:"publicPath"`
 }
 
 type Config struct {
-	Fs      *FSConfig  `json:"fs"`
-	Secrets *Secrets   `json:"secrets"`
-	Server  *ServerCfg `json:"server"`
-	Users   *UsersCfg  `json:"users"`
+	Fs      *FSConfig  `json:"fs" yaml:"fs"`
+	Secrets *Secrets   `json:"secrets" yaml:"secrets"`
+	Server  *ServerCfg `json:"server" yaml:"server"`
+	Users   *UsersCfg  `json:"users" yaml:"users"`
 }
 
 func NewConfig() *Config {
@@ -45,7 +45,7 @@ func NewConfig() *Config {
 func DefaultConfig() (string, error) {
 	defaultCfg := &Config{
 		Fs: &FSConfig{
-			Root:       ".",
+			Root:       "root",
 			OpensLimit: 128,
 			OpenTTL:    60, // 1 min
 		},

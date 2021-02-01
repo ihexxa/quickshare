@@ -4,7 +4,8 @@
   "description": "web client for quickshare",
   "main": "",
   "scripts": {
-    "build": "yarn prod:addjs && webpack --config webpack.app.prod.js",
+    "build": "yarn prod:addjs && yarn build:prod:wp",
+    "build:prod:wp": "webpack --config webpack.app.prod.js",
     "build:watch": "webpack --config webpack.app.prod.js --watch",
     "build:dev": "yarn dev:addjs && webpack --config webpack.app.dev.js --watch",
     "test": "jest test --maxWorkers=2",
