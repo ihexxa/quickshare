@@ -1,4 +1,4 @@
-import { Map } from "immutable";
+import { Map, OrderedMap } from "immutable";
 
 import {
   FileWorkerReq,
@@ -20,7 +20,7 @@ export interface IWorker {
 }
 
 export class UploadMgr {
-  private infos = Map<string, UploadEntry>();
+  private infos = OrderedMap<string, UploadEntry>();
   private worker: IWorker;
   private intervalID: number;
   private cycle: number = 500;
@@ -44,7 +44,7 @@ export class UploadMgr {
     win.clearInterval(this.intervalID);
   };
 
-  _setInfos = (infos: Map<string, UploadEntry>) => {
+  _setInfos = (infos: OrderedMap<string, UploadEntry>) => {
     this.infos = infos;
   };
 
@@ -98,7 +98,7 @@ export class UploadMgr {
     this.infos = this.infos.delete(filePath);
   };
 
-  list = (): Map<string, UploadEntry> => {
+  list = (): OrderedMap<string, UploadEntry> => {
     return this.infos;
   };
 
@@ -128,7 +128,7 @@ export class UploadMgr {
           }
 
           // call back to update the info
-          this.statusCb(this.infos);
+          this.statusCb(this.infos.toMap());
         } else {
           // TODO: refine this
           console.error(

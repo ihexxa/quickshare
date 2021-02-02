@@ -53,20 +53,18 @@ export class UploadWorker {
         const infoArray = syncReq.infos;
 
         for (let i = 0; i < infoArray.length; i++) {
-          if (
-            infoArray[i].runnable &&
-            infoArray[i].uploaded < infoArray[i].size
-          ) {
-            // infoArray[i].filePath !== this.filePath, it may re-uploading a deleted file
-            // and it will stuck or the file will be renamed in the future
-            this.stopUploader();
-            this.startUploader(infoArray[i].file, infoArray[i].filePath);
+          if (infoArray[i].runnable) {
+            if (infoArray[i].filePath === this.filePath) {
+              // in uploading, do nothing
+            } else {
+              this.stopUploader();
+              this.startUploader(infoArray[i].file, infoArray[i].filePath);
+            }
             break;
-          } else if (
-            !infoArray[i].runnable &&
-            infoArray[i].filePath == this.filePath
-          ) {
-            this.stopUploader();
+          } else {
+            if (infoArray[i].filePath === this.filePath) {
+              this.stopUploader();
+            }
           }
         }
         break;
