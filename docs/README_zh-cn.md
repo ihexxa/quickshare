@@ -24,27 +24,56 @@
 
 ## 主要功能
 
-- 在多个设备之间共享文件 (自适应 UI)
+- 在多个设备之间共享和存取文件 (自适应 UI)
 - 兼容 Linux, Mac 和 Windows
 - 上传下载都支持断点续传
 - 在 Web 浏览器 中完成上传下载
+- 通过浏览器或者OS管理文件
 
 ## 快速开始
 
-**下载**: 先下载最新版本 [发布页](https://github.com/ihexxa/quickshare/releases).
+### 在Docker内运行
 
-**解压**: 将其解压, 并在运行命令 `./quickshare`. (你可能需要为它更新执行权限: 比如在 linux 上执行 `chmod u+x quickshare`)
+下面会启动一个 `quickshare` docker 并监听 `8686` 端口.
 
-**运行**: 在第一次运行时, Quickshare 会让你输入你的用户名 (这里输入的用户名是 quickshare), 并会为你生成密码. 它可能会输出类似下面内容 (这里密码是`2fdc98`):
+然后你可以打开 `http://127.0.0.1:8686` 并且使用用户名 `qs` 和 密码 `1234` 登入.
 
 ```
-Please input admin name: quickshare
-password is generated: 2fdc98, please update it after login
-user (quickshare) is created
+docker run \
+    --name quickshare \
+    -d -p :8686:8686 \
+    -v `pwd`/quickshare/root:/quickshare/root \
+    -e DEFAULTADMIN=qs \
+    -e DEFAULTADMINPWD=1234 \
+    hexxa/quickshare
 ```
 
-**访问**: 最后, 打开你的浏览器并访问 `http://127.0.0.1:8686`.
+- `DEFAULTADMIN` 是默认的用户名
+- `DEFAULTADMINPWD` 是默认的用户密码
+- `/quickshare/root` 是 Quickshare 保存文件和目录的地方.
+
+### 运行源代码
+
+在开始之前, 请确认 Go/Golang (>1.15), Node.js 和 Yarn 已经安装在您的机器.
+
+```
+# clone this repo
+git clone git@github.com:ihexxa/quickshare.git
+
+# go to repo's folder
+cd quickshare
+
+DEFAULTADMIN=qs DEFAULTADMINPWD=1234 yarn start
+```
+
+OK! 在浏览器中打开 `http://127.0.0.1:8686`, 并且使用用户名 `qs` 和 密码 `1234` 登入.
+
+### 运行可执行文件
+
+- **下载**: 下载最新的可执行文件 [Release Page](https://github.com/ihexxa/quickshare/releases).
+- **解压**: 解压并执行 `DEFAULTADMIN=qs DEFAULTADMINPWD=1234 ./quickshare`. (你可能需要更新它的执行权限, 比如运行 `chmod u+x quickshare`)
+- **访问**: 最后, 打开 `http://127.0.0.1:8686`, 并且使用用户名 `qs` 和 密码 `1234` 登入.
 
 ### 常见问题
 
-敬请期待.
+Coming soon.

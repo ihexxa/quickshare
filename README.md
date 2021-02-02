@@ -28,7 +28,7 @@ Choose Language: English | [简体中文](./docs/README_zh-cn.md)
 - Be compatible with Linux, Mac and Windows
 - Stopping and resuming uploading/downloading
 - Do uploading and downloading in web browser
-- Manage files in browser or in OS
+- Manage files through browser or OS
 
 ## Quick Start
 
@@ -45,7 +45,7 @@ docker run \
     -v `pwd`/quickshare/root:/quickshare/root \
     -e DEFAULTADMIN=qs \
     -e DEFAULTADMINPWD=1234 \
-    hexxa/quickshare:0.3.0 
+    hexxa/quickshare
 ```
 
 - `DEFAULTADMIN` is the default user name
@@ -54,7 +54,7 @@ docker run \
 
 ### Run from source code
 
-Before start, please ensure Go/Golang (>1.15), Node.js and Yarn are installed on your machine.
+Before start, please confirm Go/Golang (>1.15), Node.js and Yarn are installed on your machine.
 
 ```
 # clone this repo
