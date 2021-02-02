@@ -31,12 +31,8 @@ describe("upload.worker", () => {
     );
     when(mockUploaderClass.stop()).thenCall(() => {});
 
-    let currentUploader: FileUploader = undefined;
-    let uploaderFile: File = undefined;
-    let uploaderFilePath: string = undefined;
-    let uploaderStopFilePath: string = undefined;
-
     interface TestCase {
+      desc: string;
       infos: Array<UploadEntry>;
       expectedUploadingFile: string;
       expectedUploaderStartInput: string;
@@ -45,33 +41,41 @@ describe("upload.worker", () => {
 
     const tcs: Array<TestCase> = [
       {
+        desc: "add new uploadings when worker is in idle",
         infos: [makeEntry("file1", true), makeEntry("file2", true)],
+        currentFilePath: "",
         expectedUploadingFile: "file1",
         expectedUploaderStartInput: "file1",
-        currentFilePath: "",
       },
       {
+        desc: "add new uploadings when worker is in idle and skip some stopped files",
         infos: [makeEntry("file1", false), makeEntry("file2", true)],
+        currentFilePath: "",
         expectedUploadingFile: "file2",
         expectedUploaderStartInput: "file2",
-        currentFilePath: "",
       },
       {
-        infos: [makeEntry("file1", true), makeEntry("file0", true)],
+        desc: "current file should be stopped and start new uploading",
+        infos: [makeEntry("file0", false), makeEntry("file1", true)],
+        currentFilePath: "file0",
         expectedUploadingFile: "file1",
         expectedUploaderStartInput: "file1",
-        currentFilePath: "file0",
       },
       {
+        desc: "uploader should keep uploading if the first uploadable file is not changed",
         infos: [makeEntry("file1", true)],
         expectedUploadingFile: "file1",
-        expectedUploaderStartInput: "file1",
+        expectedUploaderStartInput: undefined,
         currentFilePath: "file1",
       },
     ];
 
     for (let i = 0; i < tcs.length; i++) {
       const uploadWorker = new UploadWorker();
+      let currentUploader: FileUploader = undefined;
+      let uploaderFile: File = undefined;
+      let uploaderFilePath: string = undefined;
+      let uploaderStopFilePath: string = undefined;
       uploadWorker.sendEvent = (_: FileWorkerResp) => {};
       uploadWorker.makeUploader = (
         file: File,
@@ -82,7 +86,6 @@ describe("upload.worker", () => {
         currentUploader = instance(mockUploaderClass);
         return currentUploader;
       };
-
       if (tcs[i].currentFilePath !== "") {
         uploadWorker.setFilePath(tcs[i].currentFilePath);
       }
@@ -96,6 +99,8 @@ describe("upload.worker", () => {
           data: req,
         })
       );
+
+      console.log(tcs[i].desc);
       expect(uploadWorker.getFilePath()).toEqual(tcs[i].expectedUploadingFile);
       expect(uploaderFilePath).toEqual(tcs[i].expectedUploaderStartInput);
     }
