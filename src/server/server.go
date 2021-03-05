@@ -8,11 +8,15 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/ihexxa/gocfg"
+	"github.com/natefinch/lumberjack"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/ihexxa/quickshare/src/cryptoutil/jwt"
 	"github.com/ihexxa/quickshare/src/depidx"
@@ -28,16 +32,16 @@ import (
 
 type Server struct {
 	server *http.Server
+	cfg    gocfg.ICfg
 	deps   *depidx.Deps
 }
 
 func NewServer(cfg gocfg.ICfg) (*Server, error) {
-	deps := initDeps(cfg)
-
 	if !cfg.BoolOr("Server.Debug", false) {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
+	deps := initDeps(cfg)
 	router := gin.Default()
 	router, err := initHandlers(router, cfg, deps)
 	if err != nil {
@@ -55,6 +59,7 @@ func NewServer(cfg gocfg.ICfg) (*Server, error) {
 	return &Server{
 		server: srv,
 		deps:   deps,
+		cfg:    cfg,
 	}, nil
 }
 
@@ -75,10 +80,12 @@ func mkRoot(rootPath string) {
 }
 
 func initDeps(cfg gocfg.ICfg) *depidx.Deps {
+	logger := initLogger(cfg)
+
 	secret, ok := cfg.String("ENV.TOKENSECRET")
 	if !ok {
 		secret = makeRandToken()
-		fmt.Println("warning: TOKENSECRET is not given, using generated token")
+		logger.Info("warning: TOKENSECRET is not given, using generated token")
 	}
 
 	rootPath := cfg.GrabString("Fs.Root")
@@ -96,6 +103,7 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	deps.SetToken(jwtEncDec)
 	deps.SetKV(kv)
 	deps.SetID(ider)
+	deps.SetLog(logger)
 
 	return deps
 }
@@ -109,7 +117,7 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 		adminName, ok := cfg.String("ENV.DEFAULTADMIN")
 		if !ok || adminName == "" {
 			// only write to stdout
-			fmt.Print("Please input admin name: ")
+			deps.Log().Info("Please input admin name: ")
 			fmt.Scanf("%s", &adminName)
 		}
 
@@ -127,7 +135,7 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 			return nil, err
 		}
 
-		fmt.Printf("user (%s) is created\n", adminName)
+		deps.Log().Info("user (%s) is created\n", adminName)
 	}
 
 	fileHdrs, err := fileshdr.NewFileHandlers(cfg, deps)
@@ -183,7 +191,36 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 	return router, nil
 }
 
+func initLogger(cfg gocfg.ICfg) *zap.SugaredLogger {
+	fileWriter := zapcore.AddSync(&lumberjack.Logger{
+		Filename:   filepath.Join(cfg.GrabString("Fs.Root"), "quickshare.log"),
+		MaxSize:    cfg.IntOr("Log.MaxSize", 50), // megabytes
+		MaxBackups: cfg.IntOr("Log.MaxBackups", 2),
+		MaxAge:     cfg.IntOr("Log.MaxAge", 31), // days
+	})
+	stdoutWriter := zapcore.AddSync(os.Stdout)
+
+	multiWriter := zapcore.NewMultiWriteSyncer(fileWriter, stdoutWriter)
+	gin.DefaultWriter = multiWriter
+	core := zapcore.NewCore(
+		zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
+		multiWriter,
+		zap.InfoLevel,
+	)
+	return zap.New(core).Sugar()
+}
+
 func (s *Server) Start() error {
+	s.deps.Log().Infow(
+		"quickshare is starting",
+		"hostname:port",
+		fmt.Sprintf(
+			"%s:%d",
+			s.cfg.GrabString("Server.Host"),
+			s.cfg.GrabInt("Server.Port"),
+		),
+	)
+
 	err := s.server.ListenAndServe()
 	if err != http.ErrServerClosed {
 		return err
@@ -193,6 +230,7 @@ func (s *Server) Start() error {
 
 func (s *Server) Shutdown() error {
 	// TODO: add timeout
+	s.deps.Log().Sync()
 	return s.server.Shutdown(context.Background())
 }
 

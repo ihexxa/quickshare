@@ -82,11 +82,11 @@ func (lk *AutoLocker) Exec(handler func()) {
 
 	defer func() {
 		if p := recover(); p != nil {
-			fmt.Println(p)
+			lk.h.deps.Log().Error(p)
 		}
 		if locked {
 			if err = kv.Unlock(lk.key); err != nil {
-				fmt.Println(err)
+				lk.h.deps.Log().Error(err)
 			}
 		}
 	}()
