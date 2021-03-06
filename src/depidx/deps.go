@@ -2,6 +2,7 @@ package depidx
 
 import (
 	"github.com/ihexxa/gocfg"
+	"go.uber.org/zap"
 
 	"github.com/ihexxa/quickshare/src/cryptoutil"
 	"github.com/ihexxa/quickshare/src/fs"
@@ -23,6 +24,7 @@ type Deps struct {
 	kv       kvstore.IKVStore
 	uploader IUploader
 	id       idgen.IIDGen
+	logger   *zap.SugaredLogger
 }
 
 func NewDeps(cfg gocfg.ICfg) *Deps {
@@ -59,4 +61,12 @@ func (deps *Deps) ID() idgen.IIDGen {
 
 func (deps *Deps) SetID(ider idgen.IIDGen) {
 	deps.id = ider
+}
+
+func (deps *Deps) Log() *zap.SugaredLogger {
+	return deps.logger
+}
+
+func (deps *Deps) SetLog(logger *zap.SugaredLogger) {
+	deps.logger = logger
 }

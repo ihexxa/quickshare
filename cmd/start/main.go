@@ -35,10 +35,8 @@ func main() {
 	if len(opts.Configs) > 0 {
 		for _, configPath := range opts.Configs {
 			if strings.HasSuffix(configPath, ".yml") || strings.HasSuffix(configPath, ".yaml") {
-				fmt.Printf("launching config: %s\n", configPath)
 				cfg, err = cfg.Load(gocfg.YAML(configPath))
 			} else if strings.HasSuffix(configPath, ".json") {
-				fmt.Printf("launching config: %s\n", configPath)
 				cfg, err = cfg.Load(gocfg.JSON(configPath))
 			} else {
 				panic(fmt.Sprintf("unknown config file type (.yml .yaml .json are supported): %s", configPath))
@@ -65,7 +63,6 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Printf("quickshare is listening %d\n", cfg.GrabInt("Server.Port"))
 	err = srv.Start()
 	if err != nil {
 		panic(err)
