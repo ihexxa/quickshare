@@ -394,8 +394,7 @@ func (h *FileHandlers) Download(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
-	// defer r.Close()
-	//  :=	r.(*os.File)
+	// reader will be closed by multipart response writer
 
 	// respond to normal requests
 	if ifRangeVal != "" || rangeVal == "" {
@@ -410,7 +409,6 @@ func (h *FileHandlers) Download(c *gin.Context) {
 		return
 	}
 
-	// pr, pw := io.Pipe()
 	mw, contentLength, err := multipart.NewResponseWriter(r, parts, false)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
@@ -418,14 +416,9 @@ func (h *FileHandlers) Download(c *gin.Context) {
 	}
 
 	go mw.Write()
-	// WriteResponse(r, pw, filePath, parts)
-	// if err != nil {
-	// 	c.JSON(q.ErrResp(c, 500, err))
-	// 	return
-	// }
 
 	extraHeaders := map[string]string{
-		// "Content-Disposition": fmt.Sprintf(`attachment; filename="%s"`, filePath),
+		"Content-Disposition": fmt.Sprintf(`attachment; filename="%s"`, info.Name()),
 	}
 	// it takes the \r\n before body into account, so contentLength+2
 	c.DataFromReader(206, contentLength+2, contentType, mw, extraHeaders)
