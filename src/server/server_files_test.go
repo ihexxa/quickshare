@@ -446,4 +446,53 @@ func TestFileHandlers(t *testing.T) {
 			t.Fatalf("info is not deleted, info len(%d)", len(lResp.UploadInfos))
 		}
 	})
+
+	t.Run("test uploading APIs: Create, Stop, UploadChunk)", func(t *testing.T) {
+		cl := client.NewFilesClient(addr)
+
+		files := map[string]string{
+			"uploadings/path1/f1": "12345678",
+		}
+
+		for filePath, content := range files {
+			fileSize := int64(len([]byte(content)))
+			res, _, errs := cl.Create(filePath, fileSize)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if res.StatusCode != 200 {
+				t.Fatal(res.StatusCode)
+			}
+
+			chunks := [][]byte{
+				[]byte(content)[:fileSize/2],
+				[]byte(content)[fileSize/2:],
+			}
+			offset := int64(0)
+			for _, chunk := range chunks {
+				base64Content := base64.StdEncoding.EncodeToString(chunk)
+				res, _, errs = cl.UploadChunk(filePath, base64Content, offset)
+				offset += int64(len(chunk))
+
+				if len(errs) > 0 {
+					t.Fatal(errs)
+				} else if res.StatusCode != 200 {
+					t.Fatal(res.StatusCode)
+				}
+			}
+
+			// TODO: check content
+			err = fs.Sync()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// metadata
+			_, mRes, errs := cl.Metadata(filePath)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if mRes.Size != fileSize {
+				t.Fatal("incorrect uploaded size", mRes)
+			}
+		}
+	})
 }
