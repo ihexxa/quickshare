@@ -478,9 +478,13 @@ func TestFileHandlers(t *testing.T) {
 				} else if res.StatusCode != 200 {
 					t.Fatal(res.StatusCode)
 				}
+
+				err = fs.Close()
+				if err != nil {
+					t.Fatal(err)
+				}
 			}
 
-			// TODO: check content
 			err = fs.Sync()
 			if err != nil {
 				t.Fatal(err)
@@ -493,6 +497,8 @@ func TestFileHandlers(t *testing.T) {
 			} else if mRes.Size != fileSize {
 				t.Fatal("incorrect uploaded size", mRes)
 			}
+
+			assetDownloadOK(t, filePath, content)
 		}
 	})
 }
