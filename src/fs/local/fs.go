@@ -185,7 +185,7 @@ func (fs *LocalFS) ReadAt(path string, b []byte, off int64) (int, error) {
 			}
 
 			// because the fd may be for other usage, its flag is not set as os.O_RDONLY
-			fd, err := os.OpenFile(fullpath, os.O_RDWR|os.O_APPEND, fs.defaultPerm)
+			fd, err := os.OpenFile(fullpath, os.O_RDWR, fs.defaultPerm)
 			if err != nil {
 				return nil, err
 			}
@@ -231,7 +231,7 @@ func (fs *LocalFS) WriteAt(path string, b []byte, off int64) (int, error) {
 			}
 
 			// it does NOT create file for writing
-			fd, err := os.OpenFile(fullpath, os.O_RDWR|os.O_APPEND, fs.defaultPerm)
+			fd, err := os.OpenFile(fullpath, os.O_RDWR, fs.defaultPerm)
 			if err != nil {
 				return nil, err
 			}
