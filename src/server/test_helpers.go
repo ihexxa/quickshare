@@ -38,7 +38,7 @@ func waitForReady(addr string) bool {
 	for retry > 0 {
 		_, _, errs := setCl.Health()
 		if len(errs) > 0 {
-			time.Sleep(100)
+			time.Sleep(100 * time.Millisecond)
 		} else {
 			return true
 		}
