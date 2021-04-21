@@ -98,13 +98,21 @@ func TestFileHandlers(t *testing.T) {
 			})
 		}
 
+		fileName := path.Base(filePath)
+		contentDispositionHeader := res.Header.Get("Content-Disposition")
 		if len(errs) > 0 {
 			t.Error(errs)
 			return false
-		} else if res.StatusCode != 200 && res.StatusCode != 206 {
+		}
+		if res.StatusCode != 200 && res.StatusCode != 206 {
 			t.Error(res.StatusCode)
 			return false
 		}
+		if contentDispositionHeader != fmt.Sprintf(`attachment; filename="%s"`, fileName) {
+			t.Errorf("incorrect Content-Disposition header: %s", contentDispositionHeader)
+			return false
+		}
+
 		switch rd {
 		case 0:
 			if body != content {

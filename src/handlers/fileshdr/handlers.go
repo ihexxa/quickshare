@@ -396,9 +396,13 @@ func (h *FileHandlers) Download(c *gin.Context) {
 	}
 	// reader will be closed by multipart response writer
 
+	extraHeaders := map[string]string{
+		"Content-Disposition": fmt.Sprintf(`attachment; filename="%s"`, info.Name()),
+	}
+
 	// respond to normal requests
 	if ifRangeVal != "" || rangeVal == "" {
-		c.DataFromReader(200, info.Size(), contentType, r, map[string]string{})
+		c.DataFromReader(200, info.Size(), contentType, r, extraHeaders)
 		return
 	}
 
@@ -417,9 +421,6 @@ func (h *FileHandlers) Download(c *gin.Context) {
 
 	go mw.Write()
 
-	extraHeaders := map[string]string{
-		"Content-Disposition": fmt.Sprintf(`attachment; filename="%s"`, info.Name()),
-	}
 	// it takes the \r\n before body into account, so contentLength+2
 	c.DataFromReader(206, contentLength+2, contentType, mw, extraHeaders)
 }
