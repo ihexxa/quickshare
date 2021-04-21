@@ -10,6 +10,7 @@ require (
 	github.com/ihexxa/gocfg v0.0.0-20201206115732-ab537e3b1086
 	github.com/ihexxa/multipart v0.0.0-20201207132919-72f6e0e58b25
 	github.com/jessevdk/go-flags v1.4.0
+	github.com/mitchellh/gox v1.0.1 // indirect
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/parnurzeal/gorequest v0.2.16
 	github.com/pkg/errors v0.9.1 // indirect
