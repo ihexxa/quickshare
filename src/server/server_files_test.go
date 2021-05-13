@@ -120,7 +120,6 @@ func TestFileHandlers(t *testing.T) {
 				return false
 			}
 		case 1:
-
 			if body[2:] != content { // body returned by gorequest contains the first CRLF
 				t.Errorf("body not equal got(%s) expect(%s)\n", body[2:], content)
 				return false
@@ -504,6 +503,74 @@ func TestFileHandlers(t *testing.T) {
 				t.Fatal(errs)
 			} else if mRes.Size != fileSize {
 				t.Fatal("incorrect uploaded size", mRes)
+			}
+
+			assetDownloadOK(t, filePath, content)
+		}
+	})
+
+	t.Run("test uploading APIs: Create and UploadChunk randomly)", func(t *testing.T) {
+		cl := client.NewFilesClient(addr)
+
+		files := map[string]string{
+			"uploadings/random/path1/f1": "12345678",
+			"uploadings/random/path1/f2": "87654321",
+			"uploadings/random/path1/f3": "17654321",
+		}
+
+		for filePath, content := range files {
+			fileSize := int64(len([]byte(content)))
+			res, _, errs := cl.Create(filePath, fileSize)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if res.StatusCode != 200 {
+				t.Fatal(res.StatusCode)
+			}
+		}
+
+		for filePath, content := range files {
+			fileSize := int64(len([]byte(content)))
+
+			chunks := [][]byte{
+				[]byte(content)[:fileSize/2],
+				[]byte(content)[fileSize/2:],
+			}
+			offset := int64(0)
+			for _, chunk := range chunks {
+				base64Content := base64.StdEncoding.EncodeToString(chunk)
+				res, _, errs := cl.UploadChunk(filePath, base64Content, offset)
+				offset += int64(len(chunk))
+
+				if len(errs) > 0 {
+					t.Fatal(errs)
+				} else if res.StatusCode != 200 {
+					t.Fatal(res.StatusCode)
+				}
+
+				err = fs.Close()
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			err = fs.Sync()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// metadata
+			_, mRes, errs := cl.Metadata(filePath)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if mRes.Size != fileSize {
+				t.Fatal("incorrect uploaded size", mRes)
+			}
+
+			isEqual, err := compareFileContent(fs, filePath, content)
+			if err != nil {
+				t.Fatalf("err comparing content: %s", err)
+			} else if !isEqual {
+				t.Fatalf("file content not equal: %s", filePath)
 			}
 
 			assetDownloadOK(t, filePath, content)
