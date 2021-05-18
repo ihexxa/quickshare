@@ -59,6 +59,7 @@
     "@types/react-svg": "^5.0.0",
     "@types/throttle-debounce": "^1.1.1",
     "axios": "^0.21.1",
+    "css-loader": "^5.0.0",
     "filesize": "^6.1.0",
     "immutable": "^4.0.0-rc.12",
     "react": "^16.8.6",
