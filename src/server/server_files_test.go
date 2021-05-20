@@ -149,6 +149,38 @@ func TestFileHandlers(t *testing.T) {
 		return true
 	}
 
+	t.Run("test uploading files with duplicated names", func(t *testing.T) {
+		files := map[string]string{
+			"dupdir/dup_file1":     "12345678",
+			"dupdir/dup_file2.ext": "12345678",
+		}
+		renames := map[string]string{
+			"dupdir/dup_file1":     "dupdir/dup_file1_1",
+			"dupdir/dup_file2.ext": "dupdir/dup_file2_1.ext",
+		}
+
+		for filePath, content := range files {
+			for i := 0; i < 2; i++ {
+				assertUploadOK(t, filePath, content)
+
+				err = fs.Sync()
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if i == 0 {
+					assetDownloadOK(t, filePath, content)
+				} else if i == 1 {
+					renamedFilePath, ok := renames[filePath]
+					if !ok {
+						t.Fatal("new name not found")
+					}
+					assetDownloadOK(t, renamedFilePath, content)
+				}
+			}
+		}
+	})
+
 	t.Run("test files APIs: Create-UploadChunk-UploadStatus-Metadata-Delete", func(t *testing.T) {
 		for filePath, content := range map[string]string{
 			"path1/f1.md":       "1111 1111 1111 1111",
@@ -397,7 +429,7 @@ func TestFileHandlers(t *testing.T) {
 		wg.Wait()
 	})
 
-	t.Run("test uploading APIs: Create, ListUploadings, DelUploading)", func(t *testing.T) {
+	t.Run("test uploading APIs: Create, ListUploadings, DelUploading", func(t *testing.T) {
 		files := map[string]string{
 			"uploadings/path1/f1":    "123456",
 			"uploadings/path1/path2": "12345678",
@@ -454,7 +486,7 @@ func TestFileHandlers(t *testing.T) {
 		}
 	})
 
-	t.Run("test uploading APIs: Create, Stop, UploadChunk)", func(t *testing.T) {
+	t.Run("test uploading APIs: Create, Stop, UploadChunk", func(t *testing.T) {
 		cl := client.NewFilesClient(addr)
 
 		files := map[string]string{
@@ -509,7 +541,7 @@ func TestFileHandlers(t *testing.T) {
 		}
 	})
 
-	t.Run("test uploading APIs: Create and UploadChunk randomly)", func(t *testing.T) {
+	t.Run("test uploading APIs: Create and UploadChunk randomly", func(t *testing.T) {
 		cl := client.NewFilesClient(addr)
 
 		files := map[string]string{
