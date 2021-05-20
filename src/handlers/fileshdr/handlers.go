@@ -296,7 +296,12 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 
 		// move the file from uploading dir to uploaded dir
 		if uploaded+int64(wrote) == fileSize {
-			fsFilePath := h.FsPath(req.Path)
+			fsFilePath, err := h.getFSFilePath(req.Path)
+			if err != nil {
+				c.JSON(q.ErrResp(c, 500, err))
+				return
+			}
+
 			err = h.deps.FS().Rename(tmpFilePath, fsFilePath)
 			if err != nil {
 				c.JSON(q.ErrResp(c, 500, fmt.Errorf("%s error: %w", req.Path, err)))
@@ -316,6 +321,38 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 			Uploaded: uploaded + int64(wrote),
 		})
 	})
+}
+
+func (h *FileHandlers) getFSFilePath(reqPath string) (string, error) {
+	fsFilePath := h.FsPath(reqPath)
+	_, err := h.deps.FS().Stat(fsFilePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return fsFilePath, nil
+		}
+		return "", err
+	}
+
+	// this file exists
+	maxDetect := 1024
+	for i := 1; i < maxDetect; i++ {
+		dir := path.Dir(fsFilePath)
+		nameAndExt := path.Base(fsFilePath)
+		ext := path.Ext(nameAndExt)
+		fileName := nameAndExt[:len(nameAndExt)-len(ext)]
+
+		detectPath := path.Join(dir, fmt.Sprintf("%s_%d%s", fileName, i, ext))
+		_, err := h.deps.FS().Stat(detectPath)
+		if err != nil {
+			if os.IsNotExist(err) {
+				return detectPath, nil
+			} else {
+				return "", err
+			}
+		}
+	}
+
+	return "", fmt.Errorf("found more than %d duplicated files", maxDetect)
 }
 
 type UploadStatusResp struct {
