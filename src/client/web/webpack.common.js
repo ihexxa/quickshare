@@ -6,6 +6,7 @@ const TerserPlugin = require("terser-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
   .BundleAnalyzerPlugin;
 
+
 module.exports = {
   module: {
     rules: [
@@ -23,19 +24,7 @@ module.exports = {
         loader: "ts-loader",
         include: [path.resolve(__dirname, "src")],
         exclude: [/node_modules/, /\.test\.(ts|tsx)$/],
-      },
-      {
-        test: /\.css$/,
-        use: [
-          "style-loader",
-          {
-            loader: "css-loader",
-            options: {
-              url: false,
-            },
-          },
-        ],
-      },
+      }
     ],
   },
   resolve: {
