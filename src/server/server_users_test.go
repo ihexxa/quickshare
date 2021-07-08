@@ -1,11 +1,13 @@
 package server
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
 	"github.com/ihexxa/quickshare/src/client"
 	su "github.com/ihexxa/quickshare/src/handlers/singleuserhdr"
+	"github.com/ihexxa/quickshare/src/userstore"
 )
 
 func TestSingleUserHandlers(t *testing.T) {
@@ -38,14 +40,14 @@ func TestSingleUserHandlers(t *testing.T) {
 	srv := startTestServer(config)
 	defer srv.Shutdown()
 
-	suCl := client.NewSingleUserClient(addr)
+	usersCl := client.NewSingleUserClient(addr)
 
 	if !waitForReady(addr) {
 		t.Fatal("fail to start server")
 	}
 
-	t.Run("test single user APIs: Login-SetPwd-Logout-Login", func(t *testing.T) {
-		resp, _, errs := suCl.Login(adminName, adminPwd)
+	t.Run("test users APIs: Login-SetPwd-Logout-Login", func(t *testing.T) {
+		resp, _, errs := usersCl.Login(adminName, adminPwd)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
@@ -54,21 +56,56 @@ func TestSingleUserHandlers(t *testing.T) {
 
 		token := client.GetCookie(resp.Cookies(), su.TokenCookie)
 
-		resp, _, errs = suCl.SetPwd(adminPwd, adminNewPwd, token)
+		resp, _, errs = usersCl.SetPwd(adminPwd, adminNewPwd, token)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
 			t.Fatal(resp.StatusCode)
 		}
 
-		resp, _, errs = suCl.Logout(token)
+		resp, _, errs = usersCl.Logout(token)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
 			t.Fatal(resp.StatusCode)
 		}
 
-		resp, _, errs = suCl.Login(adminName, adminNewPwd)
+		resp, _, errs = usersCl.Login(adminName, adminNewPwd)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+	})
+
+	t.Run("test users APIs: Login-AddUser-Logout-Login", func(t *testing.T) {
+		resp, _, errs := usersCl.Login(adminName, adminNewPwd)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+
+		token := client.GetCookie(resp.Cookies(), su.TokenCookie)
+
+		userName, userPwd := "user", "1234"
+		resp, auResp, errs := usersCl.AddUser(userName, userPwd, userstore.UserRole, token)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+		// TODO: check id
+		fmt.Printf("new user id: %v\n", auResp)
+
+		resp, _, errs = usersCl.Logout(token)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+
+		resp, _, errs = usersCl.Login(userName, userPwd)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {

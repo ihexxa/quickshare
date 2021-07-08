@@ -12,6 +12,7 @@ import (
 
 	"github.com/ihexxa/quickshare/src/depidx"
 	q "github.com/ihexxa/quickshare/src/handlers"
+	"github.com/ihexxa/quickshare/src/userstore"
 )
 
 var (
@@ -159,11 +160,53 @@ func (h *MultiUsersSvc) SetPwd(c *gin.Context) {
 	c.JSON(q.Resp(200))
 }
 
+type AddUserReq struct {
+	Name string `json:"name"`
+	Pwd  string `json:"pwd"`
+	Role string `json:"role"`
+}
+
+type AddUserResp struct {
+	ID string `json:"id"`
+}
+
 func (h *MultiUsersSvc) AddUser(c *gin.Context) {
-	// pwdHash, err := bcrypt.GenerateFromPassword([]byte(user.Pwd), 10)
-	// if err != nil {
-	// 	return err
-	// }
+	req := &AddUserReq{}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(q.ErrResp(c, 400, err))
+		return
+	}
+	// TODO: check privilege?
+
+	// TODO: do more comprehensive validation
+	// Role and duplicated name will be validated by the store
+	if len(req.Name) < 2 {
+		c.JSON(q.ErrResp(c, 400, errors.New("name length must be greater than 2")))
+		return
+	} else if len(req.Name) < 3 {
+		c.JSON(q.ErrResp(c, 400, errors.New("password length must be greater than 2")))
+		return
+	}
+
+	uid := h.deps.ID().Gen()
+	pwdHash, err := bcrypt.GenerateFromPassword([]byte(req.Pwd), 10)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
+	err = h.deps.Users().AddUser(&userstore.User{
+		ID:   uid,
+		Name: req.Name,
+		Pwd:  string(pwdHash),
+		Role: req.Role,
+	})
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
+	c.JSON(200, &AddUserResp{ID: fmt.Sprint(uid)})
 }
 
 func (h *MultiUsersSvc) getUserInfo(c *gin.Context) (map[string]string, error) {
