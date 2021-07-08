@@ -17,17 +17,19 @@ import (
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/ihexxa/quickshare/src/cryptoutil/jwt"
 	"github.com/ihexxa/quickshare/src/depidx"
 	"github.com/ihexxa/quickshare/src/fs"
 	"github.com/ihexxa/quickshare/src/fs/local"
 	"github.com/ihexxa/quickshare/src/handlers/fileshdr"
+	"github.com/ihexxa/quickshare/src/handlers/multiusers"
 	"github.com/ihexxa/quickshare/src/handlers/settings"
-	"github.com/ihexxa/quickshare/src/handlers/singleuserhdr"
 	"github.com/ihexxa/quickshare/src/idgen/simpleidgen"
 	"github.com/ihexxa/quickshare/src/kvstore"
 	"github.com/ihexxa/quickshare/src/kvstore/boltdbpvd"
+	"github.com/ihexxa/quickshare/src/userstore"
 )
 
 type Server struct {
@@ -97,11 +99,16 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	filesystem := local.NewLocalFS(rootPath, 0660, opensLimit, openTTL)
 	jwtEncDec := jwt.NewJWTEncDec(secret)
 	kv := boltdbpvd.New(rootPath, 1024)
+	users, err := userstore.NewKVUserStore(kv)
+	if err != nil {
+		panic(fmt.Sprintf("fail to init user store: %s", err))
+	}
 
 	deps := depidx.NewDeps(cfg)
 	deps.SetFS(filesystem)
 	deps.SetToken(jwtEncDec)
 	deps.SetKV(kv)
+	deps.SetUsers(users)
 	deps.SetID(ider)
 	deps.SetLog(logger)
 
@@ -109,7 +116,7 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 }
 
 func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.Engine, error) {
-	userHdrs, err := singleuserhdr.NewSimpleUserHandlers(cfg, deps)
+	userHdrs, err := multiusers.NewMultiUsersSvc(cfg, deps)
 	if err != nil {
 		return nil, err
 	}
@@ -130,8 +137,12 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 			// only write to stdout
 			fmt.Printf("password is generated: %s, please update it after login\n", adminPwd)
 		}
-		adminPwd, err := userHdrs.Init(adminName, adminPwd)
+
+		pwdHash, err := bcrypt.GenerateFromPassword([]byte(adminPwd), 10)
 		if err != nil {
+			return nil, err
+		}
+		if _, err := userHdrs.Init(adminName, string(pwdHash)); err != nil {
 			return nil, err
 		}
 

@@ -3,6 +3,7 @@ package multiusers
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -16,20 +17,13 @@ import (
 var (
 	ErrInvalidUser   = errors.New("invalid user name or password")
 	ErrInvalidConfig = errors.New("invalid user config")
+	UserIDParam      = "uid"
 	UserParam        = "user"
 	PwdParam         = "pwd"
 	NewPwdParam      = "newpwd"
 	RoleParam        = "role"
 	ExpireParam      = "expire"
-	InitTimeParam    = "initTime"
 	TokenCookie      = "tk"
-	AdminRole        = "admin"
-	UserRole         = "user"
-	VisitorRole      = "visitor"
-	InitNs           = "usersInit"
-	UsersNs          = "users"
-	PwdsNs           = "pwds"
-	RolesNs          = "roles"
 )
 
 type MultiUsersSvc struct {
@@ -38,40 +32,25 @@ type MultiUsersSvc struct {
 }
 
 func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error) {
-	var err error
-	if err = deps.KV().AddNamespace(InitNs); err != nil {
-		return nil, err
-	}
-	if err = deps.KV().AddNamespace(UsersNs); err != nil {
-		return nil, err
-	}
-	if err = deps.KV().AddNamespace(RolesNs); err != nil {
-		return nil, err
-	}
-
 	return &MultiUsersSvc{
 		cfg:  cfg,
 		deps: deps,
 	}, nil
 }
 
+func (h *MultiUsersSvc) Init(adminName, adminPwd string) (string, error) {
+	// TODO: return "" for being compatible with singleuser service, should remove this
+	err := h.deps.Users().Init(adminName, adminPwd)
+	return "", err
+}
+
 func (h *MultiUsersSvc) IsInited() bool {
-	_, ok := h.deps.KV().GetStringIn(InitNs, InitTimeParam)
-	return ok
+	return h.deps.Users().IsInited()
 }
 
 type LoginReq struct {
 	User string `json:"user"`
 	Pwd  string `json:"pwd"`
-}
-
-func (h *MultiUsersSvc) checkPwd(user, pwd string) error {
-	expectedHash, ok := h.deps.KV().GetStringIn(UsersNs, user)
-	if !ok {
-		return ErrInvalidConfig
-	}
-
-	return bcrypt.CompareHashAndPassword([]byte(expectedHash), []byte(pwd))
 }
 
 func (h *MultiUsersSvc) Login(c *gin.Context) {
@@ -81,20 +60,23 @@ func (h *MultiUsersSvc) Login(c *gin.Context) {
 		return
 	}
 
-	if err := h.checkPwd(req.User, req.Pwd); err != nil {
+	user, err := h.deps.Users().GetUserByName(req.User)
+	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
 
-	role, ok := h.deps.KV().GetStringIn(RolesNs, req.User)
-	if !ok {
-		c.JSON(q.ErrResp(c, 501, ErrInvalidConfig))
+	err = bcrypt.CompareHashAndPassword([]byte(user.Pwd), []byte(req.Pwd))
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
+
 	ttl := h.cfg.GrabInt("Users.CookieTTL")
 	token, err := h.deps.Token().ToToken(map[string]string{
-		UserParam:   req.User,
-		RoleParam:   role,
+		UserIDParam: fmt.Sprint(user.ID),
+		UserParam:   user.Name,
+		RoleParam:   user.Role,
 		ExpireParam: fmt.Sprintf("%d", time.Now().Unix()+int64(ttl)),
 	})
 	if err != nil {
@@ -109,8 +91,7 @@ func (h *MultiUsersSvc) Login(c *gin.Context) {
 	c.JSON(q.Resp(200))
 }
 
-type LogoutReq struct {
-}
+type LogoutReq struct{}
 
 func (h *MultiUsersSvc) Logout(c *gin.Context) {
 	// token alreay verified in the authn middleware
@@ -146,13 +127,18 @@ func (h *MultiUsersSvc) SetPwd(c *gin.Context) {
 		return
 	}
 
-	expectedHash, ok := h.deps.KV().GetStringIn(UsersNs, claims[UserParam])
-	if !ok {
-		c.JSON(q.ErrResp(c, 500, ErrInvalidConfig))
+	uid, err := strconv.ParseUint(claims[UserIDParam], 10, 64)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+	user, err := h.deps.Users().GetUser(uid)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 401, err))
 		return
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(expectedHash), []byte(req.OldPwd))
+	err = bcrypt.CompareHashAndPassword([]byte(user.Pwd), []byte(req.OldPwd))
 	if err != nil {
 		c.JSON(q.ErrResp(c, 401, ErrInvalidUser))
 		return
@@ -163,13 +149,21 @@ func (h *MultiUsersSvc) SetPwd(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 500, errors.New("fail to set password")))
 		return
 	}
-	err = h.deps.KV().SetStringIn(UsersNs, claims[UserParam], string(newHash))
+
+	err = h.deps.Users().SetPwd(uid, string(newHash))
 	if err != nil {
-		c.JSON(q.ErrResp(c, 500, ErrInvalidConfig))
+		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
 
 	c.JSON(q.Resp(200))
+}
+
+func (h *MultiUsersSvc) AddUser(c *gin.Context) {
+	// pwdHash, err := bcrypt.GenerateFromPassword([]byte(user.Pwd), 10)
+	// if err != nil {
+	// 	return err
+	// }
 }
 
 func (h *MultiUsersSvc) getUserInfo(c *gin.Context) (map[string]string, error) {
@@ -180,6 +174,7 @@ func (h *MultiUsersSvc) getUserInfo(c *gin.Context) (map[string]string, error) {
 	claims, err := h.deps.Token().FromToken(
 		tokenStr,
 		map[string]string{
+			UserIDParam: "",
 			UserParam:   "",
 			RoleParam:   "",
 			ExpireParam: "",
@@ -187,7 +182,7 @@ func (h *MultiUsersSvc) getUserInfo(c *gin.Context) (map[string]string, error) {
 	)
 	if err != nil {
 		return nil, err
-	} else if claims[UserParam] == "" {
+	} else if claims[UserIDParam] == "" || claims[UserParam] == "" {
 		return nil, ErrInvalidConfig
 	}
 

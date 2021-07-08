@@ -1,4 +1,4 @@
-package multiusers
+package userstore
 
 import (
 	"io/ioutil"
@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/ihexxa/quickshare/src/kvstore/boltdbpvd"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func TestUserStores(t *testing.T) {
@@ -20,7 +19,7 @@ func TestUserStores(t *testing.T) {
 		if root.Name != rootName {
 			t.Fatal("root user not found")
 		}
-		if err = bcrypt.CompareHashAndPassword([]byte(root.Pwd), []byte(rootPwd)); err != nil {
+		if root.Pwd != rootPwd {
 			t.Fatalf("passwords not match %s", err)
 		}
 		if root.Role != AdminRole {
@@ -45,7 +44,7 @@ func TestUserStores(t *testing.T) {
 		if user.Name != name1 {
 			t.Fatalf("names not matched %s %s", name1, user.Name)
 		}
-		if err = bcrypt.CompareHashAndPassword([]byte(user.Pwd), []byte(pwd1)); err != nil {
+		if user.Pwd != pwd1 {
 			t.Fatalf("passwords not match %s", err)
 		}
 		if user.Role != role1 {
@@ -72,13 +71,26 @@ func TestUserStores(t *testing.T) {
 		if user.Name != name2 {
 			t.Fatalf("names not matched %s %s", name2, user.Name)
 		}
-		if err = bcrypt.CompareHashAndPassword([]byte(user.Pwd), []byte(pwd2)); err != nil {
+		if user.Pwd != pwd2 {
 			t.Fatalf("passwords not match %s", err)
 		}
 		if user.Role != role2 {
 			t.Fatalf("roles not matched %s %s", role2, user.Role)
 		}
 
+		user, err = store.GetUserByName(name2)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if user.ID != id {
+			t.Fatalf("ids not matched %d %d", id, user.ID)
+		}
+		if user.Pwd != pwd2 {
+			t.Fatalf("passwords not match %s", err)
+		}
+		if user.Role != role2 {
+			t.Fatalf("roles not matched %s %s", role2, user.Role)
+		}
 	}
 
 	t.Run("testing KVUserStore", func(t *testing.T) {
@@ -91,8 +103,11 @@ func TestUserStores(t *testing.T) {
 		kvstore := boltdbpvd.New(rootPath, 1024)
 		defer kvstore.Close()
 
-		store, err := NewKVUserStore(kvstore, rootName, rootPwd)
+		store, err := NewKVUserStore(kvstore)
 		if err != nil {
+			t.Fatal("fail to new kvstore", err)
+		}
+		if err = store.Init(rootName, rootPwd); err != nil {
 			t.Fatal("fail to init kvstore", err)
 		}
 
