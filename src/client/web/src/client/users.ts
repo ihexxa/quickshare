@@ -1,6 +1,5 @@
 import { BaseClient, Response } from "./";
 
-
 export class UsersClient extends BaseClient {
   constructor(url: string) {
     super(url);
@@ -15,7 +14,7 @@ export class UsersClient extends BaseClient {
         pwd,
       },
     });
-  }
+  };
 
   // token cookie is set by browser
   logout = (): Promise<Response> => {
@@ -23,14 +22,14 @@ export class UsersClient extends BaseClient {
       method: "post",
       url: `${this.url}/v1/users/logout`,
     });
-  }
+  };
 
   isAuthed = (): Promise<Response> => {
     return this.do({
       method: "get",
       url: `${this.url}/v1/users/isauthed`,
     });
-  }
+  };
 
   // token cookie is set by browser
   setPwd = (oldPwd: string, newPwd: string): Promise<Response> => {
@@ -42,5 +41,18 @@ export class UsersClient extends BaseClient {
         newPwd,
       },
     });
-  }
+  };
+
+  // token cookie is set by browser
+  adduser = (name: string, pwd: string, role: string): Promise<Response> => {
+    return this.do({
+      method: "post",
+      url: `${this.url}/v1/users/`,
+      data: {
+        name,
+        pwd,
+        role,
+      },
+    });
+  };
 }
