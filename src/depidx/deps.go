@@ -8,6 +8,7 @@ import (
 	"github.com/ihexxa/quickshare/src/fs"
 	"github.com/ihexxa/quickshare/src/idgen"
 	"github.com/ihexxa/quickshare/src/kvstore"
+	"github.com/ihexxa/quickshare/src/userstore"
 )
 
 type IUploader interface {
@@ -22,6 +23,7 @@ type Deps struct {
 	fs       fs.ISimpleFS
 	token    cryptoutil.ITokenEncDec
 	kv       kvstore.IKVStore
+	users    userstore.IUserStore
 	uploader IUploader
 	id       idgen.IIDGen
 	logger   *zap.SugaredLogger
@@ -69,4 +71,12 @@ func (deps *Deps) Log() *zap.SugaredLogger {
 
 func (deps *Deps) SetLog(logger *zap.SugaredLogger) {
 	deps.logger = logger
+}
+
+func (deps *Deps) Users() userstore.IUserStore {
+	return deps.users
+}
+
+func (deps *Deps) SetUsers(users userstore.IUserStore) {
+	deps.users = users
 }

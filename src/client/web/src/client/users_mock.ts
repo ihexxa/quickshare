@@ -7,6 +7,7 @@ export class MockUsersClient {
   private logoutMockResp: Promise<Response>;
   private isAuthedMockResp: Promise<Response>;
   private setPwdMockResp: Promise<Response>;
+  private addUserMockResp: Promise<Response>;
 
   constructor(url: string) {
     this.url = url;
@@ -24,6 +25,9 @@ export class MockUsersClient {
   setPwdMock = (resp: Promise<Response>) => {
     this.setPwdMockResp = resp;
   }
+  addUserMock = (resp: Promise<Response>) => {
+    this.addUserMockResp = resp;
+  }
 
   login = (user: string, pwd: string): Promise<Response> => {
     return this.loginMockResp;
@@ -39,6 +43,10 @@ export class MockUsersClient {
 
   setPwd = (oldPwd: string, newPwd: string): Promise<Response> => {
     return this.setPwdMockResp;
+  }
+
+  addUser = (name: string, pwd: string, role: string): Promise<Response> => {
+    return this.addUserMockResp;
   }
 
 }
