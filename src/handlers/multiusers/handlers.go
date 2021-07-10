@@ -176,7 +176,6 @@ func (h *MultiUsersSvc) AddUser(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 400, err))
 		return
 	}
-	// TODO: check privilege?
 
 	// TODO: do more comprehensive validation
 	// Role and duplicated name will be validated by the store
