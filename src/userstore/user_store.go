@@ -21,6 +21,7 @@ const (
 	NamesNs     = "users"
 	PwdsNs      = "pwds"
 	RolesNs     = "roles"
+	RoleListNs  = "roleList"
 	InitTimeKey = "initTime"
 )
 
@@ -40,6 +41,9 @@ type IUserStore interface {
 	SetName(id uint64, name string) error
 	SetPwd(id uint64, pwd string) error
 	SetRole(id uint64, role string) error
+	AddRole(role string) error
+	DelRole(role string) error
+	ListRoles() (map[string]bool, error)
 }
 
 type KVUserStore struct {
@@ -57,6 +61,7 @@ func NewKVUserStore(store kvstore.IKVStore) (*KVUserStore, error) {
 			PwdsNs,
 			RolesNs,
 			InitNs,
+			RoleListNs,
 		} {
 			if err = store.AddNamespace(nsName); err != nil {
 				return nil, err
@@ -71,7 +76,8 @@ func NewKVUserStore(store kvstore.IKVStore) (*KVUserStore, error) {
 }
 
 func (us *KVUserStore) Init(rootName, rootPwd string) error {
-	err := us.AddUser(&User{
+	var err error
+	err = us.AddUser(&User{
 		ID:   0,
 		Name: rootName,
 		Pwd:  rootPwd,
@@ -79,6 +85,13 @@ func (us *KVUserStore) Init(rootName, rootPwd string) error {
 	})
 	if err != nil {
 		return err
+	}
+
+	for _, role := range []string{AdminRole, UserRole, VisitorRole} {
+		err = us.AddRole(role)
+		if err != nil {
+			return err
+		}
 	}
 
 	return us.store.SetStringIn(InitNs, InitTimeKey, fmt.Sprintf("%d", time.Now().Unix()))
@@ -243,4 +256,34 @@ func (us *KVUserStore) SetRole(id uint64, role string) error {
 	}
 
 	return us.store.SetStringIn(RolesNs, userID, role)
+}
+
+func (us *KVUserStore) AddRole(role string) error {
+	us.mtx.Lock()
+	defer us.mtx.Unlock()
+
+	_, ok := us.store.GetBoolIn(RoleListNs, role)
+	if ok {
+		return fmt.Errorf("role (%s) exists", role)
+	}
+
+	return us.store.SetBoolIn(RoleListNs, role, true)
+}
+
+func (us *KVUserStore) DelRole(role string) error {
+	us.mtx.Lock()
+	defer us.mtx.Unlock()
+
+	if role == AdminRole || role == UserRole || role == VisitorRole {
+		return errors.New("predefined roles can not be deleted")
+	}
+
+	return us.store.DelBoolIn(RoleListNs, role)
+}
+
+func (us *KVUserStore) ListRoles() (map[string]bool, error) {
+	us.mtx.Lock()
+	defer us.mtx.Unlock()
+
+	return us.store.ListBoolsIn(RoleListNs)
 }

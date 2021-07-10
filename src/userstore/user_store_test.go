@@ -11,7 +11,7 @@ import (
 func TestUserStores(t *testing.T) {
 	rootName, rootPwd := "root", "rootPwd"
 
-	testUserStore := func(t *testing.T, store IUserStore) {
+	testUserMethods := func(t *testing.T, store IUserStore) {
 		root, err := store.GetUser(0)
 		if err != nil {
 			t.Fatal(err)
@@ -93,6 +93,47 @@ func TestUserStores(t *testing.T) {
 		}
 	}
 
+	testRoleMethods := func(t *testing.T, store IUserStore) {
+		roles := []string{"role1", "role2"}
+		var err error
+		for _, role := range roles {
+			err = store.AddRole(role)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+
+		roleMap, err := store.ListRoles()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		for _, role := range append(roles, []string{
+			AdminRole, UserRole, VisitorRole,
+		}...) {
+			if !roleMap[role] {
+				t.Fatalf("role(%s) not found", role)
+			}
+		}
+
+		for _, role := range roles {
+			err = store.DelRole(role)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+
+		roleMap, err = store.ListRoles()
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, role := range roles {
+			if roleMap[role] {
+				t.Fatalf("role(%s) should not exist", role)
+			}
+		}
+	}
+
 	t.Run("testing KVUserStore", func(t *testing.T) {
 		rootPath, err := ioutil.TempDir("./", "quickshare_userstore_test_")
 		if err != nil {
@@ -111,6 +152,7 @@ func TestUserStores(t *testing.T) {
 			t.Fatal("fail to init kvstore", err)
 		}
 
-		testUserStore(t, store)
+		testUserMethods(t, store)
+		testRoleMethods(t, store)
 	})
 }
