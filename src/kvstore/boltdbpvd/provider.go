@@ -77,10 +77,14 @@ func (bp *BoltPvd) Close() error {
 }
 
 func (bp *BoltPvd) GetBool(key string) (bool, bool) {
+	return bp.GetBoolIn("bools", key)
+}
+
+func (bp *BoltPvd) GetBoolIn(ns, key string) (bool, bool) {
 	buf, ok := make([]byte, 1), false
 
 	bp.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("bools"))
+		b := tx.Bucket([]byte(ns))
 		v := b.Get([]byte(key))
 		copy(buf, v)
 		ok = v != nil
@@ -92,21 +96,50 @@ func (bp *BoltPvd) GetBool(key string) (bool, bool) {
 }
 
 func (bp *BoltPvd) SetBool(key string, val bool) error {
+	return bp.SetBoolIn("bools", key, val)
+}
+
+func (bp *BoltPvd) SetBoolIn(ns, key string, val bool) error {
 	var bVal byte = 0
 	if val {
 		bVal = 1
 	}
 	return bp.db.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("bools"))
+		b := tx.Bucket([]byte(ns))
 		return b.Put([]byte(key), []byte{bVal})
 	})
 }
 
 func (bp *BoltPvd) DelBool(key string) error {
+	return bp.DelBoolIn("bools", key)
+}
+
+func (bp *BoltPvd) DelBoolIn(ns, key string) error {
 	return bp.db.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("bools"))
+		b := tx.Bucket([]byte(ns))
 		return b.Delete([]byte(key))
 	})
+}
+
+func (bp *BoltPvd) ListBools() (map[string]bool, error) {
+	return bp.ListBoolsIn("bools")
+}
+
+func (bp *BoltPvd) ListBoolsIn(ns string) (map[string]bool, error) {
+	list := map[string]bool{}
+	err := bp.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(ns))
+		if b == nil {
+			return ErrBucketNotFound
+		}
+
+		b.ForEach(func(k, v []byte) error {
+			list[string(k)] = (v[0] == 1)
+			return nil
+		})
+		return nil
+	})
+	return list, err
 }
 
 func (bp *BoltPvd) GetInt(key string) (int, bool) {
@@ -195,7 +228,7 @@ func (bp *BoltPvd) ListInt64sIn(ns string) (map[string]int64, error) {
 			if n < 0 {
 				return fmt.Errorf("fail to parse int64 for key (%s)", k)
 			}
-			list[fmt.Sprintf("%s", k)] = x
+			list[string(k)] = x
 			return nil
 		})
 		return nil
@@ -340,7 +373,7 @@ func (bp *BoltPvd) ListStringsIn(ns string) (map[string]string, error) {
 		}
 
 		b.ForEach(func(k, v []byte) error {
-			kv[fmt.Sprintf("%s", k)] = fmt.Sprintf("%s", v)
+			kv[string(k)] = string(v)
 			return nil
 		})
 		return nil
