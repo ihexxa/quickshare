@@ -178,9 +178,11 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 	usersAPI.GET("/isauthed", userHdrs.IsAuthed)
 	usersAPI.PATCH("/pwd", userHdrs.SetPwd)
 	usersAPI.POST("/", userHdrs.AddUser)
-	usersAPI.POST("/roles", userHdrs.AddRole)
-	usersAPI.DELETE("/roles", userHdrs.DelRole)
-	usersAPI.GET("/roles", userHdrs.ListRoles)
+
+	rolesAPI := v1.Group("/roles")
+	rolesAPI.POST("/", userHdrs.AddRole)
+	rolesAPI.DELETE("/", userHdrs.DelRole)
+	rolesAPI.GET("/", userHdrs.ListRoles)
 
 	filesAPI := v1.Group("/fs")
 	filesAPI.POST("/files", fileHdrs.Create)

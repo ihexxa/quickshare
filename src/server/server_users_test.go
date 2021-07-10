@@ -112,4 +112,62 @@ func TestSingleUserHandlers(t *testing.T) {
 			t.Fatal(resp.StatusCode)
 		}
 	})
+
+	t.Run("test roles APIs: Login-AddRole-ListRoles-DelRole-ListRoles", func(t *testing.T) {
+		resp, _, errs := usersCl.Login(adminName, adminNewPwd)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+
+		token := client.GetCookie(resp.Cookies(), su.TokenCookie)
+		roles := []string{"role1", "role2"}
+
+		for _, role := range roles {
+			resp, _, errs := usersCl.AddRole(role, token)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if resp.StatusCode != 200 {
+				t.Fatal(resp.StatusCode)
+			}
+		}
+
+		resp, lsResp, errs := usersCl.ListRoles(token)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+		for _, role := range append(roles, []string{
+			userstore.AdminRole,
+			userstore.UserRole,
+			userstore.VisitorRole,
+		}...) {
+			if !lsResp.Roles[role] {
+				t.Fatalf("role(%s) not found", role)
+			}
+		}
+
+		for _, role := range roles {
+			resp, _, errs := usersCl.DelRole(role, token)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if resp.StatusCode != 200 {
+				t.Fatal(resp.StatusCode)
+			}
+		}
+
+		resp, lsResp, errs = usersCl.ListRoles(token)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+		for _, role := range roles {
+			if lsResp.Roles[role] {
+				t.Fatalf("role(%s) should not exist", role)
+			}
+		}
+	})
 }

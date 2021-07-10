@@ -61,11 +61,50 @@ func (cl *SingleUserClient) AddUser(name, pwd, role string, token *http.Cookie) 
 		}).
 		End()
 
+	if len(errs) > 0 {
+		return nil, nil, errs
+	}
+
 	auResp := &multiusers.AddUserResp{}
 	err := json.Unmarshal([]byte(body), auResp)
 	if err != nil {
 		errs = append(errs, err)
 		return nil, nil, errs
 	}
-	return resp, auResp, nil
+	return resp, auResp, errs
+}
+
+func (cl *SingleUserClient) AddRole(role string, token *http.Cookie) (*http.Response, string, []error) {
+	return cl.r.Post(cl.url("/v1/roles/")).
+		AddCookie(token).
+		Send(multiusers.AddRoleReq{
+			Role: role,
+		}).
+		End()
+}
+
+func (cl *SingleUserClient) DelRole(role string, token *http.Cookie) (*http.Response, string, []error) {
+	return cl.r.Delete(cl.url("/v1/roles/")).
+		AddCookie(token).
+		Send(multiusers.DelRoleReq{
+			Role: role,
+		}).
+		End()
+}
+
+func (cl *SingleUserClient) ListRoles(token *http.Cookie) (*http.Response, *multiusers.ListRolesResp, []error) {
+	resp, body, errs := cl.r.Get(cl.url("/v1/roles/")).
+		AddCookie(token).
+		End()
+	if len(errs) > 0 {
+		return nil, nil, errs
+	}
+
+	lsResp := &multiusers.ListRolesResp{}
+	err := json.Unmarshal([]byte(body), lsResp)
+	if err != nil {
+		errs = append(errs, err)
+		return nil, nil, errs
+	}
+	return resp, lsResp, errs
 }
