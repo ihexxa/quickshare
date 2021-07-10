@@ -15,6 +15,7 @@ func TestKVStoreProviders(t *testing.T) {
 	var err error
 	var ok bool
 	key, boolV, intV, int64V, floatV, stringV := "key", true, 2027, int64(2027), 3.1415, "foobar"
+	key2, boolV2 := "key2", false
 
 	kvstoreTest := func(store kvstore.IKVStore, t *testing.T) {
 		// test bools
@@ -25,6 +26,19 @@ func TestKVStoreProviders(t *testing.T) {
 		err = store.SetBool(key, boolV)
 		if err != nil {
 			t.Errorf("there should be no error %v", err)
+		}
+		err = store.SetBool(key2, boolV2)
+		if err != nil {
+			t.Errorf("there should be no error %v", err)
+		}
+		boolList, err := store.ListBools()
+		if err != nil {
+			t.Errorf("there should be no error %v", err)
+		}
+		if boolList[key] != boolV {
+			t.Error("listBool incorrect val1")
+		} else if boolList[key2] != boolV2 {
+			t.Error("listBool incorrect val2")
 		}
 		boolVGot, ok := store.GetBool(key)
 		if !ok {

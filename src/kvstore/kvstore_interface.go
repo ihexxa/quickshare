@@ -9,8 +9,13 @@ type IKVStore interface {
 	AddNamespace(nsName string) error
 	DelNamespace(nsName string) error
 	GetBool(key string) (bool, bool)
+	GetBoolIn(ns, key string) (bool, bool)
 	SetBool(key string, val bool) error
+	SetBoolIn(ns, key string, val bool) error
 	DelBool(key string) error
+	DelBoolIn(ns, key string) error
+	ListBools() (map[string]bool, error)
+	ListBoolsIn(ns string) (map[string]bool, error)
 	GetInt(key string) (int, bool)
 	SetInt(key string, val int) error
 	DelInt(key string) error
