@@ -208,6 +208,73 @@ func (h *MultiUsersSvc) AddUser(c *gin.Context) {
 	c.JSON(200, &AddUserResp{ID: fmt.Sprint(uid)})
 }
 
+type AddRoleReq struct {
+	Role string `json:"role"`
+}
+
+func (h *MultiUsersSvc) AddRole(c *gin.Context) {
+	req := &AddRoleReq{}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(q.ErrResp(c, 400, err))
+		return
+	}
+
+	// TODO: do more comprehensive validation
+	if len(req.Role) < 2 {
+		c.JSON(q.ErrResp(c, 400, errors.New("name length must be greater than 2")))
+		return
+	}
+
+	err := h.deps.Users().AddRole(req.Role)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
+	c.JSON(q.Resp(200))
+}
+
+type DelRoleReq struct {
+	Role string `json:"role"`
+}
+
+func (h *MultiUsersSvc) DelRole(c *gin.Context) {
+	req := &DelRoleReq{}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(q.ErrResp(c, 400, err))
+		return
+	}
+
+	// TODO: do more comprehensive validation
+	if len(req.Role) < 2 {
+		c.JSON(q.ErrResp(c, 400, errors.New("name length must be greater than 2")))
+		return
+	}
+
+	err := h.deps.Users().DelRole(req.Role)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
+	c.JSON(q.Resp(200))
+}
+
+type ListRolesReq struct{}
+type ListRolesResp struct {
+	Roles map[string]bool `json:"roles"`
+}
+
+func (h *MultiUsersSvc) ListRoles(c *gin.Context) {
+	roles, err := h.deps.Users().ListRoles()
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
+	c.JSON(200, &ListRolesResp{Roles: roles})
+}
+
 func (h *MultiUsersSvc) getUserInfo(c *gin.Context) (map[string]string, error) {
 	tokenStr, err := c.Cookie(TokenCookie)
 	if err != nil {
