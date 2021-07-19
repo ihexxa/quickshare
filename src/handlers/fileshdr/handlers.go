@@ -514,7 +514,7 @@ type ListResp struct {
 func (h *FileHandlers) List(c *gin.Context) {
 	dirPath := c.Query(ListDirQuery)
 	if dirPath == "" {
-		c.JSON(q.ErrResp(c, 402, errors.New("incorrect path name")))
+		c.JSON(q.ErrResp(c, 400, errors.New("incorrect path name")))
 		return
 	}
 	role := c.MustGet(q.RoleParam).(string)
@@ -526,6 +526,26 @@ func (h *FileHandlers) List(c *gin.Context) {
 
 	// dirPath = q.FsPath(userID, dirPath)
 	infos, err := h.deps.FS().ListDir(dirPath)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+	metadatas := []*MetadataResp{}
+	for _, info := range infos {
+		metadatas = append(metadatas, &MetadataResp{
+			Name:    info.Name(),
+			Size:    info.Size(),
+			ModTime: info.ModTime(),
+			IsDir:   info.IsDir(),
+		})
+	}
+
+	c.JSON(200, &ListResp{Metadatas: metadatas})
+}
+
+func (h *FileHandlers) ListHome(c *gin.Context) {
+	userID := c.MustGet(q.UserIDParam).(string)
+	infos, err := h.deps.FS().ListDir(userID)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return

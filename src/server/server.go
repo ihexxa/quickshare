@@ -195,6 +195,7 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 	filesAPI.PATCH("/files/move", fileHdrs.Move)
 
 	filesAPI.GET("/dirs", fileHdrs.List)
+	filesAPI.GET("/dirs/home", fileHdrs.ListHome)
 	filesAPI.POST("/dirs", fileHdrs.Mkdir)
 	// files.POST("/dirs/copy", fileHdrs.CopyDir)
 
