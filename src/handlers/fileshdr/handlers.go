@@ -1,7 +1,6 @@
 package fileshdr
 
 import (
-	"crypto/sha1"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -18,14 +17,9 @@ import (
 
 	"github.com/ihexxa/quickshare/src/depidx"
 	q "github.com/ihexxa/quickshare/src/handlers"
-	"github.com/ihexxa/quickshare/src/handlers/singleuserhdr"
 )
 
 var (
-	// dirs
-	UploadDir = "uploadings"
-	FsDir     = "files"
-
 	// queries
 	FilePathQuery = "fp"
 	ListDirQuery  = "dp"
@@ -45,20 +39,11 @@ type FileHandlers struct {
 }
 
 func NewFileHandlers(cfg gocfg.ICfg, deps *depidx.Deps) (*FileHandlers, error) {
-	var err error
-
-	if err = deps.FS().MkdirAll(UploadDir); err != nil {
-		return nil, err
-	}
-	if err = deps.FS().MkdirAll(FsDir); err != nil {
-		return nil, err
-	}
-
 	return &FileHandlers{
 		cfg:       cfg,
 		deps:      deps,
 		uploadMgr: NewUploadMgr(deps.KV()),
-	}, err
+	}, nil
 }
 
 type AutoLocker struct {
@@ -95,7 +80,6 @@ func (lk *AutoLocker) Exec(handler func()) {
 		lk.c.JSON(q.ErrResp(lk.c, 500, errors.New("fail to lock the file")))
 		return
 	}
-	locked = true
 
 	locked = true
 	handler()
@@ -112,10 +96,10 @@ func (h *FileHandlers) Create(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
-	userName := c.MustGet(singleuserhdr.UserParam).(string)
+	userID := c.MustGet(q.UserIDParam).(string)
 
-	tmpFilePath := h.getTmpPath(req.Path)
-	locker := h.NewAutoLocker(c, lockName(userName, tmpFilePath))
+	tmpFilePath := q.GetTmpPath(userID, req.Path)
+	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {
 		err := h.deps.FS().Create(tmpFilePath)
 		if err != nil {
@@ -126,13 +110,13 @@ func (h *FileHandlers) Create(c *gin.Context) {
 			}
 			return
 		}
-		err = h.uploadMgr.AddInfo(userName, req.Path, tmpFilePath, req.FileSize)
+		err = h.uploadMgr.AddInfo(userID, req.Path, tmpFilePath, req.FileSize)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
 		}
 
-		fileDir := h.FsPath(filepath.Dir(req.Path))
+		fileDir := q.FsPath(userID, filepath.Dir(req.Path))
 		err = h.deps.FS().MkdirAll(fileDir)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
@@ -150,7 +134,8 @@ func (h *FileHandlers) Delete(c *gin.Context) {
 		return
 	}
 
-	filePath = h.FsPath(filePath)
+	userID := c.MustGet(q.UserIDParam).(string)
+	filePath = q.FsPath(userID, filePath)
 	err := h.deps.FS().Remove(filePath)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
@@ -174,7 +159,8 @@ func (h *FileHandlers) Metadata(c *gin.Context) {
 		return
 	}
 
-	filePath = h.FsPath(filePath)
+	userID := c.MustGet(q.UserIDParam).(string)
+	filePath = q.FsPath(userID, filePath)
 	info, err := h.deps.FS().Stat(filePath)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
@@ -200,7 +186,8 @@ func (h *FileHandlers) Mkdir(c *gin.Context) {
 		return
 	}
 
-	dirPath := h.FsPath(req.Path)
+	userID := c.MustGet(q.UserIDParam).(string)
+	dirPath := q.FsPath(userID, req.Path)
 	err := h.deps.FS().MkdirAll(dirPath)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
@@ -222,8 +209,9 @@ func (h *FileHandlers) Move(c *gin.Context) {
 		return
 	}
 
-	oldPath := h.FsPath(req.OldPath)
-	newPath := h.FsPath(req.NewPath)
+	userID := c.MustGet(q.UserIDParam).(string)
+	oldPath := q.FsPath(userID, req.OldPath)
+	newPath := q.FsPath(userID, req.NewPath)
 	_, err := h.deps.FS().Stat(oldPath)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
@@ -260,14 +248,14 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
-	userName := c.MustGet(singleuserhdr.UserParam).(string)
+	userID := c.MustGet(q.UserIDParam).(string)
 
-	tmpFilePath := h.getTmpPath(req.Path)
-	locker := h.NewAutoLocker(c, lockName(userName, tmpFilePath))
+	tmpFilePath := q.GetTmpPath(userID, req.Path)
+	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {
 		var err error
 
-		_, fileSize, uploaded, err := h.uploadMgr.GetInfo(userName, tmpFilePath)
+		_, fileSize, uploaded, err := h.uploadMgr.GetInfo(userID, tmpFilePath)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
@@ -288,7 +276,7 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 			return
 		}
 
-		err = h.uploadMgr.SetInfo(userName, tmpFilePath, req.Offset+int64(wrote))
+		err = h.uploadMgr.SetInfo(userID, tmpFilePath, req.Offset+int64(wrote))
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
@@ -296,7 +284,7 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 
 		// move the file from uploading dir to uploaded dir
 		if uploaded+int64(wrote) == fileSize {
-			fsFilePath, err := h.getFSFilePath(req.Path)
+			fsFilePath, err := h.getFSFilePath(userID, req.Path)
 			if err != nil {
 				c.JSON(q.ErrResp(c, 500, err))
 				return
@@ -307,7 +295,7 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 				c.JSON(q.ErrResp(c, 500, fmt.Errorf("%s error: %w", req.Path, err)))
 				return
 			}
-			err = h.uploadMgr.DelInfo(userName, tmpFilePath)
+			err = h.uploadMgr.DelInfo(userID, tmpFilePath)
 			if err != nil {
 				c.JSON(q.ErrResp(c, 500, err))
 				return
@@ -323,8 +311,8 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 	})
 }
 
-func (h *FileHandlers) getFSFilePath(reqPath string) (string, error) {
-	fsFilePath := h.FsPath(reqPath)
+func (h *FileHandlers) getFSFilePath(userID, reqPath string) (string, error) {
+	fsFilePath := q.FsPath(userID, reqPath)
 	_, err := h.deps.FS().Stat(fsFilePath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -367,12 +355,12 @@ func (h *FileHandlers) UploadStatus(c *gin.Context) {
 	if filePath == "" {
 		c.JSON(q.ErrResp(c, 400, errors.New("invalid file name")))
 	}
-	userName := c.MustGet(singleuserhdr.UserParam).(string)
+	userID := c.MustGet(q.UserIDParam).(string)
 
-	tmpFilePath := h.getTmpPath(filePath)
-	locker := h.NewAutoLocker(c, lockName(userName, tmpFilePath))
+	tmpFilePath := q.GetTmpPath(userID, filePath)
+	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {
-		_, fileSize, uploaded, err := h.uploadMgr.GetInfo(userName, tmpFilePath)
+		_, fileSize, uploaded, err := h.uploadMgr.GetInfo(userID, tmpFilePath)
 		if err != nil {
 			if os.IsNotExist(err) {
 				c.JSON(q.ErrResp(c, 404, err))
@@ -400,9 +388,10 @@ func (h *FileHandlers) Download(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 400, errors.New("invalid file name")))
 		return
 	}
+	userID := c.MustGet(q.UserIDParam).(string)
 
 	// concurrently file accessing is managed by os
-	filePath = h.FsPath(filePath)
+	filePath = q.FsPath(userID, filePath)
 	info, err := h.deps.FS().Stat(filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -473,7 +462,8 @@ func (h *FileHandlers) List(c *gin.Context) {
 		return
 	}
 
-	dirPath = h.FsPath(dirPath)
+	userID := c.MustGet(q.UserIDParam).(string)
+	dirPath = q.FsPath(userID, dirPath)
 	infos, err := h.deps.FS().ListDir(dirPath)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
@@ -500,16 +490,8 @@ func (h *FileHandlers) CopyDir(c *gin.Context) {
 	c.JSON(q.NewMsgResp(501, "Not Implemented"))
 }
 
-func (h *FileHandlers) getTmpPath(filePath string) string {
-	return path.Join(UploadDir, fmt.Sprintf("%x", sha1.Sum([]byte(filePath))))
-}
-
-func lockName(user, filePath string) string {
-	return fmt.Sprintf("%s/%s", user, filePath)
-}
-
-func (h *FileHandlers) FsPath(filePath string) string {
-	return path.Join(FsDir, filePath)
+func lockName(filePath string) string {
+	return filePath
 }
 
 type ListUploadingsResp struct {
@@ -517,9 +499,9 @@ type ListUploadingsResp struct {
 }
 
 func (h *FileHandlers) ListUploadings(c *gin.Context) {
-	userName := c.MustGet(singleuserhdr.UserParam).(string)
+	userID := c.MustGet(q.UserIDParam).(string)
 
-	infos, err := h.uploadMgr.ListInfo(userName)
+	infos, err := h.uploadMgr.ListInfo(userID)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -533,11 +515,11 @@ func (h *FileHandlers) DelUploading(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 400, errors.New("invalid file path")))
 		return
 	}
-	userName := c.MustGet(singleuserhdr.UserParam).(string)
+	userID := c.MustGet(q.UserIDParam).(string)
 
 	var err error
-	tmpFilePath := h.getTmpPath(filePath)
-	locker := h.NewAutoLocker(c, lockName(userName, tmpFilePath))
+	tmpFilePath := q.GetTmpPath(userID, filePath)
+	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {
 		err = h.deps.FS().Remove(tmpFilePath)
 		if err != nil {
@@ -545,7 +527,7 @@ func (h *FileHandlers) DelUploading(c *gin.Context) {
 			return
 		}
 
-		err = h.uploadMgr.DelInfo(userName, tmpFilePath)
+		err = h.uploadMgr.DelInfo(userID, tmpFilePath)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return

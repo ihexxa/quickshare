@@ -2,80 +2,98 @@ package multiusers
 
 import (
 	"errors"
+	"fmt"
+	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	q "github.com/ihexxa/quickshare/src/handlers"
+	"github.com/ihexxa/quickshare/src/userstore"
 )
 
-var exposedAPIs = map[string]bool{
-	"Login-fm":  true,
-	"Health-fm": true,
+func apiRuleCname(role, method, path string) string {
+	return fmt.Sprintf("%s-%s-%s", role, method, path)
 }
 
-var publicRootPath = "/"
-var publicStaticPath = "/static"
-
-func IsPublicPath(accessPath string) bool {
-	return accessPath == publicRootPath || strings.HasPrefix(accessPath, publicStaticPath)
-}
-
-func GetHandlerName(fullname string) (string, error) {
-	parts := strings.Split(fullname, ".")
-	if len(parts) == 0 {
-		return "", errors.New("invalid handler name")
-	}
-	return parts[len(parts)-1], nil
-}
-
-func (h *MultiUsersSvc) Auth() gin.HandlerFunc {
+func (h *MultiUsersSvc) AuthN() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		handlerName, err := GetHandlerName(c.HandlerName())
-		if err != nil {
-			c.JSON(q.ErrResp(c, 401, err))
-			return
-		}
-		accessPath := c.Request.URL.String()
-
 		enableAuth := h.cfg.GrabBool("Users.EnableAuth")
-		if enableAuth && !exposedAPIs[handlerName] && !IsPublicPath(accessPath) {
-			token, err := c.Cookie(TokenCookie)
-			if err != nil {
-				c.AbortWithStatusJSON(q.ErrResp(c, 401, err))
-				return
-			}
-
-			claims := map[string]string{
-				UserIDParam: "",
-				UserParam:   "",
-				RoleParam:   "",
-				ExpireParam: "",
-			}
-
-			claims, err = h.deps.Token().FromToken(token, claims)
-			if err != nil {
-				c.AbortWithStatusJSON(q.ErrResp(c, 401, err))
-				return
-			}
-			for key, val := range claims {
-				c.Set(key, val)
-			}
-
-			now := time.Now().Unix()
-			expire, err := strconv.ParseInt(claims[ExpireParam], 10, 64)
-			if err != nil || expire <= now {
-				c.AbortWithStatusJSON(q.ErrResp(c, 401, err))
-				return
-			}
-
-			// no one is allowed to download
-		} else {
-			// this is for UploadMgr to get user info to get related namespace
-			c.Set(UserParam, "quickshare_anonymous")
+		claims := map[string]string{
+			q.UserIDParam: "",
+			q.UserParam:   "",
+			q.RoleParam:   userstore.VisitorRole,
+			q.ExpireParam: "",
 		}
 
+		if enableAuth {
+			token, err := c.Cookie(q.TokenCookie)
+			if err != nil {
+				if err != http.ErrNoCookie {
+					fmt.Println("return", token)
+					c.AbortWithStatusJSON(q.ErrResp(c, 401, err))
+					return
+				}
+				// set default values if no cookie is found
+			} else if token != "" {
+				claims, err = h.deps.Token().FromToken(token, claims)
+				if err != nil {
+					c.AbortWithStatusJSON(q.ErrResp(c, 401, err))
+					return
+				}
+
+				now := time.Now().Unix()
+				expire, err := strconv.ParseInt(claims[q.ExpireParam], 10, 64)
+				if err != nil || expire <= now {
+					c.AbortWithStatusJSON(q.ErrResp(c, 401, err))
+					return
+				}
+			}
+			// set default values if token is empty
+		} else {
+			claims[q.UserIDParam] = "0"
+			claims[q.UserParam] = "admin"
+			claims[q.RoleParam] = userstore.AdminRole
+			claims[q.ExpireParam] = ""
+		}
+
+		for key, val := range claims {
+			c.Set(key, val)
+		}
 		c.Next()
 	}
 }
+
+func (h *MultiUsersSvc) APIAccessControl() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		role := c.MustGet(q.RoleParam).(string)
+		method := c.Request.Method
+		accessPath := c.Request.URL.Path
+
+		// we don't lock the map because we only read it
+		if !h.apiACRules[apiRuleCname(role, method, accessPath)] {
+			fmt.Println(apiRuleCname(role, method, accessPath))
+			c.AbortWithStatusJSON(q.ErrResp(c, 401, errors.New("unauthorized")))
+			return
+		}
+		c.Next()
+	}
+}
+
+// TODO: we don't need this currently because all operations will redirected to user's home folder by FilePath
+// func (h *MultiUsersSvc) DirAccessControl() gin.HandlerFunc {
+// 	return func(c *gin.Context) {
+// 		if strings.HasPrefix(accessPath, "/v1/fs/") && role != userstore.AdminRole {
+// 			uid := c.MustGet(UserIDParam).(string)
+// 			role := c.MustGet(RoleParam).(string)
+// 			accessPath := c.Request.URL.String()
+//
+// 			if !strings.HasPrefix(accessPath, fmt.Sprintf("/%s", uid)) {
+// 				c.AbortWithStatusJSON(q.ErrResp(c. 401, err))
+// 				return
+// 			}
+// 		}
+
+// 		c.Next()
+// 	}
+// }

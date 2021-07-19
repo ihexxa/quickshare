@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/ihexxa/quickshare/src/client"
+	q "github.com/ihexxa/quickshare/src/handlers"
 	"github.com/ihexxa/quickshare/src/handlers/fileshdr"
 )
 
@@ -22,7 +23,7 @@ func TestFileHandlers(t *testing.T) {
 	root := "testData"
 	config := `{
 		"users": {
-			"enableAuth": false
+			"enableAuth": true
 		},
 		"server": {
 			"debug": true
@@ -31,6 +32,11 @@ func TestFileHandlers(t *testing.T) {
 			"root": "testData"
 		}
 	}`
+
+	adminName := "qs"
+	adminPwd := "quicksh@re"
+	os.Setenv("DEFAULTADMIN", adminName)
+	os.Setenv("DEFAULTADMINPWD", adminPwd)
 
 	os.RemoveAll(root)
 	err := os.MkdirAll(root, 0700)
@@ -42,14 +48,23 @@ func TestFileHandlers(t *testing.T) {
 	srv := startTestServer(config)
 	defer srv.Shutdown()
 	fs := srv.depsFS()
-	cl := client.NewFilesClient(addr)
 
 	if !waitForReady(addr) {
 		t.Fatal("fail to start server")
 	}
 
+	usersCl := client.NewSingleUserClient(addr)
+	resp, _, errs := usersCl.Login(adminName, adminPwd)
+	if len(errs) > 0 {
+		t.Fatal(errs)
+	} else if resp.StatusCode != 200 {
+		t.Fatal(resp.StatusCode)
+	}
+	token := client.GetCookie(resp.Cookies(), q.TokenCookie)
+	cl := client.NewFilesClient(addr, token)
+
 	assertUploadOK := func(t *testing.T, filePath, content string) bool {
-		cl := client.NewFilesClient(addr)
+		cl := client.NewFilesClient(addr, token)
 
 		fileSize := int64(len([]byte(content)))
 		res, _, errs := cl.Create(filePath, fileSize)
@@ -82,7 +97,7 @@ func TestFileHandlers(t *testing.T) {
 			fileSize = int64(len([]byte(content)))
 		)
 
-		cl := client.NewFilesClient(addr)
+		// cl := client.NewFilesClient(addr)
 
 		rd := rand.Intn(3)
 		switch rd {
@@ -196,7 +211,7 @@ func TestFileHandlers(t *testing.T) {
 			}
 
 			// check uploading file
-			uploadFilePath := path.Join(fileshdr.UploadDir, fmt.Sprintf("%x", sha1.Sum([]byte(filePath))))
+			uploadFilePath := path.Join("0", q.UploadDir, fmt.Sprintf("%x", sha1.Sum([]byte(filePath))))
 			info, err := fs.Stat(uploadFilePath)
 			if err != nil {
 				t.Fatal(err)
@@ -242,7 +257,7 @@ func TestFileHandlers(t *testing.T) {
 			}
 
 			// check uploaded file
-			fsFilePath := filepath.Join(fileshdr.FsDir, filePath)
+			fsFilePath := filepath.Join("0", q.FsDir, filePath)
 			info, err = fs.Stat(fsFilePath)
 			if err != nil {
 				t.Fatal(err)
@@ -487,7 +502,7 @@ func TestFileHandlers(t *testing.T) {
 	})
 
 	t.Run("test uploading APIs: Create, Stop, UploadChunk", func(t *testing.T) {
-		cl := client.NewFilesClient(addr)
+		// cl := client.NewFilesClient(addr)
 
 		files := map[string]string{
 			"uploadings/path1/f1": "12345678",
@@ -542,7 +557,7 @@ func TestFileHandlers(t *testing.T) {
 	})
 
 	t.Run("test uploading APIs: Create and UploadChunk randomly", func(t *testing.T) {
-		cl := client.NewFilesClient(addr)
+		// cl := client.NewFilesClient(addr)
 
 		files := map[string]string{
 			"uploadings/random/path1/f1": "12345678",
@@ -598,7 +613,7 @@ func TestFileHandlers(t *testing.T) {
 				t.Fatal("incorrect uploaded size", mRes)
 			}
 
-			isEqual, err := compareFileContent(fs, filePath, content)
+			isEqual, err := compareFileContent(fs, "0", filePath, content)
 			if err != nil {
 				t.Fatalf("err comparing content: %s", err)
 			} else if !isEqual {
@@ -608,4 +623,11 @@ func TestFileHandlers(t *testing.T) {
 			assetDownloadOK(t, filePath, content)
 		}
 	})
+
+	resp, _, errs = usersCl.Logout(token)
+	if len(errs) > 0 {
+		t.Fatal(errs)
+	} else if resp.StatusCode != 200 {
+		t.Fatal(resp.StatusCode)
+	}
 }

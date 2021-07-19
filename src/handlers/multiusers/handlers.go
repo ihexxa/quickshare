@@ -3,6 +3,7 @@ package multiusers
 import (
 	"errors"
 	"fmt"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -18,31 +19,96 @@ import (
 var (
 	ErrInvalidUser   = errors.New("invalid user name or password")
 	ErrInvalidConfig = errors.New("invalid user config")
-	UserIDParam      = "uid"
-	UserParam        = "user"
-	PwdParam         = "pwd"
-	NewPwdParam      = "newpwd"
-	RoleParam        = "role"
-	ExpireParam      = "expire"
-	TokenCookie      = "tk"
 )
 
 type MultiUsersSvc struct {
-	cfg  gocfg.ICfg
-	deps *depidx.Deps
+	cfg        gocfg.ICfg
+	deps       *depidx.Deps
+	apiACRules map[string]bool
 }
 
 func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error) {
+	publicPath := filepath.Join("/", cfg.GrabString("Server.PublicPath"))
+
+	apiACRules := map[string]bool{
+		// TODO: make these configurable
+		// admin rules
+		apiRuleCname(userstore.AdminRole, "GET", "/"):                       true,
+		apiRuleCname(userstore.AdminRole, "GET", publicPath):                true,
+		apiRuleCname(userstore.AdminRole, "POST", "/v1/users/login"):        true,
+		apiRuleCname(userstore.AdminRole, "POST", "/v1/users/logout"):       true,
+		apiRuleCname(userstore.AdminRole, "GET", "/v1/users/isauthed"):      true,
+		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/users/pwd"):         true,
+		apiRuleCname(userstore.AdminRole, "POST", "/v1/users/"):             true,
+		apiRuleCname(userstore.AdminRole, "POST", "/v1/roles/"):             true,
+		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/roles/"):           true,
+		apiRuleCname(userstore.AdminRole, "GET", "/v1/roles/"):              true,
+		apiRuleCname(userstore.AdminRole, "POST", "/v1/fs/files"):           true,
+		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/fs/files"):         true,
+		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/files"):            true,
+		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/fs/files/chunks"):   true,
+		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/files/chunks"):     true,
+		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/fs/files/copy"):     true,
+		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/fs/files/move"):     true,
+		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/dirs"):             true,
+		apiRuleCname(userstore.AdminRole, "POST", "/v1/fs/dirs"):            true,
+		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/uploadings"):       true,
+		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/fs/uploadings"):    true,
+		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/metadata"):         true,
+		apiRuleCname(userstore.AdminRole, "OPTIONS", "/v1/settings/health"): true,
+		// user rules
+		apiRuleCname(userstore.UserRole, "GET", "/"):                       true,
+		apiRuleCname(userstore.UserRole, "GET", publicPath):                true,
+		apiRuleCname(userstore.UserRole, "POST", "/v1/users/logout"):       true,
+		apiRuleCname(userstore.UserRole, "GET", "/v1/users/isauthed"):      true,
+		apiRuleCname(userstore.UserRole, "PATCH", "/v1/users/pwd"):         true,
+		apiRuleCname(userstore.UserRole, "POST", "/v1/fs/files"):           true,
+		apiRuleCname(userstore.UserRole, "DELETE", "/v1/fs/files"):         true,
+		apiRuleCname(userstore.UserRole, "GET", "/v1/fs/files"):            true,
+		apiRuleCname(userstore.UserRole, "PATCH", "/v1/fs/files/chunks"):   true,
+		apiRuleCname(userstore.UserRole, "GET", "/v1/fs/files/chunks"):     true,
+		apiRuleCname(userstore.UserRole, "PATCH", "/v1/fs/files/copy"):     true,
+		apiRuleCname(userstore.UserRole, "PATCH", "/v1/fs/files/move"):     true,
+		apiRuleCname(userstore.UserRole, "GET", "/v1/fs/dirs"):             true,
+		apiRuleCname(userstore.UserRole, "POST", "/v1/fs/dirs"):            true,
+		apiRuleCname(userstore.UserRole, "GET", "/v1/fs/uploadings"):       true,
+		apiRuleCname(userstore.UserRole, "DELETE", "/v1/fs/uploadings"):    true,
+		apiRuleCname(userstore.UserRole, "GET", "/v1/fs/metadata"):         true,
+		apiRuleCname(userstore.UserRole, "OPTIONS", "/v1/settings/health"): true,
+		// visitor rules
+		apiRuleCname(userstore.VisitorRole, "GET", "/"):                       true,
+		apiRuleCname(userstore.VisitorRole, "GET", publicPath):                true,
+		apiRuleCname(userstore.VisitorRole, "POST", "/v1/users/login"):        true,
+		apiRuleCname(userstore.VisitorRole, "GET", "/v1/users/isauthed"):      true,
+		apiRuleCname(userstore.VisitorRole, "GET", "/v1/fs/files"):            true,
+		apiRuleCname(userstore.VisitorRole, "OPTIONS", "/v1/settings/health"): true,
+	}
+
 	return &MultiUsersSvc{
-		cfg:  cfg,
-		deps: deps,
+		cfg:        cfg,
+		deps:       deps,
+		apiACRules: apiACRules,
 	}, nil
 }
 
 func (h *MultiUsersSvc) Init(adminName, adminPwd string) (string, error) {
 	// TODO: return "" for being compatible with singleuser service, should remove this
 	err := h.deps.Users().Init(adminName, adminPwd)
-	return "", err
+	if err != nil {
+		return "", nil
+	}
+
+	userID := "0"
+	fsPath := q.FsPath(userID, "/")
+	if err = h.deps.FS().MkdirAll(fsPath); err != nil {
+		return "", err
+	}
+	uploadingsPath := q.GetTmpPath(userID, "/")
+	if err = h.deps.FS().MkdirAll(uploadingsPath); err != nil {
+		return "", err
+	}
+
+	return "", nil
 }
 
 func (h *MultiUsersSvc) IsInited() bool {
@@ -75,10 +141,10 @@ func (h *MultiUsersSvc) Login(c *gin.Context) {
 
 	ttl := h.cfg.GrabInt("Users.CookieTTL")
 	token, err := h.deps.Token().ToToken(map[string]string{
-		UserIDParam: fmt.Sprint(user.ID),
-		UserParam:   user.Name,
-		RoleParam:   user.Role,
-		ExpireParam: fmt.Sprintf("%d", time.Now().Unix()+int64(ttl)),
+		q.UserIDParam: fmt.Sprint(user.ID),
+		q.UserParam:   user.Name,
+		q.RoleParam:   user.Role,
+		q.ExpireParam: fmt.Sprintf("%d", time.Now().Unix()+int64(ttl)),
 	})
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
@@ -87,7 +153,7 @@ func (h *MultiUsersSvc) Login(c *gin.Context) {
 
 	secure := h.cfg.GrabBool("Users.CookieSecure")
 	httpOnly := h.cfg.GrabBool("Users.CookieHttpOnly")
-	c.SetCookie(TokenCookie, token, ttl, "/", "", secure, httpOnly)
+	c.SetCookie(q.TokenCookie, token, ttl, "/", "", secure, httpOnly)
 
 	c.JSON(q.Resp(200))
 }
@@ -98,7 +164,7 @@ func (h *MultiUsersSvc) Logout(c *gin.Context) {
 	// token alreay verified in the authn middleware
 	secure := h.cfg.GrabBool("Users.CookieSecure")
 	httpOnly := h.cfg.GrabBool("Users.CookieHttpOnly")
-	c.SetCookie(TokenCookie, "", 0, "/", "", secure, httpOnly)
+	c.SetCookie(q.TokenCookie, "", 0, "/", "", secure, httpOnly)
 	c.JSON(q.Resp(200))
 }
 
@@ -128,7 +194,7 @@ func (h *MultiUsersSvc) SetPwd(c *gin.Context) {
 		return
 	}
 
-	uid, err := strconv.ParseUint(claims[UserIDParam], 10, 64)
+	uid, err := strconv.ParseUint(claims[q.UserIDParam], 10, 64)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -190,6 +256,19 @@ func (h *MultiUsersSvc) AddUser(c *gin.Context) {
 	uid := h.deps.ID().Gen()
 	pwdHash, err := bcrypt.GenerateFromPassword([]byte(req.Pwd), 10)
 	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
+	// TODO: check if the folders already exists
+	userID := c.MustGet(q.UserIDParam).(string)
+	fsPath := q.FsPath(userID, "/")
+	if err = h.deps.FS().MkdirAll(fsPath); err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+	uploadingsPath := q.FsPath(userID, "/")
+	if err = h.deps.FS().MkdirAll(uploadingsPath); err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
@@ -276,22 +355,22 @@ func (h *MultiUsersSvc) ListRoles(c *gin.Context) {
 }
 
 func (h *MultiUsersSvc) getUserInfo(c *gin.Context) (map[string]string, error) {
-	tokenStr, err := c.Cookie(TokenCookie)
+	tokenStr, err := c.Cookie(q.TokenCookie)
 	if err != nil {
 		return nil, err
 	}
 	claims, err := h.deps.Token().FromToken(
 		tokenStr,
 		map[string]string{
-			UserIDParam: "",
-			UserParam:   "",
-			RoleParam:   "",
-			ExpireParam: "",
+			q.UserIDParam: "",
+			q.UserParam:   "",
+			q.RoleParam:   "",
+			q.ExpireParam: "",
 		},
 	)
 	if err != nil {
 		return nil, err
-	} else if claims[UserIDParam] == "" || claims[UserParam] == "" {
+	} else if claims[q.UserIDParam] == "" || claims[q.UserParam] == "" {
 		return nil, ErrInvalidConfig
 	}
 

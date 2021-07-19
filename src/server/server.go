@@ -165,7 +165,8 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 	}
 
 	// middleware
-	router.Use(userHdrs.Auth())
+	router.Use(userHdrs.AuthN())
+	router.Use(userHdrs.APIAccessControl())
 	// tmp static server
 	router.Use(static.Serve("/", static.LocalFile(publicPath, false)))
 

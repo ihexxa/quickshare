@@ -51,8 +51,8 @@ func waitForReady(addr string) bool {
 	return false
 }
 
-func compareFileContent(fs fspkg.ISimpleFS, filePath string, expectedContent string) (bool, error) {
-	reader, err := fs.GetFileReader(path.Join("files", filePath))
+func compareFileContent(fs fspkg.ISimpleFS, uid, filePath string, expectedContent string) (bool, error) {
+	reader, err := fs.GetFileReader(path.Join(uid, "files", filePath))
 	if err != nil {
 		return false, err
 	}
