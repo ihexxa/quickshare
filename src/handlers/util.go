@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"crypto/sha1"
+	"errors"
 	"fmt"
 	"path/filepath"
 
@@ -20,6 +21,8 @@ var (
 	RoleParam   = "role"
 	ExpireParam = "expire"
 	TokenCookie = "tk"
+
+	ErrAccessDenied = errors.New("access denied")
 )
 
 var statusCodes = map[int]string{
@@ -123,6 +126,10 @@ func FsPath(userID, relFilePath string) string {
 	return filepath.Join(userID, FsDir, relFilePath)
 }
 
+func HomePath(userID, relFilePath string) string {
+	return filepath.Join(userID, relFilePath)
+}
+
 func GetTmpPath(userID, relFilePath string) string {
-	return filepath.Join(userID, UploadDir, fmt.Sprintf("%x", sha1.Sum([]byte(relFilePath))))
+	return filepath.Join(UploadDir, userID, fmt.Sprintf("%x", sha1.Sum([]byte(relFilePath))))
 }

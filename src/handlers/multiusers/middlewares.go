@@ -1,7 +1,6 @@
 package multiusers
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -30,7 +29,6 @@ func (h *MultiUsersSvc) AuthN() gin.HandlerFunc {
 			token, err := c.Cookie(q.TokenCookie)
 			if err != nil {
 				if err != http.ErrNoCookie {
-					fmt.Println("return", token)
 					c.AbortWithStatusJSON(q.ErrResp(c, 401, err))
 					return
 				}
@@ -72,8 +70,7 @@ func (h *MultiUsersSvc) APIAccessControl() gin.HandlerFunc {
 
 		// we don't lock the map because we only read it
 		if !h.apiACRules[apiRuleCname(role, method, accessPath)] {
-			fmt.Println(apiRuleCname(role, method, accessPath))
-			c.AbortWithStatusJSON(q.ErrResp(c, 401, errors.New("unauthorized")))
+			c.AbortWithStatusJSON(q.ErrResp(c, 403, q.ErrAccessDenied))
 			return
 		}
 		c.Next()

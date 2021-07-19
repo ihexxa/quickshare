@@ -262,12 +262,12 @@ func (h *MultiUsersSvc) AddUser(c *gin.Context) {
 
 	// TODO: check if the folders already exists
 	userID := c.MustGet(q.UserIDParam).(string)
-	fsPath := q.FsPath(userID, "/")
-	if err = h.deps.FS().MkdirAll(fsPath); err != nil {
+	homePath := q.HomePath(userID, "/")
+	if err = h.deps.FS().MkdirAll(homePath); err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
-	uploadingsPath := q.FsPath(userID, "/")
+	uploadingsPath := q.GetTmpPath(userID, "/")
 	if err = h.deps.FS().MkdirAll(uploadingsPath); err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return

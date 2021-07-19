@@ -2,7 +2,7 @@ package server
 
 import (
 	"io/ioutil"
-	"path"
+	// "path"
 	"time"
 
 	"github.com/ihexxa/gocfg"
@@ -52,7 +52,7 @@ func waitForReady(addr string) bool {
 }
 
 func compareFileContent(fs fspkg.ISimpleFS, uid, filePath string, expectedContent string) (bool, error) {
-	reader, err := fs.GetFileReader(path.Join(uid, "files", filePath))
+	reader, err := fs.GetFileReader(filePath)
 	if err != nil {
 		return false, err
 	}
