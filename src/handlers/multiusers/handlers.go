@@ -51,6 +51,7 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/fs/files/copy"):     true,
 		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/fs/files/move"):     true,
 		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/dirs"):             true,
+		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/dirs/home"):        true,
 		apiRuleCname(userstore.AdminRole, "POST", "/v1/fs/dirs"):            true,
 		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/uploadings"):       true,
 		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/fs/uploadings"):    true,
@@ -70,6 +71,7 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(userstore.UserRole, "PATCH", "/v1/fs/files/copy"):     true,
 		apiRuleCname(userstore.UserRole, "PATCH", "/v1/fs/files/move"):     true,
 		apiRuleCname(userstore.UserRole, "GET", "/v1/fs/dirs"):             true,
+		apiRuleCname(userstore.UserRole, "GET", "/v1/fs/dirs/home"):        true,
 		apiRuleCname(userstore.UserRole, "POST", "/v1/fs/dirs"):            true,
 		apiRuleCname(userstore.UserRole, "GET", "/v1/fs/uploadings"):       true,
 		apiRuleCname(userstore.UserRole, "DELETE", "/v1/fs/uploadings"):    true,
@@ -99,7 +101,7 @@ func (h *MultiUsersSvc) Init(adminName, adminPwd string) (string, error) {
 	}
 
 	userID := "0"
-	fsPath := q.FsPath(userID, "/")
+	fsPath := q.HomePath(userID, "/")
 	if err = h.deps.FS().MkdirAll(fsPath); err != nil {
 		return "", err
 	}
@@ -170,6 +172,11 @@ func (h *MultiUsersSvc) Logout(c *gin.Context) {
 
 func (h *MultiUsersSvc) IsAuthed(c *gin.Context) {
 	// token alreay verified in the authn middleware
+	role := c.MustGet(q.RoleParam).(string)
+	if role == userstore.VisitorRole {
+		c.JSON(q.ErrResp(c, 401, q.ErrUnauthorized))
+		return
+	}
 	c.JSON(q.Resp(200))
 }
 

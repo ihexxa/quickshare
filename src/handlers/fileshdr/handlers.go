@@ -508,6 +508,7 @@ func (h *FileHandlers) Download(c *gin.Context) {
 }
 
 type ListResp struct {
+	Cwd       string          `json:"cwd"`
 	Metadatas []*MetadataResp `json:"metadatas"`
 }
 
@@ -540,7 +541,10 @@ func (h *FileHandlers) List(c *gin.Context) {
 		})
 	}
 
-	c.JSON(200, &ListResp{Metadatas: metadatas})
+	c.JSON(200, &ListResp{
+		Cwd:       dirPath,
+		Metadatas: metadatas,
+	})
 }
 
 func (h *FileHandlers) ListHome(c *gin.Context) {
@@ -560,7 +564,10 @@ func (h *FileHandlers) ListHome(c *gin.Context) {
 		})
 	}
 
-	c.JSON(200, &ListResp{Metadatas: metadatas})
+	c.JSON(200, &ListResp{
+		Cwd:       userID,
+		Metadatas: metadatas,
+	})
 }
 
 func (h *FileHandlers) Copy(c *gin.Context) {

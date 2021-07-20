@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -69,11 +70,16 @@ func (h *MultiUsersSvc) APIAccessControl() gin.HandlerFunc {
 		accessPath := c.Request.URL.Path
 
 		// we don't lock the map because we only read it
-		if !h.apiACRules[apiRuleCname(role, method, accessPath)] {
-			c.AbortWithStatusJSON(q.ErrResp(c, 403, q.ErrAccessDenied))
+		if h.apiACRules[apiRuleCname(role, method, accessPath)] {
+			c.Next()
+			return
+		} else if accessPath == "/" || // TODO: temporarily allow accessing static resources
+			accessPath == "/favicon.ico" ||
+			strings.HasPrefix(accessPath, "/static") {
+			c.Next()
 			return
 		}
-		c.Next()
+		c.AbortWithStatusJSON(q.ErrResp(c, 403, q.ErrAccessDenied))
 	}
 }
 

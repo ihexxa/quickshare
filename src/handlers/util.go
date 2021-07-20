@@ -23,6 +23,7 @@ var (
 	TokenCookie = "tk"
 
 	ErrAccessDenied = errors.New("access denied")
+	ErrUnauthorized = errors.New("unauthorized")
 )
 
 var statusCodes = map[int]string{
