@@ -104,9 +104,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
           this.update(PanesUpdater.updateState);
 
           // refresh
-          return BrowserUpdater().setItems(
-            List<string>(["."])
-          );
+          return BrowserUpdater().setHomeItems();
         } else {
           this.setState({ user: "", pwd: "" });
           alert("Failed to login.");
