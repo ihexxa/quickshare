@@ -301,8 +301,65 @@ export class Browser extends React.Component<Props, State, {}> {
       </span>,
     ];
 
+    // const ops = (
+    //   <Layouter isHorizontal={false} elements={layoutChildren}></Layouter>
+    // );
+
     const ops = (
-      <Layouter isHorizontal={false} elements={layoutChildren}></Layouter>
+      <div>
+        <div>
+          <span className="inline-block margin-t-m margin-b-m">
+            <input
+              type="text"
+              onChange={this.onInputChange}
+              value={this.state.inputValue}
+              className="black0-font margin-r-m"
+              placeholder="folder name"
+            />
+            <button
+              onClick={this.onMkDir}
+              className="grey1-bg white-font margin-r-m"
+            >
+              Create Folder
+            </button>
+          </span>
+          <span className="inline-block margin-t-m margin-b-m">
+            <button
+              onClick={this.onClickUpload}
+              className="green0-bg white-font"
+            >
+              Upload Files
+            </button>
+            <input
+              type="file"
+              onChange={this.addUploads}
+              multiple={true}
+              value={this.props.uploadValue}
+              ref={this.assignInput}
+              className="black0-font hidden"
+            />
+          </span>
+        </div>
+
+        <div className="hr white0-bg margin-t-m margin-b-m"></div>
+
+        <div>
+          <button
+            type="button"
+            onClick={() => this.delete()}
+            className="red0-bg white-font margin-t-m margin-b-m margin-r-m"
+          >
+            Delete Selected
+          </button>
+          <button
+            type="button"
+            onClick={() => this.moveHere()}
+            className="grey1-bg white-font margin-t-m margin-b-m"
+          >
+            Paste
+          </button>
+        </div>
+      </div>
     );
 
     const itemList = this.props.items.map((item: MetadataResp) => {
@@ -313,71 +370,61 @@ export class Browser extends React.Component<Props, State, {}> {
         : `${dirPath}/${item.name}`;
 
       return item.isDir ? (
-        <tr
-          key={item.name}
-          // className={`${isSelected ? "white0-bg selected" : ""}`}
-        >
-          <td>
-            <span className="dot yellow0-bg"></span>
-          </td>
-          <td>
-            <span
-              className={nameCellClass}
-              onClick={() => this.gotoChild(item.name)}
-            >
-              {item.name}
+        <div key={item.name} className="flex-list-container">
+          <span className="flex-list-item-l">
+            <span className="vbar yellow2-bg"></span>
+            <span className={nameCellClass}>
+              <span className="bold" onClick={() => this.gotoChild(item.name)}>
+                {item.name}
+              </span>
+              <div className="grey1-font">
+                <span>{item.modTime.slice(0, item.modTime.indexOf("T"))}</span>
+              </div>
             </span>
-          </td>
-          <td className={sizeCellClass}>--</td>
-          <td className={modTimeCellClass}>
-            {item.modTime.slice(0, item.modTime.indexOf("T"))}
-          </td>
-          <td>
+          </span>
+          <span className="flex-list-item-r padding-r-m">
             <span className="item-op">
               <button
                 onClick={() => this.select(item.name)}
-                className={`white-font ${isSelected ? "blue0-bg" : ""}`}
+                className={`white-font ${isSelected ? "blue0-bg" : "grey1-bg"}`}
                 style={{ width: "8rem", display: "inline-block" }}
               >
                 {isSelected ? "Deselect" : "Select"}
               </button>
             </span>
-          </td>
-        </tr>
+          </span>
+        </div>
       ) : (
-        <tr
-          key={item.name}
-          // className={`${isSelected ? "white0-bg selected" : ""}`}
-        >
-          <td>
-            <span className="dot green0-bg"></span>
-          </td>
-          <td>
-            <a
-              className={nameCellClass}
-              href={`/v1/fs/files?fp=${itemPath}`}
-              target="_blank"
-            >
-              {item.name}
-            </a>
-          </td>
-          <td className={sizeCellClass}>{FileSize(item.size, { round: 0 })}</td>
-          <td className={modTimeCellClass}>
-            {item.modTime.slice(0, item.modTime.indexOf("T"))}
-          </td>
-          <td>
+        <div key={item.name} className="flex-list-container">
+          <span className="flex-list-item-l">
+            <span className="vbar green2-bg"></span>
+            <span className={nameCellClass}>
+              <a
+                className="bold"
+                href={`/v1/fs/files?fp=${itemPath}`}
+                target="_blank"
+              >
+                {item.name}
+              </a>
+              <div className="grey1-font">
+                <span>{FileSize(item.size, { round: 0 })}</span>&nbsp;/&nbsp;
+                <span>{item.modTime.slice(0, item.modTime.indexOf("T"))}</span>
+              </div>
+            </span>
+          </span>
+          <span className="flex-list-item-r padding-r-m">
             <span className="item-op">
               <button
                 type="button"
                 onClick={() => this.select(item.name)}
-                className={`white-font ${isSelected ? "blue0-bg" : ""}`}
+                className={`white-font ${isSelected ? "blue0-bg" : "grey1-bg"}`}
                 style={{ width: "8rem", display: "inline-block" }}
               >
                 {isSelected ? "Deselect" : "Select"}
               </button>
             </span>
-          </td>
-        </tr>
+          </span>
+        </div>
       );
     });
 
@@ -386,30 +433,34 @@ export class Browser extends React.Component<Props, State, {}> {
       const fileName = pathParts[pathParts.length - 1];
 
       return (
-        <tr key={fileName}>
-          <td>
-            <span className="dot blue0-bg"></span>
-          </td>
-          <td>
-            <div className={nameCellClass}>{fileName}</div>
+        <div key={fileName} className="flex-list-container">
+          <span className="flex-list-item-l">
+            <span className="vbar blue2-bg"></span>
+            <div className={nameCellClass}>
+              <span className="bold">{fileName}</span>
+              <div className="grey1-font">
+                {FileSize(uploading.uploaded, { round: 0 })}
+                &nbsp;/&nbsp;{FileSize(uploading.size, { round: 0 })}
+              </div>
+            </div>
+          </span>
+          <span className="flex-list-item-r padding-r-m">
             <div className="item-op">
               <button
                 onClick={() => this.stopUploading(uploading.realFilePath)}
-                className="white-font margin-r-m"
+                className="grey1-bg white-font margin-r-m"
               >
                 Stop
               </button>
               <button
                 onClick={() => this.deleteUpload(uploading.realFilePath)}
-                className="white-font"
+                className="grey1-bg white-font"
               >
                 Delete
               </button>
             </div>
-          </td>
-          <td>{FileSize(uploading.uploaded, { round: 0 })}</td>
-          <td>{FileSize(uploading.size, { round: 0 })}</td>
-        </tr>
+          </span>
+        </div>
       );
     });
 
@@ -420,66 +471,53 @@ export class Browser extends React.Component<Props, State, {}> {
         </div>
 
         <div id="item-list">
-          <div className="margin-b-l">{breadcrumb}</div>
+          <div className="breadcrumb margin-b-l">
+            <span
+              className="white-font margin-r-m"
+              style={{
+                backgroundColor: "rgba(0, 0, 0, 0.7)",
+                padding: "0.8rem 1rem",
+                fontWeight: "bold",
+                borderRadius: "0.5rem"
+              }}
+            >
+              Location:
+            </span>
+            {breadcrumb}
+          </div>
 
           {this.props.uploadings.size === 0 ? null : (
             <div className="container">
-              <table>
-                <thead style={{ fontWeight: "bold" }}>
-                  <tr>
-                    <td>
-                      <span className="dot black-bg"></span>
-                    </td>
-                    <td>Name</td>
-                    <td className={sizeCellClass}>Uploaded</td>
-                    <td className={modTimeCellClass}>Size</td>
-                  </tr>
-                </thead>
-                <tbody>{uploadingList}</tbody>
-                <tfoot>
-                  <tr>
-                    <td></td>
-                    <td></td>
-                    <td className={sizeCellClass}></td>
-                    <td className={modTimeCellClass}></td>
-                  </tr>
-                </tfoot>
-              </table>
+              <div className="flex-list-container bold">
+                <span className="flex-list-item-l">
+                  <span className="dot black-bg"></span>
+                  <span>Uploading Files</span>
+                </span>
+                <span className="flex-list-item-r padding-r-m"></span>
+              </div>
+              {uploadingList}
             </div>
           )}
 
           <div className="container">
-            <table>
-              <thead style={{ fontWeight: "bold" }}>
-                <tr>
-                  <td>
-                    <span className="dot black-bg"></span>
-                  </td>
-                  <td>Name</td>
-                  <td className={sizeCellClass}>File Size</td>
-                  <td className={modTimeCellClass}>Mod Time</td>
-                  <td>
-                    <button
-                      onClick={() => this.selectAll()}
-                      className={`white-font`}
-                      style={{ width: "8rem", display: "inline-block" }}
-                    >
-                      Select All
-                    </button>
-                  </td>
-                </tr>
-              </thead>
-              <tbody>{itemList}</tbody>
-              <tfoot>
-                <tr>
-                  <td></td>
-                  <td></td>
-                  <td className={sizeCellClass}></td>
-                  <td className={modTimeCellClass}></td>
-                  <td></td>
-                </tr>
-              </tfoot>
-            </table>
+            <div className="flex-list-container bold">
+              <span className="flex-list-item-l">
+                <span className="dot black-bg"></span>
+                <span>Name</span>
+                {/* <span>File Size</span>
+                  <span>Mod Time</span> */}
+              </span>
+              <span className="flex-list-item-r padding-r-m">
+                <button
+                  onClick={() => this.selectAll()}
+                  className={`grey1-bg white-font`}
+                  style={{ width: "8rem", display: "inline-block" }}
+                >
+                  Select All
+                </button>
+              </span>
+            </div>
+            {itemList}
           </div>
         </div>
       </div>
