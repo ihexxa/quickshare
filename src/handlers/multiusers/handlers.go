@@ -94,11 +94,7 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 }
 
 func (h *MultiUsersSvc) Init(adminName, adminPwd string) (string, error) {
-	// TODO: return "" for being compatible with singleuser service, should remove this
-	err := h.deps.Users().Init(adminName, adminPwd)
-	if err != nil {
-		return "", nil
-	}
+	var err error
 
 	userID := "0"
 	fsPath := q.HomePath(userID, "/")
@@ -110,7 +106,9 @@ func (h *MultiUsersSvc) Init(adminName, adminPwd string) (string, error) {
 		return "", err
 	}
 
-	return "", nil
+	// TODO: return "" for being compatible with singleuser service, should remove this
+	err = h.deps.Users().Init(adminName, adminPwd)
+	return "", err
 }
 
 func (h *MultiUsersSvc) IsInited() bool {
