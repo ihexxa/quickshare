@@ -250,13 +250,13 @@ func (h *MultiUsersSvc) AddUser(c *gin.Context) {
 		return
 	}
 
-	// TODO: do more comprehensive validation
 	// Role and duplicated name will be validated by the store
-	if len(req.Name) < 2 {
-		c.JSON(q.ErrResp(c, 400, errors.New("name length must be greater than 2")))
+	var err error
+	if err = h.isValidUserName(req.Name); err != nil {
+		c.JSON(q.ErrResp(c, 400, err))
 		return
-	} else if len(req.Name) < 3 {
-		c.JSON(q.ErrResp(c, 400, errors.New("password length must be greater than 2")))
+	} else if err = h.isValidPwd(req.Pwd); err != nil {
+		c.JSON(q.ErrResp(c, 400, err))
 		return
 	}
 
@@ -267,6 +267,7 @@ func (h *MultiUsersSvc) AddUser(c *gin.Context) {
 		return
 	}
 
+	// TODO: following operations must be atomic
 	// TODO: check if the folders already exists
 	userID := c.MustGet(q.UserIDParam).(string)
 	homePath := q.HomePath(userID, "/")
@@ -299,19 +300,19 @@ type AddRoleReq struct {
 }
 
 func (h *MultiUsersSvc) AddRole(c *gin.Context) {
+	var err error
 	req := &AddRoleReq{}
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		c.JSON(q.ErrResp(c, 400, err))
 		return
 	}
 
-	// TODO: do more comprehensive validation
-	if len(req.Role) < 2 {
-		c.JSON(q.ErrResp(c, 400, errors.New("name length must be greater than 2")))
+	if err = h.isValidRole(req.Role); err != nil {
+		c.JSON(q.ErrResp(c, 400, err))
 		return
 	}
 
-	err := h.deps.Users().AddRole(req.Role)
+	err = h.deps.Users().AddRole(req.Role)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -325,19 +326,19 @@ type DelRoleReq struct {
 }
 
 func (h *MultiUsersSvc) DelRole(c *gin.Context) {
+	var err error
 	req := &DelRoleReq{}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(q.ErrResp(c, 400, err))
 		return
 	}
 
-	// TODO: do more comprehensive validation
-	if len(req.Role) < 2 {
-		c.JSON(q.ErrResp(c, 400, errors.New("name length must be greater than 2")))
+	if err = h.isValidRole(req.Role); err != nil {
+		c.JSON(q.ErrResp(c, 400, err))
 		return
 	}
 
-	err := h.deps.Users().DelRole(req.Role)
+	err = h.deps.Users().DelRole(req.Role)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -382,4 +383,27 @@ func (h *MultiUsersSvc) getUserInfo(c *gin.Context) (map[string]string, error) {
 	}
 
 	return claims, nil
+}
+
+func (h *MultiUsersSvc) isValidUserName(userName string) error {
+	minUserNameLen := h.cfg.GrabInt("Users.MinUserNameLen")
+	if len(userName) < minUserNameLen {
+		return errors.New("name is too short")
+	}
+	return nil
+}
+
+func (h *MultiUsersSvc) isValidPwd(pwd string) error {
+	minPwdLen := h.cfg.GrabInt("Users.MinPwdLen")
+	if len(pwd) < minPwdLen {
+		return errors.New("password is too short")
+	}
+	return nil
+}
+
+func (h *MultiUsersSvc) isValidRole(role string) error {
+	if role == userstore.AdminRole || role == userstore.UserRole || role == userstore.VisitorRole {
+		return errors.New("predefined roles can not be added/deleted")
+	}
+	return h.isValidUserName(role)
 }

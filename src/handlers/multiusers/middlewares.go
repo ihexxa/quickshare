@@ -82,21 +82,3 @@ func (h *MultiUsersSvc) APIAccessControl() gin.HandlerFunc {
 		c.AbortWithStatusJSON(q.ErrResp(c, 403, q.ErrAccessDenied))
 	}
 }
-
-// TODO: we don't need this currently because all operations will redirected to user's home folder by FilePath
-// func (h *MultiUsersSvc) DirAccessControl() gin.HandlerFunc {
-// 	return func(c *gin.Context) {
-// 		if strings.HasPrefix(accessPath, "/v1/fs/") && role != userstore.AdminRole {
-// 			uid := c.MustGet(UserIDParam).(string)
-// 			role := c.MustGet(RoleParam).(string)
-// 			accessPath := c.Request.URL.String()
-//
-// 			if !strings.HasPrefix(accessPath, fmt.Sprintf("/%s", uid)) {
-// 				c.AbortWithStatusJSON(q.ErrResp(c. 401, err))
-// 				return
-// 			}
-// 		}
-
-// 		c.Next()
-// 	}
-// }

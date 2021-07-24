@@ -23,7 +23,9 @@ func TestFileHandlers(t *testing.T) {
 	root := "testData"
 	config := `{
 		"users": {
-			"enableAuth": true
+			"enableAuth": true,
+			"minUserNameLen": 2,
+			"minPwdLen": 4
 		},
 		"server": {
 			"debug": true
