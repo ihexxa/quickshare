@@ -79,16 +79,15 @@ export class Updater {
   };
 
   static setState = (preState: ICoreState): ICoreState => {
-    preState.panel.admin = {
-      ...preState.panel.admin,
+    preState.panel.panes.admin = {
+      ...preState.panel.panes.admin,
       ...Updater.props,
     };
     return preState;
   };
 }
 
-export interface State {
-}
+export interface State {}
 
 export class AdminPane extends React.Component<Props, State, {}> {
   private update: (updater: (prevState: ICoreState) => ICoreState) => void;
@@ -150,35 +149,93 @@ export class AdminPane extends React.Component<Props, State, {}> {
   // };
 
   render() {
-    // const elements: Array<JSX.Element> = [
-    //   <input
-    //     name="user"
-    //     type="text"
-    //     onChange={this.changeUser}
-    //     value={this.state.user}
-    //     className="black0-font margin-t-m margin-b-m"
-    //     // style={{ width: "80%" }}
-    //     placeholder="user name"
-    //   />,
-    //   <input
-    //     name="pwd"
-    //     type="password"
-    //     onChange={this.changePwd}
-    //     value={this.state.pwd}
-    //     className="black0-font margin-t-m margin-b-m"
-    //     // style={{ width: "80%" }}
-    //     placeholder="password"
-    //   />,
-    //   <button
-    //     onClick={this.login}
-    //     className="green0-bg white-font margin-t-m margin-b-m"
-    //   >
-    //     Log in
-    //   </button>,
-    // ];
+    const users = this.props.users.valueSeq().map((user: User) => {
+      return (
+        <div key={user.id} className="flex-list-container">
+          <div className="flex-list-item-l">
+            <span className="vbar blue2-bg"></span>
+            <span className="bold">{`${user.id} - ${user.name}`}</span>
+            {/* <input
+              name={`${user.id}-role`}
+              type="text"
+              onChange={(ev: React.ChangeEvent<HTMLInputElement>) => {this.setRole(e, user.id )}}
+              value={this.state.pwd}
+              className="black0-font margin-t-m margin-b-m"
+              // style={{ width: "80%" }}
+              placeholder="password"
+            /> */}
+          </div>
+          <div className="flex-list-item-r">
+            <button
+              onClick={() => {}}
+              className="grey1-bg white-font margin-r-m"
+            >
+              Update
+            </button>
+            <button
+              onClick={() => {}}
+              className="grey1-bg white-font margin-r-m"
+            >
+              Select
+            </button>
+          </div>
+        </div>
+      );
+    });
+
+    const roles = this.props.roles.valueSeq().map((role: string) => {
+      return (
+        <div key={role} className="flex-list-container">
+          <div className="flex-list-item-l">
+            <span className="dot blue2-bg"></span>
+            <span className="bold">{role}</span>
+          </div>
+          <div className="flex-list-item-r">
+            <button
+              onClick={() => {}}
+              className="grey1-bg white-font margin-r-m"
+            >
+              Update
+            </button>
+            <button
+              onClick={() => {}}
+              className="grey1-bg white-font margin-r-m"
+            >
+              Select
+            </button>
+          </div>
+        </div>
+      );
+    });
 
     return (
-      <span></span>
+      <div>
+        <div className="container">
+          <div className="padding-l">
+            <div className="flex-list-container bold">
+              <span className="flex-list-item-l">
+                <span className="dot black-bg"></span>
+                <span>Users</span>
+              </span>
+              <span className="flex-list-item-r padding-r-m"></span>
+            </div>
+            {users}
+          </div>
+        </div>
+
+        <div className="container">
+          <div className="padding-l">
+            <div className="flex-list-container bold">
+              <span className="flex-list-item-l">
+                <span className="dot black-bg"></span>
+                <span>Roles</span>
+              </span>
+              <span className="flex-list-item-r padding-r-m"></span>
+            </div>
+            {roles}
+          </div>
+        </div>
+      </div>
     );
   }
 }

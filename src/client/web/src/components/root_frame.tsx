@@ -11,7 +11,6 @@ export interface Props {
   browser: BrowserProps;
   authPane: PaneLoginProps;
   panes: PanesProps;
-  admin: PaneAdminProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
@@ -38,6 +37,11 @@ export class RootFrame extends React.Component<Props, State, {}> {
     this.props.update(PanesUpdater.updateState);
   };
 
+  showAdmin = () => {
+    PanesUpdater.displayPane("admin");
+    this.props.update(PanesUpdater.updateState);
+  };
+
   render() {
     const update = this.props.update;
     return (
@@ -47,6 +51,7 @@ export class RootFrame extends React.Component<Props, State, {}> {
             displaying={this.props.panes.displaying}
             paneNames={this.props.panes.paneNames}
             login={this.props.authPane}
+            admin={this.props.panes.admin}
             update={update}
           />
 
@@ -67,6 +72,12 @@ export class RootFrame extends React.Component<Props, State, {}> {
                   className="grey1-bg white-font margin-r-m"
                 >
                   Settings
+                </button>
+                <button
+                  onClick={this.showAdmin}
+                  className="grey1-bg white-font margin-r-m"
+                >
+                  Admin
                 </button>
               </span>
             </div>

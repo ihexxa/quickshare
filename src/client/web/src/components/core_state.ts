@@ -61,15 +61,15 @@ export function initState(): ICoreState {
       },
       panes: {
         displaying: "",
-        paneNames: Set<string>(["settings", "login"]),
+        paneNames: Set<string>(["settings", "login", "admin"]),
         login: {
           authed: false,
         },
+        admin: {
+          users: Map<string, User>(),
+          roles: Set<string>(),
+        },
       },
-      admin: {
-        users: Map<string, User>(),
-        roles: Set<string>() 
-      }
     },
   };
 }
@@ -93,15 +93,15 @@ export function mockState(): ICoreState {
       },
       panes: {
         displaying: "",
-        paneNames: Set<string>(["settings", "login"]),
+        paneNames: Set<string>(["settings", "login", "admin"]),
         login: {
           authed: false,
         },
+        admin: {
+          users: Map<string, User>(),
+          roles: Set<string>(),
+        },
       },
-      admin: {
-        users: Map<string, User>(),
-        roles: Set<string>() 
-      }
     },
   };
 }

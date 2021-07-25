@@ -138,7 +138,7 @@
   border-top: solid 1px transparent;
 }
 
-#item-list .dot {
+.container .dot {
   overflow: hidden;
   margin-left: 1rem;
   margin-right: 1rem;

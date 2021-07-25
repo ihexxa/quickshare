@@ -41,7 +41,6 @@ export class StateMgr extends React.Component<Props, State, {}> {
         update={this.update}
         browser={this.state.panel.browser}
         panes={this.state.panel.panes}
-        admin={this.state.panel.admin}
       />
     );
   }

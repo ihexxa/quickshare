@@ -3,12 +3,14 @@ import { Set, Map } from "immutable";
 
 import { ICoreState } from "./core_state";
 import { PaneSettings } from "./pane_settings";
+import { AdminPane, Props as AdminPaneProps } from "./pane_admin";
 import { AuthPane, Props as AuthPaneProps } from "./pane_login";
 
 export interface Props {
   displaying: string;
   paneNames: Set<string>;
   login: AuthPaneProps;
+  admin: AdminPaneProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
@@ -70,6 +72,13 @@ export class Panes extends React.Component<Props, State, {}> {
       login: (
         <AuthPane authed={this.props.login.authed} update={this.props.update} />
       ),
+      admin: (
+        <AdminPane
+          users={this.props.admin.users}
+          roles={this.props.admin.roles}
+          update={this.props.update}
+        />
+      ),
     });
 
     const panes = panesMap.keySeq().map((paneName: string): JSX.Element => {
@@ -85,7 +94,6 @@ export class Panes extends React.Component<Props, State, {}> {
     return (
       <div id="panes" className={displaying === "" ? "hidden" : ""}>
         <div className="root-container">
-
           <div className="container">
             <div className="flex-list-container padding-l">
               <h3 className="flex-list-item-l txt-cap">{displaying}</h3>
