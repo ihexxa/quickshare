@@ -158,15 +158,16 @@ export class AuthPane extends React.Component<Props, State, {}> {
 
     return (
       <span>
-        <span style={{ display: this.props.authed ? "none" : "inherit" }}>
-          <h5 className="grey0-font">Login</h5>
+        <div
+          className="margin-l-l"
+          style={{ display: this.props.authed ? "none" : "block" }}
+        >
+          {/* <h5 className="black-font">Login</h5> */}
           <Layouter isHorizontal={false} elements={elements} />
-        </span>
+        </div>
+
         <span style={{ display: this.props.authed ? "inherit" : "none" }}>
-          <button
-            onClick={this.logout}
-            className="grey1-bg white-font margin-r-m"
-          >
+          <button onClick={this.logout} className="grey1-bg white-font">
             Log out
           </button>
         </span>

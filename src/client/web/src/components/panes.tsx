@@ -64,34 +64,43 @@ export class Panes extends React.Component<Props, State, {}> {
     }
 
     const panesMap: Map<string, JSX.Element> = Map({
-      settings: <PaneSettings login={this.props.login} update={this.props.update} />,
-      login: <AuthPane authed={this.props.login.authed} update={this.props.update} />,
+      settings: (
+        <PaneSettings login={this.props.login} update={this.props.update} />
+      ),
+      login: (
+        <AuthPane authed={this.props.login.authed} update={this.props.update} />
+      ),
     });
 
-    const panes = panesMap.keySeq().map(
-      (paneName: string): JSX.Element => {
-        const isDisplay = displaying === paneName ? "" : "hidden";
-        return (
-          <div key={paneName} className={`${isDisplay}`}>
-            {panesMap.get(paneName)}
-          </div>
-        );
-      }
-    );
+    const panes = panesMap.keySeq().map((paneName: string): JSX.Element => {
+      const isDisplay = displaying === paneName ? "" : "hidden";
+      return (
+        <div key={paneName} className={`${isDisplay}`}>
+          {panesMap.get(paneName)}
+        </div>
+      );
+    });
 
     const btnClass = displaying === "login" ? "hidden" : "";
     return (
       <div id="panes" className={displaying === "" ? "hidden" : ""}>
         <div className="container">
-          <div className="padding-l">
-            <div className={btnClass}>
-              <button onClick={this.closePane} className="black0-bg white-font">
-                Return
+          <div className="flex-list-container padding-l">
+            <h3 className="flex-list-item-l txt-cap">{displaying}</h3>
+            <div className="flex-list-item-r">
+              <button
+                onClick={this.closePane}
+                className={`black0-bg white-font ${btnClass}`}
+              >
+                Close
               </button>
-              <div className="hr"></div>
             </div>
-            {panes}
           </div>
+
+          <div className="hr white0-bg margin-b-m margin-l-m margin-r-m"></div>
+          {panes}
+
+          <div className="padding-l"></div>
         </div>
       </div>
     );

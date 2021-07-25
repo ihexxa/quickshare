@@ -76,7 +76,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
           if (ok) {
             alert("Password is updated");
           } else {
-            alert("fail to update password");
+            alert("Failed to update password");
           }
           this.setState({
             oldPwd: "",
@@ -120,12 +120,61 @@ export class PaneSettings extends React.Component<Props, State, {}> {
     ];
 
     return (
-      <div>
-        <h5 className="grey0-font">Update Password</h5>
-        <Layouter isHorizontal={false} elements={inputs}></Layouter>
-        <div className="hr"></div>
+      <div className="padding-l">
+        <div>
+          <div className="flex-list-container">
+            <div className="flex-list-item-l">
+              <h5 className="black-font">Update Password</h5>
+            </div>
+            <div className="flex-list-item-r">
+              <button onClick={this.setPwd} className="grey1-bg white-font">
+                Update
+              </button>
+            </div>
+          </div>
 
-        <AuthPane authed={this.props.login.authed} update={this.update} />
+          <div>
+            <input
+              name="old_pwd"
+              type="password"
+              onChange={this.changeOldPwd}
+              value={this.state.oldPwd}
+              className="black0-font margin-t-m margin-b-m"
+              placeholder="old password"
+            />
+          </div>
+          <div>
+            <input
+              name="new_pwd1"
+              type="password"
+              onChange={this.changeNewPwd1}
+              value={this.state.newPwd1}
+              className="black0-font margin-t-m margin-b-m margin-r-m"
+              placeholder="new password"
+            />
+            <input
+              name="new_pwd2"
+              type="password"
+              onChange={this.changeNewPwd2}
+              value={this.state.newPwd2}
+              className="black0-font margin-t-m margin-b-m"
+              placeholder="new password again"
+            />
+          </div>
+        </div>
+
+        <div className="hr white0-bg margin-t-m margin-b-m"></div>
+
+        <div>
+          <div className="flex-list-container">
+            <div className="flex-list-item-l">
+              <h5 className="black-font">Logout</h5>
+            </div>
+            <div className="flex-list-item-r">
+              <AuthPane authed={this.props.login.authed} update={this.update} />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

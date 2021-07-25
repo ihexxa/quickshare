@@ -3,6 +3,7 @@ import * as React from "react";
 import { ICoreState, BaseUpdater } from "./core_state";
 import { Browser, Props as BrowserProps } from "./browser";
 import { Props as PaneLoginProps } from "./pane_login";
+import { Props as PaneAdminProps } from "./pane_admin";
 import { Panes, Props as PanesProps, Updater as PanesUpdater } from "./panes";
 
 export interface Props {
@@ -10,6 +11,7 @@ export interface Props {
   browser: BrowserProps;
   authPane: PaneLoginProps;
   panes: PanesProps;
+  admin: PaneAdminProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
