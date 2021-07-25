@@ -17,6 +17,7 @@ export interface UploadStatusResp {
 }
 
 export interface ListResp {
+  cwd: string;
   metadatas: MetadataResp[];
 }
 
@@ -50,6 +51,7 @@ export interface IFilesClient {
   ) => Promise<Response<UploadStatusResp>>;
   uploadStatus: (filePath: string) => Promise<Response<UploadStatusResp>>;
   list: (dirPath: string) => Promise<Response<ListResp>>;
+  listHome: () => Promise<Response<ListResp>>;
   listUploadings: () => Promise<Response<ListUploadingsResp>>;
   deleteUploading: (filePath: string) => Promise<Response>;
 }

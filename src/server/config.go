@@ -15,6 +15,8 @@ type UsersCfg struct {
 	CookieTTL       int    `json:"cookieTTL" yaml:"cookieTTL"`
 	CookieSecure    bool   `json:"cookieSecure" yaml:"cookieSecure"`
 	CookieHttpOnly  bool   `json:"cookieHttpOnly" yaml:"cookieHttpOnly"`
+	MinUserNameLen  int    `json:"minUserNameLen" yaml:"minUserNameLen"`
+	MinPwdLen       int    `json:"minPwdLen" yaml:"minPwdLen"`
 }
 
 type Secrets struct {
@@ -56,6 +58,8 @@ func DefaultConfig() (string, error) {
 			CookieTTL:       3600 * 24 * 7, // 1 week
 			CookieSecure:    false,
 			CookieHttpOnly:  true,
+			MinUserNameLen:  4,
+			MinPwdLen:       6,
 		},
 		Secrets: &Secrets{
 			TokenSecret: "",

@@ -1,9 +1,29 @@
 package handlers
 
 import (
+	"crypto/sha1"
+	"errors"
 	"fmt"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
+)
+
+var (
+	// dirs
+	UploadDir = "uploadings"
+	FsDir     = "files"
+
+	UserIDParam = "uid"
+	UserParam   = "user"
+	PwdParam    = "pwd"
+	NewPwdParam = "newpwd"
+	RoleParam   = "role"
+	ExpireParam = "expire"
+	TokenCookie = "tk"
+
+	ErrAccessDenied = errors.New("access denied")
+	ErrUnauthorized = errors.New("unauthorized")
 )
 
 var statusCodes = map[int]string{
@@ -101,4 +121,16 @@ func ErrResp(c *gin.Context, code int, err error) (int, interface{}) {
 	gErr := c.Error(err)
 	return code, gErr.JSON()
 
+}
+
+func FsPath(userID, relFilePath string) string {
+	return filepath.Join(userID, FsDir, relFilePath)
+}
+
+func HomePath(userID, relFilePath string) string {
+	return filepath.Join(userID, relFilePath)
+}
+
+func GetTmpPath(userID, relFilePath string) string {
+	return filepath.Join(UploadDir, userID, fmt.Sprintf("%x", sha1.Sum([]byte(relFilePath))))
 }

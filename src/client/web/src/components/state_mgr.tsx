@@ -20,7 +20,7 @@ export class StateMgr extends React.Component<Props, State, {}> {
     BrowserUpdater().init(state.panel.browser);
     BrowserUpdater().setClients(new UsersClient(""), new FilesClient(""));
     BrowserUpdater()
-      .setItems(state.panel.browser.dirPath)
+      .setHomeItems()
       .then(() => {
         return BrowserUpdater().refreshUploadings();
       })

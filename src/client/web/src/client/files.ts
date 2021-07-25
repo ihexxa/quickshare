@@ -136,6 +136,14 @@ export class FilesClient extends BaseClient {
     });
   };
 
+  listHome = (): Promise<Response<ListResp>> => {
+    return this.do({
+      method: "get",
+      url: `${this.url}/v1/fs/dirs/home`,
+      params: {},
+    });
+  };
+
   listUploadings = (): Promise<Response<ListUploadingsResp>> => {
     return this.do({
       method: "get",

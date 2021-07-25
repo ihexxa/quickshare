@@ -10,15 +10,17 @@ import (
 )
 
 type FilesClient struct {
-	addr string
-	r    *gorequest.SuperAgent
+	addr  string
+	r     *gorequest.SuperAgent
+	token *http.Cookie
 }
 
-func NewFilesClient(addr string) *FilesClient {
+func NewFilesClient(addr string, token *http.Cookie) *FilesClient {
 	gr := gorequest.New()
 	return &FilesClient{
-		addr: addr,
-		r:    gr,
+		addr:  addr,
+		r:     gr,
+		token: token,
 	}
 }
 
@@ -28,6 +30,7 @@ func (cl *FilesClient) url(urlpath string) string {
 
 func (cl *FilesClient) Create(filepath string, size int64) (*http.Response, string, []error) {
 	return cl.r.Post(cl.url("/v1/fs/files")).
+		AddCookie(cl.token).
 		Send(fileshdr.CreateReq{
 			Path:     filepath,
 			FileSize: size,
@@ -37,12 +40,14 @@ func (cl *FilesClient) Create(filepath string, size int64) (*http.Response, stri
 
 func (cl *FilesClient) Delete(filepath string) (*http.Response, string, []error) {
 	return cl.r.Delete(cl.url("/v1/fs/files")).
+		AddCookie(cl.token).
 		Param(fileshdr.FilePathQuery, filepath).
 		End()
 }
 
 func (cl *FilesClient) Metadata(filepath string) (*http.Response, *fileshdr.MetadataResp, []error) {
 	resp, body, errs := cl.r.Get(cl.url("/v1/fs/metadata")).
+		AddCookie(cl.token).
 		Param(fileshdr.FilePathQuery, filepath).
 		End()
 
@@ -57,12 +62,14 @@ func (cl *FilesClient) Metadata(filepath string) (*http.Response, *fileshdr.Meta
 
 func (cl *FilesClient) Mkdir(dirpath string) (*http.Response, string, []error) {
 	return cl.r.Post(cl.url("/v1/fs/dirs")).
+		AddCookie(cl.token).
 		Send(fileshdr.MkdirReq{Path: dirpath}).
 		End()
 }
 
 func (cl *FilesClient) Move(oldpath, newpath string) (*http.Response, string, []error) {
 	return cl.r.Patch(cl.url("/v1/fs/files/move")).
+		AddCookie(cl.token).
 		Send(fileshdr.MoveReq{
 			OldPath: oldpath,
 			NewPath: newpath,
@@ -72,6 +79,7 @@ func (cl *FilesClient) Move(oldpath, newpath string) (*http.Response, string, []
 
 func (cl *FilesClient) UploadChunk(filepath string, content string, offset int64) (*http.Response, string, []error) {
 	return cl.r.Patch(cl.url("/v1/fs/files/chunks")).
+		AddCookie(cl.token).
 		Send(fileshdr.UploadChunkReq{
 			Path:    filepath,
 			Content: content,
@@ -82,6 +90,7 @@ func (cl *FilesClient) UploadChunk(filepath string, content string, offset int64
 
 func (cl *FilesClient) UploadStatus(filepath string) (*http.Response, *fileshdr.UploadStatusResp, []error) {
 	resp, body, errs := cl.r.Get(cl.url("/v1/fs/files/chunks")).
+		AddCookie(cl.token).
 		Param(fileshdr.FilePathQuery, filepath).
 		End()
 
@@ -96,6 +105,7 @@ func (cl *FilesClient) UploadStatus(filepath string) (*http.Response, *fileshdr.
 
 func (cl *FilesClient) Download(filepath string, headers map[string]string) (*http.Response, string, []error) {
 	r := cl.r.Get(cl.url("/v1/fs/files")).
+		AddCookie(cl.token).
 		Param(fileshdr.FilePathQuery, filepath)
 	for key, val := range headers {
 		r = r.Set(key, val)
@@ -105,6 +115,7 @@ func (cl *FilesClient) Download(filepath string, headers map[string]string) (*ht
 
 func (cl *FilesClient) List(dirPath string) (*http.Response, *fileshdr.ListResp, []error) {
 	resp, body, errs := cl.r.Get(cl.url("/v1/fs/dirs")).
+		AddCookie(cl.token).
 		Param(fileshdr.ListDirQuery, dirPath).
 		End()
 	if len(errs) > 0 {
@@ -121,6 +132,7 @@ func (cl *FilesClient) List(dirPath string) (*http.Response, *fileshdr.ListResp,
 
 func (cl *FilesClient) ListUploadings() (*http.Response, *fileshdr.ListUploadingsResp, []error) {
 	resp, body, errs := cl.r.Get(cl.url("/v1/fs/uploadings")).
+		AddCookie(cl.token).
 		End()
 	if len(errs) > 0 {
 		return nil, nil, errs
@@ -136,6 +148,7 @@ func (cl *FilesClient) ListUploadings() (*http.Response, *fileshdr.ListUploading
 
 func (cl *FilesClient) DelUploading(filepath string) (*http.Response, string, []error) {
 	return cl.r.Delete(cl.url("/v1/fs/uploadings")).
+		AddCookie(cl.token).
 		Param(fileshdr.FilePathQuery, filepath).
 		End()
 }

@@ -19,3 +19,5 @@ users:
   cookieTTL: 604800 # 1 week
   cookieSecure: false
   cookieHttpOnly: true
+  minUserNameLen: 2
+  minPwdLen: 4
