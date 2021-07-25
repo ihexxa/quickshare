@@ -1,11 +1,11 @@
-import { List, Set } from "immutable";
+import { List, Set, Map } from "immutable";
 
 import BgWorker from "../worker/upload.bg.worker";
 import { FgWorker } from "../worker/upload.fgworker";
 
 import { Props as PanelProps } from "./root_frame";
 import { Item } from "./browser";
-import { UploadInfo } from "../client";
+import { UploadInfo, User } from "../client";
 import { Up, initUploadMgr, IWorker } from "../worker/upload_mgr";
 
 export class BaseUpdater {
@@ -66,6 +66,10 @@ export function initState(): ICoreState {
           authed: false,
         },
       },
+      admin: {
+        users: Map<string, User>(),
+        roles: Set<string>() 
+      }
     },
   };
 }
@@ -94,6 +98,10 @@ export function mockState(): ICoreState {
           authed: false,
         },
       },
+      admin: {
+        users: Map<string, User>(),
+        roles: Set<string>() 
+      }
     },
   };
 }

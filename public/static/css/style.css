@@ -53,7 +53,7 @@
 .container-center {
   margin: 2rem auto auto auto;
   width: 96%;
-  max-width: 800px;
+  max-width: 80rem;
   z-index: 9;
 }
 
@@ -75,7 +75,7 @@
 }
 
 #panes .container {
-  max-width: 960px;
+  max-width: 80rem;
   width: 96%;
   background-color: white;
   z-index: 101;
@@ -629,4 +629,8 @@ div.hr {
 
 .breadcrumb {
   font-size: 1.4rem;
+}
+
+.txt-cap {
+  text-transform: capitalize;
 }

@@ -2,6 +2,13 @@ import axios, { AxiosRequestConfig } from "axios";
 
 export const defaultTimeout = 10000;
 
+export interface User {
+  ID: string;
+  Name: string;
+  Pwd: string;
+  Role: string;
+}
+
 export interface MetadataResp {
   name: string;
   size: number;
