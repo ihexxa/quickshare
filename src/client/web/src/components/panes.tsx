@@ -84,24 +84,26 @@ export class Panes extends React.Component<Props, State, {}> {
     const btnClass = displaying === "login" ? "hidden" : "";
     return (
       <div id="panes" className={displaying === "" ? "hidden" : ""}>
-        <div className="container">
-          <div className="flex-list-container padding-l">
-            <h3 className="flex-list-item-l txt-cap">{displaying}</h3>
-            <div className="flex-list-item-r">
-              <button
-                onClick={this.closePane}
-                className={`black0-bg white-font ${btnClass}`}
-              >
-                Close
-              </button>
+        <div className="root-container">
+
+          <div className="container">
+            <div className="flex-list-container padding-l">
+              <h3 className="flex-list-item-l txt-cap">{displaying}</h3>
+              <div className="flex-list-item-r">
+                <button
+                  onClick={this.closePane}
+                  className={`black0-bg white-font ${btnClass}`}
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
 
-          <div className="hr white0-bg margin-b-m margin-l-m margin-r-m"></div>
           {panes}
-
-          <div className="padding-l"></div>
         </div>
+        {/* <div className="hr white0-bg margin-b-m margin-l-m margin-r-m"></div> */}
+        {/* <div className="padding-l"></div> */}
       </div>
     );
   }

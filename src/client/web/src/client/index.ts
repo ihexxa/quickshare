@@ -4,10 +4,18 @@ export const defaultTimeout = 10000;
 export const userIDParam = "uid";
 
 export interface User {
-  ID: string;
-  Name: string;
-  Pwd: string;
-  Role: string;
+  id: string;
+  name: string;
+  pwd: string;
+  role: string;
+}
+
+export interface ListUsersResp {
+  users: Array<User>;
+}
+
+export interface ListRolesResp {
+  roles: Array<string>;
 }
 
 export interface MetadataResp {
@@ -49,6 +57,7 @@ export interface IUsersClient {
   listUsers: () => Promise<Response>;
   addRole: (role: string) => Promise<Response>;
   delRole: (role: string) => Promise<Response>;
+  listRoles: () => Promise<Response>;
 }
 
 export interface IFilesClient {

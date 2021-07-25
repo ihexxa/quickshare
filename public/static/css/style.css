@@ -74,13 +74,18 @@
   overflow: scroll;
 }
 
-#panes .container {
+#panes .root-container {
   max-width: 80rem;
   width: 96%;
-  background-color: white;
   z-index: 101;
   text-align: left;
   margin: 3rem auto 8rem auto;
+  border-radius: 0.6rem;
+}
+
+#panes .container {
+  background-color: white;
+  margin: 3rem auto 1rem auto;
   border-radius: 0.6rem;
 }
 
