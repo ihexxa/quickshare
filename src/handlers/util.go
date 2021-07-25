@@ -21,6 +21,7 @@ var (
 	RoleParam   = "role"
 	ExpireParam = "expire"
 	TokenCookie = "tk"
+	LastID      = "lid"
 
 	ErrAccessDenied = errors.New("access denied")
 	ErrUnauthorized = errors.New("unauthorized")

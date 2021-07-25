@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/ihexxa/quickshare/src/handlers"
 	"github.com/ihexxa/quickshare/src/handlers/multiusers"
 	"github.com/parnurzeal/gorequest"
 )
@@ -74,6 +75,30 @@ func (cl *SingleUserClient) AddUser(name, pwd, role string, token *http.Cookie) 
 	return resp, auResp, errs
 }
 
+func (cl *SingleUserClient) DelUser(id string, token *http.Cookie) (*http.Response, string, []error) {
+	return cl.r.Delete(cl.url("/v1/users/")).
+		AddCookie(token).
+		Param(handlers.UserIDParam, id).
+		End()
+}
+
+func (cl *SingleUserClient) ListUsers(token *http.Cookie) (*http.Response, *multiusers.ListUsersResp, []error) {
+	resp, body, errs := cl.r.Get(cl.url("/v1/users/list")).
+		AddCookie(token).
+		End()
+	if len(errs) > 0 {
+		return nil, nil, errs
+	}
+
+	lsResp := &multiusers.ListUsersResp{}
+	err := json.Unmarshal([]byte(body), lsResp)
+	if err != nil {
+		errs = append(errs, err)
+		return nil, nil, errs
+	}
+	return resp, lsResp, errs
+}
+
 func (cl *SingleUserClient) AddRole(role string, token *http.Cookie) (*http.Response, string, []error) {
 	return cl.r.Post(cl.url("/v1/roles/")).
 		AddCookie(token).
@@ -93,7 +118,7 @@ func (cl *SingleUserClient) DelRole(role string, token *http.Cookie) (*http.Resp
 }
 
 func (cl *SingleUserClient) ListRoles(token *http.Cookie) (*http.Response, *multiusers.ListRolesResp, []error) {
-	resp, body, errs := cl.r.Get(cl.url("/v1/roles/")).
+	resp, body, errs := cl.r.Get(cl.url("/v1/roles/list")).
 		AddCookie(token).
 		End()
 	if len(errs) > 0 {

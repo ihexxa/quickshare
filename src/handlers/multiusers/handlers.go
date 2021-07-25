@@ -40,9 +40,11 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(userstore.AdminRole, "GET", "/v1/users/isauthed"):      true,
 		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/users/pwd"):         true,
 		apiRuleCname(userstore.AdminRole, "POST", "/v1/users/"):             true,
+		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/users/"):           true,
+		apiRuleCname(userstore.AdminRole, "GET", "/v1/users/list"):          true,
 		apiRuleCname(userstore.AdminRole, "POST", "/v1/roles/"):             true,
 		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/roles/"):           true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/roles/"):              true,
+		apiRuleCname(userstore.AdminRole, "GET", "/v1/roles/list"):          true,
 		apiRuleCname(userstore.AdminRole, "POST", "/v1/fs/files"):           true,
 		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/fs/files"):         true,
 		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/files"):            true,
@@ -291,6 +293,53 @@ func (h *MultiUsersSvc) AddUser(c *gin.Context) {
 	}
 
 	c.JSON(200, &AddUserResp{ID: fmt.Sprint(uid)})
+}
+
+type DelUserResp struct {
+	ID string `json:"id"`
+}
+
+func (h *MultiUsersSvc) DelUser(c *gin.Context) {
+	userIDStr := c.Query(q.UserIDParam)
+	userID, err := strconv.ParseUint(userIDStr, 10, 64)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 400, fmt.Errorf("invalid users ID %w", err)))
+		return
+	} else if userID == 0 {
+		c.JSON(q.ErrResp(c, 400, errors.New("It is not allowed to delete root")))
+		return
+	}
+
+	err = h.deps.Users().DelUser(userID)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+	c.JSON(200, &DelUserResp{ID: userIDStr})
+}
+
+type ListUsersResp struct {
+	Users []*userstore.User `json:"users"`
+}
+
+func (h *MultiUsersSvc) ListUsers(c *gin.Context) {
+	// TODO: pagination is not enabled
+	// lastID := 0
+	// lastIDStr := c.Query(q.LastID)
+	// if lastIDStr != "" {
+	// 	lastID, err := strconv.Atoi(lastIDStr)
+	// 	if err != nil {
+	// 		c.JSON(q.ErrResp(c, 400, fmt.Errorf("invalid param %w", err)))
+	// 		return
+	// 	}
+	// }
+
+	users, err := h.deps.Users().ListUsers()
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+	c.JSON(200, &ListUsersResp{Users: users})
 }
 
 type AddRoleReq struct {
