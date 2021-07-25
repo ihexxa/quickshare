@@ -36,6 +36,7 @@ type IUserStore interface {
 	Init(rootName, rootPwd string) error
 	IsInited() bool
 	AddUser(user *User) error
+	DelUser(id uint64) error
 	GetUser(id uint64) (*User, error)
 	GetUserByName(name string) (*User, error)
 	SetName(id uint64, name string) error
@@ -134,6 +135,27 @@ func (us *KVUserStore) AddUser(user *User) error {
 		return err
 	}
 	return us.store.SetStringIn(RolesNs, userID, user.Role)
+}
+
+func (us *KVUserStore) DelUser(id uint64) error {
+	us.mtx.Lock()
+	defer us.mtx.Unlock()
+
+	userID := fmt.Sprint(id)
+	name, ok := us.store.GetStringIn(NamesNs, userID)
+	if !ok {
+		return fmt.Errorf("userID (%s) exists", userID)
+	}
+
+	// TODO: add complement operations if part of the actions fails
+	err1 := us.store.DelStringIn(NamesNs, userID)
+	err2 := us.store.DelStringIn(IDsNs, name)
+	err3 := us.store.DelStringIn(PwdsNs, userID)
+	err4 := us.store.DelStringIn(RolesNs, userID)
+	if err1 != nil || err2 != nil || err3 != nil || err4 != nil {
+		return fmt.Errorf("get name(%s) id(%s) pwd(%s) role(%s)", err1, err2, err3, err4)
+	}
+	return nil
 }
 
 func (us *KVUserStore) GetUser(id uint64) (*User, error) {
@@ -260,8 +282,8 @@ func (us *KVUserStore) SetRole(id uint64, role string) error {
 }
 
 func (us *KVUserStore) ListUsers() ([]*User, error) {
-	us.mtx.Lock()
-	defer us.mtx.Unlock()
+	us.mtx.RLock()
+	defer us.mtx.RUnlock()
 
 	idToName, err := us.store.ListStringsIn(NamesNs)
 	if err != nil {
