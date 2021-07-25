@@ -51,6 +51,20 @@ func TestUserStores(t *testing.T) {
 			t.Fatalf("roles not matched %s %s", role1, user.Role)
 		}
 
+		users, err := store.ListUsers()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if users[0].ID != 0 || users[0].Name != rootName || users[0].Role != AdminRole {
+			t.Fatalf("incorrect root info %v", users[0])
+		}
+		if users[1].ID != 1 || users[1].Name != name1 || users[1].Role != role1 {
+			t.Fatalf("incorrect user info %v", users[1])
+		}
+		if len(users) != 2 {
+			t.Fatalf("users size should be 2 (%d)", len(users))
+		}
+
 		err = store.SetName(id, name2)
 		if err != nil {
 			t.Fatal(err)

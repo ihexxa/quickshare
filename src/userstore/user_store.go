@@ -40,6 +40,7 @@ type IUserStore interface {
 	GetUserByName(name string) (*User, error)
 	SetName(id uint64, name string) error
 	SetPwd(id uint64, pwd string) error
+	ListUsers() ([]*User, error)
 	SetRole(id uint64, role string) error
 	AddRole(role string) error
 	DelRole(role string) error
@@ -256,6 +257,37 @@ func (us *KVUserStore) SetRole(id uint64, role string) error {
 	}
 
 	return us.store.SetStringIn(RolesNs, userID, role)
+}
+
+func (us *KVUserStore) ListUsers() ([]*User, error) {
+	us.mtx.Lock()
+	defer us.mtx.Unlock()
+
+	idToName, err := us.store.ListStringsIn(NamesNs)
+	if err != nil {
+		return nil, err
+	}
+
+	roles, err := us.store.ListStringsIn(RolesNs)
+	if err != nil {
+		return nil, err
+	}
+
+	users := []*User{}
+	for id, name := range idToName {
+		intID, err := strconv.ParseUint(id, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		users = append(users, &User{
+			ID:   intID,
+			Name: name,
+			Role: roles[id],
+		})
+	}
+
+	return users, nil
 }
 
 func (us *KVUserStore) AddRole(role string) error {
