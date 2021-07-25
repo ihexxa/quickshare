@@ -8,6 +8,11 @@ export class MockUsersClient {
   private isAuthedMockResp: Promise<Response>;
   private setPwdMockResp: Promise<Response>;
   private addUserMockResp: Promise<Response>;
+  private delUserMockResp: Promise<Response>;
+  private listUsersMockResp: Promise<Response>;
+  private addRoleMockResp: Promise<Response>;
+  private delRoleMockResp: Promise<Response>;
+  private listRolesMockResp: Promise<Response>;
 
   constructor(url: string) {
     this.url = url;
@@ -27,6 +32,21 @@ export class MockUsersClient {
   }
   addUserMock = (resp: Promise<Response>) => {
     this.addUserMockResp = resp;
+  }
+  delUserMock = (resp: Promise<Response>) => {
+    this.delUserMockResp = resp;
+  }
+  listUsersMock = (resp: Promise<Response>) => {
+    this.listUsersMockResp = resp;
+  }
+  addRoleMock = (resp: Promise<Response>) => {
+    this.addRoleMockResp = resp;
+  }
+  delRoleMock = (resp: Promise<Response>) => {
+    this.delRoleMockResp = resp;
+  }
+  listRolesMock = (resp: Promise<Response>) => {
+    this.listRolesMockResp = resp;
   }
 
   login = (user: string, pwd: string): Promise<Response> => {
@@ -49,4 +69,23 @@ export class MockUsersClient {
     return this.addUserMockResp;
   }
 
+  delUser = (userID: string): Promise<Response> => {
+    return this.delUserMockResp;
+  }
+  
+  listUsers = (): Promise<Response> => {
+    return this.listUsersMockResp;
+  }
+
+  addRole = (role: string): Promise<Response> => {
+    return this.addRoleMockResp;
+  }
+
+  delRole = (role: string): Promise<Response> => {
+    return this.delRoleMockResp;
+  }
+
+  listRoles = (): Promise<Response> => {
+    return this.listRolesMockResp;
+  }
 }

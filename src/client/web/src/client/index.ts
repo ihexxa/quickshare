@@ -1,6 +1,7 @@
 import axios, { AxiosRequestConfig } from "axios";
 
 export const defaultTimeout = 10000;
+export const userIDParam = "uid";
 
 export interface User {
   ID: string;
@@ -43,6 +44,11 @@ export interface IUsersClient {
   logout: () => Promise<Response>;
   isAuthed: () => Promise<Response>;
   setPwd: (oldPwd: string, newPwd: string) => Promise<Response>;
+  addUser: (name: string, pwd: string, role: string) => Promise<Response>;
+  delUser: (userID: string) => Promise<Response>;
+  listUsers: () => Promise<Response>;
+  addRole: (role: string) => Promise<Response>;
+  delRole: (role: string) => Promise<Response>;
 }
 
 export interface IFilesClient {
