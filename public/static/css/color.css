@@ -54,6 +54,10 @@
     color: #27ae60;
 }
 
+.green2-font {
+    color: #15cd3d;
+}
+
 .white-font {
     color: #fff;
 }
@@ -94,6 +98,11 @@
     background-color: #2980b9;
 }
 
+.blue2-bg {
+    background-color: #2f45c5;
+}
+
+
 .cyan0-bg {
     background-color: #1abc9c;
 }
@@ -131,6 +140,10 @@
 }
 
 .yellow3-bg {
+    background-color: #15cd3d;;
+}
+
+.yellow3-bg {
     background-color: #d35400;
 }
 
@@ -140,6 +153,10 @@
 
 .green1-bg {
     background-color: #27ae60;
+}
+
+.green2-bg {
+    background-color: #15cd3d;
 }
 
 .white-bg {

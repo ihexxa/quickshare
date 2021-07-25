@@ -82,7 +82,7 @@ export class RootFrame extends React.Component<Props, State, {}> {
             />
           </div>
 
-          <div className="container-center black0-font tail margin-t-xl margin-b-xl">
+          <div id="tail" className="container-center black0-font">
             <a href="https://github.com/ihexxa/quickshare">Quickshare</a> -
             sharing in simple way.
           </div>
