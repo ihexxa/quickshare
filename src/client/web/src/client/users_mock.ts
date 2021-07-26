@@ -7,6 +7,7 @@ export class MockUsersClient {
   private logoutMockResp: Promise<Response>;
   private isAuthedMockResp: Promise<Response>;
   private setPwdMockResp: Promise<Response>;
+  private forceSetPwdMockResp: Promise<Response>;
   private addUserMockResp: Promise<Response>;
   private delUserMockResp: Promise<Response>;
   private listUsersMockResp: Promise<Response>;
@@ -29,6 +30,9 @@ export class MockUsersClient {
   }
   setPwdMock = (resp: Promise<Response>) => {
     this.setPwdMockResp = resp;
+  }
+  forceSetPwdMock = (resp: Promise<Response>) => {
+    this.forceSetPwdMockResp = resp;
   }
   addUserMock = (resp: Promise<Response>) => {
     this.addUserMockResp = resp;
@@ -63,6 +67,10 @@ export class MockUsersClient {
 
   setPwd = (oldPwd: string, newPwd: string): Promise<Response> => {
     return this.setPwdMockResp;
+  }
+  
+  forceSetPwd = (userID: string, newPwd: string): Promise<Response> => {
+    return this.forceSetPwdMockResp;
   }
 
   addUser = (name: string, pwd: string, role: string): Promise<Response> => {

@@ -259,52 +259,6 @@ export class Browser extends React.Component<Props, State, {}> {
     const sizeCellClass = this.props.isVertical ? `hidden margin-s` : ``;
     const modTimeCellClass = this.props.isVertical ? `hidden margin-s` : ``;
 
-    const layoutChildren = [
-      <button
-        type="button"
-        onClick={() => this.delete()}
-        className="red0-bg white-font margin-t-m margin-b-m"
-      >
-        Delete Selected
-      </button>,
-      <button
-        type="button"
-        onClick={() => this.moveHere()}
-        className="grey1-bg white-font margin-t-m margin-b-m"
-      >
-        Paste
-      </button>,
-      <span className="inline-block margin-t-m margin-b-m">
-        <input
-          type="text"
-          onChange={this.onInputChange}
-          value={this.state.inputValue}
-          className="black0-font margin-r-m"
-          placeholder="folder name"
-        />
-        <button onClick={this.onMkDir} className="grey1-bg white-font">
-          Create Folder
-        </button>
-      </span>,
-      <span className="inline-block margin-t-m margin-b-m">
-        <button onClick={this.onClickUpload} className="green0-bg white-font">
-          Upload Files
-        </button>
-        <input
-          type="file"
-          onChange={this.addUploads}
-          multiple={true}
-          value={this.props.uploadValue}
-          ref={this.assignInput}
-          className="black0-font hidden"
-        />
-      </span>,
-    ];
-
-    // const ops = (
-    //   <Layouter isHorizontal={false} elements={layoutChildren}></Layouter>
-    // );
-
     const ops = (
       <div>
         <div>

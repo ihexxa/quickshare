@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import { updater as BrowserUpdater } from "./browser.updater";
+import { Updater as PanesUpdater } from "./panes";
 import { ICoreState, init } from "./core_state";
 import { RootFrame } from "./root_frame";
 import { FilesClient } from "../client/files";
@@ -26,6 +27,15 @@ export class StateMgr extends React.Component<Props, State, {}> {
       })
       .then((_: boolean) => {
         this.update(BrowserUpdater().setBrowser);
+      })
+      .then(() => {
+        return PanesUpdater.listRoles()
+      })
+      .then((_: boolean) => {
+        return PanesUpdater.listUsers()
+      })
+      .then((_: boolean) => {
+        this.update(PanesUpdater.updateState);
       });
   };
 

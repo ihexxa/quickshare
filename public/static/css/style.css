@@ -144,6 +144,11 @@
   margin-right: 1rem;
 }
 
+#panes .dot {
+  overflow: hidden;
+  margin-left: 0;
+}
+
 #item-list .vbar {
   overflow: hidden;
   margin: 1.5rem 1rem;
@@ -162,6 +167,14 @@
 }
 
 #item-list .item-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-wrap: break-word;
+  display: block;
+}
+
+.item-name {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;

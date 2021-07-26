@@ -1,6 +1,8 @@
 import * as React from "react";
 import { Set, Map } from "immutable";
 
+import { IUsersClient, User, ListUsersResp, ListRolesResp } from "../client";
+import { UsersClient } from "../client/users";
 import { ICoreState } from "./core_state";
 import { PaneSettings } from "./pane_settings";
 import { AdminPane, Props as AdminPaneProps } from "./pane_admin";
@@ -16,8 +18,12 @@ export interface Props {
 
 export class Updater {
   static props: Props;
+  private static client: IUsersClient;
 
   static init = (props: Props) => (Updater.props = { ...props });
+  static setClient = (client: IUsersClient): void => {
+    Updater.client = client;
+  };
 
   static displayPane = (paneName: string) => {
     if (paneName === "") {
@@ -33,7 +39,72 @@ export class Updater {
     }
   };
 
+  static addUser = async (user: User): Promise<boolean> => {
+    const resp = await Updater.client.addUser(user.name, user.pwd, user.role);
+    // TODO: should return uid instead
+    return resp.status === 200;
+  };
+
+  static delUser = async (userID: string): Promise<boolean> => {
+    const resp = await Updater.client.delUser(userID);
+    return resp.status === 200;
+  };
+
+  static setRole = async (userID: string, role: string): Promise<boolean> => {
+    const resp = await Updater.client.delUser(userID);
+    return resp.status === 200;
+  };
+
+  static forceSetPwd = async (userID: string, pwd: string): Promise<boolean> => {
+    const resp = await Updater.client.forceSetPwd(userID, pwd);
+    return resp.status === 200;
+  };
+
+  static listUsers = async (): Promise<boolean> => {
+    const resp = await Updater.client.listUsers();
+    if (resp.status !== 200) {
+      return false;
+    }
+
+    const lsRes = resp.data as ListUsersResp;
+    let users = Map<User>({});
+    lsRes.users.forEach((user: User) => {
+      users = users.set(user.name, user);
+    });
+    Updater.props.admin.users = users;
+
+    return true;
+  };
+
+  static addRole = async (role: string): Promise<boolean> => {
+    const resp = await Updater.client.addRole(role);
+    // TODO: should return uid instead
+    return resp.status === 200;
+  };
+
+  static delRole = async (role: string): Promise<boolean> => {
+    const resp = await Updater.client.delRole(role);
+    return resp.status === 200;
+  };
+
+  static listRoles = async (): Promise<boolean> => {
+    const resp = await Updater.client.listRoles();
+    if (resp.status !== 200) {
+      return false;
+    }
+
+    const lsRes = resp.data as ListRolesResp;
+    let roles = Set<string>();
+    Object.keys(lsRes.roles).forEach((role: string) => {
+      roles = roles.add(role);
+    });
+    Updater.props.admin.roles = roles;
+
+    return true;
+  };
+
   static updateState = (prevState: ICoreState): ICoreState => {
+    console.log(prevState, Updater.props);
     return {
       ...prevState,
       panel: {
@@ -49,6 +120,7 @@ export class Panes extends React.Component<Props, State, {}> {
   constructor(p: Props) {
     super(p);
     Updater.init(p);
+    Updater.setClient(new UsersClient(""));
   }
 
   closePane = () => {

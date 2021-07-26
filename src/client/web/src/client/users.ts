@@ -41,6 +41,17 @@ export class UsersClient extends BaseClient {
     });
   };
 
+  forceSetPwd = (userID: string, newPwd: string): Promise<Response> => {
+    return this.do({
+      method: "patch",
+      url: `${this.url}/v1/users/pwd/force-set`,
+      data: {
+        id: userID,
+        newPwd,
+      },
+    });
+  };
+
   // token cookie is set by browser
   addUser = (name: string, pwd: string, role: string): Promise<Response> => {
     return this.do({
