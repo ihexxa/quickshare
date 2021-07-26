@@ -33,32 +33,33 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 	apiACRules := map[string]bool{
 		// TODO: make these configurable
 		// admin rules
-		apiRuleCname(userstore.AdminRole, "GET", "/"):                       true,
-		apiRuleCname(userstore.AdminRole, "GET", publicPath):                true,
-		apiRuleCname(userstore.AdminRole, "POST", "/v1/users/login"):        true,
-		apiRuleCname(userstore.AdminRole, "POST", "/v1/users/logout"):       true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/users/isauthed"):      true,
-		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/users/pwd"):         true,
-		apiRuleCname(userstore.AdminRole, "POST", "/v1/users/"):             true,
-		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/users/"):           true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/users/list"):          true,
-		apiRuleCname(userstore.AdminRole, "POST", "/v1/roles/"):             true,
-		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/roles/"):           true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/roles/list"):          true,
-		apiRuleCname(userstore.AdminRole, "POST", "/v1/fs/files"):           true,
-		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/fs/files"):         true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/files"):            true,
-		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/fs/files/chunks"):   true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/files/chunks"):     true,
-		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/fs/files/copy"):     true,
-		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/fs/files/move"):     true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/dirs"):             true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/dirs/home"):        true,
-		apiRuleCname(userstore.AdminRole, "POST", "/v1/fs/dirs"):            true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/uploadings"):       true,
-		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/fs/uploadings"):    true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/metadata"):         true,
-		apiRuleCname(userstore.AdminRole, "OPTIONS", "/v1/settings/health"): true,
+		apiRuleCname(userstore.AdminRole, "GET", "/"):                         true,
+		apiRuleCname(userstore.AdminRole, "GET", publicPath):                  true,
+		apiRuleCname(userstore.AdminRole, "POST", "/v1/users/login"):          true,
+		apiRuleCname(userstore.AdminRole, "POST", "/v1/users/logout"):         true,
+		apiRuleCname(userstore.AdminRole, "GET", "/v1/users/isauthed"):        true,
+		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/users/pwd"):           true,
+		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/users/pwd/force-set"): true,
+		apiRuleCname(userstore.AdminRole, "POST", "/v1/users/"):               true,
+		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/users/"):             true,
+		apiRuleCname(userstore.AdminRole, "GET", "/v1/users/list"):            true,
+		apiRuleCname(userstore.AdminRole, "POST", "/v1/roles/"):               true,
+		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/roles/"):             true,
+		apiRuleCname(userstore.AdminRole, "GET", "/v1/roles/list"):            true,
+		apiRuleCname(userstore.AdminRole, "POST", "/v1/fs/files"):             true,
+		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/fs/files"):           true,
+		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/files"):              true,
+		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/fs/files/chunks"):     true,
+		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/files/chunks"):       true,
+		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/fs/files/copy"):       true,
+		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/fs/files/move"):       true,
+		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/dirs"):               true,
+		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/dirs/home"):          true,
+		apiRuleCname(userstore.AdminRole, "POST", "/v1/fs/dirs"):              true,
+		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/uploadings"):         true,
+		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/fs/uploadings"):      true,
+		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/metadata"):           true,
+		apiRuleCname(userstore.AdminRole, "OPTIONS", "/v1/settings/health"):   true,
 		// user rules
 		apiRuleCname(userstore.UserRole, "GET", "/"):                       true,
 		apiRuleCname(userstore.UserRole, "GET", publicPath):                true,
@@ -233,6 +234,57 @@ func (h *MultiUsersSvc) SetPwd(c *gin.Context) {
 	c.JSON(q.Resp(200))
 }
 
+type ForceSetPwdReq struct {
+	ID     string `json:"id"`
+	NewPwd string `json:"newPwd"`
+}
+
+func (h *MultiUsersSvc) ForceSetPwd(c *gin.Context) {
+	req := &ForceSetPwdReq{}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(q.ErrResp(c, 400, err))
+		return
+	}
+
+	claims, err := h.getUserInfo(c)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 401, err))
+		return
+	}
+	if claims[q.RoleParam] != userstore.AdminRole {
+		c.JSON(q.ErrResp(c, 403, errors.New("operation denied")))
+		return
+	}
+	targetUID, err := strconv.ParseUint(req.ID, 10, 64)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+	targetUser, err := h.deps.Users().GetUser(targetUID)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+	if targetUser.Role == userstore.AdminRole {
+		c.JSON(q.ErrResp(c, 403, errors.New("can not set admin's password")))
+		return
+	}
+
+	newHash, err := bcrypt.GenerateFromPassword([]byte(req.NewPwd), 10)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, errors.New("fail to set password")))
+		return
+	}
+
+	err = h.deps.Users().SetPwd(targetUser.ID, string(newHash))
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
+	c.JSON(q.Resp(200))
+}
+
 type AddUserReq struct {
 	Name string `json:"name"`
 	Pwd  string `json:"pwd"`
@@ -307,6 +359,16 @@ func (h *MultiUsersSvc) DelUser(c *gin.Context) {
 		return
 	} else if userID == 0 {
 		c.JSON(q.ErrResp(c, 400, errors.New("It is not allowed to delete root")))
+		return
+	}
+
+	claims, err := h.getUserInfo(c)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 401, err))
+		return
+	}
+	if claims[q.UserIDParam] == userIDStr {
+		c.JSON(q.ErrResp(c, 403, errors.New("can not delete self")))
 		return
 	}
 

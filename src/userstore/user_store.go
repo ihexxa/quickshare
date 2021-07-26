@@ -26,10 +26,10 @@ const (
 )
 
 type User struct {
-	ID   uint64
-	Name string
-	Pwd  string
-	Role string
+	ID   uint64 `json:"id,string"`
+	Name string `json:"name"`
+	Pwd  string `json:"pwd"`
+	Role string `json:"role"`
 }
 
 type IUserStore interface {
