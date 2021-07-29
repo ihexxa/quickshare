@@ -49,7 +49,7 @@ func TestSingleUserHandlers(t *testing.T) {
 		t.Fatal("fail to start server")
 	}
 
-	t.Run("test users APIs: Login-SetPwd-Logout-Login", func(t *testing.T) {
+	t.Run("test users APIs: Login-Self-SetPwd-Logout-Login", func(t *testing.T) {
 		resp, _, errs := usersCl.Login(adminName, adminPwd)
 		if len(errs) > 0 {
 			t.Fatal(errs)
@@ -58,6 +58,17 @@ func TestSingleUserHandlers(t *testing.T) {
 		}
 
 		token := client.GetCookie(resp.Cookies(), su.TokenCookie)
+
+		resp, selfResp, errs := usersCl.Self(token)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		} else if selfResp.ID != "0" ||
+			selfResp.Name != adminName ||
+			selfResp.Role != userstore.AdminRole {
+			t.Fatalf("user infos don't match %v", selfResp)
+		}
 
 		resp, _, errs = usersCl.SetPwd(adminPwd, adminNewPwd, token)
 		if len(errs) > 0 {

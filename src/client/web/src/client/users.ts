@@ -106,4 +106,12 @@ export class UsersClient extends BaseClient {
       params: {},
     });
   };
+
+  self = (): Promise<Response> => {
+    return this.do({
+      method: "get",
+      url: `${this.url}/v1/users/self`,
+      params: {},
+    });
+  };
 }

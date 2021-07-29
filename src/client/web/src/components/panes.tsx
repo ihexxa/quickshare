@@ -172,7 +172,7 @@ export class Panes extends React.Component<Props, State, {}> {
               <div className="flex-list-item-r">
                 <button
                   onClick={this.closePane}
-                  className={`black0-bg white-font ${btnClass}`}
+                  className={`red0-bg white-font ${btnClass}`}
                 >
                   Close
                 </button>

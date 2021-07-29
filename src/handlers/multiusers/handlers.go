@@ -43,6 +43,7 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(userstore.AdminRole, "POST", "/v1/users/"):               true,
 		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/users/"):             true,
 		apiRuleCname(userstore.AdminRole, "GET", "/v1/users/list"):            true,
+		apiRuleCname(userstore.AdminRole, "GET", "/v1/users/self"):            true,
 		apiRuleCname(userstore.AdminRole, "POST", "/v1/roles/"):               true,
 		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/roles/"):             true,
 		apiRuleCname(userstore.AdminRole, "GET", "/v1/roles/list"):            true,
@@ -66,6 +67,7 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(userstore.UserRole, "POST", "/v1/users/logout"):       true,
 		apiRuleCname(userstore.UserRole, "GET", "/v1/users/isauthed"):      true,
 		apiRuleCname(userstore.UserRole, "PATCH", "/v1/users/pwd"):         true,
+		apiRuleCname(userstore.UserRole, "GET", "/v1/users/self"):          true,
 		apiRuleCname(userstore.UserRole, "POST", "/v1/fs/files"):           true,
 		apiRuleCname(userstore.UserRole, "DELETE", "/v1/fs/files"):         true,
 		apiRuleCname(userstore.UserRole, "GET", "/v1/fs/files"):            true,
@@ -85,6 +87,7 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(userstore.VisitorRole, "GET", publicPath):                true,
 		apiRuleCname(userstore.VisitorRole, "POST", "/v1/users/login"):        true,
 		apiRuleCname(userstore.VisitorRole, "GET", "/v1/users/isauthed"):      true,
+		apiRuleCname(userstore.VisitorRole, "GET", "/v1/users/self"):          true,
 		apiRuleCname(userstore.VisitorRole, "GET", "/v1/fs/files"):            true,
 		apiRuleCname(userstore.VisitorRole, "OPTIONS", "/v1/settings/health"): true,
 	}
@@ -100,12 +103,12 @@ func (h *MultiUsersSvc) Init(adminName, adminPwd string) (string, error) {
 	var err error
 
 	userID := "0"
-	fsPath := q.HomePath(userID, "/")
+	fsPath := q.FsRootPath(userID, "/")
 	if err = h.deps.FS().MkdirAll(fsPath); err != nil {
 		return "", err
 	}
-	uploadingsPath := q.GetTmpPath(userID, "/")
-	if err = h.deps.FS().MkdirAll(uploadingsPath); err != nil {
+	uploadFolder := q.UploadFolder(userID)
+	if err = h.deps.FS().MkdirAll(uploadFolder); err != nil {
 		return "", err
 	}
 
@@ -322,13 +325,13 @@ func (h *MultiUsersSvc) AddUser(c *gin.Context) {
 	// TODO: following operations must be atomic
 	// TODO: check if the folders already exists
 	userID := c.MustGet(q.UserIDParam).(string)
-	homePath := q.HomePath(userID, "/")
-	if err = h.deps.FS().MkdirAll(homePath); err != nil {
+	fsRootFolder := q.FsRootPath(userID, "/")
+	if err = h.deps.FS().MkdirAll(fsRootFolder); err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
-	uploadingsPath := q.GetTmpPath(userID, "/")
-	if err = h.deps.FS().MkdirAll(uploadingsPath); err != nil {
+	uploadFolder := q.UploadFolder(userID)
+	if err = h.deps.FS().MkdirAll(uploadFolder); err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
@@ -515,4 +518,24 @@ func (h *MultiUsersSvc) isValidRole(role string) error {
 		return errors.New("predefined roles can not be added/deleted")
 	}
 	return h.isValidUserName(role)
+}
+
+type SelfResp struct {
+	ID   string
+	Name string
+	Role string
+}
+
+func (h *MultiUsersSvc) Self(c *gin.Context) {
+	claims, err := h.getUserInfo(c)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 401, err))
+		return
+	}
+
+	c.JSON(200, &SelfResp{
+		ID:   claims[q.UserIDParam],
+		Name: claims[q.UserParam],
+		Role: claims[q.RoleParam],
+	})
 }

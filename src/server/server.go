@@ -182,6 +182,7 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 	usersAPI.POST("/", userHdrs.AddUser)
 	usersAPI.DELETE("/", userHdrs.DelUser)
 	usersAPI.GET("/list", userHdrs.ListUsers)
+	usersAPI.GET("/self", userHdrs.Self)
 
 	rolesAPI := v1.Group("/roles")
 	rolesAPI.POST("/", userHdrs.AddRole)

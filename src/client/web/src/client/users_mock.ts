@@ -14,6 +14,7 @@ export class MockUsersClient {
   private addRoleMockResp: Promise<Response>;
   private delRoleMockResp: Promise<Response>;
   private listRolesMockResp: Promise<Response>;
+  private selfMockResp: Promise<Response>;
 
   constructor(url: string) {
     this.url = url;
@@ -51,6 +52,9 @@ export class MockUsersClient {
   }
   listRolesMock = (resp: Promise<Response>) => {
     this.listRolesMockResp = resp;
+  }
+  slefMock = (resp: Promise<Response>) => {
+    this.selfMockResp = resp;
   }
 
   login = (user: string, pwd: string): Promise<Response> => {
@@ -95,5 +99,9 @@ export class MockUsersClient {
 
   listRoles = (): Promise<Response> => {
     return this.listRolesMockResp;
+  }
+
+  self = (): Promise<Response> => {
+    return this.selfMockResp;
   }
 }

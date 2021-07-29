@@ -1,7 +1,7 @@
 package server
 
 import (
-	"crypto/sha1"
+	// "crypto/sha1"
 	"encoding/base64"
 	"fmt"
 	"math/rand"
@@ -45,7 +45,7 @@ func TestFileHandlers(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(root)
+	// defer os.RemoveAll(root)
 
 	srv := startTestServer(config)
 	defer srv.Shutdown()
@@ -168,12 +168,12 @@ func TestFileHandlers(t *testing.T) {
 
 	t.Run("test uploading files with duplicated names", func(t *testing.T) {
 		files := map[string]string{
-			"0/dupdir/dup_file1":     "12345678",
-			"0/dupdir/dup_file2.ext": "12345678",
+			"0/files/dupdir/dup_file1":     "12345678",
+			"0/files/dupdir/dup_file2.ext": "12345678",
 		}
 		renames := map[string]string{
-			"0/dupdir/dup_file1":     "0/dupdir/dup_file1_1",
-			"0/dupdir/dup_file2.ext": "0/dupdir/dup_file2_1.ext",
+			"0/files/dupdir/dup_file1":     "0/files/dupdir/dup_file1_1",
+			"0/files/dupdir/dup_file2.ext": "0/files/dupdir/dup_file2_1.ext",
 		}
 
 		for filePath, content := range files {
@@ -200,8 +200,8 @@ func TestFileHandlers(t *testing.T) {
 
 	t.Run("test files APIs: Create-UploadChunk-UploadStatus-Metadata-Delete", func(t *testing.T) {
 		for filePath, content := range map[string]string{
-			"0/path1/f1.md":       "1111 1111 1111 1111",
-			"0/path1/path2/f2.md": "1010 1010 1111 0000 0010",
+			"0/files/path1/f1.md":       "1111 1111 1111 1111",
+			"0/files/path1/path2/f2.md": "1010 1010 1111 0000 0010",
 		} {
 			fileSize := int64(len([]byte(content)))
 			// create a file
@@ -213,7 +213,7 @@ func TestFileHandlers(t *testing.T) {
 			}
 
 			// check uploading file
-			uploadFilePath := path.Join(q.UploadDir, "0", fmt.Sprintf("%x", sha1.Sum([]byte(filePath))))
+			uploadFilePath := q.UploadPath("0", filePath)
 			info, err := fs.Stat(uploadFilePath)
 			if err != nil {
 				t.Fatal(err)
@@ -290,11 +290,11 @@ func TestFileHandlers(t *testing.T) {
 
 	t.Run("test dirs APIs: Mkdir-Create-UploadChunk-List", func(t *testing.T) {
 		for dirPath, files := range map[string]map[string]string{
-			"0/dir/path1": map[string]string{
+			"0/files/dir/path1": map[string]string{
 				"f1.md": "11111",
 				"f2.md": "22222222222",
 			},
-			"0/dir/path2/path2": map[string]string{
+			"0/files/dir/path2/path2": map[string]string{
 				"f3.md": "3333333",
 			},
 		} {
@@ -331,8 +331,8 @@ func TestFileHandlers(t *testing.T) {
 	})
 
 	t.Run("test operation APIs: Mkdir-Create-UploadChunk-Move-List", func(t *testing.T) {
-		srcDir := "0/move/src"
-		dstDir := "0/move/dst"
+		srcDir := "0/files/move/src"
+		dstDir := "0/files/move/dst"
 
 		for _, dirPath := range []string{srcDir, dstDir} {
 			res, _, errs := cl.Mkdir(dirPath)
@@ -383,8 +383,8 @@ func TestFileHandlers(t *testing.T) {
 
 	t.Run("test download APIs: Download(normal, ranges)", func(t *testing.T) {
 		for filePath, content := range map[string]string{
-			"0/download/path1/f1":    "123456",
-			"0/download/path1/path2": "12345678",
+			"0/files/download/path1/f1":    "123456",
+			"0/files/download/path1/path2": "12345678",
 		} {
 			assertUploadOK(t, filePath, content)
 
@@ -448,8 +448,8 @@ func TestFileHandlers(t *testing.T) {
 
 	t.Run("test uploading APIs: Create, ListUploadings, DelUploading", func(t *testing.T) {
 		files := map[string]string{
-			"0/uploadings/path1/f1":    "123456",
-			"0/uploadings/path1/path2": "12345678",
+			"0/files/uploadings/path1/f1":    "123456",
+			"0/files/uploadings/path1/path2": "12345678",
 		}
 
 		for filePath, content := range files {
@@ -507,7 +507,7 @@ func TestFileHandlers(t *testing.T) {
 		// cl := client.NewFilesClient(addr)
 
 		files := map[string]string{
-			"0/uploadings/path1/f1": "12345678",
+			"0/files/uploadings/path1/f1": "12345678",
 		}
 
 		for filePath, content := range files {
@@ -562,9 +562,9 @@ func TestFileHandlers(t *testing.T) {
 		// cl := client.NewFilesClient(addr)
 
 		files := map[string]string{
-			"0/uploadings/random/path1/f1": "12345678",
-			"0/uploadings/random/path1/f2": "87654321",
-			"0/uploadings/random/path1/f3": "17654321",
+			"0/files/uploadings/random/path1/f1": "12345678",
+			"0/files/uploadings/random/path1/f2": "87654321",
+			"0/files/uploadings/random/path1/f3": "17654321",
 		}
 
 		for filePath, content := range files {

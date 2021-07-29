@@ -133,3 +133,20 @@ func (cl *SingleUserClient) ListRoles(token *http.Cookie) (*http.Response, *mult
 	}
 	return resp, lsResp, errs
 }
+
+func (cl *SingleUserClient) Self(token *http.Cookie) (*http.Response, *multiusers.SelfResp, []error) {
+	resp, body, errs := cl.r.Get(cl.url("/v1/users/self")).
+		AddCookie(token).
+		End()
+	if len(errs) > 0 {
+		return nil, nil, errs
+	}
+
+	selfResp := &multiusers.SelfResp{}
+	err := json.Unmarshal([]byte(body), selfResp)
+	if err != nil {
+		errs = append(errs, err)
+		return nil, nil, errs
+	}
+	return resp, selfResp, errs
+}

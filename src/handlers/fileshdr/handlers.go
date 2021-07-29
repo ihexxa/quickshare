@@ -118,7 +118,7 @@ func (h *FileHandlers) Create(c *gin.Context) {
 		return
 	}
 
-	tmpFilePath := q.GetTmpPath(userID, req.Path)
+	tmpFilePath := q.UploadPath(userID, req.Path)
 	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {
 		err := h.deps.FS().Create(tmpFilePath)
@@ -295,7 +295,7 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 		return
 	}
 
-	tmpFilePath := q.GetTmpPath(userID, req.Path)
+	tmpFilePath := q.UploadPath(userID, req.Path)
 	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {
 		var err error
@@ -407,7 +407,7 @@ func (h *FileHandlers) UploadStatus(c *gin.Context) {
 		return
 	}
 
-	tmpFilePath := q.GetTmpPath(userID, filePath)
+	tmpFilePath := q.UploadPath(userID, filePath)
 	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {
 		_, fileSize, uploaded, err := h.uploadMgr.GetInfo(userID, tmpFilePath)
@@ -606,7 +606,7 @@ func (h *FileHandlers) DelUploading(c *gin.Context) {
 	userID := c.MustGet(q.UserIDParam).(string)
 
 	var err error
-	tmpFilePath := q.GetTmpPath(userID, filePath)
+	tmpFilePath := q.UploadPath(userID, filePath)
 	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {
 		err = h.deps.FS().Remove(tmpFilePath)
