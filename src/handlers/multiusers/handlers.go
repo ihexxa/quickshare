@@ -375,8 +375,16 @@ func (h *MultiUsersSvc) DelUser(c *gin.Context) {
 		return
 	}
 
+	// TODO: try to make following atomic
 	err = h.deps.Users().DelUser(userID)
 	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
+	// TODO: move the folder to recycle bin when it failed to remove it
+	homePath := userIDStr
+	if err = h.deps.FS().Remove(homePath); err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
