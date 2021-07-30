@@ -549,7 +549,8 @@ func (h *FileHandlers) List(c *gin.Context) {
 
 func (h *FileHandlers) ListHome(c *gin.Context) {
 	userID := c.MustGet(q.UserIDParam).(string)
-	infos, err := h.deps.FS().ListDir(userID)
+	fsPath := q.FsRootPath(userID, "/")
+	infos, err := h.deps.FS().ListDir(fsPath)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -589,6 +590,7 @@ type ListUploadingsResp struct {
 func (h *FileHandlers) ListUploadings(c *gin.Context) {
 	userID := c.MustGet(q.UserIDParam).(string)
 
+	fmt.Println(userID)
 	infos, err := h.uploadMgr.ListInfo(userID)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
