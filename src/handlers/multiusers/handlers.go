@@ -324,13 +324,13 @@ func (h *MultiUsersSvc) AddUser(c *gin.Context) {
 
 	// TODO: following operations must be atomic
 	// TODO: check if the folders already exists
-	userID := c.MustGet(q.UserIDParam).(string)
-	fsRootFolder := q.FsRootPath(userID, "/")
+	uidStr := fmt.Sprint(uid)
+	fsRootFolder := q.FsRootPath(uidStr, "/")
 	if err = h.deps.FS().MkdirAll(fsRootFolder); err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
-	uploadFolder := q.UploadFolder(userID)
+	uploadFolder := q.UploadFolder(uidStr)
 	if err = h.deps.FS().MkdirAll(uploadFolder); err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -529,9 +529,9 @@ func (h *MultiUsersSvc) isValidRole(role string) error {
 }
 
 type SelfResp struct {
-	ID   string
-	Name string
-	Role string
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Role string `json:"role"`
 }
 
 func (h *MultiUsersSvc) Self(c *gin.Context) {

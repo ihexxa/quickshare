@@ -566,7 +566,7 @@ func (h *FileHandlers) ListHome(c *gin.Context) {
 	}
 
 	c.JSON(200, &ListResp{
-		Cwd:       userID,
+		Cwd:       fsPath,
 		Metadatas: metadatas,
 	})
 }
@@ -590,7 +590,6 @@ type ListUploadingsResp struct {
 func (h *FileHandlers) ListUploadings(c *gin.Context) {
 	userID := c.MustGet(q.UserIDParam).(string)
 
-	fmt.Println(userID)
 	infos, err := h.uploadMgr.ListInfo(userID)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
