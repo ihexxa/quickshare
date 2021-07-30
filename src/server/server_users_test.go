@@ -7,11 +7,12 @@ import (
 	"testing"
 
 	"github.com/ihexxa/quickshare/src/client"
+	q "github.com/ihexxa/quickshare/src/handlers"
 	su "github.com/ihexxa/quickshare/src/handlers/singleuserhdr"
 	"github.com/ihexxa/quickshare/src/userstore"
 )
 
-func TestSingleUserHandlers(t *testing.T) {
+func TestUsersHandlers(t *testing.T) {
 	addr := "http://127.0.0.1:8686"
 	root := "testData"
 	config := `{
@@ -42,6 +43,7 @@ func TestSingleUserHandlers(t *testing.T) {
 
 	srv := startTestServer(config)
 	defer srv.Shutdown()
+	fs := srv.depsFS()
 
 	usersCl := client.NewSingleUserClient(addr)
 
@@ -111,6 +113,18 @@ func TestSingleUserHandlers(t *testing.T) {
 		}
 		// TODO: check id
 		fmt.Printf("new user id: %v\n", auResp)
+
+		// check uploading file
+		userFsRootFolder := q.FsRootPath(auResp.ID, "/")
+		_, err = fs.Stat(userFsRootFolder)
+		if err != nil {
+			t.Fatal(err)
+		}
+		userUploadFolder := q.UploadFolder(auResp.ID)
+		_, err = fs.Stat(userUploadFolder)
+		if err != nil {
+			t.Fatal(err)
+		}
 
 		resp, _, errs = usersCl.Logout(token)
 		if len(errs) > 0 {

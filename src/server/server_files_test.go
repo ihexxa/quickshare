@@ -166,6 +166,54 @@ func TestFileHandlers(t *testing.T) {
 		return true
 	}
 
+	// TODO: remove all files under home folder before testing
+	// or the count of files is incorrect
+	t.Run("ListHome", func(t *testing.T) {
+		files := map[string]string{
+			"0/files/home_file1": "12345678",
+			"0/files/home_file2": "12345678",
+		}
+
+		for filePath, content := range files {
+			assertUploadOK(t, filePath, content)
+
+			err = fs.Sync()
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+
+		resp, lhResp, errs := cl.ListHome()
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		} else if lhResp.Cwd != "0/files" {
+			t.Fatalf("incorrect ListHome cwd %s", lhResp.Cwd)
+		} else if len(lhResp.Metadatas) != len(files) {
+			for _, metadata := range lhResp.Metadatas {
+				fmt.Printf("%v\n", metadata)
+			}
+			t.Fatalf("incorrect ListHome content %d", len(lhResp.Metadatas))
+		}
+
+		infos := map[string]*fileshdr.MetadataResp{}
+		for _, metadata := range lhResp.Metadatas {
+			infos[metadata.Name] = metadata
+		}
+
+		if infos["home_file1"].Size != int64(len(files["0/files/home_file1"])) {
+			t.Fatalf("incorrect file size %d", infos["home_file1"].Size)
+		} else if infos["home_file1"].IsDir {
+			t.Fatal("incorrect item type")
+		}
+		if infos["home_file2"].Size != int64(len(files["0/files/home_file2"])) {
+			t.Fatalf("incorrect file size %d", infos["home_file2"].Size)
+		} else if infos["home_file2"].IsDir {
+			t.Fatal("incorrect item type")
+		}
+	})
+
 	t.Run("test uploading files with duplicated names", func(t *testing.T) {
 		files := map[string]string{
 			"0/files/dupdir/dup_file1":     "12345678",
@@ -446,7 +494,15 @@ func TestFileHandlers(t *testing.T) {
 		wg.Wait()
 	})
 
-	t.Run("test uploading APIs: Create, ListUploadings, DelUploading", func(t *testing.T) {
+	t.Run("test uploading APIs: ListUploadings, Create, ListUploadings, DelUploading", func(t *testing.T) {
+		// it should return no error even no file is uploaded
+		res, lResp, errs := cl.ListUploadings()
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if res.StatusCode != 200 {
+			t.Fatal(res.StatusCode)
+		}
+
 		files := map[string]string{
 			"0/files/uploadings/path1/f1":    "123456",
 			"0/files/uploadings/path1/path2": "12345678",
@@ -462,7 +518,7 @@ func TestFileHandlers(t *testing.T) {
 			}
 		}
 
-		res, lResp, errs := cl.ListUploadings()
+		res, lResp, errs = cl.ListUploadings()
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if res.StatusCode != 200 {

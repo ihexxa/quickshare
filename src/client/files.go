@@ -130,6 +130,22 @@ func (cl *FilesClient) List(dirPath string) (*http.Response, *fileshdr.ListResp,
 	return resp, lResp, nil
 }
 
+func (cl *FilesClient) ListHome() (*http.Response, *fileshdr.ListResp, []error) {
+	resp, body, errs := cl.r.Get(cl.url("/v1/fs/dirs/home")).
+		AddCookie(cl.token).
+		End()
+	if len(errs) > 0 {
+		return nil, nil, errs
+	}
+
+	lResp := &fileshdr.ListResp{}
+	err := json.Unmarshal([]byte(body), lResp)
+	if err != nil {
+		return nil, nil, append(errs, err)
+	}
+	return resp, lResp, nil
+}
+
 func (cl *FilesClient) ListUploadings() (*http.Response, *fileshdr.ListUploadingsResp, []error) {
 	resp, body, errs := cl.r.Get(cl.url("/v1/fs/uploadings")).
 		AddCookie(cl.token).
