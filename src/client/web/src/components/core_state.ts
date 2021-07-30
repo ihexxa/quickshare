@@ -60,6 +60,7 @@ export function initState(): ICoreState {
         uploadFiles: List<File>([]),
       },
       panes: {
+        userRole: "",
         displaying: "",
         paneNames: Set<string>(["settings", "login", "admin"]),
         login: {
@@ -92,6 +93,7 @@ export function mockState(): ICoreState {
         uploadFiles: List<File>([]),
       },
       panes: {
+        userRole: "",
         displaying: "",
         paneNames: Set<string>(["settings", "login", "admin"]),
         login: {

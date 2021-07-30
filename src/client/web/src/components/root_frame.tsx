@@ -48,6 +48,7 @@ export class RootFrame extends React.Component<Props, State, {}> {
       <div className="theme-white desktop">
         <div id="bg" className="bg bg-img font-m">
           <Panes
+            userRole={this.props.panes.userRole}
             displaying={this.props.panes.displaying}
             paneNames={this.props.panes.paneNames}
             login={this.props.authPane}

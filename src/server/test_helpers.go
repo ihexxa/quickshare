@@ -2,7 +2,6 @@ package server
 
 import (
 	"io/ioutil"
-	// "path"
 	"time"
 
 	"github.com/ihexxa/gocfg"

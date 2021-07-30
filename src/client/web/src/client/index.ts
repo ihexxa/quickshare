@@ -51,6 +51,7 @@ export interface IUsersClient {
   login: (user: string, pwd: string) => Promise<Response>;
   logout: () => Promise<Response>;
   isAuthed: () => Promise<Response>;
+  self: () => Promise<Response>;
   setPwd: (oldPwd: string, newPwd: string) => Promise<Response>;
   forceSetPwd: (userID: string, newPwd: string) => Promise<Response>;
   addUser: (name: string, pwd: string, role: string) => Promise<Response>;

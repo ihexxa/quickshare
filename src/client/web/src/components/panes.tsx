@@ -9,6 +9,7 @@ import { AdminPane, Props as AdminPaneProps } from "./pane_admin";
 import { AuthPane, Props as AuthPaneProps } from "./pane_login";
 
 export interface Props {
+  userRole: string;
   displaying: string;
   paneNames: Set<string>;
   login: AuthPaneProps;
@@ -39,6 +40,16 @@ export class Updater {
     }
   };
 
+  static self = async (): Promise<boolean> => {
+    const resp = await Updater.client.self();
+    if (resp.status === 200) {
+      Updater.props.userRole = resp.data.role;
+      return true;
+    }
+    return false;
+  }
+
+
   static addUser = async (user: User): Promise<boolean> => {
     const resp = await Updater.client.addUser(user.name, user.pwd, user.role);
     // TODO: should return uid instead
@@ -55,7 +66,10 @@ export class Updater {
     return resp.status === 200;
   };
 
-  static forceSetPwd = async (userID: string, pwd: string): Promise<boolean> => {
+  static forceSetPwd = async (
+    userID: string,
+    pwd: string
+  ): Promise<boolean> => {
     const resp = await Updater.client.forceSetPwd(userID, pwd);
     return resp.status === 200;
   };
@@ -137,21 +151,25 @@ export class Panes extends React.Component<Props, State, {}> {
       displaying = "login";
     }
 
-    const panesMap: Map<string, JSX.Element> = Map({
+    let panesMap: Map<string, JSX.Element> = Map({
       settings: (
         <PaneSettings login={this.props.login} update={this.props.update} />
       ),
       login: (
         <AuthPane authed={this.props.login.authed} update={this.props.update} />
       ),
-      admin: (
+    });
+
+    if (this.props.userRole === "admin") {
+      panesMap = panesMap.set(
+        "admin",
         <AdminPane
           users={this.props.admin.users}
           roles={this.props.admin.roles}
           update={this.props.update}
         />
-      ),
-    });
+      );
+    }
 
     const panes = panesMap.keySeq().map((paneName: string): JSX.Element => {
       const isDisplay = displaying === paneName ? "" : "hidden";

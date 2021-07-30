@@ -29,10 +29,13 @@ export class StateMgr extends React.Component<Props, State, {}> {
         this.update(BrowserUpdater().setBrowser);
       })
       .then(() => {
-        return PanesUpdater.listRoles()
+        return PanesUpdater.self();
+      })
+      .then(() => {
+        return PanesUpdater.listRoles();
       })
       .then((_: boolean) => {
-        return PanesUpdater.listUsers()
+        return PanesUpdater.listUsers();
       })
       .then((_: boolean) => {
         this.update(PanesUpdater.updateState);
