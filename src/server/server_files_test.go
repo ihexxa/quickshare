@@ -5,11 +5,8 @@ import (
 	"encoding/base64"
 	"fmt"
 	"math/rand"
-	"net/http"
 	"os"
-	"path"
 	"path/filepath"
-	"strings"
 	"sync"
 	"testing"
 
@@ -18,7 +15,7 @@ import (
 	"github.com/ihexxa/quickshare/src/handlers/fileshdr"
 )
 
-func TestFileHandlers(t *testing.T) {
+func xTestFileHandlers(t *testing.T) {
 	addr := "http://127.0.0.1:8686"
 	root := "testData"
 	config := `{
@@ -45,7 +42,7 @@ func TestFileHandlers(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// defer os.RemoveAll(root)
+	defer os.RemoveAll(root)
 
 	srv := startTestServer(config)
 	defer srv.Shutdown()
@@ -65,107 +62,6 @@ func TestFileHandlers(t *testing.T) {
 	token := client.GetCookie(resp.Cookies(), q.TokenCookie)
 	cl := client.NewFilesClient(addr, token)
 
-	assertUploadOK := func(t *testing.T, filePath, content string) bool {
-		cl := client.NewFilesClient(addr, token)
-
-		fileSize := int64(len([]byte(content)))
-		res, _, errs := cl.Create(filePath, fileSize)
-		if len(errs) > 0 {
-			t.Error(errs)
-			return false
-		} else if res.StatusCode != 200 {
-			t.Error(res.StatusCode)
-			return false
-		}
-
-		base64Content := base64.StdEncoding.EncodeToString([]byte(content))
-		res, _, errs = cl.UploadChunk(filePath, base64Content, 0)
-		if len(errs) > 0 {
-			t.Error(errs)
-			return false
-		} else if res.StatusCode != 200 {
-			t.Error(res.StatusCode)
-			return false
-		}
-
-		return true
-	}
-
-	assetDownloadOK := func(t *testing.T, filePath, content string) bool {
-		var (
-			res      *http.Response
-			body     string
-			errs     []error
-			fileSize = int64(len([]byte(content)))
-		)
-
-		// cl := client.NewFilesClient(addr)
-
-		rd := rand.Intn(3)
-		switch rd {
-		case 0:
-			res, body, errs = cl.Download(filePath, map[string]string{})
-		case 1:
-			res, body, errs = cl.Download(filePath, map[string]string{
-				"Range": fmt.Sprintf("bytes=0-%d", fileSize-1),
-			})
-		case 2:
-			res, body, errs = cl.Download(filePath, map[string]string{
-				"Range": fmt.Sprintf("bytes=0-%d, %d-%d", (fileSize-1)/2, (fileSize-1)/2+1, fileSize-1),
-			})
-		}
-
-		fileName := path.Base(filePath)
-		contentDispositionHeader := res.Header.Get("Content-Disposition")
-		if len(errs) > 0 {
-			t.Error(errs)
-			return false
-		}
-		if res.StatusCode != 200 && res.StatusCode != 206 {
-			t.Error(res.StatusCode)
-			return false
-		}
-		if contentDispositionHeader != fmt.Sprintf(`attachment; filename="%s"`, fileName) {
-			t.Errorf("incorrect Content-Disposition header: %s", contentDispositionHeader)
-			return false
-		}
-
-		switch rd {
-		case 0:
-			if body != content {
-				t.Errorf("body not equal got(%s) expect(%s)\n", body, content)
-				return false
-			}
-		case 1:
-			if body[2:] != content { // body returned by gorequest contains the first CRLF
-				t.Errorf("body not equal got(%s) expect(%s)\n", body[2:], content)
-				return false
-			}
-		default:
-			body = body[2:] // body returned by gorequest contains the first CRLF
-			realBody := ""
-			boundaryEnd := strings.Index(body, "\r\n")
-			boundary := body[0:boundaryEnd]
-			bodyParts := strings.Split(body, boundary)
-
-			for i, bodyPart := range bodyParts {
-				if i == 0 || i == len(bodyParts)-1 {
-					continue
-				}
-				start := strings.Index(bodyPart, "\r\n\r\n")
-
-				fmt.Printf("<%s>", bodyPart[start+4:len(bodyPart)-2]) // ignore the last CRLF
-				realBody += bodyPart[start+4 : len(bodyPart)-2]
-			}
-			if realBody != content {
-				t.Errorf("multi body not equal got(%s) expect(%s)\n", realBody, content)
-				return false
-			}
-		}
-
-		return true
-	}
-
 	// TODO: remove all files under home folder before testing
 	// or the count of files is incorrect
 	t.Run("ListHome", func(t *testing.T) {
@@ -175,7 +71,7 @@ func TestFileHandlers(t *testing.T) {
 		}
 
 		for filePath, content := range files {
-			assertUploadOK(t, filePath, content)
+			assertUploadOK(t, filePath, content, addr, token)
 
 			err = fs.Sync()
 			if err != nil {
@@ -226,7 +122,7 @@ func TestFileHandlers(t *testing.T) {
 
 		for filePath, content := range files {
 			for i := 0; i < 2; i++ {
-				assertUploadOK(t, filePath, content)
+				assertUploadOK(t, filePath, content, addr, token)
 
 				err = fs.Sync()
 				if err != nil {
@@ -234,13 +130,13 @@ func TestFileHandlers(t *testing.T) {
 				}
 
 				if i == 0 {
-					assetDownloadOK(t, filePath, content)
+					assertDownloadOK(t, filePath, content, addr, token)
 				} else if i == 1 {
 					renamedFilePath, ok := renames[filePath]
 					if !ok {
 						t.Fatal("new name not found")
 					}
-					assetDownloadOK(t, renamedFilePath, content)
+					assertDownloadOK(t, renamedFilePath, content, addr, token)
 				}
 			}
 		}
@@ -355,7 +251,7 @@ func TestFileHandlers(t *testing.T) {
 
 			for fileName, content := range files {
 				filePath := filepath.Join(dirPath, fileName)
-				assertUploadOK(t, filePath, content)
+				assertUploadOK(t, filePath, content, addr, token)
 			}
 
 			err = fs.Sync()
@@ -400,7 +296,7 @@ func TestFileHandlers(t *testing.T) {
 			oldPath := filepath.Join(srcDir, fileName)
 			newPath := filepath.Join(dstDir, fileName)
 			// fileSize := int64(len([]byte(content)))
-			assertUploadOK(t, oldPath, content)
+			assertUploadOK(t, oldPath, content, addr, token)
 
 			res, _, errs := cl.Move(oldPath, newPath)
 			if len(errs) > 0 {
@@ -434,14 +330,14 @@ func TestFileHandlers(t *testing.T) {
 			"0/files/download/path1/f1":    "123456",
 			"0/files/download/path1/path2": "12345678",
 		} {
-			assertUploadOK(t, filePath, content)
+			assertUploadOK(t, filePath, content, addr, token)
 
 			err = fs.Sync()
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			assetDownloadOK(t, filePath, content)
+			assertDownloadOK(t, filePath, content, addr, token)
 		}
 	})
 
@@ -455,7 +351,7 @@ func TestFileHandlers(t *testing.T) {
 		startClient := func(files []*mockFile) {
 			for i := 0; i < 5; i++ {
 				for _, file := range files {
-					if !assertUploadOK(t, fmt.Sprintf("%s_%d", file.FilePath, i), file.Content) {
+					if !assertUploadOK(t, fmt.Sprintf("%s_%d", file.FilePath, i), file.Content, addr, token) {
 						break
 					}
 
@@ -464,7 +360,7 @@ func TestFileHandlers(t *testing.T) {
 						t.Fatal(err)
 					}
 
-					if !assetDownloadOK(t, fmt.Sprintf("%s_%d", file.FilePath, i), file.Content) {
+					if !assertDownloadOK(t, fmt.Sprintf("%s_%d", file.FilePath, i), file.Content, addr, token) {
 						break
 					}
 				}
@@ -610,7 +506,7 @@ func TestFileHandlers(t *testing.T) {
 				t.Fatal("incorrect uploaded size", mRes)
 			}
 
-			assetDownloadOK(t, filePath, content)
+			assertDownloadOK(t, filePath, content, addr, token)
 		}
 	})
 
@@ -678,7 +574,7 @@ func TestFileHandlers(t *testing.T) {
 				t.Fatalf("file content not equal: %s", filePath)
 			}
 
-			assetDownloadOK(t, filePath, content)
+			assertDownloadOK(t, filePath, content, addr, token)
 		}
 	})
 

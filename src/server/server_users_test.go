@@ -12,7 +12,7 @@ import (
 	"github.com/ihexxa/quickshare/src/userstore"
 )
 
-func TestUsersHandlers(t *testing.T) {
+func xTestUsersHandlers(t *testing.T) {
 	addr := "http://127.0.0.1:8686"
 	root := "testData"
 	config := `{
