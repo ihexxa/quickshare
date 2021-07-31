@@ -8,6 +8,7 @@ var ErrNoLock = errors.New("no lock to unlock")
 type IKVStore interface {
 	AddNamespace(nsName string) error
 	DelNamespace(nsName string) error
+	HasNamespace(nsName string) bool
 	GetBool(key string) (bool, bool)
 	GetBoolIn(ns, key string) (bool, bool)
 	SetBool(key string, val bool) error

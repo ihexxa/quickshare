@@ -102,7 +102,12 @@ func (um *UploadMgr) DelInfo(user, filePath string) error {
 }
 
 func (um *UploadMgr) ListInfo(user string) ([]*UploadInfo, error) {
-	infoMap, err := um.kv.ListStringsIn(UploadNS(user))
+	ns := UploadNS(user)
+	if !um.kv.HasNamespace(ns) {
+		return nil, nil
+	}
+
+	infoMap, err := um.kv.ListStringsIn(ns)
 	if err != nil {
 		return nil, err
 	}

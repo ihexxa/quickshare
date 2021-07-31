@@ -13,6 +13,7 @@ var (
 	// dirs
 	UploadDir = "uploadings"
 	FsDir     = "files"
+	FsRootDir = "files"
 
 	UserIDParam = "uid"
 	UserParam   = "user"
@@ -21,6 +22,7 @@ var (
 	RoleParam   = "role"
 	ExpireParam = "expire"
 	TokenCookie = "tk"
+	LastID      = "lid"
 
 	ErrAccessDenied = errors.New("access denied")
 	ErrUnauthorized = errors.New("unauthorized")
@@ -131,6 +133,18 @@ func HomePath(userID, relFilePath string) string {
 	return filepath.Join(userID, relFilePath)
 }
 
+func FsRootPath(userID, relFilePath string) string {
+	return filepath.Join(userID, FsRootDir, relFilePath)
+}
+
 func GetTmpPath(userID, relFilePath string) string {
 	return filepath.Join(UploadDir, userID, fmt.Sprintf("%x", sha1.Sum([]byte(relFilePath))))
+}
+
+func UploadPath(userID, relFilePath string) string {
+	return filepath.Join(UploadFolder(userID), fmt.Sprintf("%x", sha1.Sum([]byte(relFilePath))))
+}
+
+func UploadFolder(userID string) string {
+	return filepath.Join(userID, UploadDir)
 }

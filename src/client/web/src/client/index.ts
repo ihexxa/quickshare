@@ -1,12 +1,21 @@
 import axios, { AxiosRequestConfig } from "axios";
 
 export const defaultTimeout = 10000;
+export const userIDParam = "uid";
 
 export interface User {
-  ID: string;
-  Name: string;
-  Pwd: string;
-  Role: string;
+  id: string;
+  name: string;
+  pwd: string;
+  role: string;
+}
+
+export interface ListUsersResp {
+  users: Array<User>;
+}
+
+export interface ListRolesResp {
+  roles: Array<string>;
 }
 
 export interface MetadataResp {
@@ -42,7 +51,15 @@ export interface IUsersClient {
   login: (user: string, pwd: string) => Promise<Response>;
   logout: () => Promise<Response>;
   isAuthed: () => Promise<Response>;
+  self: () => Promise<Response>;
   setPwd: (oldPwd: string, newPwd: string) => Promise<Response>;
+  forceSetPwd: (userID: string, newPwd: string) => Promise<Response>;
+  addUser: (name: string, pwd: string, role: string) => Promise<Response>;
+  delUser: (userID: string) => Promise<Response>;
+  listUsers: () => Promise<Response>;
+  addRole: (role: string) => Promise<Response>;
+  delRole: (role: string) => Promise<Response>;
+  listRoles: () => Promise<Response>;
 }
 
 export interface IFilesClient {

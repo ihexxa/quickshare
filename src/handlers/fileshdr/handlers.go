@@ -118,7 +118,7 @@ func (h *FileHandlers) Create(c *gin.Context) {
 		return
 	}
 
-	tmpFilePath := q.GetTmpPath(userID, req.Path)
+	tmpFilePath := q.UploadPath(userID, req.Path)
 	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {
 		err := h.deps.FS().Create(tmpFilePath)
@@ -295,7 +295,7 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 		return
 	}
 
-	tmpFilePath := q.GetTmpPath(userID, req.Path)
+	tmpFilePath := q.UploadPath(userID, req.Path)
 	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {
 		var err error
@@ -407,7 +407,7 @@ func (h *FileHandlers) UploadStatus(c *gin.Context) {
 		return
 	}
 
-	tmpFilePath := q.GetTmpPath(userID, filePath)
+	tmpFilePath := q.UploadPath(userID, filePath)
 	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {
 		_, fileSize, uploaded, err := h.uploadMgr.GetInfo(userID, tmpFilePath)
@@ -549,7 +549,8 @@ func (h *FileHandlers) List(c *gin.Context) {
 
 func (h *FileHandlers) ListHome(c *gin.Context) {
 	userID := c.MustGet(q.UserIDParam).(string)
-	infos, err := h.deps.FS().ListDir(userID)
+	fsPath := q.FsRootPath(userID, "/")
+	infos, err := h.deps.FS().ListDir(fsPath)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -565,7 +566,7 @@ func (h *FileHandlers) ListHome(c *gin.Context) {
 	}
 
 	c.JSON(200, &ListResp{
-		Cwd:       userID,
+		Cwd:       fsPath,
 		Metadatas: metadatas,
 	})
 }
@@ -606,7 +607,7 @@ func (h *FileHandlers) DelUploading(c *gin.Context) {
 	userID := c.MustGet(q.UserIDParam).(string)
 
 	var err error
-	tmpFilePath := q.GetTmpPath(userID, filePath)
+	tmpFilePath := q.UploadPath(userID, filePath)
 	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {
 		err = h.deps.FS().Remove(tmpFilePath)

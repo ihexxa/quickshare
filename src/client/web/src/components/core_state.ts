@@ -60,16 +60,17 @@ export function initState(): ICoreState {
         uploadFiles: List<File>([]),
       },
       panes: {
+        userRole: "",
         displaying: "",
-        paneNames: Set<string>(["settings", "login"]),
+        paneNames: Set<string>(["settings", "login", "admin"]),
         login: {
           authed: false,
         },
+        admin: {
+          users: Map<string, User>(),
+          roles: Set<string>(),
+        },
       },
-      admin: {
-        users: Map<string, User>(),
-        roles: Set<string>() 
-      }
     },
   };
 }
@@ -92,16 +93,17 @@ export function mockState(): ICoreState {
         uploadFiles: List<File>([]),
       },
       panes: {
+        userRole: "",
         displaying: "",
-        paneNames: Set<string>(["settings", "login"]),
+        paneNames: Set<string>(["settings", "login", "admin"]),
         login: {
           authed: false,
         },
+        admin: {
+          users: Map<string, User>(),
+          roles: Set<string>(),
+        },
       },
-      admin: {
-        users: Map<string, User>(),
-        roles: Set<string>() 
-      }
     },
   };
 }

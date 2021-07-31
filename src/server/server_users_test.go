@@ -3,14 +3,16 @@ package server
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"testing"
 
 	"github.com/ihexxa/quickshare/src/client"
+	q "github.com/ihexxa/quickshare/src/handlers"
 	su "github.com/ihexxa/quickshare/src/handlers/singleuserhdr"
 	"github.com/ihexxa/quickshare/src/userstore"
 )
 
-func TestSingleUserHandlers(t *testing.T) {
+func TestUsersHandlers(t *testing.T) {
 	addr := "http://127.0.0.1:8686"
 	root := "testData"
 	config := `{
@@ -41,6 +43,7 @@ func TestSingleUserHandlers(t *testing.T) {
 
 	srv := startTestServer(config)
 	defer srv.Shutdown()
+	fs := srv.depsFS()
 
 	usersCl := client.NewSingleUserClient(addr)
 
@@ -48,7 +51,7 @@ func TestSingleUserHandlers(t *testing.T) {
 		t.Fatal("fail to start server")
 	}
 
-	t.Run("test users APIs: Login-SetPwd-Logout-Login", func(t *testing.T) {
+	t.Run("test users APIs: Login-Self-SetPwd-Logout-Login", func(t *testing.T) {
 		resp, _, errs := usersCl.Login(adminName, adminPwd)
 		if len(errs) > 0 {
 			t.Fatal(errs)
@@ -57,6 +60,17 @@ func TestSingleUserHandlers(t *testing.T) {
 		}
 
 		token := client.GetCookie(resp.Cookies(), su.TokenCookie)
+
+		resp, selfResp, errs := usersCl.Self(token)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		} else if selfResp.ID != "0" ||
+			selfResp.Name != adminName ||
+			selfResp.Role != userstore.AdminRole {
+			t.Fatalf("user infos don't match %v", selfResp)
+		}
 
 		resp, _, errs = usersCl.SetPwd(adminPwd, adminNewPwd, token)
 		if len(errs) > 0 {
@@ -90,7 +104,7 @@ func TestSingleUserHandlers(t *testing.T) {
 
 		token := client.GetCookie(resp.Cookies(), su.TokenCookie)
 
-		userName, userPwd := "user", "1234"
+		userName, userPwd := "user_login", "1234"
 		resp, auResp, errs := usersCl.AddUser(userName, userPwd, userstore.UserRole, token)
 		if len(errs) > 0 {
 			t.Fatal(errs)
@@ -99,6 +113,18 @@ func TestSingleUserHandlers(t *testing.T) {
 		}
 		// TODO: check id
 		fmt.Printf("new user id: %v\n", auResp)
+
+		// check uploading file
+		userFsRootFolder := q.FsRootPath(auResp.ID, "/")
+		_, err = fs.Stat(userFsRootFolder)
+		if err != nil {
+			t.Fatal(err)
+		}
+		userUploadFolder := q.UploadFolder(auResp.ID)
+		_, err = fs.Stat(userUploadFolder)
+		if err != nil {
+			t.Fatal(err)
+		}
 
 		resp, _, errs = usersCl.Logout(token)
 		if len(errs) > 0 {
@@ -112,6 +138,85 @@ func TestSingleUserHandlers(t *testing.T) {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
 			t.Fatal(resp.StatusCode)
+		}
+
+		resp, _, errs = usersCl.DelUser(auResp.ID, token)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+
+		resp, _, errs = usersCl.Logout(token)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+	})
+
+	t.Run("test users APIs: Login-AddUser-ListUsers-DelUser-ListUsers", func(t *testing.T) {
+		resp, _, errs := usersCl.Login(adminName, adminNewPwd)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+
+		token := client.GetCookie(resp.Cookies(), su.TokenCookie)
+
+		userName, userPwd, userRole := "user_admin", "1234", userstore.UserRole
+		resp, auResp, errs := usersCl.AddUser(userName, userPwd, userRole, token)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+		// TODO: check id
+		fmt.Printf("new user id: %v\n", auResp)
+		newUserID, err := strconv.ParseUint(auResp.ID, 10, 64)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		resp, lsResp, errs := usersCl.ListUsers(token)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+
+		if len(lsResp.Users) != 2 {
+			t.Fatal(fmt.Errorf("incorrect users size (%d)", len(lsResp.Users)))
+		} else if lsResp.Users[0].ID != 0 ||
+			lsResp.Users[0].Name != adminName ||
+			lsResp.Users[0].Role != userstore.AdminRole {
+			t.Fatal(fmt.Errorf("incorrect root info (%v)", lsResp.Users[0]))
+		} else if lsResp.Users[1].ID != newUserID ||
+			lsResp.Users[1].Name != userName ||
+			lsResp.Users[1].Role != userRole {
+			t.Fatal(fmt.Errorf("incorrect user info (%v)", lsResp.Users[1]))
+		}
+
+		resp, _, errs = usersCl.DelUser(auResp.ID, token)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+
+		resp, lsResp, errs = usersCl.ListUsers(token)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+		if len(lsResp.Users) != 1 {
+			t.Fatal(fmt.Errorf("incorrect users size (%d)", len(lsResp.Users)))
+		} else if lsResp.Users[0].ID != 0 ||
+			lsResp.Users[0].Name != adminName ||
+			lsResp.Users[0].Role != userstore.AdminRole {
+			t.Fatal(fmt.Errorf("incorrect root info (%v)", lsResp.Users[0]))
 		}
 
 		resp, _, errs = usersCl.Logout(token)

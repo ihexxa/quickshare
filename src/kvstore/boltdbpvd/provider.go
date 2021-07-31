@@ -72,6 +72,18 @@ func (bp *BoltPvd) DelNamespace(nsName string) error {
 	})
 }
 
+func (bp *BoltPvd) HasNamespace(nsName string) bool {
+	err := bp.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(nsName))
+		if b == nil {
+			return ErrBucketNotFound
+		}
+		return nil
+	})
+
+	return err == nil
+}
+
 func (bp *BoltPvd) Close() error {
 	return bp.db.Close()
 }

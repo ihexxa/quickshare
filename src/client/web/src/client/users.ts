@@ -1,4 +1,4 @@
-import { BaseClient, Response } from "./";
+import { BaseClient, Response, userIDParam } from "./";
 
 export class UsersClient extends BaseClient {
   constructor(url: string) {
@@ -16,7 +16,6 @@ export class UsersClient extends BaseClient {
     });
   };
 
-  // token cookie is set by browser
   logout = (): Promise<Response> => {
     return this.do({
       method: "post",
@@ -31,7 +30,6 @@ export class UsersClient extends BaseClient {
     });
   };
 
-  // token cookie is set by browser
   setPwd = (oldPwd: string, newPwd: string): Promise<Response> => {
     return this.do({
       method: "patch",
@@ -43,8 +41,19 @@ export class UsersClient extends BaseClient {
     });
   };
 
+  forceSetPwd = (userID: string, newPwd: string): Promise<Response> => {
+    return this.do({
+      method: "patch",
+      url: `${this.url}/v1/users/pwd/force-set`,
+      data: {
+        id: userID,
+        newPwd,
+      },
+    });
+  };
+
   // token cookie is set by browser
-  adduser = (name: string, pwd: string, role: string): Promise<Response> => {
+  addUser = (name: string, pwd: string, role: string): Promise<Response> => {
     return this.do({
       method: "post",
       url: `${this.url}/v1/users/`,
@@ -53,6 +62,56 @@ export class UsersClient extends BaseClient {
         pwd,
         role,
       },
+    });
+  };
+
+  delUser = (userID: string): Promise<Response> => {
+    return this.do({
+      method: "delete",
+      url: `${this.url}/v1/users/`,
+      params: {
+        [userIDParam]: userID,
+      },
+    });
+  };
+
+  listUsers = (): Promise<Response> => {
+    return this.do({
+      method: "get",
+      url: `${this.url}/v1/users/list`,
+      params: {},
+    });
+  };
+
+  addRole = (role: string): Promise<Response> => {
+    return this.do({
+      method: "post",
+      url: `${this.url}/v1/roles/`,
+      data: { role },
+    });
+  };
+
+  delRole = (role: string): Promise<Response> => {
+    return this.do({
+      method: "delete",
+      url: `${this.url}/v1/roles/`,
+      data: { role },
+    });
+  };
+
+  listRoles = (): Promise<Response> => {
+    return this.do({
+      method: "get",
+      url: `${this.url}/v1/roles/list`,
+      params: {},
+    });
+  };
+
+  self = (): Promise<Response> => {
+    return this.do({
+      method: "get",
+      url: `${this.url}/v1/users/self`,
+      params: {},
     });
   };
 }

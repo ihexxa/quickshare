@@ -124,17 +124,6 @@ export class Updater {
         : this.props.items;
   };
 
-  goHome = async (): Promise<void> => {
-    const listResp = await this.filesClient.listHome();
-
-    // how to get current dir? to dirPath?
-    // this.props.dirPath = dirParts;
-    this.props.items =
-      listResp.status === 200
-        ? List<MetadataResp>(listResp.data.metadatas)
-        : this.props.items;
-  };
-
   moveHere = async (
     srcDir: string,
     dstDir: string,

@@ -178,12 +178,16 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 	usersAPI.POST("/logout", userHdrs.Logout)
 	usersAPI.GET("/isauthed", userHdrs.IsAuthed)
 	usersAPI.PATCH("/pwd", userHdrs.SetPwd)
+	usersAPI.PATCH("/pwd/force-set", userHdrs.ForceSetPwd)
 	usersAPI.POST("/", userHdrs.AddUser)
+	usersAPI.DELETE("/", userHdrs.DelUser)
+	usersAPI.GET("/list", userHdrs.ListUsers)
+	usersAPI.GET("/self", userHdrs.Self)
 
 	rolesAPI := v1.Group("/roles")
 	rolesAPI.POST("/", userHdrs.AddRole)
 	rolesAPI.DELETE("/", userHdrs.DelRole)
-	rolesAPI.GET("/", userHdrs.ListRoles)
+	rolesAPI.GET("/list", userHdrs.ListRoles)
 
 	filesAPI := v1.Group("/fs")
 	filesAPI.POST("/files", fileHdrs.Create)

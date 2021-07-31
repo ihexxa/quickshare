@@ -69,18 +69,23 @@
   right: 0;
   top: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.75);
+  background-color: rgba(0, 0, 0, 0.5);
   z-index: 100;
   overflow: scroll;
 }
 
-#panes .container {
+#panes .root-container {
   max-width: 80rem;
   width: 96%;
-  background-color: white;
   z-index: 101;
   text-align: left;
   margin: 3rem auto 8rem auto;
+  border-radius: 0.6rem;
+}
+
+#panes .container {
+  background-color: white;
+  margin: 3rem auto 1rem auto;
   border-radius: 0.6rem;
 }
 
@@ -133,10 +138,15 @@
   border-top: solid 1px transparent;
 }
 
-#item-list .dot {
+.container .dot {
   overflow: hidden;
   margin-left: 1rem;
   margin-right: 1rem;
+}
+
+#panes .dot {
+  overflow: hidden;
+  margin-left: 0;
 }
 
 #item-list .vbar {
@@ -157,6 +167,14 @@
 }
 
 #item-list .item-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-wrap: break-word;
+  display: block;
+}
+
+.item-name {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;

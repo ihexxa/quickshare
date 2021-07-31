@@ -7,7 +7,14 @@ export class MockUsersClient {
   private logoutMockResp: Promise<Response>;
   private isAuthedMockResp: Promise<Response>;
   private setPwdMockResp: Promise<Response>;
+  private forceSetPwdMockResp: Promise<Response>;
   private addUserMockResp: Promise<Response>;
+  private delUserMockResp: Promise<Response>;
+  private listUsersMockResp: Promise<Response>;
+  private addRoleMockResp: Promise<Response>;
+  private delRoleMockResp: Promise<Response>;
+  private listRolesMockResp: Promise<Response>;
+  private selfMockResp: Promise<Response>;
 
   constructor(url: string) {
     this.url = url;
@@ -25,8 +32,29 @@ export class MockUsersClient {
   setPwdMock = (resp: Promise<Response>) => {
     this.setPwdMockResp = resp;
   }
+  forceSetPwdMock = (resp: Promise<Response>) => {
+    this.forceSetPwdMockResp = resp;
+  }
   addUserMock = (resp: Promise<Response>) => {
     this.addUserMockResp = resp;
+  }
+  delUserMock = (resp: Promise<Response>) => {
+    this.delUserMockResp = resp;
+  }
+  listUsersMock = (resp: Promise<Response>) => {
+    this.listUsersMockResp = resp;
+  }
+  addRoleMock = (resp: Promise<Response>) => {
+    this.addRoleMockResp = resp;
+  }
+  delRoleMock = (resp: Promise<Response>) => {
+    this.delRoleMockResp = resp;
+  }
+  listRolesMock = (resp: Promise<Response>) => {
+    this.listRolesMockResp = resp;
+  }
+  slefMock = (resp: Promise<Response>) => {
+    this.selfMockResp = resp;
   }
 
   login = (user: string, pwd: string): Promise<Response> => {
@@ -44,9 +72,36 @@ export class MockUsersClient {
   setPwd = (oldPwd: string, newPwd: string): Promise<Response> => {
     return this.setPwdMockResp;
   }
+  
+  forceSetPwd = (userID: string, newPwd: string): Promise<Response> => {
+    return this.forceSetPwdMockResp;
+  }
 
   addUser = (name: string, pwd: string, role: string): Promise<Response> => {
     return this.addUserMockResp;
   }
 
+  delUser = (userID: string): Promise<Response> => {
+    return this.delUserMockResp;
+  }
+  
+  listUsers = (): Promise<Response> => {
+    return this.listUsersMockResp;
+  }
+
+  addRole = (role: string): Promise<Response> => {
+    return this.addRoleMockResp;
+  }
+
+  delRole = (role: string): Promise<Response> => {
+    return this.delRoleMockResp;
+  }
+
+  listRoles = (): Promise<Response> => {
+    return this.listRolesMockResp;
+  }
+
+  self = (): Promise<Response> => {
+    return this.selfMockResp;
+  }
 }
