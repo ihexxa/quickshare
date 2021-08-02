@@ -38,7 +38,6 @@ export class StateMgr extends React.Component<Props, State, {}> {
         return PanesUpdater.listUsers();
       })
       .then((_: boolean) => {
-        console.log(PanesUpdater);
         this.update(PanesUpdater.updateState);
       });
   };

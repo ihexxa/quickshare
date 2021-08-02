@@ -125,20 +125,8 @@ func ErrResp(c *gin.Context, code int, err error) (int, interface{}) {
 
 }
 
-func FsPath(userID, relFilePath string) string {
-	return filepath.Join(userID, FsDir, relFilePath)
-}
-
-func HomePath(userID, relFilePath string) string {
-	return filepath.Join(userID, relFilePath)
-}
-
 func FsRootPath(userID, relFilePath string) string {
 	return filepath.Join(userID, FsRootDir, relFilePath)
-}
-
-func GetTmpPath(userID, relFilePath string) string {
-	return filepath.Join(UploadDir, userID, fmt.Sprintf("%x", sha1.Sum([]byte(relFilePath))))
 }
 
 func UploadPath(userID, relFilePath string) string {
