@@ -21,24 +21,24 @@ export class UploadWorker {
 
   constructor() {}
 
-  handleUploadStatus = (status: UploadStatus): boolean => {
-    if (status.state === UploadState.Error) {
-      this.sendEvent({
+  handleUploadStatus = (status: UploadStatus) => {
+    if (status.state !== UploadState.Error) {
+      const resp: UploadInfoResp = {
+        kind: uploadInfoKind,
+        filePath: status.filePath,
+        uploaded: status.uploaded,
+        state: status.state,
+        err: "",
+      };
+      this.sendEvent(resp);
+    } else {
+      const resp: ErrResp = {
         kind: errKind,
         filePath: status.filePath,
         err: status.err,
-      });
-      return false;
+      };
+      this.sendEvent(resp);
     }
-
-    this.sendEvent({
-      kind: uploadInfoKind,
-      filePath: status.filePath,
-      uploaded: status.uploaded,
-      state: status.state,
-      err: "",
-    });
-    return true;
   };
 
   onMsg = (event: MessageEvent) => {

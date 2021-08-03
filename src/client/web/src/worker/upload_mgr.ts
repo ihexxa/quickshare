@@ -11,7 +11,6 @@ import {
   uploadInfoKind,
   UploadState,
 } from "./interface";
-import { FgWorker } from "./upload.fg.worker";
 
 const win: Window = self as any;
 
@@ -50,14 +49,11 @@ export class UploadMgr {
           info.state === UploadState.Ready ||
           info.state === UploadState.Created
         ) {
-          console.log(pos, info);
 
           this.infos = this.infos.set(info.filePath, {
             ...info,
             state: UploadState.Uploading,
           });
-
-          console.log(pos, info);
 
           this.worker.postMessage({
             kind: syncReqKind,
@@ -126,8 +122,6 @@ export class UploadMgr {
         filePath === entry.filePath &&
         file.size === entry.size
       ) {
-
-        console.log("uploaded", entry.uploaded);
         // try to upload a file with same name but actually with different content.
         // it still can not resolve one case: names and sizes are same, but contents are different
         // TODO: showing file SHA will avoid above case
@@ -148,14 +142,12 @@ export class UploadMgr {
   stop = (filePath: string) => {
     const entry = this.infos.get(filePath);
     if (entry != null) {
-      console.log("stopping", filePath);
 
       this.infos = this.infos.set(filePath, {
         ...entry,
         state: UploadState.Stopped,
       });
 
-      console.log("stopped", this.infos.get(filePath));
     } else {
       alert(`failed to stop uploading ${filePath}: not found`);
     }

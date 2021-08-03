@@ -77,7 +77,7 @@ export class ChunkUploader {
     uploaded: number
   ): Promise<UploadStatus> => {
     if (this.chunkLen === 0) {
-      this.chunkLen = 1024; // reset it to 1KB
+      this.chunkLen = 1; // reset it to 1B
     } else if (uploaded > file.size) {
       return {
         filePath,
