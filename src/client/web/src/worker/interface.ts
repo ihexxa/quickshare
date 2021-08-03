@@ -1,9 +1,24 @@
+export const enum UploadState {
+  Created,
+  Ready,
+  Uploading,
+  Stopped,
+  Error,
+}
+
+export interface UploadStatus {
+  filePath: string;
+  uploaded: number;
+  state: UploadState;
+  err: string;
+}
+
 export interface UploadEntry {
   file: File;
   filePath: string;
   size: number;
   uploaded: number;
-  runnable: boolean;
+  state: UploadState;
   err: string;
 }
 
@@ -17,7 +32,11 @@ export const syncReqKind: SyncReqKind = "worker.req.sync";
 
 export interface SyncReq extends WorkerEvent {
   kind: SyncReqKind;
-  infos: Array<UploadEntry>;
+  file: File,
+  filePath: string;
+  size: number;
+  uploaded: number;
+  created: boolean;
 }
 
 export type FileWorkerReq = SyncReq;
@@ -26,6 +45,7 @@ export type ErrKind = "worker.resp.err";
 export const errKind: ErrKind = "worker.resp.err";
 export interface ErrResp extends WorkerEvent {
   kind: ErrKind;
+  filePath: string;
   err: string;
 }
 
@@ -36,7 +56,7 @@ export interface UploadInfoResp extends WorkerEvent {
   kind: UploadInfoKind;
   filePath: string;
   uploaded: number;
-  runnable: boolean;
+  state: UploadState;
   err: string;
 }
 

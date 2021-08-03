@@ -26,6 +26,9 @@ export class StateMgr extends React.Component<Props, State, {}> {
         return BrowserUpdater().refreshUploadings();
       })
       .then((_: boolean) => {
+        BrowserUpdater().initUploads();
+      })
+      .then(() => {
         this.update(BrowserUpdater().setBrowser);
       })
       .then(() => {

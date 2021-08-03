@@ -24,6 +24,13 @@ export class Updater {
     this.filesClient = filesClient;
   }
 
+  initUploads = () => {
+    this.props.uploadings.forEach(entry => {
+      Up().addStopped(entry.realFilePath, entry.uploaded, entry.size);
+    })
+    // this.setUploadings(Up().list());
+  };
+
   addUploads = (fileList: List<File>) => {
     fileList.forEach(file => {
       const filePath = getItemPath(

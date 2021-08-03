@@ -5,6 +5,11 @@ import { FilesClient } from "../../client/files_mock";
 import { makePromise } from "../../test/helpers";
 
 import { Up, initUploadMgr } from "../upload_mgr";
+import { 
+  UploadState,
+  FileWorkerResp,
+  UploadInfoResp
+} from "../interface";
 
 import {
   FileWorkerReq,
@@ -32,85 +37,91 @@ describe("UploadMgr", () => {
   const content = ["123456"];
   const filePath = "mock/file";
   const blob = new Blob(content);
-  const fileSize = blob.size;
-  const file = new File(content, filePath);
-  const makeInfo = (filePath: string, runnable: boolean): UploadEntry => {
-    return {
-      file: file,
-      filePath: filePath,
-      size: fileSize,
-      uploaded: 0,
-      runnable,
-      err: "",
-    };
-  };
+  // const fileSize = blob.size;
+  // const file = new File(content, filePath);
 
-  test("test init and respHandler: pick up tasks and remove them after done", async () => {
+
+  test("test syncing: pick up item which is ready", async () => {
     interface TestCase {
       inputInfos: Array<UploadEntry>;
-      expectedInfos: Array<UploadEntry>;
+      expectedInfo: UploadEntry;
     }
 
     class MockWorker {
       constructor() {}
+      public expectedEntry: UploadEntry;
       onmessage = (event: MessageEvent): void => {};
       postMessage = (req: FileWorkerReq): void => {
-        switch (req.kind) {
-          case syncReqKind:
-            const syncReq = req as SyncReq;
-            // find the first qualified task
-            const infoArray = syncReq.infos;
-            for (let i = 0; i < infoArray.length; i++) {
-              if (
-                infoArray[i].runnable &&
-                infoArray[i].uploaded < infoArray[i].size
-              ) {
-                this.onmessage(
-                  new MessageEvent("worker", {
-                    data: {
-                      kind: uploadInfoKind,
-                      filePath: infoArray[i].filePath,
-                      uploaded: infoArray[i].size,
-                      runnable: true,
-                      err: "",
-                    },
-                  })
-                );
-                break;
-              }
-            }
-            break;
-          default:
-            throw Error(
-              `unknown worker request ${req.kind} ${req.kind === syncReqKind}`
-            );
-        }
+        expect(req.filePath).toEqual(this.expectedEntry.filePath);
+        expect(req.uploaded).toEqual(this.expectedEntry.uploaded);
+        expect(req.size).toEqual(this.expectedEntry.size);
       };
     }
 
     const tcs: Array<TestCase> = [
       {
         inputInfos: [
-          makeInfo("path1/file1", true),
-          makeInfo("path2/file1", true),
+          {
+            file: undefined,
+            filePath: "t1/file1",
+            state: UploadState.Stopped,
+            uploaded: 3, 
+            size: 2,
+            err: ""
+          },
+          {
+            file: undefined,
+            filePath: "t1/file2",
+            state: UploadState.Uploading,
+            uploaded: 6, 
+            size: 3,
+            err: ""
+          },
+          {
+            file: undefined,
+            filePath: "t1/file3",
+            state: UploadState.Ready,
+            uploaded: 6, 
+            size: 3,
+            err: ""
+          }
         ],
-        expectedInfos: [],
+        expectedInfo: {
+          file: undefined,
+          filePath: "t1/file3",
+          state: UploadState.Ready,
+          uploaded: 6, 
+          size: 3,
+          err: ""
+        },
       },
       {
         inputInfos: [
-          makeInfo("path1/file1", true),
-          makeInfo("path2/file1", false),
+          {
+            file: undefined,
+            filePath: "path3/file1",
+            state: UploadState.Ready,
+            uploaded: 6, 
+            size: 3,
+            err: ""
+          },
+          {
+            file: undefined,
+            filePath: "path2/file1",
+            state: UploadState.Stopped,
+            uploaded: 6, 
+            size: 3,
+            err: ""
+          },
         ],
-        expectedInfos: [makeInfo("path2/file1", false)],
-      },
-      {
-        inputInfos: [
-          makeInfo("path1/file1", false),
-          makeInfo("path2/file1", true),
-        ],
-        expectedInfos: [
-          makeInfo("path1/file1", false),
-        ],
+        expectedInfo: {
+          file: undefined,
+          filePath: "path3/file1",
+          state: UploadState.Ready,
+          uploaded: 6, 
+          size: 3,
+          err: ""
+        },
       },
     ];
 
@@ -118,24 +129,15 @@ describe("UploadMgr", () => {
     for (let i = 0; i < tcs.length; i++) {
       initUploadMgr(worker);
       const up = Up();
-      up.setCycle(100);
+      up.setCycle(50);
 
       const infoMap = arraytoMap(tcs[i].inputInfos);
       up._setInfos(infoMap);
+      worker.expectedEntry = tcs[i].expectedInfo;
 
+      // TODO: find a better way to wait
       // polling needs several rounds to finish all the tasks
       await delay(tcs.length * up.getCycle() + 1000);
-      // TODO: find a better way to wait
-      const gotInfos = up.list();
-
-      const expectedInfoMap = arraytoMap(tcs[i].expectedInfos);
-      gotInfos.keySeq().forEach((filePath) => {
-        expect(gotInfos.get(filePath)).toEqual(expectedInfoMap.get(filePath));
-      });
-      expectedInfoMap.keySeq().forEach((filePath) => {
-        expect(expectedInfoMap.get(filePath)).toEqual(gotInfos.get(filePath));
-      });
-
       up.destory();
     }
   });

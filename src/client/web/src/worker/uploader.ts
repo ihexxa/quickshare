@@ -175,7 +175,7 @@ export class FileUploader {
 
     if (this.chunkLen === 0) {
       this.errMsgs.push(
-        "the network condition may be poor, please retry later."
+        "the network condition is poor, please retry later."
       );
     } else if (!this.isOn) {
       this.errMsgs.push("uploading is stopped");
