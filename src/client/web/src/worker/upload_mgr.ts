@@ -11,7 +11,7 @@ import {
   uploadInfoKind,
   UploadState,
 } from "./interface";
-import { FgWorker } from "./upload.fgworker";
+import { FgWorker } from "./upload.fg.worker";
 
 const win: Window = self as any;
 

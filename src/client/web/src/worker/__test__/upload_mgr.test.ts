@@ -123,6 +123,34 @@ describe("UploadMgr", () => {
           err: ""
         },
       },
+      {
+        inputInfos: [
+          {
+            file: undefined,
+            filePath: "path3/file1",
+            state: UploadState.Created,
+            uploaded: 6, 
+            size: 3,
+            err: ""
+          },
+          {
+            file: undefined,
+            filePath: "path2/file1",
+            state: UploadState.Stopped,
+            uploaded: 6, 
+            size: 3,
+            err: ""
+          },
+        ],
+        expectedInfo: {
+          file: undefined,
+          filePath: "path3/file1",
+          state: UploadState.Created,
+          uploaded: 6, 
+          size: 3,
+          err: ""
+        },
+      },
     ];
 
     const worker = new MockWorker();

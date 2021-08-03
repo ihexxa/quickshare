@@ -1,7 +1,7 @@
 import { List, Set, Map } from "immutable";
 
 import BgWorker from "../worker/upload.bg.worker";
-import { FgWorker } from "../worker/upload.fgworker";
+import { FgWorker } from "../worker/upload.fg.worker";
 
 import { Props as PanelProps } from "./root_frame";
 import { Item } from "./browser";
