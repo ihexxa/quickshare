@@ -1,16 +1,11 @@
 import { Map } from "immutable";
-// import { mock, instance, when, anything } from "ts-mockito";
 
-// import { FilesClient } from "../../client/files_mock";
-// import { makePromise } from "../../test/helpers";
 import { FgWorker } from "../upload.fg.worker";
 
 import { Up, initUploadMgr } from "../upload_mgr";
 import {
   UploadState,
   UploadStatus,
-  FileWorkerResp,
-  UploadInfoResp,
 } from "../interface";
 
 import {

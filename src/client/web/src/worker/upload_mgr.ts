@@ -190,8 +190,6 @@ export class UploadMgr {
         const infoResp = resp as UploadInfoResp;
         const entry = this.infos.get(infoResp.filePath);
 
-        console.log("resp", infoResp);
-
         if (entry != null) {
           if (infoResp.uploaded === entry.size) {
             this.infos = this.infos.delete(infoResp.filePath);
