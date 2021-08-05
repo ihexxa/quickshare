@@ -10,16 +10,21 @@ import {
   FileWorkerResp,
   UploadStatus,
   UploadState,
+  IChunkUploader,
 } from "./interface";
 
 export class UploadWorker {
-  private uploader = new ChunkUploader();
+  private uploader: IChunkUploader = new ChunkUploader();
   sendEvent = (resp: FileWorkerResp): void => {
     // TODO: make this abstract
     throw new Error("not implemented");
   };
 
   constructor() {}
+
+  setUploader = (uploader: IChunkUploader) => {
+    this.uploader = uploader;
+  };
 
   handleUploadStatus = (status: UploadStatus) => {
     if (status.state !== UploadState.Error) {

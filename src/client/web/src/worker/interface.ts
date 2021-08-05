@@ -22,6 +22,15 @@ export interface UploadEntry {
   err: string;
 }
 
+export interface IChunkUploader {
+  create: (filePath: string, file: File) => Promise<UploadStatus>;
+  upload: (
+    filePath: string,
+    file: File,
+    uploaded: number
+  ) => Promise<UploadStatus>;
+}
+
 export type eventKind = SyncReqKind | ErrKind | UploadInfoKind;
 export interface WorkerEvent {
   kind: eventKind;

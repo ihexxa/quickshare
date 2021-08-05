@@ -92,6 +92,8 @@ export class UploadMgr {
     this.statusCb = cb;
   };
 
+  // addStopped is for initializing uploading list in the UploadMgr
+  // notice even uploading list are shown in the UI, it may not inited in the UploadMgr
   addStopped = (filePath: string, uploaded: number, fileSize: number) => {
     this.infos = this.infos.set(filePath, {
       file: new File([""], filePath), // create a dumb file
@@ -188,6 +190,8 @@ export class UploadMgr {
         const infoResp = resp as UploadInfoResp;
         const entry = this.infos.get(infoResp.filePath);
 
+        console.log("resp", infoResp);
+
         if (entry != null) {
           if (infoResp.uploaded === entry.size) {
             this.infos = this.infos.delete(infoResp.filePath);
@@ -196,7 +200,8 @@ export class UploadMgr {
               ...entry,
               uploaded: infoResp.uploaded,
               state:
-                entry.state === UploadState.Stopped
+                // this avoids overwriting Stopped/Error state
+                (entry.state === UploadState.Stopped || entry.state === UploadState.Error)
                   ? UploadState.Stopped
                   : infoResp.state,
             });

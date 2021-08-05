@@ -11,14 +11,6 @@ const createRetryLimit = 2;
 const uploadRetryLimit = 1024;
 const backoffMax = 2000;
 
-export interface IChunkUploader {
-  // stop: () => void;
-  // err: () => string | null;
-  upload: () => Promise<boolean>;
-  setClient: (client: IFilesClient) => void;
-  // start: () => Promise<boolean>;
-}
-
 export interface ReaderResult {
   chunk?: string;
   err?: Error;
