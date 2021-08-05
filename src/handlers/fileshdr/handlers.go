@@ -136,7 +136,6 @@ func (h *FileHandlers) Create(c *gin.Context) {
 			return
 		}
 
-		// fileDir := q.FsPath(userID, filepath.Dir(req.Path))
 		err = h.deps.FS().MkdirAll(filepath.Dir(req.Path))
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
@@ -160,7 +159,6 @@ func (h *FileHandlers) Delete(c *gin.Context) {
 		return
 	}
 
-	// filePath = q.FsPath(userID, filePath)
 	err := h.deps.FS().Remove(filePath)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
@@ -190,7 +188,6 @@ func (h *FileHandlers) Metadata(c *gin.Context) {
 		return
 	}
 
-	// filePath = q.FsPath(userID, filePath)
 	info, err := h.deps.FS().Stat(filePath)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
@@ -222,7 +219,6 @@ func (h *FileHandlers) Mkdir(c *gin.Context) {
 		return
 	}
 
-	// dirPath := q.FsPath(userID, req.Path)
 	err := h.deps.FS().MkdirAll(req.Path)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
@@ -250,8 +246,6 @@ func (h *FileHandlers) Move(c *gin.Context) {
 		return
 	}
 
-	// oldPath := q.FsPath(userID, req.OldPath)
-	// newPath := q.FsPath(userID, req.NewPath)
 	_, err := h.deps.FS().Stat(req.OldPath)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
@@ -357,7 +351,6 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 }
 
 func (h *FileHandlers) getFSFilePath(userID, fsFilePath string) (string, error) {
-	// fsFilePath := q.FsPath(userID, reqPath)
 	_, err := h.deps.FS().Stat(fsFilePath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -447,7 +440,6 @@ func (h *FileHandlers) Download(c *gin.Context) {
 
 	// TODO: when sharing is introduced, move following logics to a separeted method
 	// concurrently file accessing is managed by os
-	// filePath = q.FsPath(userID, filePath)
 	info, err := h.deps.FS().Stat(filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -525,7 +517,6 @@ func (h *FileHandlers) List(c *gin.Context) {
 		return
 	}
 
-	// dirPath = q.FsPath(userID, dirPath)
 	infos, err := h.deps.FS().ListDir(dirPath)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))

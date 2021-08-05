@@ -9,8 +9,8 @@ import {
   syncReqKind,
   errKind,
   uploadInfoKind,
+  UploadState,
 } from "./interface";
-import { FgWorker } from "./upload.fgworker";
 
 const win: Window = self as any;
 
@@ -20,22 +20,54 @@ export interface IWorker {
 }
 
 export class UploadMgr {
-  private infos = OrderedMap<string, UploadEntry>();
-  private worker: IWorker;
-  private intervalID: number;
+  private idx = 0;
   private cycle: number = 500;
+  private intervalID: number;
+  private worker: IWorker;
+  private infos = OrderedMap<string, UploadEntry>();
   private statusCb = (infos: Map<string, UploadEntry>): void => {};
 
   constructor(worker: IWorker) {
     this.worker = worker;
-    // TODO: fallback to normal if Web Worker is not available
     this.worker.onmessage = this.respHandler;
 
     const syncing = () => {
-      this.worker.postMessage({
-        kind: syncReqKind,
-        infos: this.infos.valueSeq().toArray(),
-      });
+      if (this.infos.size === 0) {
+        return;
+      }
+      if (this.idx > 10000) {
+        this.idx = 0;
+      }
+
+      const start = this.idx % this.infos.size;
+      const infos = this.infos.valueSeq().toArray();
+      for (let i = 0; i < this.infos.size; i++) {
+        const pos = (start + i) % this.infos.size;
+        const info = infos[pos];
+
+        if (
+          info.state === UploadState.Ready ||
+          info.state === UploadState.Created
+        ) {
+
+          this.infos = this.infos.set(info.filePath, {
+            ...info,
+            state: UploadState.Uploading,
+          });
+
+          this.worker.postMessage({
+            kind: syncReqKind,
+            file: info.file,
+            filePath: info.filePath,
+            size: info.size,
+            uploaded: info.uploaded,
+            created: info.uploaded > 0 || info.state === UploadState.Created,
+          });
+          break;
+        }
+      }
+
+      this.idx++;
     };
     this.intervalID = win.setInterval(syncing, this.cycle);
   }
@@ -60,6 +92,19 @@ export class UploadMgr {
     this.statusCb = cb;
   };
 
+  // addStopped is for initializing uploading list in the UploadMgr
+  // notice even uploading list are shown in the UI, it may not inited in the UploadMgr
+  addStopped = (filePath: string, uploaded: number, fileSize: number) => {
+    this.infos = this.infos.set(filePath, {
+      file: new File([""], filePath), // create a dumb file
+      filePath,
+      size: fileSize,
+      uploaded,
+      state: UploadState.Stopped,
+      err: "",
+    });
+  };
+
   add = (file: File, filePath: string) => {
     const entry = this.infos.get(filePath);
     if (entry == null) {
@@ -69,33 +114,52 @@ export class UploadMgr {
         filePath: filePath,
         size: file.size,
         uploaded: 0,
-        runnable: true,
+        state: UploadState.Ready,
         err: "",
       });
     } else {
       // restart the uploading
-      this.infos = this.infos.set(filePath, {
-        ...entry,
-        runnable: true,
-      });
+      if (
+        entry.state === UploadState.Stopped &&
+        filePath === entry.filePath &&
+        file.size === entry.size
+      ) {
+        // try to upload a file with same name but actually with different content.
+        // it still can not resolve one case: names and sizes are same, but contents are different
+        // TODO: showing file SHA will avoid above case
+        this.infos = this.infos.set(filePath, {
+          ...entry,
+          file: file,
+          state: UploadState.Ready,
+        });
+      } else {
+        alert(
+          `(${filePath}) seems not same file with uploading item, please check.`
+        );
+      }
     }
+    this.statusCb(this.infos.toMap());
   };
 
   stop = (filePath: string) => {
     const entry = this.infos.get(filePath);
     if (entry != null) {
+
       this.infos = this.infos.set(filePath, {
         ...entry,
-        runnable: false,
+        state: UploadState.Stopped,
       });
+
     } else {
       alert(`failed to stop uploading ${filePath}: not found`);
     }
+    this.statusCb(this.infos.toMap());
   };
 
   delete = (filePath: string) => {
     this.stop(filePath);
     this.infos = this.infos.delete(filePath);
+    this.statusCb(this.infos.toMap());
   };
 
   list = (): OrderedMap<string, UploadEntry> => {
@@ -107,9 +171,20 @@ export class UploadMgr {
 
     switch (resp.kind) {
       case errKind:
-        // TODO: refine this
         const errResp = resp as ErrResp;
-        console.error(`respHandler: ${errResp}`);
+        const errEntry = this.infos.get(errResp.filePath);
+
+        if (errEntry != null) {
+          this.infos = this.infos.set(errResp.filePath, {
+            ...errEntry,
+            state: UploadState.Error,
+            err: `${errEntry.err} / ${errResp.filePath}`,
+          });
+        } else {
+          // TODO: refine this
+          console.error(`uploading ${errResp.filePath} may already be deleted`);
+        }
+
         break;
       case uploadInfoKind:
         const infoResp = resp as UploadInfoResp;
@@ -122,17 +197,17 @@ export class UploadMgr {
             this.infos = this.infos.set(infoResp.filePath, {
               ...entry,
               uploaded: infoResp.uploaded,
-              runnable: infoResp.runnable,
-              err: infoResp.err,
+              state:
+                // this avoids overwriting Stopped/Error state
+                (entry.state === UploadState.Stopped || entry.state === UploadState.Error)
+                  ? UploadState.Stopped
+                  : infoResp.state,
             });
           }
-
-          // call back to update the info
-          this.statusCb(this.infos.toMap());
         } else {
           // TODO: refine this
           console.error(
-            `respHandler: fail to found: file(${
+            `respHandler: may already be deleted: file(${
               infoResp.filePath
             }) infos(${this.infos.toObject()})`
           );
@@ -141,6 +216,7 @@ export class UploadMgr {
       default:
         console.error(`respHandler: response kind not found: ${resp}`);
     }
+    this.statusCb(this.infos.toMap());
   };
 }
 
