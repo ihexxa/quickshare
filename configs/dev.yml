@@ -12,6 +12,11 @@ server:
   writerTimeout: 86400000 # 1 day
   maxHeaderBytes: 512
   publicPath: "public"
+  captchaWidth: 256
+  captchaHeight: 60
+  captchaLength: 6
+  captchaFont: "public/static/font/Roboto-Light.ttf"
+  captchaEnabled: true
 users:
   enableAuth: true
   defaultAdmin: ""

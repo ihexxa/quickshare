@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/dchest/captcha"
 	"github.com/gin-gonic/gin"
 	"github.com/ihexxa/gocfg"
 	"golang.org/x/crypto/bcrypt"
@@ -61,6 +62,8 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/fs/uploadings"):      true,
 		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/metadata"):           true,
 		apiRuleCname(userstore.AdminRole, "OPTIONS", "/v1/settings/health"):   true,
+		apiRuleCname(userstore.AdminRole, "GET", "/v1/captchas/"):             true,
+		apiRuleCname(userstore.AdminRole, "GET", "/v1/captchas/imgs"):         true,
 		// user rules
 		apiRuleCname(userstore.UserRole, "GET", "/"):                       true,
 		apiRuleCname(userstore.UserRole, "GET", publicPath):                true,
@@ -82,6 +85,8 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(userstore.UserRole, "DELETE", "/v1/fs/uploadings"):    true,
 		apiRuleCname(userstore.UserRole, "GET", "/v1/fs/metadata"):         true,
 		apiRuleCname(userstore.UserRole, "OPTIONS", "/v1/settings/health"): true,
+		apiRuleCname(userstore.UserRole, "GET", "/v1/captchas/"):           true,
+		apiRuleCname(userstore.UserRole, "GET", "/v1/captchas/imgs"):       true,
 		// visitor rules
 		apiRuleCname(userstore.VisitorRole, "GET", "/"):                       true,
 		apiRuleCname(userstore.VisitorRole, "GET", publicPath):                true,
@@ -90,6 +95,8 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(userstore.VisitorRole, "GET", "/v1/users/self"):          true,
 		apiRuleCname(userstore.VisitorRole, "GET", "/v1/fs/files"):            true,
 		apiRuleCname(userstore.VisitorRole, "OPTIONS", "/v1/settings/health"): true,
+		apiRuleCname(userstore.VisitorRole, "GET", "/v1/captchas/"):           true,
+		apiRuleCname(userstore.VisitorRole, "GET", "/v1/captchas/imgs"):       true,
 	}
 
 	return &MultiUsersSvc{
@@ -122,8 +129,10 @@ func (h *MultiUsersSvc) IsInited() bool {
 }
 
 type LoginReq struct {
-	User string `json:"user"`
-	Pwd  string `json:"pwd"`
+	User         string `json:"user"`
+	Pwd          string `json:"pwd"`
+	CaptchaID    string `json:"captchaId"`
+	CaptchaInput string `json:"captchaInput"`
 }
 
 func (h *MultiUsersSvc) Login(c *gin.Context) {
@@ -131,6 +140,15 @@ func (h *MultiUsersSvc) Login(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
+	}
+
+	// TODO: add rate limiter for verifying
+	captchaEnabled := h.cfg.BoolOr("Users.CaptchaEnabled", true)
+	if captchaEnabled {
+		if !captcha.VerifyString(req.CaptchaID, req.CaptchaInput) {
+			c.JSON(q.ErrResp(c, 403, errors.New("login failed")))
+			return
+		}
 	}
 
 	user, err := h.deps.Users().GetUserByName(req.User)

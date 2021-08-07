@@ -21,7 +21,9 @@ func TestFileHandlers(t *testing.T) {
 		"users": {
 			"enableAuth": true,
 			"minUserNameLen": 2,
-			"minPwdLen": 4
+			"minPwdLen": 4,
+			"captchaEnabled": false,
+			"captchaFont": "../../public/static/font/Roboto-Light.ttf"
 		},
 		"server": {
 			"debug": true

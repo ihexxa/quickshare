@@ -32,6 +32,11 @@ import (
 	"github.com/ihexxa/quickshare/src/userstore"
 )
 
+const (
+	CaptchaWidth  = 640
+	CaptchaHeight = 50
+)
+
 type Server struct {
 	server *http.Server
 	cfg    gocfg.ICfg
@@ -188,6 +193,10 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 	rolesAPI.POST("/", userHdrs.AddRole)
 	rolesAPI.DELETE("/", userHdrs.DelRole)
 	rolesAPI.GET("/list", userHdrs.ListRoles)
+
+	captchaAPI := v1.Group("/captchas")
+	captchaAPI.GET("/", userHdrs.GetCaptchaID)
+	captchaAPI.GET("/imgs", userHdrs.GetCaptchaImg)
 
 	filesAPI := v1.Group("/fs")
 	filesAPI.POST("/files", fileHdrs.Create)
