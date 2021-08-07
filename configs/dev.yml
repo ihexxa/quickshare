@@ -12,6 +12,9 @@ server:
   writerTimeout: 86400000 # 1 day
   maxHeaderBytes: 512
   publicPath: "public"
+  captchaWidth: 256
+  captchaHeight: 60
+  captchaEnabled: true
 users:
   enableAuth: true
   defaultAdmin: ""

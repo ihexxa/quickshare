@@ -50,6 +50,7 @@ export function initState(): ICoreState {
       displaying: "browser",
       authPane: {
         authed: false,
+        captchaID: "",
       },
       browser: {
         isVertical: isVertical(),
@@ -65,6 +66,7 @@ export function initState(): ICoreState {
         paneNames: Set<string>(["settings", "login", "admin"]),
         login: {
           authed: false,
+          captchaID: "",
         },
         admin: {
           users: Map<string, User>(),
@@ -83,6 +85,7 @@ export function mockState(): ICoreState {
       displaying: "browser",
       authPane: {
         authed: false,
+        captchaID: "",
       },
       browser: {
         isVertical: false,
@@ -98,6 +101,7 @@ export function mockState(): ICoreState {
         paneNames: Set<string>(["settings", "login", "admin"]),
         login: {
           authed: false,
+          captchaID: "",
         },
         admin: {
           users: Map<string, User>(),

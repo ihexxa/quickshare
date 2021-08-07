@@ -15,14 +15,15 @@ var (
 	FsDir     = "files"
 	FsRootDir = "files"
 
-	UserIDParam = "uid"
-	UserParam   = "user"
-	PwdParam    = "pwd"
-	NewPwdParam = "newpwd"
-	RoleParam   = "role"
-	ExpireParam = "expire"
-	TokenCookie = "tk"
-	LastID      = "lid"
+	UserIDParam    = "uid"
+	UserParam      = "user"
+	PwdParam       = "pwd"
+	NewPwdParam    = "newpwd"
+	RoleParam      = "role"
+	ExpireParam    = "expire"
+	CaptchaIDParam = "capid"
+	TokenCookie    = "tk"
+	LastID         = "lid"
 
 	ErrAccessDenied = errors.New("access denied")
 	ErrUnauthorized = errors.New("unauthorized")

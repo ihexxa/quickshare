@@ -12,6 +12,9 @@ server:
   writerTimeout: 86400000 # 1 day
   maxHeaderBytes: 512
   publicPath: "/quickshare/public"
+  captchaWidth: 256
+  captchaHeight: 60
+  captchaEnabled: true
 users:
   enableAuth: true
   defaultAdmin: ""
@@ -21,4 +24,3 @@ users:
   cookieHttpOnly: true
   minUserNameLen: 4
   minPwdLen: 6
-

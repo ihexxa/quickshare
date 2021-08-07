@@ -3,7 +3,6 @@ import * as React from "react";
 import { ICoreState } from "./core_state";
 import { IUsersClient } from "../client";
 import { AuthPane, Props as LoginProps } from "./pane_login";
-import { Layouter } from "./layouter";
 import { UsersClient } from "../client/users";
 
 export interface Props {
@@ -174,6 +173,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               <div className="flex-list-item-r">
                 <AuthPane
                   authed={this.props.login.authed}
+                  captchaID={this.props.login.captchaID}
                   update={this.update}
                 />
               </div>

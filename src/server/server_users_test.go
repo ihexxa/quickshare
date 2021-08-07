@@ -19,7 +19,8 @@ func TestUsersHandlers(t *testing.T) {
 		"users": {
 			"enableAuth": true,
 			"minUserNameLen": 2,
-			"minPwdLen": 4
+			"minPwdLen": 4,
+			"captchaEnabled": false
 		},
 		"server": {
 			"debug": true

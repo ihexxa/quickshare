@@ -10,6 +10,7 @@ import { Layouter } from "./layouter";
 
 export interface Props {
   authed: boolean;
+  captchaID: string;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
@@ -23,8 +24,13 @@ export class Updater {
     Updater.client = client;
   };
 
-  static login = async (user: string, pwd: string): Promise<boolean> => {
-    const resp = await Updater.client.login(user, pwd);
+  static login = async (
+    user: string,
+    pwd: string,
+    captchaID: string,
+    captchaInput: string
+  ): Promise<boolean> => {
+    const resp = await Updater.client.login(user, pwd, captchaID, captchaInput);
     Updater.setAuthed(resp.status === 200);
     return resp.status === 200;
   };
@@ -50,6 +56,15 @@ export class Updater {
     Updater.props.authed = isAuthed;
   };
 
+  static getCaptchaID = async (): Promise<boolean> => {
+    return Updater.client.getCaptchaID().then((resp) => {
+      if (resp.status === 200) {
+        Updater.props.captchaID = resp.data.id;
+      }
+      return resp.status === 200;
+    });
+  };
+
   static setAuthPane = (preState: ICoreState): ICoreState => {
     preState.panel.authPane = {
       ...preState.panel.authPane,
@@ -62,6 +77,7 @@ export class Updater {
 export interface State {
   user: string;
   pwd: string;
+  captchaInput: string;
 }
 
 export class AuthPane extends React.Component<Props, State, {}> {
@@ -74,6 +90,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
     this.state = {
       user: "",
       pwd: "",
+      captchaInput: "",
     };
 
     this.initIsAuthed();
@@ -87,6 +104,10 @@ export class AuthPane extends React.Component<Props, State, {}> {
     this.setState({ pwd: ev.target.value });
   };
 
+  changeCaptcha = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ captchaInput: ev.target.value });
+  };
+
   initIsAuthed = () => {
     Updater.initIsAuthed().then(() => {
       this.update(Updater.setAuthPane);
@@ -94,7 +115,12 @@ export class AuthPane extends React.Component<Props, State, {}> {
   };
 
   login = () => {
-    Updater.login(this.state.user, this.state.pwd)
+    Updater.login(
+      this.state.user,
+      this.state.pwd,
+      this.props.captchaID,
+      this.state.captchaInput
+    )
       .then((ok: boolean) => {
         if (ok) {
           this.update(Updater.setAuthPane);
@@ -129,33 +155,6 @@ export class AuthPane extends React.Component<Props, State, {}> {
   };
 
   render() {
-    const elements: Array<JSX.Element> = [
-      <input
-        name="user"
-        type="text"
-        onChange={this.changeUser}
-        value={this.state.user}
-        className="black0-font margin-t-m margin-b-m"
-        // style={{ width: "80%" }}
-        placeholder="user name"
-      />,
-      <input
-        name="pwd"
-        type="password"
-        onChange={this.changePwd}
-        value={this.state.pwd}
-        className="black0-font margin-t-m margin-b-m"
-        // style={{ width: "80%" }}
-        placeholder="password"
-      />,
-      <button
-        onClick={this.login}
-        className="green0-bg white-font margin-t-m margin-b-m"
-      >
-        Log in
-      </button>,
-    ];
-
     return (
       <span>
         <div
@@ -163,8 +162,52 @@ export class AuthPane extends React.Component<Props, State, {}> {
           style={{ display: this.props.authed ? "none" : "block" }}
         >
           <div className="padding-l">
-              {/* <h5 className="black-font">Login</h5> */}
-              <Layouter isHorizontal={false} elements={elements} />
+            <div className="flex-list-container">
+              <div className="flex-list-item-l">
+                <input
+                  name="user"
+                  type="text"
+                  onChange={this.changeUser}
+                  value={this.state.user}
+                  className="black0-font margin-t-m margin-b-m margin-r-m"
+                  placeholder="user name"
+                />
+                <input
+                  name="pwd"
+                  type="password"
+                  onChange={this.changePwd}
+                  value={this.state.pwd}
+                  className="black0-font margin-t-m margin-b-m"
+                  placeholder="password"
+                />
+              </div>
+              <div className="flex-list-item-r">
+                <button
+                  onClick={this.login}
+                  className="green0-bg white-font margin-t-m margin-b-m"
+                >
+                  Log in
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-list-container">
+              <div className="flex-list-item-l">
+                <input
+                  name="captcha"
+                  type="text"
+                  onChange={this.changeCaptcha}
+                  value={this.state.captchaInput}
+                  className="black0-font margin-t-m margin-b-m margin-r-m"
+                  placeholder="captcha"
+                />
+                <img
+                  src={`/v1/captchas/imgs?capid=${this.props.captchaID}`}
+                  className="captcha"
+                />
+              </div>
+              <div className="flex-list-item-l"></div>
+            </div>
           </div>
         </div>
 

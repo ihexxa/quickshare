@@ -17,6 +17,9 @@ type UsersCfg struct {
 	CookieHttpOnly  bool   `json:"cookieHttpOnly" yaml:"cookieHttpOnly"`
 	MinUserNameLen  int    `json:"minUserNameLen" yaml:"minUserNameLen"`
 	MinPwdLen       int    `json:"minPwdLen" yaml:"minPwdLen"`
+	CaptchaWidth    int    `json:"captchaWidth" yaml:"captchaWidth"`
+	CaptchaHeight   int    `json:"captchaHeight" yaml:"captchaHeight"`
+	CaptchaEnabled  bool   `json:"captchaEnabled" yaml:"captchaEnabled"`
 }
 
 type Secrets struct {
@@ -60,6 +63,9 @@ func DefaultConfig() (string, error) {
 			CookieHttpOnly:  true,
 			MinUserNameLen:  4,
 			MinPwdLen:       6,
+			CaptchaWidth:    256,
+			CaptchaHeight:   60,
+			CaptchaEnabled:  true,
 		},
 		Secrets: &Secrets{
 			TokenSecret: "",

@@ -48,7 +48,7 @@ export interface ListUploadingsResp {
 }
 
 export interface IUsersClient {
-  login: (user: string, pwd: string) => Promise<Response>;
+  login: (user: string, pwd: string, captchaId: string, captchaInput:string) => Promise<Response>;
   logout: () => Promise<Response>;
   isAuthed: () => Promise<Response>;
   self: () => Promise<Response>;
@@ -60,6 +60,7 @@ export interface IUsersClient {
   addRole: (role: string) => Promise<Response>;
   delRole: (role: string) => Promise<Response>;
   listRoles: () => Promise<Response>;
+  getCaptchaID: () => Promise<Response>;
 }
 
 export interface IFilesClient {
