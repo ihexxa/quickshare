@@ -17,16 +17,18 @@ const (
 	InitNs      = "usersInit"
 	IDsNs       = "ids"
 	UsersNs     = "users"
-	PwdsNs      = "pwds"
-	RolesNs     = "roles"
 	RoleListNs  = "roleList"
 	InitTimeKey = "initTime"
+
+	defaultSpaceLimit         = 1024       // 1GB
+	defaultUploadSpeedLimit   = 100 * 1024 // 100KB
+	defaultDownloadSpeedLimit = 100 * 1024 // 100KB
 )
 
 type Quota struct {
-	SpaceLimit         int64 `json:"spaceLimit,string"`
-	UploadSpeedLimit   int   `json:"uploadSpeedLimit"`
-	DownloadSpeedLimit int   `json:"downloadSpeedLimit"`
+	SpaceLimit         int `json:"spaceLimit"`
+	UploadSpeedLimit   int `json:"uploadSpeedLimit"`
+	DownloadSpeedLimit int `json:"downloadSpeedLimit"`
 }
 
 type User struct {
@@ -44,8 +46,6 @@ type IUserStore interface {
 	DelUser(id uint64) error
 	GetUser(id uint64) (*User, error)
 	GetUserByName(name string) (*User, error)
-	// SetName(id uint64, name string) error
-	// SetRole(id uint64, role string) error
 	SetInfo(id uint64, user *User) error
 	SetPwd(id uint64, pwd string) error
 	ListUsers() ([]*User, error)
@@ -66,8 +66,6 @@ func NewKVUserStore(store kvstore.IKVStore) (*KVUserStore, error) {
 		for _, nsName := range []string{
 			IDsNs,
 			UsersNs,
-			PwdsNs,
-			RolesNs,
 			InitNs,
 			RoleListNs,
 		} {
@@ -90,6 +88,11 @@ func (us *KVUserStore) Init(rootName, rootPwd string) error {
 		Name: rootName,
 		Pwd:  rootPwd,
 		Role: AdminRole,
+		Quota: &Quota{
+			SpaceLimit:         defaultSpaceLimit,
+			UploadSpeedLimit:   defaultUploadSpeedLimit,
+			DownloadSpeedLimit: defaultDownloadSpeedLimit,
+		},
 	})
 	if err != nil {
 		return err

@@ -9,17 +9,20 @@ type FSConfig struct {
 }
 
 type UsersCfg struct {
-	EnableAuth      bool   `json:"enableAuth" yaml:"enableAuth"`
-	DefaultAdmin    string `json:"defaultAdmin" yaml:"defaultAdmin" cfg:"env"`
-	DefaultAdminPwd string `json:"defaultAdminPwd" yaml:"defaultAdminPwd" cfg:"env"`
-	CookieTTL       int    `json:"cookieTTL" yaml:"cookieTTL"`
-	CookieSecure    bool   `json:"cookieSecure" yaml:"cookieSecure"`
-	CookieHttpOnly  bool   `json:"cookieHttpOnly" yaml:"cookieHttpOnly"`
-	MinUserNameLen  int    `json:"minUserNameLen" yaml:"minUserNameLen"`
-	MinPwdLen       int    `json:"minPwdLen" yaml:"minPwdLen"`
-	CaptchaWidth    int    `json:"captchaWidth" yaml:"captchaWidth"`
-	CaptchaHeight   int    `json:"captchaHeight" yaml:"captchaHeight"`
-	CaptchaEnabled  bool   `json:"captchaEnabled" yaml:"captchaEnabled"`
+	EnableAuth         bool   `json:"enableAuth" yaml:"enableAuth"`
+	DefaultAdmin       string `json:"defaultAdmin" yaml:"defaultAdmin" cfg:"env"`
+	DefaultAdminPwd    string `json:"defaultAdminPwd" yaml:"defaultAdminPwd" cfg:"env"`
+	CookieTTL          int    `json:"cookieTTL" yaml:"cookieTTL"`
+	CookieSecure       bool   `json:"cookieSecure" yaml:"cookieSecure"`
+	CookieHttpOnly     bool   `json:"cookieHttpOnly" yaml:"cookieHttpOnly"`
+	MinUserNameLen     int    `json:"minUserNameLen" yaml:"minUserNameLen"`
+	MinPwdLen          int    `json:"minPwdLen" yaml:"minPwdLen"`
+	CaptchaWidth       int    `json:"captchaWidth" yaml:"captchaWidth"`
+	CaptchaHeight      int    `json:"captchaHeight" yaml:"captchaHeight"`
+	CaptchaEnabled     bool   `json:"captchaEnabled" yaml:"captchaEnabled"`
+	UploadSpeedLimit   int    `json:"uploadSpeedLimit" yaml:"uploadSpeedLimit"`
+	DownloadSpeedLimit int    `json:"downloadSpeedLimit" yaml:"downloadSpeedLimit"`
+	SpaceLimit         int    `json:"spaceLimit" yaml:"spaceLimit"`
 }
 
 type Secrets struct {
@@ -55,17 +58,20 @@ func DefaultConfig() (string, error) {
 			OpenTTL:    60, // 1 min
 		},
 		Users: &UsersCfg{
-			EnableAuth:      true,
-			DefaultAdmin:    "",
-			DefaultAdminPwd: "",
-			CookieTTL:       3600 * 24 * 7, // 1 week
-			CookieSecure:    false,
-			CookieHttpOnly:  true,
-			MinUserNameLen:  4,
-			MinPwdLen:       6,
-			CaptchaWidth:    256,
-			CaptchaHeight:   60,
-			CaptchaEnabled:  true,
+			EnableAuth:         true,
+			DefaultAdmin:       "",
+			DefaultAdminPwd:    "",
+			CookieTTL:          3600 * 24 * 7, // 1 week
+			CookieSecure:       false,
+			CookieHttpOnly:     true,
+			MinUserNameLen:     4,
+			MinPwdLen:          6,
+			CaptchaWidth:       256,
+			CaptchaHeight:      60,
+			CaptchaEnabled:     true,
+			UploadSpeedLimit:   100 * 1024, // B
+			DownloadSpeedLimit: 100 * 1024, // B
+			SpaceLimit:         1024,       // GB
 		},
 		Secrets: &Secrets{
 			TokenSecret: "",
