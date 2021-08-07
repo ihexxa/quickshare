@@ -58,7 +58,6 @@ export class Updater {
 
   static getCaptchaID = async (): Promise<boolean> => {
     return Updater.client.getCaptchaID().then((resp) => {
-      // console.log(resp.data);
       if (resp.status === 200) {
         Updater.props.captchaID = resp.data.id;
       }

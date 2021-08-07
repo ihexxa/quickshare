@@ -32,11 +32,6 @@ import (
 	"github.com/ihexxa/quickshare/src/userstore"
 )
 
-const (
-	CaptchaWidth  = 640
-	CaptchaHeight = 50
-)
-
 type Server struct {
 	server *http.Server
 	cfg    gocfg.ICfg
