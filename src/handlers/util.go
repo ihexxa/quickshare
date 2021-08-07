@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
+
+	"github.com/ihexxa/quickshare/src/cryptoutil"
 )
 
 var (
@@ -136,4 +138,23 @@ func UploadPath(userID, relFilePath string) string {
 
 func UploadFolder(userID string) string {
 	return filepath.Join(userID, UploadDir)
+}
+
+func GetUserInfo(tokenStr string, tokenEncDec cryptoutil.ITokenEncDec) (map[string]string, error) {
+	claims, err := tokenEncDec.FromToken(
+		tokenStr,
+		map[string]string{
+			UserIDParam: "",
+			UserParam:   "",
+			RoleParam:   "",
+			ExpireParam: "",
+		},
+	)
+	if err != nil {
+		return nil, err
+	} else if claims[UserIDParam] == "" || claims[UserParam] == "" {
+		return nil, errors.New("empty user id or name")
+	}
+
+	return claims, nil
 }
