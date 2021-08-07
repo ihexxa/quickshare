@@ -6,6 +6,7 @@ import { ICoreState, init } from "./core_state";
 import { RootFrame } from "./root_frame";
 import { FilesClient } from "../client/files";
 import { UsersClient } from "../client/users";
+import { Updater as LoginPaneUpdater } from "./pane_login";
 
 export interface Props {}
 export interface State extends ICoreState {}
@@ -20,6 +21,19 @@ export class StateMgr extends React.Component<Props, State, {}> {
   initUpdaters = (state: ICoreState) => {
     BrowserUpdater().init(state.panel.browser);
     BrowserUpdater().setClients(new UsersClient(""), new FilesClient(""));
+
+    LoginPaneUpdater.init(state.panel.authPane);
+    LoginPaneUpdater.setClient(new UsersClient(""));
+    LoginPaneUpdater.getCaptchaID()
+      .then((ok: boolean) => {
+        if (!ok) {
+          alert("failed to get captcha id");
+        } else {
+          this.update(LoginPaneUpdater.setAuthPane);
+          console.log(LoginPaneUpdater)
+        }
+      });
+
     BrowserUpdater()
       .setHomeItems()
       .then(() => {

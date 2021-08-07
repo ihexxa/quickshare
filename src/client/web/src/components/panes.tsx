@@ -47,8 +47,7 @@ export class Updater {
       return true;
     }
     return false;
-  }
-
+  };
 
   static addUser = async (user: User): Promise<boolean> => {
     const resp = await Updater.client.addUser(user.name, user.pwd, user.role);
@@ -156,7 +155,11 @@ export class Panes extends React.Component<Props, State, {}> {
         <PaneSettings login={this.props.login} update={this.props.update} />
       ),
       login: (
-        <AuthPane authed={this.props.login.authed} update={this.props.update} />
+        <AuthPane
+          authed={this.props.login.authed}
+          captchaID={this.props.login.captchaID}
+          update={this.props.update}
+        />
       ),
     });
 

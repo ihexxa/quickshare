@@ -5,13 +5,15 @@ export class UsersClient extends BaseClient {
     super(url);
   }
 
-  login = (user: string, pwd: string): Promise<Response> => {
+  login = (user: string, pwd: string, captchaId: string, captchaInput:string): Promise<Response> => {
     return this.do({
       method: "post",
       url: `${this.url}/v1/users/login`,
       data: {
         user,
         pwd,
+        captchaId,
+        captchaInput,
       },
     });
   };
@@ -111,6 +113,14 @@ export class UsersClient extends BaseClient {
     return this.do({
       method: "get",
       url: `${this.url}/v1/users/self`,
+      params: {},
+    });
+  };
+
+  getCaptchaID = (): Promise<Response> => {
+    return this.do({
+      method: "get",
+      url: `${this.url}/v1/captchas/`,
       params: {},
     });
   };
