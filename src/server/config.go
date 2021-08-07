@@ -19,8 +19,6 @@ type UsersCfg struct {
 	MinPwdLen       int    `json:"minPwdLen" yaml:"minPwdLen"`
 	CaptchaWidth    int    `json:"captchaWidth" yaml:"captchaWidth"`
 	CaptchaHeight   int    `json:"captchaHeight" yaml:"captchaHeight"`
-	CaptchaLength   int    `json:"captchaLength" yaml:"captchaLength"`
-	CaptchaFont     string `json:"captchaFont" yaml:"captchaFont"`
 	CaptchaEnabled  bool   `json:"captchaEnabled" yaml:"captchaEnabled"`
 }
 
@@ -67,8 +65,6 @@ func DefaultConfig() (string, error) {
 			MinPwdLen:       6,
 			CaptchaWidth:    256,
 			CaptchaHeight:   60,
-			CaptchaLength:   6,
-			CaptchaFont:     "public/static/font/Roboto-Light.ttf",
 			CaptchaEnabled:  true,
 		},
 		Secrets: &Secrets{

@@ -14,8 +14,6 @@ server:
   publicPath: "/quickshare/public"
   captchaWidth: 256
   captchaHeight: 60
-  captchaLength: 6
-  captchaFont: "public/static/font/Roboto-Light.ttf"
   captchaEnabled: true
 users:
   enableAuth: true
