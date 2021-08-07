@@ -23,14 +23,23 @@ func TestUserStores(t *testing.T) {
 			t.Fatalf("passwords not match %s", err)
 		}
 		if root.Role != AdminRole {
-			t.Fatalf("incorrect root fole")
+			t.Fatalf("incorrect root role")
+		}
+		if root.Quota.SpaceLimit != defaultSpaceLimit {
+			t.Fatalf("incorrect root SpaceLimit")
+		}
+		if root.Quota.UploadSpeedLimit != defaultUploadSpeedLimit {
+			t.Fatalf("incorrect root UploadSpeedLimit")
+		}
+		if root.Quota.DownloadSpeedLimit != defaultDownloadSpeedLimit {
+			t.Fatalf("incorrect root DownloadSpeedLimit")
 		}
 
 		id, name1 := uint64(1), "test_user1"
 		pwd1, pwd2 := "666", "888"
 		role1, role2 := UserRole, AdminRole
-		spaceLimit1, upLimit1, downLimit1 := int64(3), 5, 7
-		spaceLimit2, upLimit2, downLimit2 := int64(11), 13, 17
+		spaceLimit1, upLimit1, downLimit1 := 3, 5, 7
+		spaceLimit2, upLimit2, downLimit2 := 11, 13, 17
 
 		err = store.AddUser(&User{
 			ID:   id,
