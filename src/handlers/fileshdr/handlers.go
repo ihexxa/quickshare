@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -286,6 +287,21 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 	userID := c.MustGet(q.UserIDParam).(string)
 	if !h.canAccess(userID, role, req.Path) {
 		c.JSON(q.ErrResp(c, 403, q.ErrAccessDenied))
+		return
+	}
+
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
+	ok, err := h.deps.Limiter().CanUpload(userIDInt, len([]byte(req.Content)))
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	} else if !ok {
+		c.JSON(q.ErrResp(c, 503, errors.New("retry later")))
 		return
 	}
 

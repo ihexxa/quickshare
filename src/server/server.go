@@ -27,6 +27,7 @@ import (
 	"github.com/ihexxa/quickshare/src/handlers/multiusers"
 	"github.com/ihexxa/quickshare/src/handlers/settings"
 	"github.com/ihexxa/quickshare/src/idgen/simpleidgen"
+	"github.com/ihexxa/quickshare/src/iolimiter"
 	"github.com/ihexxa/quickshare/src/kvstore"
 	"github.com/ihexxa/quickshare/src/kvstore/boltdbpvd"
 	"github.com/ihexxa/quickshare/src/userstore"
@@ -104,6 +105,10 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 		panic(fmt.Sprintf("fail to init user store: %s", err))
 	}
 
+	limiterCap := cfg.IntOr("Users.LimiterCapacity", 4096)
+	limiterCyc := cfg.IntOr("Users.LimiterCyc", 3000)
+	limiter := iolimiter.NewIOLimiter(limiterCap, limiterCyc, users)
+
 	deps := depidx.NewDeps(cfg)
 	deps.SetFS(filesystem)
 	deps.SetToken(jwtEncDec)
@@ -111,6 +116,7 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	deps.SetUsers(users)
 	deps.SetID(ider)
 	deps.SetLog(logger)
+	deps.SetLimiter(limiter)
 
 	return deps
 }
