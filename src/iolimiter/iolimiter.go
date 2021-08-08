@@ -11,26 +11,29 @@ import (
 const cacheSizeLimit = 1024
 
 type ILimiter interface {
-	CanUpload(id uint64, chunkSize int) (bool, error)
+	CanWrite(userID uint64, chunkSize int) (bool, error)
+	CanRead(userID uint64, chunkSize int) (bool, error)
 }
 
 type IOLimiter struct {
-	mtx           *sync.Mutex
-	UploadLimiter *golimiter.Limiter
-	users         userstore.IUserStore
-	quotaCache    map[uint64]*userstore.Quota
+	mtx             *sync.Mutex
+	UploadLimiter   *golimiter.Limiter
+	DownloadLimiter *golimiter.Limiter
+	users           userstore.IUserStore
+	quotaCache      map[uint64]*userstore.Quota
 }
 
-func NewIOLimiter(upCap, upCyc int, users userstore.IUserStore) *IOLimiter {
+func NewIOLimiter(cap, cyc int, users userstore.IUserStore) *IOLimiter {
 	return &IOLimiter{
-		mtx:           &sync.Mutex{},
-		UploadLimiter: golimiter.New(upCap, upCyc),
-		users:         users,
-		quotaCache:    map[uint64]*userstore.Quota{},
+		mtx:             &sync.Mutex{},
+		UploadLimiter:   golimiter.New(cap, cyc),
+		DownloadLimiter: golimiter.New(cap, cyc),
+		users:           users,
+		quotaCache:      map[uint64]*userstore.Quota{},
 	}
 }
 
-func (lm *IOLimiter) CanUpload(id uint64, chunkSize int) (bool, error) {
+func (lm *IOLimiter) CanWrite(id uint64, chunkSize int) (bool, error) {
 	lm.mtx.Lock()
 	defer lm.mtx.Unlock()
 
@@ -50,6 +53,30 @@ func (lm *IOLimiter) CanUpload(id uint64, chunkSize int) (bool, error) {
 	return lm.UploadLimiter.Access(
 		fmt.Sprint(id),
 		quota.UploadSpeedLimit,
+		chunkSize,
+	), nil
+}
+
+func (lm *IOLimiter) CanRead(id uint64, chunkSize int) (bool, error) {
+	lm.mtx.Lock()
+	defer lm.mtx.Unlock()
+
+	quota, ok := lm.quotaCache[id]
+	if !ok {
+		user, err := lm.users.GetUser(id)
+		if err != nil {
+			return false, err
+		}
+		quota = user.Quota
+		lm.quotaCache[id] = quota
+	}
+	if len(lm.quotaCache) > cacheSizeLimit {
+		lm.clean()
+	}
+
+	return lm.DownloadLimiter.Access(
+		fmt.Sprint(id),
+		quota.DownloadSpeedLimit,
 		chunkSize,
 	), nil
 }
