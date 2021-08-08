@@ -19,7 +19,12 @@ func TestConcurrency(t *testing.T) {
 			"enableAuth": true,
 			"minUserNameLen": 2,
 			"minPwdLen": 4,
-			"captchaEnabled": false
+			"captchaEnabled": false,
+			"uploadSpeedLimit": 409600,
+			"downloadSpeedLimit": 409600,
+			"spaceLimit": 1024,
+			"limiterCapacity": 1000,
+			"limiterCyc": 1000
 		},
 		"server": {
 			"debug": true
