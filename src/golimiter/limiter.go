@@ -2,7 +2,6 @@ package golimiter
 
 import (
 	"fmt"
-	// "math"
 	"sync"
 	"time"
 )
@@ -36,7 +35,6 @@ func (b *Bucket) Access(cyc, incr, decr int) bool {
 		After(now) {
 		return false
 	}
-	fmt.Println(4)
 	b.token = incr - decr
 	b.refreshedAt = now
 	return true

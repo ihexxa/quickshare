@@ -301,7 +301,7 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	} else if !ok {
-		c.JSON(q.ErrResp(c, 503, errors.New("retry later")))
+		c.JSON(q.ErrResp(c, 429, errors.New("retry later")))
 		return
 	}
 

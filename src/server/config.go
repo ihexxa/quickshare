@@ -23,6 +23,8 @@ type UsersCfg struct {
 	UploadSpeedLimit   int    `json:"uploadSpeedLimit" yaml:"uploadSpeedLimit"`
 	DownloadSpeedLimit int    `json:"downloadSpeedLimit" yaml:"downloadSpeedLimit"`
 	SpaceLimit         int    `json:"spaceLimit" yaml:"spaceLimit"`
+	LimiterCapacity    int    `json:"limiterCapacity" yaml:"limiterCapacity"`
+	LimiterCyc         int    `json:"limiterCyc" yaml:"limiterCyc"`
 }
 
 type Secrets struct {
@@ -72,6 +74,8 @@ func DefaultConfig() (string, error) {
 			UploadSpeedLimit:   100 * 1024, // B
 			DownloadSpeedLimit: 100 * 1024, // B
 			SpaceLimit:         1024,       // GB
+			LimiterCapacity:    1000,
+			LimiterCyc:         1000, // 1s
 		},
 		Secrets: &Secrets{
 			TokenSecret: "",

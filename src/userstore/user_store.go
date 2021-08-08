@@ -20,9 +20,9 @@ const (
 	RoleListNs  = "roleList"
 	InitTimeKey = "initTime"
 
-	defaultSpaceLimit         = 1024       // 1GB
-	defaultUploadSpeedLimit   = 100 * 1024 // 100KB
-	defaultDownloadSpeedLimit = 100 * 1024 // 100KB
+	defaultSpaceLimit         = 1024             // 1GB
+	defaultUploadSpeedLimit   = 50 * 1024 * 1024 // 50MB
+	defaultDownloadSpeedLimit = 50 * 1024 * 1024 // 50MB
 )
 
 type Quota struct {

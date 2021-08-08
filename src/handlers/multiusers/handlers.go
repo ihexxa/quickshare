@@ -354,18 +354,15 @@ func (h *MultiUsersSvc) AddUser(c *gin.Context) {
 		return
 	}
 
-	spaceLimit := h.cfg.IntOr("Users.SpaceLimit", 1024)
-	uploadSpeedLimit := h.cfg.IntOr("Users.UploadSpeedLimit", 100*1024)
-	downloadSpeedLimit := h.cfg.IntOr("Users.DownloadSpeedLimit", 100*1024)
 	err = h.deps.Users().AddUser(&userstore.User{
 		ID:   uid,
 		Name: req.Name,
 		Pwd:  string(pwdHash),
 		Role: req.Role,
 		Quota: &userstore.Quota{
-			SpaceLimit:         spaceLimit,
-			UploadSpeedLimit:   uploadSpeedLimit,
-			DownloadSpeedLimit: downloadSpeedLimit,
+			SpaceLimit:         h.cfg.IntOr("Users.SpaceLimit", 1024),
+			UploadSpeedLimit:   h.cfg.IntOr("Users.UploadSpeedLimit", 100*1024),
+			DownloadSpeedLimit: h.cfg.IntOr("Users.DownloadSpeedLimit", 100*1024),
 		},
 	})
 	if err != nil {
