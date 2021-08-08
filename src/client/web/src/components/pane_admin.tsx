@@ -2,7 +2,7 @@ import * as React from "react";
 import { Map, Set } from "immutable";
 
 import { ICoreState } from "./core_state";
-import { User } from "../client";
+import { User, Quota } from "../client";
 import { Updater as PanesUpdater } from "./panes";
 
 export interface Props {
@@ -16,6 +16,7 @@ export interface UserFormProps {
   id: string;
   name: string;
   role: string;
+  quota: Quota;
   roles: Set<string>;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
@@ -102,9 +103,14 @@ export class UserForm extends React.Component<
                 flexDirection: "column",
               }}
             >
-              <div className="bold item-name">Name: {this.props.name}</div>
+              <div className="bold item-name">
+                Name: {this.props.name} / ID: {this.props.id} / Role:{" "}
+                {this.props.role}
+              </div>
               <div className="grey1-font item-name">
-                ID: {this.props.id} / Role: {this.props.role}
+                SpaceLimit: {this.props.quota.spaceLimit} / UploadSpeedLimit:{" "}
+                {this.props.quota.uploadSpeedLimit} / DownloadSpeedLimit:{" "}
+                {this.props.quota.downloadSpeedLimit}
               </div>
             </div>
           </div>
@@ -169,7 +175,6 @@ export class UserForm extends React.Component<
             Update
           </button>
         </div>
-
       </span>
     );
   }
@@ -255,6 +260,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
       name: this.state.newUserName,
       pwd: this.state.newUserPwd1,
       role: this.state.newUserRole,
+      quota: undefined,
     })
       .then((ok: boolean) => {
         if (!ok) {
@@ -282,6 +288,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
             id={user.id}
             name={user.name}
             role={user.role}
+            quota={user.quota}
             roles={this.props.roles}
             update={this.props.update}
           />

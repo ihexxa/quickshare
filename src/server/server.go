@@ -105,8 +105,8 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 		panic(fmt.Sprintf("fail to init user store: %s", err))
 	}
 
-	limiterCap := cfg.IntOr("Users.LimiterCapacity", 4096)
-	limiterCyc := cfg.IntOr("Users.LimiterCyc", 3000)
+	limiterCap := cfg.IntOr("Users.LimiterCapacity", 10000)
+	limiterCyc := cfg.IntOr("Users.LimiterCyc", 1000)
 	limiter := iolimiter.NewIOLimiter(limiterCap, limiterCyc, users)
 
 	deps := depidx.NewDeps(cfg)

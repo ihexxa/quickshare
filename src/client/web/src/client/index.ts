@@ -3,11 +3,18 @@ import axios, { AxiosRequestConfig } from "axios";
 export const defaultTimeout = 10000;
 export const userIDParam = "uid";
 
+export interface Quota {
+  spaceLimit: number;
+  uploadSpeedLimit: number;
+  downloadSpeedLimit: number;
+}
+
 export interface User {
   id: string;
   name: string;
   pwd: string;
   role: string;
+  quota: Quota;
 }
 
 export interface ListUsersResp {

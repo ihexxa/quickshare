@@ -15,6 +15,11 @@ server:
   captchaWidth: 256
   captchaHeight: 60
   captchaEnabled: true
+  uploadSpeedLimit: 409600 # 400KB/limiterCyc
+  downloadSpeedLimit: 409600 # 400KB/limiterCyc
+  spaceLimit: 1024 # 1GB
+  limiterCapacity: 1000
+  limiterCyc: 1000 # 1s
 users:
   enableAuth: true
   defaultAdmin: ""
