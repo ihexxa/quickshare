@@ -27,6 +27,7 @@ export interface UserFormState {
   newPwd1: string;
   newPwd2: string;
   role: string;
+  quota: Quota;
 }
 
 export class UserForm extends React.Component<
@@ -42,6 +43,11 @@ export class UserForm extends React.Component<
       newPwd1: "",
       newPwd2: "",
       role: p.role,
+      quota: {
+        spaceLimit: p.quota.spaceLimit,
+        uploadSpeedLimit: p.quota.uploadSpeedLimit,
+        downloadSpeedLimit: p.quota.downloadSpeedLimit,
+      },
     };
   }
 
@@ -53,6 +59,33 @@ export class UserForm extends React.Component<
   };
   changeRole = (ev: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ role: ev.target.value });
+  };
+  changeSpaceLimit = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({
+      quota: {
+        spaceLimit: parseInt(ev.target.value, 10),
+        uploadSpeedLimit: this.state.quota.uploadSpeedLimit,
+        downloadSpeedLimit: this.state.quota.downloadSpeedLimit,
+      },
+    });
+  };
+  changeUploadSpeedLimit = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({
+      quota: {
+        spaceLimit: this.state.quota.spaceLimit,
+        uploadSpeedLimit: parseInt(ev.target.value, 10),
+        downloadSpeedLimit: this.state.quota.downloadSpeedLimit,
+      },
+    });
+  };
+  changeDownloadSpeedLimit = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({
+      quota: {
+        spaceLimit: this.state.quota.spaceLimit,
+        uploadSpeedLimit: this.state.quota.uploadSpeedLimit,
+        downloadSpeedLimit: parseInt(ev.target.value, 10),
+      },
+    });
   };
 
   setPwd = () => {
@@ -75,6 +108,8 @@ export class UserForm extends React.Component<
       }
     );
   };
+
+  setUser = () => {};
 
   delUser = () => {
     PanesUpdater.delUser(this.state.id)
@@ -112,6 +147,50 @@ export class UserForm extends React.Component<
                 {this.props.quota.uploadSpeedLimit} / DownloadSpeedLimit:{" "}
                 {this.props.quota.downloadSpeedLimit}
               </div>
+              <div className="margin-t-m">
+                <div className="flex-list-item-l">
+                  <input
+                    name={`${this.props.id}-role`}
+                    type="text"
+                    onChange={this.changeRole}
+                    value={this.state.role}
+                    className="black0-font margin-r-m"
+                    placeholder={this.state.role}
+                  />
+                  <input
+                    name={`${this.props.id}-spaceLimit`}
+                    type="text"
+                    onChange={this.changeSpaceLimit}
+                    value={this.state.quota.spaceLimit}
+                    className="black0-font margin-r-m"
+                    placeholder={`${this.state.quota.spaceLimit}`}
+                  />
+                  <input
+                    name={`${this.props.id}-uploadSpeedLimit`}
+                    type="text"
+                    onChange={this.changeUploadSpeedLimit}
+                    value={this.state.quota.uploadSpeedLimit}
+                    className="black0-font margin-r-m"
+                    placeholder={`${this.state.quota.uploadSpeedLimit}`}
+                  />
+                  <input
+                    name={`${this.props.id}-downloadSpeedLimit`}
+                    type="text"
+                    onChange={this.changeDownloadSpeedLimit}
+                    value={this.state.quota.downloadSpeedLimit}
+                    className="black0-font margin-r-m"
+                    placeholder={`${this.state.quota.downloadSpeedLimit}`}
+                  />
+                </div>
+                <div className="flex-list-item-r">
+                  <button
+                    onClick={this.setUser}
+                    className="grey1-bg white-font margin-r-m"
+                  >
+                    Update User
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
           <div
@@ -130,24 +209,6 @@ export class UserForm extends React.Component<
                 Delete User
               </button>
             </div>
-
-            {/* no API yet */}
-            {/* <div className="margin-t-m">
-            <input
-              name={`${this.props.id}-role`}
-              type="text"
-              onChange={this.changeRole}
-              value={this.state.role}
-              className="black0-font margin-r-m"
-              placeholder={this.props.role}
-            />
-            <button
-              onClick={this.setRole}
-              className="grey1-bg white-font margin-r-m"
-            >
-              Update Role
-            </button>
-          </div> */}
           </div>
         </span>
 
