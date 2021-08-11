@@ -21,6 +21,7 @@ import (
 
 	"github.com/ihexxa/quickshare/src/cryptoutil/jwt"
 	"github.com/ihexxa/quickshare/src/depidx"
+	"github.com/ihexxa/quickshare/src/fileinfostore"
 	"github.com/ihexxa/quickshare/src/fs"
 	"github.com/ihexxa/quickshare/src/fs/local"
 	"github.com/ihexxa/quickshare/src/handlers/fileshdr"
@@ -104,6 +105,10 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	if err != nil {
 		panic(fmt.Sprintf("fail to init user store: %s", err))
 	}
+	fileInfos, err := fileinfostore.NewFileInfoStore(kv)
+	if err != nil {
+		panic(fmt.Sprintf("fail to init file info store: %s", err))
+	}
 
 	limiterCap := cfg.IntOr("Users.LimiterCapacity", 10000)
 	limiterCyc := cfg.IntOr("Users.LimiterCyc", 1000)
@@ -114,6 +119,7 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	deps.SetToken(jwtEncDec)
 	deps.SetKV(kv)
 	deps.SetUsers(users)
+	deps.SetFileInfos(fileInfos)
 	deps.SetID(ider)
 	deps.SetLog(logger)
 	deps.SetLimiter(limiter)

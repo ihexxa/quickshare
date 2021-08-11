@@ -1,4 +1,4 @@
-package userstore
+package fileinfostore
 
 import (
 	"github.com/ihexxa/quickshare/src/kvstore"
