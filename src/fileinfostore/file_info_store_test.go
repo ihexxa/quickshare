@@ -30,6 +30,10 @@ func TestUserStores(t *testing.T) {
 			if !sharingMap[sharingDir] {
 				t.Fatalf("sharing(%s) not found", sharingDir)
 			}
+			mustTrue, exist := store.GetSharing(sharingDir)
+			if !mustTrue || !exist {
+				t.Fatalf("get sharing(%t %t) should exist", mustTrue, exist)
+			}
 		}
 
 		for _, dirPath := range dirPaths {
@@ -46,6 +50,10 @@ func TestUserStores(t *testing.T) {
 		for _, dirPath := range dirPaths {
 			if sharingMap[dirPath] {
 				t.Fatalf("sharing(%s) should not exist", dirPath)
+			}
+			_, exist := store.GetSharing(dirPath)
+			if exist {
+				t.Fatalf("get sharing(%t) should not exit", exist)
 			}
 		}
 	}
