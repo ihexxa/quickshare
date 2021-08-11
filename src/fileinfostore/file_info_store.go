@@ -13,6 +13,7 @@ const (
 type IFileInfoStore interface {
 	AddSharing(dirPath string) error
 	DelSharing(dirPath string) error
+	GetSharing(dirPath string) (bool, bool)
 	ListSharings(prefix string) (map[string]bool, error)
 }
 
@@ -45,6 +46,10 @@ func (us *FileInfoStore) AddSharing(dirPath string) error {
 
 func (us *FileInfoStore) DelSharing(dirPath string) error {
 	return us.store.DelBoolIn(SharingNs, dirPath)
+}
+
+func (us *FileInfoStore) GetSharing(dirPath string) (bool, bool) {
+	return us.store.GetBoolIn(SharingNs, dirPath)
 }
 
 func (us *FileInfoStore) ListSharings(prefix string) (map[string]bool, error) {
