@@ -1,4 +1,4 @@
-package userstore
+package fileinfostore
 
 import (
 	"io/ioutil"

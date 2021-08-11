@@ -5,6 +5,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/ihexxa/quickshare/src/cryptoutil"
+	"github.com/ihexxa/quickshare/src/fileinfostore"
 	"github.com/ihexxa/quickshare/src/fs"
 	"github.com/ihexxa/quickshare/src/idgen"
 	"github.com/ihexxa/quickshare/src/iolimiter"
@@ -21,14 +22,15 @@ type IUploader interface {
 }
 
 type Deps struct {
-	fs       fs.ISimpleFS
-	token    cryptoutil.ITokenEncDec
-	kv       kvstore.IKVStore
-	users    userstore.IUserStore
-	uploader IUploader
-	id       idgen.IIDGen
-	logger   *zap.SugaredLogger
-	limiter  iolimiter.ILimiter
+	fs        fs.ISimpleFS
+	token     cryptoutil.ITokenEncDec
+	kv        kvstore.IKVStore
+	users     userstore.IUserStore
+	fileInfos fileinfostore.IFileInfoStore
+	uploader  IUploader
+	id        idgen.IIDGen
+	logger    *zap.SugaredLogger
+	limiter   iolimiter.ILimiter
 }
 
 func NewDeps(cfg gocfg.ICfg) *Deps {
@@ -81,6 +83,14 @@ func (deps *Deps) Users() userstore.IUserStore {
 
 func (deps *Deps) SetUsers(users userstore.IUserStore) {
 	deps.users = users
+}
+
+func (deps *Deps) FileInfos() fileinfostore.IFileInfoStore {
+	return deps.fileInfos
+}
+
+func (deps *Deps) SetFileInfos(fileInfos fileinfostore.IFileInfoStore) {
+	deps.fileInfos = fileInfos
 }
 
 func (deps *Deps) Limiter() iolimiter.ILimiter {
