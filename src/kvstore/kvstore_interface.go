@@ -17,6 +17,7 @@ type IKVStore interface {
 	DelBoolIn(ns, key string) error
 	ListBools() (map[string]bool, error)
 	ListBoolsIn(ns string) (map[string]bool, error)
+	ListBoolsByPrefixIn(prefix, ns string) (map[string]bool, error)
 	GetInt(key string) (int, bool)
 	SetInt(key string, val int) error
 	DelInt(key string) error

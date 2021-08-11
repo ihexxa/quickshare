@@ -1,6 +1,7 @@
 package boltdbpvd
 
 import (
+	"bytes"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -152,6 +153,25 @@ func (bp *BoltPvd) ListBoolsIn(ns string) (map[string]bool, error) {
 		return nil
 	})
 	return list, err
+}
+
+func (bp *BoltPvd) ListBoolsByPrefixIn(prefix, ns string) (map[string]bool, error) {
+	results := map[string]bool{}
+
+	err := bp.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(ns)).Cursor()
+		if b == nil {
+			return ErrBucketNotFound
+		}
+
+		prefixBytes := []byte(prefix)
+		for k, _ := b.Seek(prefixBytes); k != nil && bytes.HasPrefix(k, prefixBytes); k, _ = b.Next() {
+			results[string(k)] = true
+		}
+		return nil
+	})
+
+	return results, err
 }
 
 func (bp *BoltPvd) GetInt(key string) (int, bool) {
