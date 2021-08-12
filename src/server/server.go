@@ -222,6 +222,10 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 	filesAPI.GET("/uploadings", fileHdrs.ListUploadings)
 	filesAPI.DELETE("/uploadings", fileHdrs.DelUploading)
 
+	filesAPI.POST("/sharings", fileHdrs.AddSharing)
+	filesAPI.DELETE("/sharings", fileHdrs.DelSharing)
+	filesAPI.GET("/sharings", fileHdrs.ListSharings)
+
 	filesAPI.GET("/metadata", fileHdrs.Metadata)
 
 	settingsAPI := v1.Group("/settings")
