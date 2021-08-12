@@ -64,6 +64,9 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(userstore.AdminRole, "OPTIONS", "/v1/settings/health"):   true,
 		apiRuleCname(userstore.AdminRole, "GET", "/v1/captchas/"):             true,
 		apiRuleCname(userstore.AdminRole, "GET", "/v1/captchas/imgs"):         true,
+		apiRuleCname(userstore.AdminRole, "POST", "/v1/fs/sharings"):          true,
+		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/fs/sharings"):        true,
+		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/sharings"):           true,
 		// user rules
 		apiRuleCname(userstore.UserRole, "GET", "/"):                       true,
 		apiRuleCname(userstore.UserRole, "GET", publicPath):                true,
@@ -87,6 +90,9 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(userstore.UserRole, "OPTIONS", "/v1/settings/health"): true,
 		apiRuleCname(userstore.UserRole, "GET", "/v1/captchas/"):           true,
 		apiRuleCname(userstore.UserRole, "GET", "/v1/captchas/imgs"):       true,
+		apiRuleCname(userstore.UserRole, "POST", "/v1/fs/sharings"):        true,
+		apiRuleCname(userstore.UserRole, "DELETE", "/v1/fs/sharings"):      true,
+		apiRuleCname(userstore.UserRole, "GET", "/v1/fs/sharings"):         true,
 		// visitor rules
 		apiRuleCname(userstore.VisitorRole, "GET", "/"):                       true,
 		apiRuleCname(userstore.VisitorRole, "GET", publicPath):                true,
