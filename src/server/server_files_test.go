@@ -346,6 +346,95 @@ func TestFileHandlers(t *testing.T) {
 		}
 	})
 
+	t.Run("test sharing APIs: Upload-AddSharing-ListSharings-List-Download-DelSharing-ListSharings", func(t *testing.T) {
+		files := map[string]string{
+			"0/files/sharing/path1/f1":    "123456",
+			"0/files/sharing/path2/path2": "12345678",
+		}
+
+		for filePath, content := range files {
+			assertUploadOK(t, filePath, content, addr, token)
+			err = fs.Sync()
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+
+		// add sharings
+		sharedPaths := map[string]bool{}
+		for filePath := range files {
+			dirPath := filepath.Dir(filePath)
+			sharedPaths[dirPath] = true
+
+			res, _, errs := cl.AddSharing(dirPath)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if res.StatusCode != 200 {
+				t.Fatal(res.StatusCode)
+			}
+		}
+
+		// check listSharings
+		res, shRes, errs := cl.ListSharings()
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if res.StatusCode != 200 {
+			t.Fatal(res.StatusCode)
+		}
+		for _, dirPath := range shRes.SharingDirs {
+			if !sharedPaths[dirPath] {
+				t.Fatalf("sharing %s not found", dirPath)
+			}
+		}
+
+		for _, dirPath := range shRes.SharingDirs {
+			res, lsResp, errs := cl.List(dirPath)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if res.StatusCode != 200 {
+				t.Fatal(res.StatusCode)
+			}
+			if lsResp.Cwd != dirPath {
+				t.Fatalf("list sharing folder: incorrect cwd (%s)", lsResp.Cwd)
+			}
+			if len(lsResp.Metadatas) != 1 {
+				t.Fatalf("list sharing folder: incorrect metadata size (%d)", len(lsResp.Metadatas))
+			}
+		}
+
+		for filePath, content := range files {
+			assertDownloadOK(t, filePath, content, addr, token)
+		}
+
+		i := 0
+		for filePath := range files {
+			if i++; i%2 == 0 {
+				dirPath := filepath.Dir(filePath)
+				delete(sharedPaths, dirPath)
+
+				res, _, errs := cl.DelSharing(dirPath)
+				if len(errs) > 0 {
+					t.Fatal(errs)
+				} else if res.StatusCode != 200 {
+					t.Fatal(res.StatusCode)
+				}
+			}
+		}
+
+		// check listSharings
+		res, shRes, errs = cl.ListSharings()
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if res.StatusCode != 200 {
+			t.Fatal(res.StatusCode)
+		}
+		for _, dirPath := range shRes.SharingDirs {
+			if !sharedPaths[dirPath] {
+				t.Fatalf("sharing %s not found", dirPath)
+			}
+		}
+	})
+
 	t.Run("test concurrently uploading & downloading", func(t *testing.T) {
 		type mockFile struct {
 			FilePath string
