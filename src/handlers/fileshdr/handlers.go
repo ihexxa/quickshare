@@ -96,7 +96,7 @@ func (h *FileHandlers) canAccess(userID, role, op, path string) bool {
 
 	// the file path must start with userID: <userID>/...
 	parts := strings.Split(path, "/")
-	if len(parts) < 1 {
+	if len(parts) < 2 { // the path must be longer than <userName>/files
 		return false
 	} else if parts[0] == userID {
 		return true
