@@ -168,3 +168,33 @@ func (cl *FilesClient) DelUploading(filepath string) (*http.Response, string, []
 		Param(fileshdr.FilePathQuery, filepath).
 		End()
 }
+
+func (cl *FilesClient) AddSharing(dirpath string) (*http.Response, string, []error) {
+	return cl.r.Post(cl.url("/v1/fs/sharings")).
+		AddCookie(cl.token).
+		Send(fileshdr.SharingReq{SharingPath: dirpath}).
+		End()
+}
+
+func (cl *FilesClient) DelSharing(dirpath string) (*http.Response, string, []error) {
+	return cl.r.Delete(cl.url("/v1/fs/sharings")).
+		AddCookie(cl.token).
+		Send(fileshdr.SharingReq{SharingPath: dirpath}).
+		End()
+}
+
+func (cl *FilesClient) ListSharings() (*http.Response, *fileshdr.SharingResp, []error) {
+	resp, body, errs := cl.r.Get(cl.url("/v1/fs/sharings")).
+		AddCookie(cl.token).
+		End()
+	if len(errs) > 0 {
+		return nil, nil, errs
+	}
+
+	shResp := &fileshdr.SharingResp{}
+	err := json.Unmarshal([]byte(body), shResp)
+	if err != nil {
+		return nil, nil, append(errs, err)
+	}
+	return resp, shResp, nil
+}
