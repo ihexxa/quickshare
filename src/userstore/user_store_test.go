@@ -83,11 +83,17 @@ func TestUserStores(t *testing.T) {
 		if len(users) != 2 {
 			t.Fatalf("users size should be 2 (%d)", len(users))
 		}
-		if users[0].ID != 0 || users[0].Name != rootName || users[0].Role != AdminRole {
-			t.Fatalf("incorrect root info %v", users[0])
-		}
-		if users[1].ID != 1 || users[1].Name != name1 || users[1].Role != role1 {
-			t.Fatalf("incorrect user info %v", users[1])
+		for _, user := range users {
+			if user.ID == 0 {
+				if users[0].Name != rootName || users[0].Role != AdminRole {
+					t.Fatalf("incorrect root info %v", users[0])
+				}
+			}
+			if user.ID == 1 {
+				if users[1].Name != name1 || users[1].Role != role1 {
+					t.Fatalf("incorrect user info %v", users[1])
+				}
+			}
 		}
 
 		err = store.SetPwd(id, pwd2)
