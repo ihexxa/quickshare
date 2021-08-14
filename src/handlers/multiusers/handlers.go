@@ -115,12 +115,11 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 func (h *MultiUsersSvc) Init(adminName, adminPwd string) (string, error) {
 	var err error
 
-	userID := "0"
-	fsPath := q.FsRootPath(userID, "/")
+	fsPath := q.FsRootPath(adminName, "/")
 	if err = h.deps.FS().MkdirAll(fsPath); err != nil {
 		return "", err
 	}
-	uploadFolder := q.UploadFolder(userID)
+	uploadFolder := q.UploadFolder(adminName)
 	if err = h.deps.FS().MkdirAll(uploadFolder); err != nil {
 		return "", err
 	}
@@ -348,13 +347,12 @@ func (h *MultiUsersSvc) AddUser(c *gin.Context) {
 
 	// TODO: following operations must be atomic
 	// TODO: check if the folders already exists
-	uidStr := fmt.Sprint(uid)
-	fsRootFolder := q.FsRootPath(uidStr, "/")
+	fsRootFolder := q.FsRootPath(req.Name, "/")
 	if err = h.deps.FS().MkdirAll(fsRootFolder); err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
-	uploadFolder := q.UploadFolder(uidStr)
+	uploadFolder := q.UploadFolder(req.Name)
 	if err = h.deps.FS().MkdirAll(uploadFolder); err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
