@@ -128,16 +128,16 @@ func ErrResp(c *gin.Context, code int, err error) (int, interface{}) {
 
 }
 
-func FsRootPath(userID, relFilePath string) string {
-	return filepath.Join(userID, FsRootDir, relFilePath)
+func FsRootPath(userName, relFilePath string) string {
+	return filepath.Join(userName, FsRootDir, relFilePath)
 }
 
-func UploadPath(userID, relFilePath string) string {
-	return filepath.Join(UploadFolder(userID), fmt.Sprintf("%x", sha1.Sum([]byte(relFilePath))))
+func UploadPath(userName, relFilePath string) string {
+	return filepath.Join(UploadFolder(userName), fmt.Sprintf("%x", sha1.Sum([]byte(relFilePath))))
 }
 
-func UploadFolder(userID string) string {
-	return filepath.Join(userID, UploadDir)
+func UploadFolder(userName string) string {
+	return filepath.Join(userName, UploadDir)
 }
 
 func GetUserInfo(tokenStr string, tokenEncDec cryptoutil.ITokenEncDec) (map[string]string, error) {

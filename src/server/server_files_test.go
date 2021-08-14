@@ -162,7 +162,7 @@ func TestFileHandlers(t *testing.T) {
 			}
 
 			// check uploading file
-			uploadFilePath := q.UploadPath("0", filePath)
+			uploadFilePath := q.UploadPath(adminName, filePath)
 			info, err := fs.Stat(uploadFilePath)
 			if err != nil {
 				t.Fatal(err)

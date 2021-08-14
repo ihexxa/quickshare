@@ -121,7 +121,7 @@ func TestUsersHandlers(t *testing.T) {
 		fmt.Printf("new user id: %v\n", auResp)
 
 		// check uploading file
-		userFsRootFolder := q.FsRootPath(auResp.ID, "/")
+		userFsRootFolder := q.FsRootPath(userName, "/")
 		_, err = fs.Stat(userFsRootFolder)
 		if err != nil {
 			t.Fatal(err)
