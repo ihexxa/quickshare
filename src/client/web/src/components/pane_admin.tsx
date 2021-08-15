@@ -140,10 +140,10 @@ export class UserForm extends React.Component<
               style={{
                 flexDirection: "column",
               }}
+              className="bold item-name"
             >
-              <div className="bold item-name">
-                Name: {this.props.name} / ID: {this.props.id}
-              </div>
+              <div>ID: {this.props.id}</div>
+              <div>Name: {this.props.name}</div>
             </div>
           </div>
 
