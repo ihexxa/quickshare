@@ -164,7 +164,7 @@ export class UserForm extends React.Component<
           </div>
         </div>
 
-        <div className="hr margin-t-m margin-b-m"></div>
+        <div className="hr white0-bg margin-t-m margin-b-m"></div>
 
         <div className="flex-list-container">
           <div className="flex-list-item-l" style={{ flex: "70%" }}>
@@ -234,7 +234,7 @@ export class UserForm extends React.Component<
           </div>
         </div>
 
-        <div className="hr margin-t-m margin-b-m"></div>
+        <div className="hr white0-bg margin-t-m margin-b-m"></div>
 
         <div className="flex-list-container margin-t-m">
           <div
