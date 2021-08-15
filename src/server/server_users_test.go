@@ -194,14 +194,20 @@ func TestUsersHandlers(t *testing.T) {
 
 		if len(lsResp.Users) != 2 {
 			t.Fatal(fmt.Errorf("incorrect users size (%d)", len(lsResp.Users)))
-		} else if lsResp.Users[0].ID != 0 ||
-			lsResp.Users[0].Name != adminName ||
-			lsResp.Users[0].Role != userstore.AdminRole {
-			t.Fatal(fmt.Errorf("incorrect root info (%v)", lsResp.Users[0]))
-		} else if lsResp.Users[1].ID != newUserID ||
-			lsResp.Users[1].Name != userName ||
-			lsResp.Users[1].Role != userRole {
-			t.Fatal(fmt.Errorf("incorrect user info (%v)", lsResp.Users[1]))
+		}
+		for _, user := range lsResp.Users {
+			if user.ID == 0 {
+				if user.Name != adminName ||
+					user.Role != userstore.AdminRole {
+					t.Fatal(fmt.Errorf("incorrect root info (%v)", user))
+				}
+			}
+			if user.ID == newUserID {
+				if user.Name != userName ||
+					user.Role != userRole {
+					t.Fatal(fmt.Errorf("incorrect user info (%v)", user))
+				}
+			}
 		}
 
 		resp, _, errs = usersCl.DelUser(auResp.ID, token)
