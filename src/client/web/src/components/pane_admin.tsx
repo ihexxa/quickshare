@@ -128,71 +128,25 @@ export class UserForm extends React.Component<
 
   render() {
     return (
-      <span>
-        <span className="flex-list-container">
+      <div
+        style={{
+          border: "dashed 2px #ccc",
+          padding: "1rem",
+        }}
+      >
+        <div className="flex-list-container">
           <div className="flex-list-item-l">
-            <span className="vbar green0-bg"></span>
             <div
-              className="margin-l-m"
               style={{
                 flexDirection: "column",
               }}
             >
               <div className="bold item-name">
-                Name: {this.props.name} / ID: {this.props.id} / Role:{" "}
-                {this.props.role}
-              </div>
-              <div className="grey1-font item-name">
-                SpaceLimit: {this.props.quota.spaceLimit} / UploadSpeedLimit:{" "}
-                {this.props.quota.uploadSpeedLimit} / DownloadSpeedLimit:{" "}
-                {this.props.quota.downloadSpeedLimit}
-              </div>
-              <div className="margin-t-m">
-                <div className="flex-list-item-l">
-                  <input
-                    name={`${this.props.id}-role`}
-                    type="text"
-                    onChange={this.changeRole}
-                    value={this.state.role}
-                    className="black0-font margin-r-m"
-                    placeholder={this.state.role}
-                  />
-                  <input
-                    name={`${this.props.id}-spaceLimit`}
-                    type="text"
-                    onChange={this.changeSpaceLimit}
-                    value={this.state.quota.spaceLimit}
-                    className="black0-font margin-r-m"
-                    placeholder={`${this.state.quota.spaceLimit}`}
-                  />
-                  <input
-                    name={`${this.props.id}-uploadSpeedLimit`}
-                    type="text"
-                    onChange={this.changeUploadSpeedLimit}
-                    value={this.state.quota.uploadSpeedLimit}
-                    className="black0-font margin-r-m"
-                    placeholder={`${this.state.quota.uploadSpeedLimit}`}
-                  />
-                  <input
-                    name={`${this.props.id}-downloadSpeedLimit`}
-                    type="text"
-                    onChange={this.changeDownloadSpeedLimit}
-                    value={this.state.quota.downloadSpeedLimit}
-                    className="black0-font margin-r-m"
-                    placeholder={`${this.state.quota.downloadSpeedLimit}`}
-                  />
-                </div>
-                <div className="flex-list-item-r">
-                  <button
-                    onClick={this.setUser}
-                    className="grey1-bg white-font margin-r-m"
-                  >
-                    Update User
-                  </button>
-                </div>
+                Name: {this.props.name} / ID: {this.props.id}
               </div>
             </div>
           </div>
+
           <div
             className="flex-list-item-r"
             style={{
@@ -201,42 +155,122 @@ export class UserForm extends React.Component<
               alignItems: "flex-end",
             }}
           >
-            <div className="margin-t-m">
-              <button
-                onClick={this.delUser}
-                className="grey1-bg white-font margin-r-m"
-              >
-                Delete User
-              </button>
+            <button
+              onClick={this.delUser}
+              className="grey1-bg white-font margin-r-m"
+            >
+              Delete User
+            </button>
+          </div>
+        </div>
+
+        <div className="hr margin-t-m margin-b-m"></div>
+
+        <div className="flex-list-container">
+          <div className="flex-list-item-l" style={{ flex: "70%" }}>
+            <div>
+              <div>
+                <div className="margin-r-m font-size-s grey1-font">Role</div>
+                <input
+                  name={`${this.props.id}-role`}
+                  type="text"
+                  onChange={this.changeRole}
+                  value={this.state.role}
+                  className="black0-font margin-r-m"
+                  placeholder={this.state.role}
+                />
+              </div>
+
+              <div className="margin-t-m">
+                <div className="margin-r-m font-size-s grey1-font">
+                  Space Limit
+                </div>
+                <input
+                  name={`${this.props.id}-spaceLimit`}
+                  type="text"
+                  onChange={this.changeSpaceLimit}
+                  value={this.state.quota.spaceLimit}
+                  className="black0-font margin-r-m"
+                  placeholder={`${this.state.quota.spaceLimit}`}
+                />
+              </div>
+
+              <div className="margin-t-m">
+                <div className="margin-r-m font-size-s grey1-font">
+                  Upload Speed Limit
+                </div>
+                <input
+                  name={`${this.props.id}-uploadSpeedLimit`}
+                  type="text"
+                  onChange={this.changeUploadSpeedLimit}
+                  value={this.state.quota.uploadSpeedLimit}
+                  className="black0-font margin-r-m"
+                  placeholder={`${this.state.quota.uploadSpeedLimit}`}
+                />
+              </div>
+
+              <div className="margin-t-m">
+                <div className="margin-r-m font-size-s grey1-font">
+                  Download Speed Limit
+                </div>
+                <input
+                  name={`${this.props.id}-downloadSpeedLimit`}
+                  type="text"
+                  onChange={this.changeDownloadSpeedLimit}
+                  value={this.state.quota.downloadSpeedLimit}
+                  className="black0-font margin-r-m"
+                  placeholder={`${this.state.quota.downloadSpeedLimit}`}
+                />
+              </div>
             </div>
           </div>
-        </span>
-
-        <div className="margin-t-m">
-          <input
-            name={`${this.props.id}-pwd1`}
-            type="password"
-            onChange={this.changePwd1}
-            value={this.state.newPwd1}
-            className="black0-font margin-r-m"
-            placeholder="new password"
-          />
-          <input
-            name={`${this.props.id}-pwd2`}
-            type="password"
-            onChange={this.changePwd2}
-            value={this.state.newPwd2}
-            className="black0-font margin-r-m"
-            placeholder="repeat password"
-          />
-          <button
-            onClick={this.setPwd}
-            className="grey1-bg white-font margin-r-m"
-          >
-            Update
-          </button>
+          <div className="flex-list-item-r">
+            <button
+              onClick={this.setUser}
+              className="grey1-bg white-font margin-r-m"
+            >
+              Update User
+            </button>
+          </div>
         </div>
-      </span>
+
+        <div className="hr margin-t-m margin-b-m"></div>
+
+        <div className="flex-list-container margin-t-m">
+          <div
+            className="flex-list-item-l"
+            style={{ flexDirection: "column", alignItems: "flex-start" }}
+          >
+            <div className="font-size-s grey1-font">Password</div>
+
+            <input
+              name={`${this.props.id}-pwd1`}
+              type="password"
+              onChange={this.changePwd1}
+              value={this.state.newPwd1}
+              className="black0-font margin-b-m"
+              placeholder="new password"
+            />
+            <input
+              name={`${this.props.id}-pwd2`}
+              type="password"
+              onChange={this.changePwd2}
+              value={this.state.newPwd2}
+              className="black0-font margin-b-m"
+              placeholder="repeat password"
+            />
+          </div>
+
+          <div className="flex-list-item-r">
+            <button
+              onClick={this.setPwd}
+              className="grey1-bg white-font margin-r-m"
+            >
+              Update
+            </button>
+          </div>
+        </div>
+      </div>
     );
   }
 }
@@ -380,9 +414,16 @@ export class AdminPane extends React.Component<Props, State, {}> {
 
     return (
       <div className="font-size-m">
-        <div className="container">
-          <div className="flex-list-container padding-l">
-            {/* <span className="inline-block margin-t-m margin-b-m"> */}
+        <div className="container padding-l">
+          <div className="flex-list-container bold">
+            <span className="flex-list-item-l">
+              <span className="dot black-bg"></span>
+              <span>Add New User</span>
+            </span>
+            <span className="flex-list-item-r padding-r-m"></span>
+          </div>
+
+          <div className="flex-list-container margin-t-m">
             <div
               className="flex-list-item-l"
               style={{
@@ -427,7 +468,6 @@ export class AdminPane extends React.Component<Props, State, {}> {
                 Create User
               </button>
             </div>
-            {/* </span> */}
           </div>
         </div>
 
@@ -444,8 +484,16 @@ export class AdminPane extends React.Component<Props, State, {}> {
           </div>
         </div>
 
-        <div className="container">
-          <div className="flex-list-container padding-l">
+        <div className="container padding-l">
+          <div className="flex-list-container bold">
+            <span className="flex-list-item-l">
+              <span className="dot black-bg"></span>
+              <span>Add New Role</span>
+            </span>
+            <span className="flex-list-item-r padding-r-m"></span>
+          </div>
+
+          <div className="flex-list-container">
             <div className="flex-list-item-l">
               <span className="inline-block margin-t-m margin-b-m">
                 <input

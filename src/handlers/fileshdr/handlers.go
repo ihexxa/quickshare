@@ -572,8 +572,8 @@ func (h *FileHandlers) List(c *gin.Context) {
 }
 
 func (h *FileHandlers) ListHome(c *gin.Context) {
-	userID := c.MustGet(q.UserIDParam).(string)
-	fsPath := q.FsRootPath(userID, "/")
+	userName := c.MustGet(q.UserParam).(string)
+	fsPath := q.FsRootPath(userName, "/")
 	infos, err := h.deps.FS().ListDir(fsPath)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
