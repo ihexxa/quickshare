@@ -71,8 +71,8 @@ func TestFileHandlers(t *testing.T) {
 	// or the count of files is incorrect
 	t.Run("ListHome", func(t *testing.T) {
 		files := map[string]string{
-			"0/files/home_file1": "12345678",
-			"0/files/home_file2": "12345678",
+			"qs/files/home_file1": "12345678",
+			"qs/files/home_file2": "12345678",
 		}
 
 		for filePath, content := range files {
@@ -89,7 +89,7 @@ func TestFileHandlers(t *testing.T) {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
 			t.Fatal(resp.StatusCode)
-		} else if lhResp.Cwd != "0/files" {
+		} else if lhResp.Cwd != "qs/files" {
 			t.Fatalf("incorrect ListHome cwd %s", lhResp.Cwd)
 		} else if len(lhResp.Metadatas) != len(files) {
 			for _, metadata := range lhResp.Metadatas {
@@ -103,12 +103,12 @@ func TestFileHandlers(t *testing.T) {
 			infos[metadata.Name] = metadata
 		}
 
-		if infos["home_file1"].Size != int64(len(files["0/files/home_file1"])) {
+		if infos["home_file1"].Size != int64(len(files["qs/files/home_file1"])) {
 			t.Fatalf("incorrect file size %d", infos["home_file1"].Size)
 		} else if infos["home_file1"].IsDir {
 			t.Fatal("incorrect item type")
 		}
-		if infos["home_file2"].Size != int64(len(files["0/files/home_file2"])) {
+		if infos["home_file2"].Size != int64(len(files["qs/files/home_file2"])) {
 			t.Fatalf("incorrect file size %d", infos["home_file2"].Size)
 		} else if infos["home_file2"].IsDir {
 			t.Fatal("incorrect item type")
@@ -117,12 +117,12 @@ func TestFileHandlers(t *testing.T) {
 
 	t.Run("test uploading files with duplicated names", func(t *testing.T) {
 		files := map[string]string{
-			"0/files/dupdir/dup_file1":     "12345678",
-			"0/files/dupdir/dup_file2.ext": "12345678",
+			"qs/files/dupdir/dup_file1":     "12345678",
+			"qs/files/dupdir/dup_file2.ext": "12345678",
 		}
 		renames := map[string]string{
-			"0/files/dupdir/dup_file1":     "0/files/dupdir/dup_file1_1",
-			"0/files/dupdir/dup_file2.ext": "0/files/dupdir/dup_file2_1.ext",
+			"qs/files/dupdir/dup_file1":     "qs/files/dupdir/dup_file1_1",
+			"qs/files/dupdir/dup_file2.ext": "qs/files/dupdir/dup_file2_1.ext",
 		}
 
 		for filePath, content := range files {
@@ -149,8 +149,8 @@ func TestFileHandlers(t *testing.T) {
 
 	t.Run("test files APIs: Create-UploadChunk-UploadStatus-Metadata-Delete", func(t *testing.T) {
 		for filePath, content := range map[string]string{
-			"0/files/path1/f1.md":       "1111 1111 1111 1111",
-			"0/files/path1/path2/f2.md": "1010 1010 1111 0000 0010",
+			"qs/files/path1/f1.md":       "1111 1111 1111 1111",
+			"qs/files/path1/path2/f2.md": "1010 1010 1111 0000 0010",
 		} {
 			fileSize := int64(len([]byte(content)))
 			// create a file
@@ -239,11 +239,11 @@ func TestFileHandlers(t *testing.T) {
 
 	t.Run("test dirs APIs: Mkdir-Create-UploadChunk-List", func(t *testing.T) {
 		for dirPath, files := range map[string]map[string]string{
-			"0/files/dir/path1": map[string]string{
+			"qs/files/dir/path1": map[string]string{
 				"f1.md": "11111",
 				"f2.md": "22222222222",
 			},
-			"0/files/dir/path2/path2": map[string]string{
+			"qs/files/dir/path2/path2": map[string]string{
 				"f3.md": "3333333",
 			},
 		} {
@@ -280,8 +280,8 @@ func TestFileHandlers(t *testing.T) {
 	})
 
 	t.Run("test operation APIs: Mkdir-Create-UploadChunk-Move-List", func(t *testing.T) {
-		srcDir := "0/files/move/src"
-		dstDir := "0/files/move/dst"
+		srcDir := "qs/files/move/src"
+		dstDir := "qs/files/move/dst"
 
 		for _, dirPath := range []string{srcDir, dstDir} {
 			res, _, errs := cl.Mkdir(dirPath)
@@ -332,8 +332,8 @@ func TestFileHandlers(t *testing.T) {
 
 	t.Run("test download APIs: Download(normal, ranges)", func(t *testing.T) {
 		for filePath, content := range map[string]string{
-			"0/files/download/path1/f1":    "123456",
-			"0/files/download/path1/path2": "12345678",
+			"qs/files/download/path1/f1":    "123456",
+			"qs/files/download/path1/path2": "12345678",
 		} {
 			assertUploadOK(t, filePath, content, addr, token)
 
@@ -348,8 +348,8 @@ func TestFileHandlers(t *testing.T) {
 
 	t.Run("test sharing APIs: Upload-AddSharing-ListSharings-List-Download-DelSharing-ListSharings", func(t *testing.T) {
 		files := map[string]string{
-			"0/files/sharing/path1/f1":    "123456",
-			"0/files/sharing/path2/path2": "12345678",
+			"qs/files/sharing/path1/f1":    "123456",
+			"qs/files/sharing/path2/path2": "12345678",
 		}
 
 		for filePath, content := range files {
@@ -494,8 +494,8 @@ func TestFileHandlers(t *testing.T) {
 		}
 
 		files := map[string]string{
-			"0/files/uploadings/path1/f1":    "123456",
-			"0/files/uploadings/path1/path2": "12345678",
+			"qs/files/uploadings/path1/f1":    "123456",
+			"qs/files/uploadings/path1/path2": "12345678",
 		}
 
 		for filePath, content := range files {
@@ -553,7 +553,7 @@ func TestFileHandlers(t *testing.T) {
 		// cl := client.NewFilesClient(addr)
 
 		files := map[string]string{
-			"0/files/uploadings/path1/f1": "12345678",
+			"qs/files/uploadings/path1/f1": "12345678",
 		}
 
 		for filePath, content := range files {
@@ -608,9 +608,9 @@ func TestFileHandlers(t *testing.T) {
 		// cl := client.NewFilesClient(addr)
 
 		files := map[string]string{
-			"0/files/uploadings/random/path1/f1": "12345678",
-			"0/files/uploadings/random/path1/f2": "87654321",
-			"0/files/uploadings/random/path1/f3": "17654321",
+			"qs/files/uploadings/random/path1/f1": "12345678",
+			"qs/files/uploadings/random/path1/f2": "87654321",
+			"qs/files/uploadings/random/path1/f3": "17654321",
 		}
 
 		for filePath, content := range files {

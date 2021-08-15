@@ -323,7 +323,6 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 		return
 	}
 
-	userName := c.MustGet(q.UserParam).(string)
 	tmpFilePath := q.UploadPath(userName, req.Path)
 	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {

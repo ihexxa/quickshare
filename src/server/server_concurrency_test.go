@@ -83,7 +83,7 @@ func TestConcurrency(t *testing.T) {
 	}
 
 	filesSize := 10
-	mockClient := func(id, name, pwd string, wg *sync.WaitGroup) {
+	mockClient := func(name, pwd string, wg *sync.WaitGroup) {
 		usersCl := client.NewSingleUserClient(addr)
 		resp, _, errs := usersCl.Login(name, pwd)
 		if len(errs) > 0 {
@@ -96,7 +96,7 @@ func TestConcurrency(t *testing.T) {
 		files := map[string]string{}
 		content := "12345678"
 		for i := range make([]int, filesSize, filesSize) {
-			files[fmt.Sprintf("%s/files/home_file_%d", id, i)] = content
+			files[fmt.Sprintf("%s/files/home_file_%d", name, i)] = content
 		}
 
 		for filePath, content := range files {
@@ -112,7 +112,7 @@ func TestConcurrency(t *testing.T) {
 			t.Fatal("failed to add user")
 		}
 
-		if lsResp.Cwd != fmt.Sprintf("%s/files", id) {
+		if lsResp.Cwd != fmt.Sprintf("%s/files", name) {
 			t.Fatalf("incorrct cwd (%s)", lsResp.Cwd)
 		} else if len(lsResp.Metadatas) != len(files) {
 			t.Fatalf("incorrct metadata size (%d)", len(lsResp.Metadatas))
@@ -123,9 +123,9 @@ func TestConcurrency(t *testing.T) {
 
 	var wg sync.WaitGroup
 	t.Run("ListHome", func(t *testing.T) {
-		for userName, userID := range users {
+		for userName := range users {
 			wg.Add(1)
-			go mockClient(userID, userName, userPwd, &wg)
+			go mockClient(userName, userPwd, &wg)
 		}
 
 		wg.Wait()

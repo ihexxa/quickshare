@@ -126,7 +126,7 @@ func TestUsersHandlers(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		userUploadFolder := q.UploadFolder(auResp.ID)
+		userUploadFolder := q.UploadFolder(userName)
 		_, err = fs.Stat(userUploadFolder)
 		if err != nil {
 			t.Fatal(err)
