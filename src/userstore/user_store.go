@@ -26,17 +26,18 @@ const (
 )
 
 type Quota struct {
-	SpaceLimit         int `json:"spaceLimit"`
-	UploadSpeedLimit   int `json:"uploadSpeedLimit"`
-	DownloadSpeedLimit int `json:"downloadSpeedLimit"`
+	SpaceLimit         int64 `json:"spaceLimit,space"`
+	UploadSpeedLimit   int   `json:"uploadSpeedLimit"`
+	DownloadSpeedLimit int   `json:"downloadSpeedLimit"`
 }
 
 type User struct {
-	ID    uint64 `json:"id,string"`
-	Name  string `json:"name"`
-	Pwd   string `json:"pwd"`
-	Role  string `json:"role"`
-	Quota *Quota `json:"quota"`
+	ID        uint64 `json:"id,string"`
+	Name      string `json:"name"`
+	Pwd       string `json:"pwd"`
+	Role      string `json:"role"`
+	UsedSpace int64  `json:"usedSpace,string"`
+	Quota     *Quota `json:"quota"`
 }
 
 type IUserStore interface {
@@ -47,6 +48,7 @@ type IUserStore interface {
 	GetUser(id uint64) (*User, error)
 	GetUserByName(name string) (*User, error)
 	SetInfo(id uint64, user *User) error
+	SetUsed(id uint64, incr bool, capacity int64) error
 	SetPwd(id uint64, pwd string) error
 	ListUsers() ([]*User, error)
 	AddRole(role string) error
@@ -215,31 +217,6 @@ func (us *KVUserStore) GetUserByName(name string) (*User, error) {
 
 }
 
-// func (us *KVUserStore) SetName(id uint64, name string) error {
-// 	us.mtx.Lock()
-// 	defer us.mtx.Unlock()
-
-// 	_, ok := us.store.GetStringIn(IDsNs, name)
-// 	if ok {
-// 		return fmt.Errorf("user name (%s) exists", name)
-// 	}
-
-// 	userID := fmt.Sprint(id)
-// 	_, ok = us.store.GetStringIn(UsersNs, userID)
-// 	if !ok {
-// 		return fmt.Errorf("Name (%d) does not exist", id)
-// 	}
-// 	if name == "" {
-// 		return fmt.Errorf("Name can not be empty")
-// 	}
-
-// 	err := us.store.SetStringIn(IDsNs, name, userID)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return us.store.SetStringIn(UsersNs, userID, name)
-// }
-
 func (us *KVUserStore) SetPwd(id uint64, pwd string) error {
 	us.mtx.Lock()
 	defer us.mtx.Unlock()
@@ -258,6 +235,44 @@ func (us *KVUserStore) SetPwd(id uint64, pwd string) error {
 	}
 
 	gotUser.Pwd = pwd
+	infoBytes, err := json.Marshal(gotUser)
+	if err != nil {
+		return err
+	}
+	return us.store.SetStringIn(UsersNs, userID, string(infoBytes))
+}
+
+func (us *KVUserStore) SetUsed(id uint64, incr bool, capacity int64) error {
+	us.mtx.Lock()
+	defer us.mtx.Unlock()
+
+	userID := fmt.Sprint(id)
+	infoStr, ok := us.store.GetStringIn(UsersNs, userID)
+	if !ok {
+		return fmt.Errorf("user (%d) does not exist", id)
+	}
+	gotUser := &User{}
+	err := json.Unmarshal([]byte(infoStr), gotUser)
+	if err != nil {
+		return err
+	} else if gotUser.ID != id {
+		return fmt.Errorf("user id key(%d) info(%d) does match", id, gotUser.ID)
+	}
+
+	if incr && gotUser.UsedSpace+capacity > int64(gotUser.Quota.SpaceLimit) {
+		return fmt.Errorf(
+			"reached space limit (%d): file size(%d), used(%d)",
+			gotUser.Quota.SpaceLimit,
+			capacity,
+			gotUser.UsedSpace,
+		)
+	}
+
+	if incr {
+		gotUser.UsedSpace = gotUser.UsedSpace + capacity
+	} else {
+		gotUser.UsedSpace = gotUser.UsedSpace - capacity
+	}
 	infoBytes, err := json.Marshal(gotUser)
 	if err != nil {
 		return err
@@ -289,6 +304,9 @@ func (us *KVUserStore) SetInfo(id uint64, user *User) error {
 	if user.Quota != nil {
 		gotUser.Quota = user.Quota
 	}
+	if user.UsedSpace > 0 {
+		gotUser.UsedSpace = user.UsedSpace
+	}
 
 	infoBytes, err := json.Marshal(gotUser)
 	if err != nil {
@@ -296,19 +314,6 @@ func (us *KVUserStore) SetInfo(id uint64, user *User) error {
 	}
 	return us.store.SetStringIn(UsersNs, userID, string(infoBytes))
 }
-
-// func (us *KVUserStore) SetRole(id uint64, role string) error {
-// 	us.mtx.Lock()
-// 	defer us.mtx.Unlock()
-
-// 	userID := fmt.Sprint(id)
-// 	_, ok := us.store.GetStringIn(RolesNs, userID)
-// 	if !ok {
-// 		return fmt.Errorf("Role (%d) does not exist", id)
-// 	}
-
-// 	return us.store.SetStringIn(RolesNs, userID, role)
-// }
 
 func (us *KVUserStore) ListUsers() ([]*User, error) {
 	us.mtx.RLock()

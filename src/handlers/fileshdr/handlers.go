@@ -129,17 +129,29 @@ func (h *FileHandlers) Create(c *gin.Context) {
 		return
 	}
 	role := c.MustGet(q.RoleParam).(string)
-	userID := c.MustGet(q.UserIDParam).(string)
 	userName := c.MustGet(q.UserParam).(string)
 	if !h.canAccess(userName, role, "create", req.Path) {
 		c.JSON(q.ErrResp(c, 403, q.ErrAccessDenied))
 		return
 	}
 
+	userID := c.MustGet(q.UserIDParam).(string)
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
 	tmpFilePath := q.UploadPath(userName, req.Path)
 	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {
-		err := h.deps.FS().Create(tmpFilePath)
+		err = h.deps.Users().SetUsed(userIDInt, true, req.FileSize)
+		if err != nil {
+			c.JSON(q.ErrResp(c, 500, err))
+			return
+		}
+
+		err = h.deps.FS().Create(tmpFilePath)
 		if err != nil {
 			if os.IsExist(err) {
 				c.JSON(q.ErrResp(c, 304, err))
@@ -177,13 +189,35 @@ func (h *FileHandlers) Delete(c *gin.Context) {
 		return
 	}
 
-	err := h.deps.FS().Remove(filePath)
+	userID := c.MustGet(q.UserIDParam).(string)
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
 
-	c.JSON(q.Resp(200))
+	locker := h.NewAutoLocker(c, lockName(filePath))
+	locker.Exec(func() {
+		info, err := h.deps.FS().Stat(filePath)
+		if err != nil {
+			c.JSON(q.ErrResp(c, 500, err))
+			return
+		}
+
+		err = h.deps.Users().SetUsed(userIDInt, false, info.Size())
+		if err != nil {
+			c.JSON(q.ErrResp(c, 500, err))
+			return
+		}
+
+		err = h.deps.FS().Remove(filePath)
+		if err != nil {
+			c.JSON(q.ErrResp(c, 500, err))
+			return
+		}
+
+		c.JSON(q.Resp(200))
+	})
 }
 
 type MetadataResp struct {
@@ -648,13 +682,30 @@ func (h *FileHandlers) DelUploading(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 400, errors.New("invalid file path")))
 		return
 	}
-	userID := c.MustGet(q.UserIDParam).(string)
 
-	var err error
+	userID := c.MustGet(q.UserIDParam).(string)
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
 	userName := c.MustGet(q.UserParam).(string)
 	tmpFilePath := q.UploadPath(userName, filePath)
 	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {
+		_, size, _, err := h.uploadMgr.GetInfo(userID, tmpFilePath)
+		if err != nil {
+			c.JSON(q.ErrResp(c, 500, err))
+			return
+		}
+
+		err = h.deps.Users().SetUsed(userIDInt, false, size)
+		if err != nil {
+			c.JSON(q.ErrResp(c, 500, err))
+			return
+		}
+
 		err = h.deps.FS().Remove(tmpFilePath)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
@@ -666,6 +717,7 @@ func (h *FileHandlers) DelUploading(c *gin.Context) {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
 		}
+
 		c.JSON(q.Resp(200))
 	})
 }

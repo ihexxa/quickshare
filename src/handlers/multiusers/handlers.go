@@ -364,7 +364,7 @@ func (h *MultiUsersSvc) AddUser(c *gin.Context) {
 		Pwd:  string(pwdHash),
 		Role: req.Role,
 		Quota: &userstore.Quota{
-			SpaceLimit:         h.cfg.IntOr("Users.SpaceLimit", 1024),
+			SpaceLimit:         int64(h.cfg.IntOr("Users.SpaceLimit", 100*1024*1024)), // TODO: support int64
 			UploadSpeedLimit:   h.cfg.IntOr("Users.UploadSpeedLimit", 100*1024),
 			DownloadSpeedLimit: h.cfg.IntOr("Users.DownloadSpeedLimit", 100*1024),
 		},
@@ -556,9 +556,10 @@ func (h *MultiUsersSvc) isValidRole(role string) error {
 }
 
 type SelfResp struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-	Role string `json:"role"`
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	Role      string `json:"role"`
+	UsedSpace int64  `json:"usedSpace,string"`
 }
 
 func (h *MultiUsersSvc) Self(c *gin.Context) {
@@ -568,9 +569,16 @@ func (h *MultiUsersSvc) Self(c *gin.Context) {
 		return
 	}
 
+	user, err := h.deps.Users().GetUserByName(claims[q.UserParam])
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
 	c.JSON(200, &SelfResp{
-		ID:   claims[q.UserIDParam],
-		Name: claims[q.UserParam],
-		Role: claims[q.RoleParam],
+		ID:        claims[q.UserIDParam],
+		Name:      claims[q.UserParam],
+		Role:      claims[q.RoleParam],
+		UsedSpace: user.UsedSpace,
 	})
 }
