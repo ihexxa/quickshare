@@ -3,6 +3,7 @@ package userstore
 import (
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/ihexxa/quickshare/src/kvstore/boltdbpvd"
@@ -38,8 +39,8 @@ func TestUserStores(t *testing.T) {
 		id, name1 := uint64(1), "test_user1"
 		pwd1, pwd2 := "666", "888"
 		role1, role2 := UserRole, AdminRole
-		spaceLimit1, upLimit1, downLimit1 := 3, 5, 7
-		spaceLimit2, upLimit2, downLimit2 := 11, 13, 17
+		spaceLimit1, upLimit1, downLimit1 := 17, 5, 7
+		spaceLimit2, upLimit2, downLimit2 := 19, 13, 17
 
 		err = store.AddUser(&User{
 			ID:   id,
@@ -110,6 +111,22 @@ func TestUserStores(t *testing.T) {
 			},
 		})
 
+		usedIncr, usedDecr := int64(spaceLimit2), int64(7)
+		err = store.SetUsed(id, true, usedIncr)
+		if err != nil {
+			t.Fatal(err)
+		}
+		err = store.SetUsed(id, false, usedDecr)
+		if err != nil {
+			t.Fatal(err)
+		}
+		err = store.SetUsed(id, true, int64(spaceLimit2)-(usedIncr-usedDecr)+1)
+		if err == nil || !strings.Contains(err.Error(), "reached space limit") {
+			t.Fatal("should reject big file")
+		} else {
+			err = nil
+		}
+
 		user, err = store.GetUser(id)
 		if err != nil {
 			t.Fatal(err)
@@ -128,6 +145,9 @@ func TestUserStores(t *testing.T) {
 		}
 		if user.Quota.DownloadSpeedLimit != downLimit2 {
 			t.Fatalf("down limit not matched %d %d", downLimit2, user.Quota.DownloadSpeedLimit)
+		}
+		if user.UsedSpace != usedIncr-usedDecr {
+			t.Fatalf("used space not matched %d %d", user.UsedSpace, usedIncr-usedDecr)
 		}
 
 		user, err = store.GetUserByName(name1)
