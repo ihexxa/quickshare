@@ -39,8 +39,8 @@ func TestUserStores(t *testing.T) {
 		id, name1 := uint64(1), "test_user1"
 		pwd1, pwd2 := "666", "888"
 		role1, role2 := UserRole, AdminRole
-		spaceLimit1, upLimit1, downLimit1 := 17, 5, 7
-		spaceLimit2, upLimit2, downLimit2 := 19, 13, 17
+		spaceLimit1, upLimit1, downLimit1 := int64(17), 5, 7
+		spaceLimit2, upLimit2, downLimit2 := int64(19), 13, 17
 
 		err = store.AddUser(&User{
 			ID:   id,
