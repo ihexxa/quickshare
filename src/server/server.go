@@ -225,6 +225,7 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 	filesAPI.POST("/sharings", fileHdrs.AddSharing)
 	filesAPI.DELETE("/sharings", fileHdrs.DelSharing)
 	filesAPI.GET("/sharings", fileHdrs.ListSharings)
+	filesAPI.GET("/sharings/exist", fileHdrs.IsSharing)
 
 	filesAPI.GET("/metadata", fileHdrs.Metadata)
 

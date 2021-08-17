@@ -67,6 +67,7 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(userstore.AdminRole, "POST", "/v1/fs/sharings"):          true,
 		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/fs/sharings"):        true,
 		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/sharings"):           true,
+		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/sharings/exist"):     true,
 		// user rules
 		apiRuleCname(userstore.UserRole, "GET", "/"):                       true,
 		apiRuleCname(userstore.UserRole, "GET", publicPath):                true,
@@ -93,6 +94,7 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(userstore.UserRole, "POST", "/v1/fs/sharings"):        true,
 		apiRuleCname(userstore.UserRole, "DELETE", "/v1/fs/sharings"):      true,
 		apiRuleCname(userstore.UserRole, "GET", "/v1/fs/sharings"):         true,
+		apiRuleCname(userstore.UserRole, "GET", "/v1/fs/sharings/exist"):   true,
 		// visitor rules
 		apiRuleCname(userstore.VisitorRole, "GET", "/"):                       true,
 		apiRuleCname(userstore.VisitorRole, "GET", publicPath):                true,

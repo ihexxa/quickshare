@@ -785,6 +785,21 @@ func (h *FileHandlers) DelSharing(c *gin.Context) {
 	c.JSON(q.Resp(200))
 }
 
+func (h *FileHandlers) IsSharing(c *gin.Context) {
+	req := &SharingReq{}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(q.ErrResp(c, 400, err))
+		return
+	}
+
+	_, ok := h.deps.FileInfos().GetSharing(req.SharingPath)
+	if ok {
+		c.JSON(q.Resp(200))
+	} else {
+		c.JSON(q.Resp(404))
+	}
+}
+
 type SharingResp struct {
 	SharingDirs []string `json:"sharingPaths"`
 }
