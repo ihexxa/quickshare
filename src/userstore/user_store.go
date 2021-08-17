@@ -25,6 +25,14 @@ const (
 	defaultDownloadSpeedLimit = 50 * 1024 * 1024 // 50MB
 )
 
+var (
+	ErrReachedLimit = errors.New("reached space limit")
+)
+
+func IsReachedLimitErr(err error) bool {
+	return err == ErrReachedLimit
+}
+
 type Quota struct {
 	SpaceLimit         int64 `json:"spaceLimit,space"`
 	UploadSpeedLimit   int   `json:"uploadSpeedLimit"`
@@ -260,12 +268,7 @@ func (us *KVUserStore) SetUsed(id uint64, incr bool, capacity int64) error {
 	}
 
 	if incr && gotUser.UsedSpace+capacity > int64(gotUser.Quota.SpaceLimit) {
-		return fmt.Errorf(
-			"reached space limit (%d): file size(%d), used(%d)",
-			gotUser.Quota.SpaceLimit,
-			capacity,
-			gotUser.UsedSpace,
-		)
+		return ErrReachedLimit
 	}
 
 	if incr {

@@ -25,7 +25,7 @@ func TestFileHandlers(t *testing.T) {
 			"captchaEnabled": false,
 			"uploadSpeedLimit": 409600,
 			"downloadSpeedLimit": 409600,
-			"spaceLimit": 1024,
+			"spaceLimit": 1000,
 			"limiterCapacity": 1000,
 			"limiterCyc": 1000
 		},
