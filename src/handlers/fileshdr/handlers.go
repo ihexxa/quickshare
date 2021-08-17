@@ -147,7 +147,11 @@ func (h *FileHandlers) Create(c *gin.Context) {
 	locker.Exec(func() {
 		err = h.deps.Users().SetUsed(userIDInt, true, req.FileSize)
 		if err != nil {
-			c.JSON(q.ErrResp(c, 500, err))
+			if userstore.IsReachedLimitErr(err) {
+				c.JSON(q.ErrResp(c, 429, err))
+			} else {
+				c.JSON(q.ErrResp(c, 500, err))
+			}
 			return
 		}
 
@@ -206,7 +210,11 @@ func (h *FileHandlers) Delete(c *gin.Context) {
 
 		err = h.deps.Users().SetUsed(userIDInt, false, info.Size())
 		if err != nil {
-			c.JSON(q.ErrResp(c, 500, err))
+			if userstore.IsReachedLimitErr(err) {
+				c.JSON(q.ErrResp(c, 429, err))
+			} else {
+				c.JSON(q.ErrResp(c, 500, err))
+			}
 			return
 		}
 
@@ -702,7 +710,11 @@ func (h *FileHandlers) DelUploading(c *gin.Context) {
 
 		err = h.deps.Users().SetUsed(userIDInt, false, size)
 		if err != nil {
-			c.JSON(q.ErrResp(c, 500, err))
+			if userstore.IsReachedLimitErr(err) {
+				c.JSON(q.ErrResp(c, 429, err))
+			} else {
+				c.JSON(q.ErrResp(c, 500, err))
+			}
 			return
 		}
 
