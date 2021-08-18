@@ -30,7 +30,8 @@ func TestFileHandlers(t *testing.T) {
 			"limiterCyc": 1000
 		},
 		"server": {
-			"debug": true
+			"debug": true,
+			"host": "127.0.0.1"
 		},
 		"fs": {
 			"root": "testData"
