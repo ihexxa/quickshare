@@ -54,6 +54,10 @@ export interface ListUploadingsResp {
   uploadInfos: UploadInfo[];
 }
 
+export interface ListSharingsResp {
+	sharingDirs: string[];
+}
+
 export interface IUsersClient {
   login: (user: string, pwd: string, captchaId: string, captchaInput:string) => Promise<Response>;
   logout: () => Promise<Response>;
@@ -86,6 +90,10 @@ export interface IFilesClient {
   listHome: () => Promise<Response<ListResp>>;
   listUploadings: () => Promise<Response<ListUploadingsResp>>;
   deleteUploading: (filePath: string) => Promise<Response>;
+  addSharing: (dirPath: string) => Promise<Response>;
+  deleteSharing: (dirPath: string) => Promise<Response>;
+  isSharing: (dirPath: string) => Promise<Response>;
+  listSharings: () => Promise<Response<ListSharingsResp>>;
 }
 
 export interface Response<T = any> {
