@@ -86,13 +86,13 @@ func TestUserStores(t *testing.T) {
 		}
 		for _, user := range users {
 			if user.ID == 0 {
-				if users[0].Name != rootName || users[0].Role != AdminRole {
-					t.Fatalf("incorrect root info %v", users[0])
+				if user.Name != rootName || user.Role != AdminRole {
+					t.Fatalf("incorrect root info %v", user)
 				}
 			}
 			if user.ID == 1 {
-				if users[1].Name != name1 || users[1].Role != role1 {
-					t.Fatalf("incorrect user info %v", users[1])
+				if user.Name != name1 || user.Role != role1 {
+					t.Fatalf("incorrect user info %v", user)
 				}
 			}
 		}
