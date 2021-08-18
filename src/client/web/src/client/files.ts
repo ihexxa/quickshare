@@ -5,6 +5,7 @@ import {
   UploadStatusResp,
   ListResp,
   ListUploadingsResp,
+  ListSharingsResp,
 } from "./";
 
 const filePathQuery = "fp";
@@ -187,6 +188,13 @@ export class FilesClient extends BaseClient {
       params: {
         [filePathQuery]: dirPath,
       },
+    });
+  };
+
+  listSharings = (): Promise<Response<ListSharingsResp>> => {
+    return this.do({
+      method: "get",
+      url: `${this.url}/v1/fs/sharings`,
     });
   };
 }
