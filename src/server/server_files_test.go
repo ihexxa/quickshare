@@ -387,6 +387,22 @@ func TestFileHandlers(t *testing.T) {
 			}
 		}
 
+		for dirPath := range sharedPaths {
+			res, _, errs := cl.IsSharing(dirPath)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if res.StatusCode != 200 {
+				t.Fatal(res.StatusCode)
+			}
+
+			res, _, errs = cl.IsSharing(fmt.Sprintf("%s/", dirPath))
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if res.StatusCode != 404 {
+				t.Fatal(res.StatusCode)
+			}
+		}
+
 		for _, dirPath := range shRes.SharingDirs {
 			res, lsResp, errs := cl.List(dirPath)
 			if len(errs) > 0 {

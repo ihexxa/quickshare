@@ -763,21 +763,21 @@ func (h *FileHandlers) AddSharing(c *gin.Context) {
 }
 
 func (h *FileHandlers) DelSharing(c *gin.Context) {
-	req := &SharingReq{}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(q.ErrResp(c, 400, err))
+	dirPath := c.Query(FilePathQuery)
+	if dirPath == "" {
+		c.JSON(q.ErrResp(c, 400, errors.New("invalid file path")))
 		return
 	}
 
 	// TODO: move canAccess to authedFS
 	userName := c.MustGet(q.UserParam).(string)
 	role := c.MustGet(q.RoleParam).(string)
-	if !h.canAccess(userName, role, "", req.SharingPath) {
+	if !h.canAccess(userName, role, "", dirPath) {
 		c.JSON(q.ErrResp(c, 403, errors.New("forbidden")))
 		return
 	}
 
-	err := h.deps.FileInfos().DelSharing(req.SharingPath)
+	err := h.deps.FileInfos().DelSharing(dirPath)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -786,13 +786,13 @@ func (h *FileHandlers) DelSharing(c *gin.Context) {
 }
 
 func (h *FileHandlers) IsSharing(c *gin.Context) {
-	req := &SharingReq{}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(q.ErrResp(c, 400, err))
+	dirPath := c.Query(FilePathQuery)
+	if dirPath == "" {
+		c.JSON(q.ErrResp(c, 400, errors.New("invalid file path")))
 		return
 	}
 
-	_, ok := h.deps.FileInfos().GetSharing(req.SharingPath)
+	_, ok := h.deps.FileInfos().GetSharing(dirPath)
 	if ok {
 		c.JSON(q.Resp(200))
 	} else {

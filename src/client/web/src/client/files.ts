@@ -14,13 +14,12 @@ const listDirQuery = "dp";
 function translateResp(resp: Response<any>): Response<any> {
   if (resp.status === 500) {
     if (
-      (resp.data == null || resp.data === "") ||
-      (
-        resp.data.error != null &&
+      resp.data == null ||
+      resp.data === "" ||
+      (resp.data.error != null &&
         !resp.data.error.includes("fail to lock the file") &&
         !resp.data.error.includes("offset != uploaded") &&
-        !resp.data.error.includes("i/o timeout")
-      )
+        !resp.data.error.includes("i/o timeout"))
     ) {
       return FatalErrResp(resp.statusText);
     }
@@ -157,6 +156,36 @@ export class FilesClient extends BaseClient {
       url: `${this.url}/v1/fs/uploadings`,
       params: {
         [filePathQuery]: filePath,
+      },
+    });
+  };
+
+  addSharing = (dirPath: string): Promise<Response> => {
+    return this.do({
+      method: "post",
+      url: `${this.url}/v1/fs/sharings`,
+      data: {
+        SharingPath: dirPath,
+      },
+    });
+  };
+
+  deleteSharing = (dirPath: string): Promise<Response> => {
+    return this.do({
+      method: "delete",
+      url: `${this.url}/v1/fs/sharings`,
+      params: {
+        [filePathQuery]: dirPath,
+      },
+    });
+  };
+
+  isSharing = (dirPath: string): Promise<Response> => {
+    return this.do({
+      method: "get",
+      url: `${this.url}/v1/fs/sharings/exist`,
+      params: {
+        [filePathQuery]: dirPath,
       },
     });
   };
