@@ -25,21 +25,18 @@ export class Updater {
   }
 
   initUploads = () => {
-    this.props.uploadings.forEach(entry => {
+    this.props.uploadings.forEach((entry) => {
       Up().addStopped(entry.realFilePath, entry.uploaded, entry.size);
-    })
+    });
     // this.setUploadings(Up().list());
   };
 
   addUploads = (fileList: List<File>) => {
-    fileList.forEach(file => {
-      const filePath = getItemPath(
-        this.props.dirPath.join("/"),
-        file.name
-      );
+    fileList.forEach((file) => {
+      const filePath = getItemPath(this.props.dirPath.join("/"), file.name);
       // do not wait for the promise
       Up().add(file, filePath);
-    })
+    });
     this.setUploadings(Up().list());
   };
 
@@ -51,16 +48,40 @@ export class Updater {
 
   setUploadings = (infos: Map<string, UploadEntry>) => {
     this.props.uploadings = List<UploadInfo>(
-      infos.valueSeq().map(
-        (v: UploadEntry): UploadInfo => {
-          return {
-            realFilePath: v.filePath,
-            size: v.size,
-            uploaded: v.uploaded,
-          };
-        }
-      )
+      infos.valueSeq().map((v: UploadEntry): UploadInfo => {
+        return {
+          realFilePath: v.filePath,
+          size: v.size,
+          uploaded: v.uploaded,
+        };
+      })
     );
+  };
+
+  addSharing = async (): Promise<boolean> => {
+    const dirPath = this.props.dirPath.join("/");
+    const resp = await this.filesClient.addSharing(dirPath);
+    return resp.status === 200;
+  };
+
+  deleteSharing = async (dirPath: string): Promise<boolean> => {
+    const resp = await this.filesClient.addSharing(dirPath);
+    return resp.status === 200;
+  };
+
+  setSharing = async (dirPath: string): Promise<boolean> => {
+    const resp = await this.filesClient.isSharing(dirPath);
+    this.props.isSharing = resp.status === 200;
+    return resp.status === 200; // TODO: differentiate 404 and error
+  };
+
+  listSharings = async (): Promise<boolean> => {
+    const resp = await this.filesClient.listSharings();
+    this.props.sharings =
+      resp.status === 200
+        ? List<string>(resp.data.sharingDirs)
+        : this.props.sharings;
+    return resp.status === 200;
   };
 
   refreshUploadings = async (): Promise<boolean> => {
@@ -93,13 +114,11 @@ export class Updater {
       .filter((item) => {
         return selectedItems.has(item.name);
       })
-      .map(
-        async (selectedItem: MetadataResp): Promise<string> => {
-          const itemPath = getItemPath(dirParts.join("/"), selectedItem.name);
-          const resp = await this.filesClient.delete(itemPath);
-          return resp.status === 200 ? "" : selectedItem.name;
-        }
-      );
+      .map(async (selectedItem: MetadataResp): Promise<string> => {
+        const itemPath = getItemPath(dirParts.join("/"), selectedItem.name);
+        const resp = await this.filesClient.delete(itemPath);
+        return resp.status === 200 ? "" : selectedItem.name;
+      });
 
     const failedFiles = await Promise.all(delRequests);
     failedFiles.forEach((failedFile) => {
@@ -156,8 +175,13 @@ export class Updater {
   };
 
   setBrowser = (prevState: ICoreState): ICoreState => {
-    prevState.panel.browser = { ...prevState.panel, ...this.props };
-    return prevState;
+    return {
+      ...prevState,
+      panel: {
+        ...prevState.panel,
+        browser: { ...this.props }, // TODO: use spread
+      },
+    };
   };
 }
 

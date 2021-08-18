@@ -377,7 +377,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
   render() {
     const userList = this.props.users.valueSeq().map((user: User) => {
       return (
-        <div className="margin-t-m">
+        <div key={user.id} className="margin-t-m">
           <UserForm
             key={user.id}
             id={user.id}
