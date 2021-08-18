@@ -148,7 +148,6 @@ func TestConcurrency(t *testing.T) {
 		if selfResp.UsedSpace != int64((filesCount-1)*len(content)) {
 			t.Fatalf("usedSpace(%d) doesn't match (%d)", selfResp.UsedSpace, int64((filesCount-1)*len(content)))
 		}
-		fmt.Println("\n\n\n", selfResp.UsedSpace, int64((filesCount-1)*len(content)))
 
 		wg.Done()
 	}

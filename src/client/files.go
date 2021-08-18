@@ -179,7 +179,14 @@ func (cl *FilesClient) AddSharing(dirpath string) (*http.Response, string, []err
 func (cl *FilesClient) DelSharing(dirpath string) (*http.Response, string, []error) {
 	return cl.r.Delete(cl.url("/v1/fs/sharings")).
 		AddCookie(cl.token).
-		Send(fileshdr.SharingReq{SharingPath: dirpath}).
+		Param(fileshdr.FilePathQuery, dirpath).
+		End()
+}
+
+func (cl *FilesClient) IsSharing(dirpath string) (*http.Response, string, []error) {
+	return cl.r.Get(cl.url("/v1/fs/sharings/exist")).
+		AddCookie(cl.token).
+		Param(fileshdr.FilePathQuery, dirpath).
 		End()
 }
 
