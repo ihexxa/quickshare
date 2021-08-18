@@ -117,7 +117,6 @@ export class Updater {
   };
 
   static updateState = (prevState: ICoreState): ICoreState => {
-    console.log(prevState, Updater.props);
     return {
       ...prevState,
       panel: {

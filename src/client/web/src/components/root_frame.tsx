@@ -43,6 +43,8 @@ export class RootFrame extends React.Component<Props, State, {}> {
 
   render() {
     const update = this.props.update;
+    console.log("rootframe", this.props.browser.isSharing);
+
     return (
       <div className="theme-white desktop">
         <div id="bg" className="bg bg-img font-m">
@@ -88,6 +90,8 @@ export class RootFrame extends React.Component<Props, State, {}> {
               dirPath={this.props.browser.dirPath}
               items={this.props.browser.items}
               uploadings={this.props.browser.uploadings}
+              sharings={this.props.browser.sharings}
+              isSharing={this.props.browser.isSharing}
               update={update}
               uploadFiles={this.props.browser.uploadFiles}
               uploadValue={this.props.browser.uploadValue}

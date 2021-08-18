@@ -16,8 +16,6 @@ import {
 import { Up } from "../worker/upload_mgr";
 import { UploadEntry } from "../worker/interface";
 
-export const uploadCheckCycle = 1000;
-
 export interface Item {
   name: string;
   size: number;
@@ -28,8 +26,10 @@ export interface Item {
 
 export interface Props {
   dirPath: List<string>;
+  isSharing: boolean;
   items: List<MetadataResp>;
   uploadings: List<UploadInfo>;
+  sharings: List<string>;
 
   uploadFiles: List<File>;
   uploadValue: string;
@@ -192,6 +192,12 @@ export class Browser extends React.Component<Props, State, {}> {
     updater()
       .setItems(dirPath)
       .then(() => {
+        updater().listSharings();
+      })
+      .then(() => {
+        updater().setSharing(dirPath.join("/"));
+      })
+      .then(() => {
         this.update(updater().setBrowser);
       });
   };
@@ -233,6 +239,40 @@ export class Browser extends React.Component<Props, State, {}> {
       selectedSrc: this.props.dirPath.join("/"),
       selectedItems: newSelected,
     });
+  };
+
+  addSharing = () => {
+    updater()
+      .addSharing()
+      .then((ok) => {
+        if (!ok) {
+          alert("failed to enable sharing");
+        } else {
+          this.listSharings();
+        }
+      });
+  };
+
+  deleteSharing = (dirPath: string) => {
+    updater()
+      .deleteSharing(dirPath)
+      .then((ok) => {
+        if (!ok) {
+          alert("failed to disable sharing");
+        } else {
+          this.listSharings();
+        }
+      });
+  };
+
+  listSharings = () => {
+    updater()
+      .listSharings()
+      .then((ok) => {
+        if (ok) {
+          this.update(updater().setBrowser);
+        }
+      });
   };
 
   render() {
@@ -308,10 +348,29 @@ export class Browser extends React.Component<Props, State, {}> {
           <button
             type="button"
             onClick={() => this.moveHere()}
-            className="grey1-bg white-font margin-t-m margin-b-m"
+            className="grey1-bg white-font margin-t-m margin-b-m margin-r-m"
           >
             Paste
           </button>
+          {this.props.isSharing ? (
+            <button
+              type="button"
+              onClick={() => {
+                this.deleteSharing(this.props.dirPath.join("/"));
+              }}
+              className="red0-bg white-font margin-t-m margin-b-m"
+            >
+              Stop Sharing
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={this.addSharing}
+              className="green0-bg white-font margin-t-m margin-b-m"
+            >
+              Share Folder
+            </button>
+          )}
         </div>
       </div>
     );
@@ -418,6 +477,24 @@ export class Browser extends React.Component<Props, State, {}> {
       );
     });
 
+    const sharingList = this.props.sharings.map((dirPath: string) => {
+      <div key={dirPath} className="flex-list-container">
+        <span className="flex-list-item-l">{dirPath}</span>
+        <span className="flex-list-item-r">
+          <button
+            onClick={() => {
+              this.deleteSharing(dirPath);
+            }}
+            className="grey1-bg white-font"
+          >
+            Delete
+          </button>
+        </span>
+      </div>;
+    });
+
+    console.log("browser", this.props.sharings, this.props.isSharing);
+
     return (
       <div>
         <div id="op-bar" className="op-bar">
@@ -432,7 +509,7 @@ export class Browser extends React.Component<Props, State, {}> {
                 backgroundColor: "rgba(0, 0, 0, 0.7)",
                 padding: "0.8rem 1rem",
                 fontWeight: "bold",
-                borderRadius: "0.5rem"
+                borderRadius: "0.5rem",
               }}
             >
               Location:
@@ -450,6 +527,19 @@ export class Browser extends React.Component<Props, State, {}> {
                 <span className="flex-list-item-r padding-r-m"></span>
               </div>
               {uploadingList}
+            </div>
+          )}
+
+          {this.props.sharings.size === 0 ? null : (
+            <div className="container">
+              <div className="flex-list-container bold">
+                <span className="flex-list-item-l">
+                  <span className="dot black-bg"></span>
+                  <span>Uploading Files</span>
+                </span>
+                <span className="flex-list-item-r padding-r-m"></span>
+              </div>
+              {sharingList}
             </div>
           )}
 

@@ -139,6 +139,14 @@ export class AuthPane extends React.Component<Props, State, {}> {
       .then(() => {
         return BrowserUpdater().refreshUploadings();
       })
+      .then(() => {
+        return BrowserUpdater().setSharing(
+          BrowserUpdater().props.dirPath.join("/")
+        );
+      })
+      .then(() => {
+        return BrowserUpdater().listSharings();
+      })
       .then((_: boolean) => {
         this.update(BrowserUpdater().setBrowser);
       });
