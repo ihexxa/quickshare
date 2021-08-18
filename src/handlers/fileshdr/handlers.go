@@ -801,7 +801,7 @@ func (h *FileHandlers) IsSharing(c *gin.Context) {
 }
 
 type SharingResp struct {
-	SharingDirs []string `json:"sharingPaths"`
+	SharingDirs []string `json:"sharingDirs"`
 }
 
 func (h *FileHandlers) ListSharings(c *gin.Context) {
