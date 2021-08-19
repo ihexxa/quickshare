@@ -38,44 +38,38 @@ export class StateMgr extends React.Component<Props, State, {}> {
         return BrowserUpdater().refreshUploadings();
       })
       .then((_: boolean) => {
-        BrowserUpdater().initUploads();
+        return BrowserUpdater().initUploads();
       })
       .then(() => {
-        BrowserUpdater().setSharing(BrowserUpdater().props.dirPath.join("/"));
+        return BrowserUpdater().setSharing(
+          BrowserUpdater().props.dirPath.join("/")
+        );
       })
       .then(() => {
-        BrowserUpdater().listSharings();
+        return BrowserUpdater().listSharings();
       })
       .then(() => {
         this.update(BrowserUpdater().setBrowser);
-        console.log("0", this.state, BrowserUpdater().props);
       })
       .then(() => {
-        PanesUpdater.self();
-        console.log("1", this.state);
+        return PanesUpdater.self();
       })
       .then(() => {
-        PanesUpdater.listRoles();
-        console.log("2", this.state);
+        return PanesUpdater.listRoles();
       })
       .then(() => {
-        PanesUpdater.listUsers();
-        console.log("3", this.state);
+        return PanesUpdater.listUsers();
       })
       .then(() => {
         this.update(PanesUpdater.updateState);
-        console.log("final", this.state);
       });
   };
 
   update = (apply: (prevState: ICoreState) => ICoreState): void => {
     this.setState(apply(this.state));
-    console.log("core", this.state);
   };
 
   render() {
-    console.log("state_mgr", this.state.panel.browser.isSharing);
-
     return (
       <RootFrame
         authPane={this.state.panel.authPane}

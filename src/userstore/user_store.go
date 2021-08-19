@@ -20,9 +20,9 @@ const (
 	RoleListNs  = "roleList"
 	InitTimeKey = "initTime"
 
-	defaultSpaceLimit         = 1024             // 1GB
-	defaultUploadSpeedLimit   = 50 * 1024 * 1024 // 50MB
-	defaultDownloadSpeedLimit = 50 * 1024 * 1024 // 50MB
+	defaultSpaceLimit         = 1024 * 1024 * 1024 // 1GB
+	defaultUploadSpeedLimit   = 50 * 1024 * 1024   // 50MB
+	defaultDownloadSpeedLimit = 50 * 1024 * 1024   // 50MB
 )
 
 var (

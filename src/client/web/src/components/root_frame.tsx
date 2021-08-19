@@ -43,7 +43,6 @@ export class RootFrame extends React.Component<Props, State, {}> {
 
   render() {
     const update = this.props.update;
-    console.log("rootframe", this.props.browser.isSharing);
 
     return (
       <div className="theme-white desktop">
