@@ -478,22 +478,25 @@ export class Browser extends React.Component<Props, State, {}> {
     });
 
     const sharingList = this.props.sharings.map((dirPath: string) => {
-      <div key={dirPath} className="flex-list-container">
-        <span className="flex-list-item-l">{dirPath}</span>
-        <span className="flex-list-item-r">
-          <button
-            onClick={() => {
-              this.deleteSharing(dirPath);
-            }}
-            className="grey1-bg white-font"
-          >
-            Delete
-          </button>
-        </span>
-      </div>;
+      return (
+        <div key={dirPath} className="flex-list-container">
+          <span className="flex-list-item-l">
+            <span className="dot yellow3-bg"></span>
+            <span className="bold">{dirPath}</span>
+          </span>
+          <span className="flex-list-item-r padding-r-m">
+            <button
+              onClick={() => {
+                this.deleteSharing(dirPath);
+              }}
+              className="grey1-bg white-font"
+            >
+              Delete
+            </button>
+          </span>
+        </div>
+      );
     });
-
-    console.log("browser", this.props.sharings, this.props.isSharing);
 
     return (
       <div>
@@ -535,7 +538,7 @@ export class Browser extends React.Component<Props, State, {}> {
               <div className="flex-list-container bold">
                 <span className="flex-list-item-l">
                   <span className="dot black-bg"></span>
-                  <span>Uploading Files</span>
+                  <span>Sharing Folders</span>
                 </span>
                 <span className="flex-list-item-r padding-r-m"></span>
               </div>

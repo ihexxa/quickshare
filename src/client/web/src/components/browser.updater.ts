@@ -179,7 +179,16 @@ export class Updater {
       ...prevState,
       panel: {
         ...prevState.panel,
-        browser: { ...this.props }, // TODO: use spread
+        browser: {
+          dirPath: this.props.dirPath,
+          isSharing: this.props.isSharing,
+          items: this.props.items,
+          uploadings: this.props.uploadings,
+          sharings: this.props.sharings,
+          uploadFiles: this.props.uploadFiles,
+          uploadValue: this.props.uploadValue,
+          isVertical: this.props.isVertical,
+        },
       },
     };
   };
