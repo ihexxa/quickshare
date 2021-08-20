@@ -71,9 +71,9 @@ func DefaultConfig() (string, error) {
 			CaptchaWidth:       256,
 			CaptchaHeight:      60,
 			CaptchaEnabled:     true,
-			UploadSpeedLimit:   100 * 1024, // B
-			DownloadSpeedLimit: 100 * 1024, // B
-			SpaceLimit:         1024,       // GB
+			UploadSpeedLimit:   100 * 1024,        // B
+			DownloadSpeedLimit: 100 * 1024,        // B
+			SpaceLimit:         1024 * 1024 * 100, // 100MB
 			LimiterCapacity:    1000,
 			LimiterCyc:         1000, // 1s
 		},

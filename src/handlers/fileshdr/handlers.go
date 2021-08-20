@@ -109,7 +109,8 @@ func (h *FileHandlers) canAccess(userName, role, op, path string) bool {
 	}
 	// TODO: improve performance
 	for i := 1; i <= len(parts); i++ {
-		_, ok := h.deps.FileInfos().GetSharing(strings.Join(parts[0:i], "/"))
+		prefix := strings.Join(parts[0:i], "/")
+		_, ok := h.deps.FileInfos().GetSharing(prefix)
 		if ok {
 			return true
 		}
