@@ -1,4 +1,5 @@
 import * as React from "react";
+import { List } from "immutable";
 
 import { updater as BrowserUpdater } from "./browser.updater";
 import { Updater as PanesUpdater } from "./panes";
@@ -22,6 +23,8 @@ export class StateMgr extends React.Component<Props, State, {}> {
     BrowserUpdater().init(state.panel.browser);
     BrowserUpdater().setClients(new UsersClient(""), new FilesClient(""));
 
+    const params = new URLSearchParams(document.location.search.substring(1));
+
     LoginPaneUpdater.init(state.panel.authPane);
     LoginPaneUpdater.setClient(new UsersClient(""));
     LoginPaneUpdater.getCaptchaID().then((ok: boolean) => {
@@ -33,11 +36,17 @@ export class StateMgr extends React.Component<Props, State, {}> {
     });
 
     BrowserUpdater()
-      .setHomeItems()
+      .refreshUploadings()
       .then(() => {
-        return BrowserUpdater().refreshUploadings();
+        const dir = params.get("dir");
+        if (dir != null && dir !== "") {
+          const dirPath = List(dir.split("/"));
+          return BrowserUpdater().setItems(dirPath);
+        } else {
+          return BrowserUpdater().setHomeItems();
+        }
       })
-      .then((_: boolean) => {
+      .then(() => {
         return BrowserUpdater().initUploads();
       })
       .then(() => {
@@ -55,10 +64,16 @@ export class StateMgr extends React.Component<Props, State, {}> {
         return PanesUpdater.self();
       })
       .then(() => {
-        return PanesUpdater.listRoles();
+        if (PanesUpdater.props.userRole === "admin") {
+          // TODO: remove hardcode
+          return PanesUpdater.listRoles();
+        }
       })
       .then(() => {
-        return PanesUpdater.listUsers();
+        if (PanesUpdater.props.userRole === "admin") {
+          // TODO: remove hardcode
+          return PanesUpdater.listUsers();
+        }
       })
       .then(() => {
         this.update(PanesUpdater.updateState);
