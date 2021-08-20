@@ -3,6 +3,7 @@ import {
   UploadStatusResp,
   ListResp,
   ListUploadingsResp,
+  ListSharingsResp,
 } from "./";
 
 export class FilesClient {
@@ -22,6 +23,10 @@ export class FilesClient {
   private listHomeMockResp: Promise<Response<ListResp>>;
   private listUploadingsMockResp: Promise<Response<ListUploadingsResp>>;
   private deleteUploadingMockResp: Promise<Response>;
+  private addSharingMockResp: Promise<Response>;
+  private deleteSharingMockResp: Promise<Response>;
+  private listSharingsMockResp: Promise<Response<ListSharingsResp>>;
+  private isSharingMockResp: Promise<Response>;
 
   constructor(url: string) {
     this.url = url;
@@ -65,17 +70,35 @@ export class FilesClient {
 
   listUploadingsMock = (resp: Promise<Response<ListUploadingsResp>>) => {
     this.listUploadingsMockResp = resp;
-  }
+  };
 
   deleteUploadingMock = (resp: Promise<Response>) => {
     this.deleteUploadingMockResp = resp;
-  }
+  };
+
+  addSharingMock = (resp: Promise<Response>) => {
+    this.addSharingMockResp = resp;
+  };
+
+  deleteSharingMock = (resp: Promise<Response>) => {
+    this.deleteSharingMockResp = resp;
+  };
+
+  listSharingsMock = (resp: Promise<Response>) => {
+    this.listSharingsMockResp = resp;
+  };
+
+  isSharingMock = (resp: Promise<Response>) => {
+    this.isSharingMockResp = resp;
+  };
 
   create = (filePath: string, fileSize: number): Promise<Response> => {
     if (this.createMockRespID < this.createMockResps.length) {
       return this.createMockResps[this.createMockRespID++];
     }
-    throw new Error(`this.createMockRespID (${this.createMockRespID}) out of bound: ${this.createMockResps.length}`);
+    throw new Error(
+      `this.createMockRespID (${this.createMockRespID}) out of bound: ${this.createMockResps.length}`
+    );
   };
 
   delete = (filePath: string): Promise<Response> => {
@@ -102,14 +125,18 @@ export class FilesClient {
     if (this.uploadChunkMockRespID < this.uploadChunkMockResps.length) {
       return this.uploadChunkMockResps[this.uploadChunkMockRespID++];
     }
-    throw new Error(`this.uploadChunkMockRespID (${this.uploadChunkMockRespID}) out of bound: ${this.uploadChunkMockResps.length}`);
+    throw new Error(
+      `this.uploadChunkMockRespID (${this.uploadChunkMockRespID}) out of bound: ${this.uploadChunkMockResps.length}`
+    );
   };
 
   uploadStatus = (filePath: string): Promise<Response<UploadStatusResp>> => {
     if (this.uploadStatusMockRespID < this.uploadStatusMockResps.length) {
       return this.uploadStatusMockResps[this.uploadStatusMockRespID++];
     }
-    throw new Error(`this.uploadStatusMockRespID (${this.uploadStatusMockRespID}) out of bound: ${this.uploadStatusMockResps.length}`);
+    throw new Error(
+      `this.uploadStatusMockRespID (${this.uploadStatusMockRespID}) out of bound: ${this.uploadStatusMockResps.length}`
+    );
   };
 
   list = (dirPath: string): Promise<Response<ListResp>> => {
@@ -124,7 +151,23 @@ export class FilesClient {
     return this.listUploadingsMockResp;
   };
 
-  deleteUploading = (filePath:string): Promise<Response<Response>> => {
+  deleteUploading = (filePath: string): Promise<Response<Response>> => {
     return this.deleteUploadingMockResp;
+  };
+
+  addSharing = (dirPath: string): Promise<Response> => {
+    return this.addSharingMockResp;
+  };
+
+  deleteSharing = (dirPath: string): Promise<Response> => {
+    return this.deleteSharingMockResp;
+  };
+
+  listSharings = (): Promise<Response<ListSharingsResp>> => {
+    return this.listSharingsMockResp;
+  };
+
+  isSharing = (dirPath: string): Promise<Response> => {
+    return this.isSharingMockResp;
   };
 }
