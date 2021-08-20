@@ -65,14 +65,18 @@ export class Updater {
   };
 
   deleteSharing = async (dirPath: string): Promise<boolean> => {
-    const resp = await this.filesClient.addSharing(dirPath);
+    const resp = await this.filesClient.deleteSharing(dirPath);
     return resp.status === 200;
   };
 
-  setSharing = async (dirPath: string): Promise<boolean> => {
+  isSharing = async (dirPath: string): Promise<boolean> => {
     const resp = await this.filesClient.isSharing(dirPath);
     this.props.isSharing = resp.status === 200;
     return resp.status === 200; // TODO: differentiate 404 and error
+  };
+
+  setSharing = (shared: boolean) => {
+    this.props.isSharing = shared;
   };
 
   listSharings = async (): Promise<boolean> => {

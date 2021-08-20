@@ -41,7 +41,7 @@ export class StateMgr extends React.Component<Props, State, {}> {
         return BrowserUpdater().initUploads();
       })
       .then(() => {
-        return BrowserUpdater().setSharing(
+        return BrowserUpdater().isSharing(
           BrowserUpdater().props.dirPath.join("/")
         );
       })

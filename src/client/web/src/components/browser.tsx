@@ -192,10 +192,10 @@ export class Browser extends React.Component<Props, State, {}> {
     updater()
       .setItems(dirPath)
       .then(() => {
-        updater().listSharings();
+        return updater().listSharings();
       })
       .then(() => {
-        updater().setSharing(dirPath.join("/"));
+        return updater().isSharing(dirPath.join("/"));
       })
       .then(() => {
         this.update(updater().setBrowser);
@@ -248,8 +248,12 @@ export class Browser extends React.Component<Props, State, {}> {
         if (!ok) {
           alert("failed to enable sharing");
         } else {
-          this.listSharings();
+          updater().setSharing(true);
+          return this.listSharings();
         }
+      })
+      .then(() => {
+        this.props.update(updater().setBrowser);
       });
   };
 
@@ -260,8 +264,12 @@ export class Browser extends React.Component<Props, State, {}> {
         if (!ok) {
           alert("failed to disable sharing");
         } else {
-          this.listSharings();
+          updater().setSharing(false);
+          return this.listSharings();
         }
+      })
+      .then(() => {
+        this.props.update(updater().setBrowser);
       });
   };
 
