@@ -493,6 +493,13 @@ export class Browser extends React.Component<Props, State, {}> {
             <span className="bold">{dirPath}</span>
           </span>
           <span className="flex-list-item-r padding-r-m">
+            <input
+              type="text"
+              className="margin-r-m"
+              value={`${
+                document.location.href.split("?")[0]
+              }?dir=${encodeURIComponent(dirPath)}`}
+            />
             <button
               onClick={() => {
                 this.deleteSharing(dirPath);
