@@ -140,7 +140,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
         return BrowserUpdater().refreshUploadings();
       })
       .then(() => {
-        return BrowserUpdater().setSharing(
+        return BrowserUpdater().isSharing(
           BrowserUpdater().props.dirPath.join("/")
         );
       })
