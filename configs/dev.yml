@@ -17,7 +17,7 @@ server:
   captchaEnabled: true
   uploadSpeedLimit: 409600 # 400KB/limiterCyc
   downloadSpeedLimit: 409600 # 400KB/limiterCyc
-  spaceLimit: 1024 # 1GB
+  spaceLimit: 104857600 # 100MB
   limiterCapacity: 1000
   limiterCyc: 1000 # 1s
 users:
