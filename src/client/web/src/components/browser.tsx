@@ -495,6 +495,7 @@ export class Browser extends React.Component<Props, State, {}> {
           <span className="flex-list-item-r padding-r-m">
             <input
               type="text"
+              readOnly
               className="margin-r-m"
               value={`${
                 document.location.href.split("?")[0]
@@ -506,7 +507,7 @@ export class Browser extends React.Component<Props, State, {}> {
               }}
               className="grey1-bg white-font"
             >
-              Delete
+              Disable
             </button>
           </span>
         </div>
