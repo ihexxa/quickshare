@@ -6,7 +6,7 @@ import { FgWorker } from "../worker/upload.fg.worker";
 import { Props as PanelProps } from "./root_frame";
 import { Item } from "./browser";
 import { UploadInfo, User } from "../client";
-import { Up, initUploadMgr, IWorker } from "../worker/upload_mgr";
+import { initUploadMgr, IWorker } from "../worker/upload_mgr";
 
 export class BaseUpdater {
   public static props: any;
@@ -16,12 +16,7 @@ export class BaseUpdater {
   };
 }
 
-export interface IContext {
-  update: (targetStatePatch: any) => void;
-}
-
 export interface ICoreState {
-  ctx: IContext;
   panel: PanelProps;
   isVertical: boolean;
 }
@@ -44,7 +39,6 @@ export function isVertical(): boolean {
 
 export function initState(): ICoreState {
   return {
-    ctx: null,
     isVertical: isVertical(),
     panel: {
       displaying: "browser",
@@ -81,7 +75,6 @@ export function initState(): ICoreState {
 
 export function mockState(): ICoreState {
   return {
-    ctx: undefined,
     isVertical: false,
     panel: {
       displaying: "browser",
