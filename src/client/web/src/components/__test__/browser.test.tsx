@@ -2,7 +2,7 @@ import * as React from "react";
 import { List, Map } from "immutable";
 import { mock, instance, anyString, anything, when, verify } from "ts-mockito";
 
-import { ICoreState, initWithWorker, mockState } from "../core_state";
+import { ICoreState, newWithWorker, initState } from "../core_state";
 import {
   makePromise,
   makeNumberResponse,
@@ -11,7 +11,9 @@ import {
   mockFileList,
 } from "../../test/helpers";
 import { Browser } from "../browser";
-import { Updater, setUpdater } from "../browser.updater";
+// import { Updater, setUpdater } from "../browser.updater";
+
+import { updater, Updater, setUpdater } from "../state_updater";
 import { MockUsersClient } from "../../client/users_mock";
 import { UsersClient } from "../../client/users";
 import { FilesClient } from "../../client/files";
@@ -25,18 +27,18 @@ describe("Browser", () => {
   const mockWorker = instance(mockWorkerClass);
 
   test("Updater: addUploads: add each files to UploadMgr", async () => {
-    let coreState = mockState();
+    let coreState = initState();
     const UploadMgrClass = mock(UploadMgr);
     const uploadMgr = instance(UploadMgrClass);
     setUploadMgr(uploadMgr);
 
     const filePaths = ["./file1", "./file2"];
     const fileList = mockFileList(filePaths);
-    const updater = new Updater();
-    updater.setUploadings = (infos: Map<string, UploadEntry>) => {};
-    updater.init(coreState.panel.browser);
+    // const updater = new Updater();
+    updater().setUploadings = (infos: Map<string, UploadEntry>) => {};
+    updater().init(coreState);
 
-    updater.addUploads(fileList);
+    updater().addUploads(fileList);
 
     // it seems that new File will do some file path escaping, so just check call time here
     verify(UploadMgrClass.add(anything(), anything())).times(filePaths.length);
@@ -46,12 +48,12 @@ describe("Browser", () => {
   });
 
   test("Updater: deleteUploads: call UploadMgr and api to delete", async () => {
-    let coreState = mockState();
+    let coreState = initState();
     const UploadMgrClass = mock(UploadMgr);
     const uploadMgr = instance(UploadMgrClass);
     setUploadMgr(uploadMgr);
 
-    const updater = new Updater();
+    // const updater = new Updater();
     const filesClientClass = mock(FilesClient);
     when(filesClientClass.deleteUploading(anyString())).thenResolve({
       status: 200,
@@ -61,11 +63,11 @@ describe("Browser", () => {
     const filesClient = instance(filesClientClass);
     const usersClientClass = mock(UsersClient);
     const usersClient = instance(usersClientClass);
-    updater.init(coreState.panel.browser);
-    updater.setClients(usersClient, filesClient);
+    updater().init(coreState);
+    updater().setClients(usersClient, filesClient);
 
     const filePath = "./path/file";
-    updater.deleteUpload(filePath);
+    updater().deleteUpload(filePath);
 
     verify(filesClientClass.deleteUploading(filePath)).once();
     verify(UploadMgrClass.delete(filePath)).once();
@@ -114,20 +116,20 @@ describe("Browser", () => {
     const filesClient = new MockFilesClient("");
     for (let i = 0; i < tests.length; i++) {
       const tc = tests[i];
-      const updater = new Updater();
-      updater.setClients(usersClient, filesClient);
+      // const updater = new Updater();
+      updater().setClients(usersClient, filesClient);
       filesClient.listMock(makePromise(tc.listResp));
       filesClient.deleteMock(makeNumberResponse(200));
-      const coreState = initWithWorker(mockWorker);
-      updater.init(coreState.panel.browser);
+      const coreState = newWithWorker(mockWorker);
+      updater().init(coreState);
 
-      await updater.delete(
+      await updater().delete(
         List<string>(tc.dirPath.split("/")),
         List<MetadataResp>(tc.items),
         Map(tc.selected)
       );
 
-      const newState = updater.setBrowser(coreState);
+      const newState = updater().updateBrowser(coreState);
 
       // TODO: check inputs of delete
       newState.panel.browser.items.forEach((item, i) => {
@@ -171,14 +173,14 @@ describe("Browser", () => {
 
     for (let i = 0; i < tests.length; i++) {
       const tc = tests[i];
-      const updater = new Updater();
-      filesClient.listMock(makePromise(tc.listResp));
-      updater.setClients(usersClient, filesClient);
-      const coreState = initWithWorker(mockWorker);
-      updater.init(coreState.panel.browser);
 
-      await updater.setItems(List<string>(tc.filePath.split("/")));
-      const newState = updater.setBrowser(coreState);
+      filesClient.listMock(makePromise(tc.listResp));
+      updater().setClients(usersClient, filesClient);
+      const coreState = newWithWorker(mockWorker);
+      updater().init(coreState);
+
+      await updater().setItems(List<string>(tc.filePath.split("/")));
+      const newState = updater().updateBrowser(coreState);
 
       newState.panel.browser.items.forEach((item, i) => {
         expect(item.name).toEqual(tc.listResp.data.metadatas[i].name);
@@ -225,17 +227,16 @@ describe("Browser", () => {
     const filesClient = new MockFilesClient("");
     for (let i = 0; i < tests.length; i++) {
       const tc = tests[i];
-      const updater = new Updater();
 
       filesClient.listMock(makePromise(tc.listResp));
       filesClient.moveMock(makeNumberResponse(200));
-      updater.setClients(usersClient, filesClient);
+      updater().setClients(usersClient, filesClient);
 
-      const coreState = initWithWorker(mockWorker);
-      updater.init(coreState.panel.browser);
-      await updater.moveHere(tc.dirPath1, tc.dirPath2, Map(tc.selected));
+      const coreState = newWithWorker(mockWorker);
+      updater().init(coreState);
+      await updater().moveHere(tc.dirPath1, tc.dirPath2, Map(tc.selected));
 
-      const newState = updater.setBrowser(coreState);
+      const newState = updater().updateBrowser(coreState);
 
       // TODO: check inputs of move
       newState.panel.browser.items.forEach((item, i) => {
@@ -248,7 +249,7 @@ describe("Browser", () => {
   });
 
   test("Browser: deleteUpload: tell uploader to deleteUpload and refreshUploadings", async () => {
-    let coreState = mockState();
+    let coreState = initState();
     addMockUpdate(coreState.panel.browser);
     const component = new Browser(coreState.panel.browser);
     const UpdaterClass = mock(Updater);
@@ -266,7 +267,7 @@ describe("Browser", () => {
   });
 
   test("Browser: stopUploading: tell updater to stopUploading", async () => {
-    let coreState = mockState();
+    let coreState = initState();
     addMockUpdate(coreState.panel.browser);
     const component = new Browser(coreState.panel.browser);
     const UpdaterClass = mock(Updater);

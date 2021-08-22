@@ -2,76 +2,12 @@ import * as React from "react";
 import { List } from "immutable";
 
 import { ICoreState } from "./core_state";
-import { IUsersClient } from "../client";
-import { UsersClient } from "../client/users";
-import { Updater as PanesUpdater } from "./panes";
-import { updater as BrowserUpdater } from "./browser.updater";
-import { Layouter } from "./layouter";
+import { updater } from "./state_updater";
 
 export interface Props {
   authed: boolean;
   captchaID: string;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
-}
-
-export class Updater {
-  private static props: Props;
-  private static client: IUsersClient;
-
-  static init = (props: Props) => (Updater.props = { ...props });
-
-  static setClient = (client: IUsersClient): void => {
-    Updater.client = client;
-  };
-
-  static login = async (
-    user: string,
-    pwd: string,
-    captchaID: string,
-    captchaInput: string
-  ): Promise<boolean> => {
-    const resp = await Updater.client.login(user, pwd, captchaID, captchaInput);
-    Updater.setAuthed(resp.status === 200);
-    return resp.status === 200;
-  };
-
-  static logout = async (): Promise<boolean> => {
-    const resp = await Updater.client.logout();
-    Updater.setAuthed(false);
-    return resp.status === 200;
-  };
-
-  static isAuthed = async (): Promise<boolean> => {
-    const resp = await Updater.client.isAuthed();
-    return resp.status === 200;
-  };
-
-  static initIsAuthed = async (): Promise<void> => {
-    return Updater.isAuthed().then((isAuthed) => {
-      Updater.setAuthed(isAuthed);
-    });
-  };
-
-  static setAuthed = (isAuthed: boolean) => {
-    Updater.props.authed = isAuthed;
-  };
-
-  static getCaptchaID = async (): Promise<boolean> => {
-    return Updater.client.getCaptchaID().then((resp) => {
-      if (resp.status === 200) {
-        Updater.props.captchaID = resp.data.id;
-      }
-      return resp.status === 200;
-    });
-  };
-
-  static setAuthPane = (preState: ICoreState): ICoreState => {
-    preState.panel.authPane = {
-      ...preState.panel.authPane,
-      ...Updater.props,
-    };
-    return preState;
-  };
 }
 
 export interface State {
@@ -84,8 +20,6 @@ export class AuthPane extends React.Component<Props, State, {}> {
   private update: (updater: (prevState: ICoreState) => ICoreState) => void;
   constructor(p: Props) {
     super(p);
-    Updater.init(p);
-    Updater.setClient(new UsersClient(""));
     this.update = p.update;
     this.state = {
       user: "",
@@ -109,53 +43,56 @@ export class AuthPane extends React.Component<Props, State, {}> {
   };
 
   initIsAuthed = () => {
-    Updater.initIsAuthed().then(() => {
-      this.update(Updater.setAuthPane);
-    });
+    updater()
+      .initIsAuthed()
+      .then(() => {
+        this.update(updater().updateAuthPane);
+      });
   };
 
   login = () => {
-    Updater.login(
-      this.state.user,
-      this.state.pwd,
-      this.props.captchaID,
-      this.state.captchaInput
-    )
+    updater()
+      .login(
+        this.state.user,
+        this.state.pwd,
+        this.props.captchaID,
+        this.state.captchaInput
+      )
       .then((ok: boolean) => {
         if (ok) {
-          this.update(Updater.setAuthPane);
+          this.update(updater().updateAuthPane);
           this.setState({ user: "", pwd: "" });
           // close all the panes
-          PanesUpdater.displayPane("");
-          this.update(PanesUpdater.updateState);
+          updater().displayPane("");
+          this.update(updater().updatePanes);
 
           // refresh
-          return BrowserUpdater().setHomeItems();
+          return updater().setHomeItems();
         } else {
           this.setState({ user: "", pwd: "" });
           alert("Failed to login.");
         }
       })
       .then(() => {
-        return BrowserUpdater().refreshUploadings();
+        return updater().refreshUploadings();
       })
       .then(() => {
-        return BrowserUpdater().isSharing(
-          BrowserUpdater().props.dirPath.join("/")
+        return updater().isSharing(
+          updater().props.panel.browser.dirPath.join("/")
         );
       })
       .then(() => {
-        return BrowserUpdater().listSharings();
+        return updater().listSharings();
       })
       .then((_: boolean) => {
-        this.update(BrowserUpdater().setBrowser);
+        this.update(updater().updateBrowser);
       });
   };
 
   logout = () => {
-    Updater.logout().then((ok: boolean) => {
+    updater().logout().then((ok: boolean) => {
       if (ok) {
-        this.update(Updater.setAuthPane);
+        this.update(updater().updateAuthPane);
       } else {
         alert("Failed to logout.");
       }

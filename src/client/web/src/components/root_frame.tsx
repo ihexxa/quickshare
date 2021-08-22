@@ -1,9 +1,10 @@
 import * as React from "react";
 
-import { ICoreState, BaseUpdater } from "./core_state";
+import { ICoreState } from "./core_state";
 import { Browser, Props as BrowserProps } from "./browser";
 import { Props as PaneLoginProps } from "./pane_login";
-import { Panes, Props as PanesProps, Updater as PanesUpdater } from "./panes";
+import { Panes, Props as PanesProps } from "./panes";
+import { TopBar } from "./topbar";
 
 export interface Props {
   displaying: string;
@@ -13,37 +14,13 @@ export interface Props {
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
-export class Updater {
-  public static props: Props;
-  public static init = (props: Props) => (BaseUpdater.props = { ...props });
-  public static apply = (prevState: ICoreState): ICoreState => {
-    return {
-      ...prevState,
-      panel: { ...prevState.panel, ...Updater.props },
-    };
-  };
-}
-
 export interface State {}
 export class RootFrame extends React.Component<Props, State, {}> {
   constructor(p: Props) {
     super(p);
-    Updater.init(p);
   }
 
-  showSettings = () => {
-    PanesUpdater.displayPane("settings");
-    this.props.update(PanesUpdater.updateState);
-  };
-
-  showAdmin = () => {
-    PanesUpdater.displayPane("admin");
-    this.props.update(PanesUpdater.updateState);
-  };
-
   render() {
-    const update = this.props.update;
-
     return (
       <div className="theme-white desktop">
         <div id="bg" className="bg bg-img font-m">
@@ -53,36 +30,10 @@ export class RootFrame extends React.Component<Props, State, {}> {
             paneNames={this.props.panes.paneNames}
             login={this.props.authPane}
             admin={this.props.panes.admin}
-            update={update}
+            update={this.props.update}
           />
 
-          <div
-            id="top-bar"
-            className="top-bar cyan1-font padding-t-m padding-b-m padding-l-l padding-r-l"
-          >
-            <div className="flex-2col-parent">
-              <a
-                href="https://github.com/ihexxa/quickshare"
-                className="flex-13col h5"
-              >
-                Quickshare
-              </a>
-              <span className="flex-23col text-right">
-                <button
-                  onClick={this.showSettings}
-                  className="grey1-bg white-font margin-r-m"
-                >
-                  Settings
-                </button>
-                <button
-                  onClick={this.showAdmin}
-                  className="grey1-bg white-font margin-r-m"
-                >
-                  Admin
-                </button>
-              </span>
-            </div>
-          </div>
+          <TopBar update={this.props.update}></TopBar>
 
           <div className="container-center">
             <Browser
@@ -91,7 +42,7 @@ export class RootFrame extends React.Component<Props, State, {}> {
               uploadings={this.props.browser.uploadings}
               sharings={this.props.browser.sharings}
               isSharing={this.props.browser.isSharing}
-              update={update}
+              update={this.props.update}
               uploadFiles={this.props.browser.uploadFiles}
               uploadValue={this.props.browser.uploadValue}
               isVertical={this.props.browser.isVertical}

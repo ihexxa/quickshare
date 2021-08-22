@@ -1,8 +1,9 @@
 import * as React from "react";
 import { Set, Map } from "immutable";
 
-import { IUsersClient, User, ListUsersResp, ListRolesResp } from "../client";
-import { UsersClient } from "../client/users";
+import { updater } from "./state_updater";
+// import { IUsersClient, User, ListUsersResp, ListRolesResp } from "../client";
+// import { UsersClient } from "../client/users";
 import { ICoreState } from "./core_state";
 import { PaneSettings } from "./pane_settings";
 import { AdminPane, Props as AdminPaneProps } from "./pane_admin";
@@ -17,128 +18,126 @@ export interface Props {
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
-export class Updater {
-  static props: Props;
-  private static client: IUsersClient;
+// export class Updater {
+//   static props: Props;
+//   private static client: IUsersClient;
 
-  static init = (props: Props) => (Updater.props = { ...props });
-  static setClient = (client: IUsersClient): void => {
-    Updater.client = client;
-  };
+//   static init = (props: Props) => (Updater.props = { ...props });
+//   static setClient = (client: IUsersClient): void => {
+//     Updater.client = client;
+//   };
 
-  static displayPane = (paneName: string) => {
-    if (paneName === "") {
-      // hide all panes
-      Updater.props.displaying = "";
-    } else {
-      const pane = Updater.props.paneNames.get(paneName);
-      if (pane != null) {
-        Updater.props.displaying = paneName;
-      } else {
-        alert(`dialgos: pane (${paneName}) not found`);
-      }
-    }
-  };
+//   static displayPane = (paneName: string) => {
+//     if (paneName === "") {
+//       // hide all panes
+//       Updater.props.displaying = "";
+//     } else {
+//       const pane = Updater.props.paneNames.get(paneName);
+//       if (pane != null) {
+//         Updater.props.displaying = paneName;
+//       } else {
+//         alert(`dialgos: pane (${paneName}) not found`);
+//       }
+//     }
+//   };
 
-  static self = async (): Promise<boolean> => {
-    const resp = await Updater.client.self();
-    if (resp.status === 200) {
-      Updater.props.userRole = resp.data.role;
-      return true;
-    }
-    return false;
-  };
+//   static self = async (): Promise<boolean> => {
+//     const resp = await Updater.client.self();
+//     if (resp.status === 200) {
+//       Updater.props.userRole = resp.data.role;
+//       return true;
+//     }
+//     return false;
+//   };
 
-  static addUser = async (user: User): Promise<boolean> => {
-    const resp = await Updater.client.addUser(user.name, user.pwd, user.role);
-    // TODO: should return uid instead
-    return resp.status === 200;
-  };
+//   static addUser = async (user: User): Promise<boolean> => {
+//     const resp = await Updater.client.addUser(user.name, user.pwd, user.role);
+//     // TODO: should return uid instead
+//     return resp.status === 200;
+//   };
 
-  static delUser = async (userID: string): Promise<boolean> => {
-    const resp = await Updater.client.delUser(userID);
-    return resp.status === 200;
-  };
+//   static delUser = async (userID: string): Promise<boolean> => {
+//     const resp = await Updater.client.delUser(userID);
+//     return resp.status === 200;
+//   };
 
-  static setRole = async (userID: string, role: string): Promise<boolean> => {
-    const resp = await Updater.client.delUser(userID);
-    return resp.status === 200;
-  };
+//   static setRole = async (userID: string, role: string): Promise<boolean> => {
+//     const resp = await Updater.client.delUser(userID);
+//     return resp.status === 200;
+//   };
 
-  static forceSetPwd = async (
-    userID: string,
-    pwd: string
-  ): Promise<boolean> => {
-    const resp = await Updater.client.forceSetPwd(userID, pwd);
-    return resp.status === 200;
-  };
+//   static forceSetPwd = async (
+//     userID: string,
+//     pwd: string
+//   ): Promise<boolean> => {
+//     const resp = await Updater.client.forceSetPwd(userID, pwd);
+//     return resp.status === 200;
+//   };
 
-  static listUsers = async (): Promise<boolean> => {
-    const resp = await Updater.client.listUsers();
-    if (resp.status !== 200) {
-      return false;
-    }
+//   static listUsers = async (): Promise<boolean> => {
+//     const resp = await Updater.client.listUsers();
+//     if (resp.status !== 200) {
+//       return false;
+//     }
 
-    const lsRes = resp.data as ListUsersResp;
-    let users = Map<User>({});
-    lsRes.users.forEach((user: User) => {
-      users = users.set(user.name, user);
-    });
-    Updater.props.admin.users = users;
+//     const lsRes = resp.data as ListUsersResp;
+//     let users = Map<User>({});
+//     lsRes.users.forEach((user: User) => {
+//       users = users.set(user.name, user);
+//     });
+//     Updater.props.admin.users = users;
 
-    return true;
-  };
+//     return true;
+//   };
 
-  static addRole = async (role: string): Promise<boolean> => {
-    const resp = await Updater.client.addRole(role);
-    // TODO: should return uid instead
-    return resp.status === 200;
-  };
+//   static addRole = async (role: string): Promise<boolean> => {
+//     const resp = await Updater.client.addRole(role);
+//     // TODO: should return uid instead
+//     return resp.status === 200;
+//   };
 
-  static delRole = async (role: string): Promise<boolean> => {
-    const resp = await Updater.client.delRole(role);
-    return resp.status === 200;
-  };
+//   static delRole = async (role: string): Promise<boolean> => {
+//     const resp = await Updater.client.delRole(role);
+//     return resp.status === 200;
+//   };
 
-  static listRoles = async (): Promise<boolean> => {
-    const resp = await Updater.client.listRoles();
-    if (resp.status !== 200) {
-      return false;
-    }
+//   static listRoles = async (): Promise<boolean> => {
+//     const resp = await Updater.client.listRoles();
+//     if (resp.status !== 200) {
+//       return false;
+//     }
 
-    const lsRes = resp.data as ListRolesResp;
-    let roles = Set<string>();
-    Object.keys(lsRes.roles).forEach((role: string) => {
-      roles = roles.add(role);
-    });
-    Updater.props.admin.roles = roles;
+//     const lsRes = resp.data as ListRolesResp;
+//     let roles = Set<string>();
+//     Object.keys(lsRes.roles).forEach((role: string) => {
+//       roles = roles.add(role);
+//     });
+//     Updater.props.admin.roles = roles;
 
-    return true;
-  };
+//     return true;
+//   };
 
-  static updateState = (prevState: ICoreState): ICoreState => {
-    return {
-      ...prevState,
-      panel: {
-        ...prevState.panel,
-        panes: { ...prevState.panel.panes, ...Updater.props },
-      },
-    };
-  };
-}
+//   static updateState = (prevState: ICoreState): ICoreState => {
+//     return {
+//       ...prevState,
+//       panel: {
+//         ...prevState.panel,
+//         panes: { ...prevState.panel.panes, ...Updater.props },
+//       },
+//     };
+//   };
+// }
 
 export interface State {}
 export class Panes extends React.Component<Props, State, {}> {
   constructor(p: Props) {
     super(p);
-    Updater.init(p);
-    Updater.setClient(new UsersClient(""));
   }
 
   closePane = () => {
     if (this.props.displaying !== "login") {
-      Updater.displayPane("");
-      this.props.update(Updater.updateState);
+      updater().displayPane("");
+      this.props.update(updater().updatePanes);
     }
   };
 
@@ -146,6 +145,7 @@ export class Panes extends React.Component<Props, State, {}> {
     let displaying = this.props.displaying;
     if (!this.props.login.authed) {
       // TODO: use constant instead
+      // TODO: control this with props
       displaying = "login";
     }
 

@@ -1,8 +1,9 @@
 import { Set } from "immutable";
 
-import { ICoreState, mockState } from "../core_state";
-import { Panes, Updater } from "../panes";
+import { ICoreState, initState } from "../core_state";
+import { Panes } from "../panes";
 import { mockUpdate } from "../../test/helpers";
+import { updater } from "../state_updater";
 
 describe("Panes", () => {
   test("Panes: closePane", async () => {
@@ -36,14 +37,14 @@ describe("Panes", () => {
     };
 
     tcs.forEach((tc: TestCase) => {
-      const preState = setState(tc.preState, mockState());
-      const postState = setState(tc.postState, mockState());
+      const preState = setState(tc.preState, initState());
+      const postState = setState(tc.postState, initState());
 
       const component = new Panes(preState.panel.panes);
-      Updater.init(preState.panel.panes);
+      updater().init(preState);
 
       component.closePane();
-      expect(Updater.props).toEqual(postState.panel.panes);
+      expect(updater().props).toEqual(postState);
     });
   });
 });

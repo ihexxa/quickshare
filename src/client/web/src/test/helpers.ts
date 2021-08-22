@@ -1,5 +1,5 @@
 import { Response } from "../client";
-import { ICoreState, mockState } from "../components/core_state";
+import { ICoreState, initState } from "../components/core_state";
 import { List } from "immutable";
 
 export const makePromise = (ret: any): Promise<any> => {
@@ -19,7 +19,7 @@ export const makeNumberResponse = (status: number): Promise<Response> => {
 export const mockUpdate = (
   apply: (prevState: ICoreState) => ICoreState
 ): void => {
-  apply(mockState());
+  apply(initState());
 };
 
 export const addMockUpdate = (subState: any) => {
