@@ -125,8 +125,6 @@ export class UserForm extends React.Component<
       });
   };
 
-  // setRole = () => {};
-
   render() {
     return (
       <div
