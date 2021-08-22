@@ -65,6 +65,7 @@
     "react-dom": "^16.8.6",
     "react-svg": "^8.0.6",
     "throttle-debounce": "^2.1.0",
+    "webpack-bundle-analyzer": "^4.4.2",
     "worker-loader": "^3.0.7"
   },
   "jest": {
