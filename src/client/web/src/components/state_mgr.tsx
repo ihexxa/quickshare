@@ -15,10 +15,10 @@ export class StateMgr extends React.Component<Props, State, {}> {
   constructor(p: Props) {
     super(p);
     this.state = newState();
-    this.initUpdaters(this.state);
+    this.initUpdater(this.state);
   }
 
-  initUpdaters = (state: ICoreState) => {
+  initUpdater = (state: ICoreState) => {
     updater().init(state);
     updater().setClients(new UsersClient(""), new FilesClient(""));
 
