@@ -3,13 +3,10 @@ import * as ReactDOM from "react-dom";
 import { List, Map } from "immutable";
 import FileSize from "filesize";
 
-import { Layouter } from "./layouter";
 import { alertMsg, comfirmMsg } from "../common/env";
-import { updater } from "./browser.updater";
+import { updater } from "./state_updater";
 import { ICoreState } from "./core_state";
 import {
-  IUsersClient,
-  IFilesClient,
   MetadataResp,
   UploadInfo,
 } from "../client";
@@ -88,7 +85,7 @@ export class Browser extends React.Component<Props, State, {}> {
       fileList = fileList.push(event.target.files[i]);
     }
     updater().addUploads(fileList);
-    this.update(updater().setBrowser);
+    this.update(updater().updateBrowser);
   };
 
   deleteUpload = (filePath: string): Promise<void> => {
@@ -101,13 +98,13 @@ export class Browser extends React.Component<Props, State, {}> {
         return updater().refreshUploadings();
       })
       .then(() => {
-        this.update(updater().setBrowser);
+        this.update(updater().updateBrowser);
       });
   };
 
   stopUploading = (filePath: string) => {
     updater().stopUploading(filePath);
-    this.update(updater().setBrowser);
+    this.update(updater().updateBrowser);
   };
 
   onMkDir = () => {
@@ -127,7 +124,7 @@ export class Browser extends React.Component<Props, State, {}> {
         return updater().setItems(this.props.dirPath);
       })
       .then(() => {
-        this.update(updater().setBrowser);
+        this.update(updater().updateBrowser);
       });
   };
 
@@ -149,7 +146,7 @@ export class Browser extends React.Component<Props, State, {}> {
     updater()
       .delete(this.props.dirPath, this.props.items, this.state.selectedItems)
       .then(() => {
-        this.update(updater().setBrowser);
+        this.update(updater().updateBrowser);
         this.setState({
           selectedSrc: "",
           selectedItems: Map<string, boolean>(),
@@ -172,7 +169,7 @@ export class Browser extends React.Component<Props, State, {}> {
         this.state.selectedItems
       )
       .then(() => {
-        this.update(updater().setBrowser);
+        this.update(updater().updateBrowser);
         this.setState({
           selectedSrc: "",
           selectedItems: Map<string, boolean>(),
@@ -198,7 +195,7 @@ export class Browser extends React.Component<Props, State, {}> {
         return updater().isSharing(dirPath.join("/"));
       })
       .then(() => {
-        this.update(updater().setBrowser);
+        this.update(updater().updateBrowser);
       });
   };
 
@@ -207,7 +204,7 @@ export class Browser extends React.Component<Props, State, {}> {
     updater()
       .setItems(this.props.dirPath)
       .then(() => {
-        this.update(updater().setBrowser);
+        this.update(updater().updateBrowser);
       });
   };
 
@@ -253,7 +250,7 @@ export class Browser extends React.Component<Props, State, {}> {
         }
       })
       .then(() => {
-        this.props.update(updater().setBrowser);
+        this.props.update(updater().updateBrowser);
       });
   };
 
@@ -269,7 +266,7 @@ export class Browser extends React.Component<Props, State, {}> {
         }
       })
       .then(() => {
-        this.props.update(updater().setBrowser);
+        this.props.update(updater().updateBrowser);
       });
   };
 
@@ -278,7 +275,7 @@ export class Browser extends React.Component<Props, State, {}> {
       .listSharings()
       .then((ok) => {
         if (ok) {
-          this.update(updater().setBrowser);
+          this.update(updater().updateBrowser);
         }
       });
   };

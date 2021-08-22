@@ -1,8 +1,9 @@
 import { mock, instance } from "ts-mockito";
 
-import { initWithWorker } from "../core_state";
-import { Updater } from "../pane_login";
+import { newWithWorker } from "../core_state";
+import { updater } from "../state_updater";
 import { MockUsersClient } from "../../client/users_mock";
+import { FilesClient } from "../../client/files_mock";
 import { Response } from "../../client";
 import { MockWorker } from "../../worker/interface";
 
@@ -41,20 +42,21 @@ describe("AuthPane", () => {
       },
     ];
 
-    const client = new MockUsersClient("");
+    const usersClient = new MockUsersClient("");
+    const filesClient = new FilesClient("");
     for (let i = 0; i < tests.length; i++) {
       const tc = tests[i];
 
-      client.loginMock(makeNumberResponse(tc.loginStatus));
-      client.logoutMock(makeNumberResponse(tc.logoutStatus));
-      client.isAuthedMock(makeNumberResponse(tc.isAuthedStatus));
-      client.setPwdMock(makeNumberResponse(tc.setPwdStatus));
+      usersClient.loginMock(makeNumberResponse(tc.loginStatus));
+      usersClient.logoutMock(makeNumberResponse(tc.logoutStatus));
+      usersClient.isAuthedMock(makeNumberResponse(tc.isAuthedStatus));
+      usersClient.setPwdMock(makeNumberResponse(tc.setPwdStatus));
 
-      const coreState = initWithWorker(mockWorker);
-      Updater.setClient(client);
-      Updater.init(coreState.panel.authPane);
-      await Updater.initIsAuthed();
-      const newState = Updater.setAuthPane(coreState);
+      const coreState = newWithWorker(mockWorker);
+      updater().setClients(usersClient, filesClient);
+      updater().init(coreState);
+      await updater().initIsAuthed();
+      const newState = updater().updateAuthPane(coreState);
 
       expect(newState.panel.authPane.authed).toEqual(tc.isAuthed);
     }

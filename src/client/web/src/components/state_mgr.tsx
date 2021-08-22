@@ -1,13 +1,12 @@
 import * as React from "react";
 import { List } from "immutable";
 
-import { updater as BrowserUpdater } from "./browser.updater";
-import { Updater as PanesUpdater } from "./panes";
-import { ICoreState, init } from "./core_state";
+import { updater } from "./state_updater";
+import { ICoreState, newState } from "./core_state";
 import { RootFrame } from "./root_frame";
 import { FilesClient } from "../client/files";
 import { UsersClient } from "../client/users";
-import { Updater as LoginPaneUpdater } from "./pane_login";
+// import { Updater as LoginPaneUpdater } from "./pane_login";
 
 export interface Props {}
 export interface State extends ICoreState {}
@@ -15,68 +14,67 @@ export interface State extends ICoreState {}
 export class StateMgr extends React.Component<Props, State, {}> {
   constructor(p: Props) {
     super(p);
-    this.state = init();
+    this.state = newState();
     this.initUpdaters(this.state);
   }
 
   initUpdaters = (state: ICoreState) => {
-    BrowserUpdater().init(state.panel.browser);
-    BrowserUpdater().setClients(new UsersClient(""), new FilesClient(""));
+    updater().init(state);
+    updater().setClients(new UsersClient(""), new FilesClient(""));
 
     const params = new URLSearchParams(document.location.search.substring(1));
+    updater()
+      .getCaptchaID()
+      .then((ok: boolean) => {
+        if (!ok) {
+          alert("failed to get captcha id");
+        } else {
+          this.update(updater().updateAuthPane);
+        }
+      });
 
-    LoginPaneUpdater.init(state.panel.authPane);
-    LoginPaneUpdater.setClient(new UsersClient(""));
-    LoginPaneUpdater.getCaptchaID().then((ok: boolean) => {
-      if (!ok) {
-        alert("failed to get captcha id");
-      } else {
-        this.update(LoginPaneUpdater.setAuthPane);
-      }
-    });
-
-    BrowserUpdater()
+    updater()
       .refreshUploadings()
       .then(() => {
         const dir = params.get("dir");
         if (dir != null && dir !== "") {
           const dirPath = List(dir.split("/"));
-          return BrowserUpdater().setItems(dirPath);
+          return updater().setItems(dirPath);
         } else {
-          return BrowserUpdater().setHomeItems();
+          return updater().setHomeItems();
         }
       })
       .then(() => {
-        return BrowserUpdater().initUploads();
+        return updater().initUploads();
       })
       .then(() => {
-        return BrowserUpdater().isSharing(
-          BrowserUpdater().props.dirPath.join("/")
+        return updater().isSharing(
+          updater().props.panel.browser.dirPath.join("/")
         );
       })
       .then(() => {
-        return BrowserUpdater().listSharings();
+        return updater().listSharings();
       })
       .then(() => {
-        this.update(BrowserUpdater().setBrowser);
+        this.update(updater().updateBrowser);
       })
       .then(() => {
-        return PanesUpdater.self();
+        return updater().self();
       })
       .then(() => {
-        if (PanesUpdater.props.userRole === "admin") {
+        if (updater().props.panel.panes.userRole === "admin") {
           // TODO: remove hardcode
-          return PanesUpdater.listRoles();
+          return updater().listRoles();
         }
       })
       .then(() => {
-        if (PanesUpdater.props.userRole === "admin") {
+        if (updater().props.panel.panes.userRole === "admin") {
           // TODO: remove hardcode
-          return PanesUpdater.listUsers();
+          return updater().listUsers();
         }
       })
       .then(() => {
-        this.update(PanesUpdater.updateState);
+        this.update(updater().updatePanes);
       });
   };
 

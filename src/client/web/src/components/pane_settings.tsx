@@ -1,35 +1,12 @@
 import * as React from "react";
 
 import { ICoreState } from "./core_state";
-import { IUsersClient } from "../client";
 import { AuthPane, Props as LoginProps } from "./pane_login";
-import { UsersClient } from "../client/users";
+import { updater } from "./state_updater";
 
 export interface Props {
   login: LoginProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
-}
-
-export class Updater {
-  private static props: Props;
-  private static usersClient: IUsersClient;
-
-  static init = (props: Props) => (Updater.props = { ...props });
-  static setClient(usersClient: IUsersClient) {
-    Updater.usersClient = usersClient;
-  }
-
-  static setPwd = async (oldPwd: string, newPwd: string): Promise<boolean> => {
-    const resp = await Updater.usersClient.setPwd(oldPwd, newPwd);
-    return resp.status === 200;
-  };
-
-  static updateState = (prevState: ICoreState): ICoreState => {
-    return {
-      ...prevState,
-      panel: { ...prevState.panel, ...Updater.props },
-    };
-  };
 }
 
 export interface State {
@@ -52,8 +29,6 @@ export class PaneSettings extends React.Component<Props, State, {}> {
 
   constructor(p: Props) {
     super(p);
-    Updater.init(p);
-    Updater.setClient(new UsersClient(""));
     this.update = p.update;
     this.state = {
       oldPwd: "",
@@ -70,8 +45,9 @@ export class PaneSettings extends React.Component<Props, State, {}> {
     } else if (this.state.oldPwd == this.state.newPwd1) {
       alert("old and new passwords are same");
     } else {
-      Updater.setPwd(this.state.oldPwd, this.state.newPwd1).then(
-        (ok: boolean) => {
+      updater()
+        .setPwd(this.state.oldPwd, this.state.newPwd1)
+        .then((ok: boolean) => {
           if (ok) {
             alert("Password is updated");
           } else {
@@ -82,8 +58,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
             newPwd1: "",
             newPwd2: "",
           });
-        }
-      );
+        });
     }
   };
 

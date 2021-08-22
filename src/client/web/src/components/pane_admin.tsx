@@ -3,7 +3,7 @@ import { Map, Set } from "immutable";
 
 import { ICoreState } from "./core_state";
 import { User, Quota } from "../client";
-import { Updater as PanesUpdater } from "./panes";
+import { updater } from "./state_updater";
 
 export interface Props {
   users: Map<string, User>;
@@ -94,8 +94,9 @@ export class UserForm extends React.Component<
       return;
     }
 
-    PanesUpdater.forceSetPwd(this.state.id, this.state.newPwd1).then(
-      (ok: boolean) => {
+    updater()
+      .forceSetPwd(this.state.id, this.state.newPwd1)
+      .then((ok: boolean) => {
         if (ok) {
           alert("password is updated");
         } else {
@@ -105,22 +106,22 @@ export class UserForm extends React.Component<
           newPwd1: "",
           newPwd2: "",
         });
-      }
-    );
+      });
   };
 
   setUser = () => {};
 
   delUser = () => {
-    PanesUpdater.delUser(this.state.id)
+    updater()
+      .delUser(this.state.id)
       .then((ok: boolean) => {
         if (!ok) {
           alert("failed to delete user");
         }
-        return PanesUpdater.listUsers();
+        return updater().listUsers();
       })
       .then((_: boolean) => {
-        this.props.update(PanesUpdater.updateState);
+        this.props.update(updater().updatePanes);
       });
   };
 
@@ -311,15 +312,16 @@ export class AdminPane extends React.Component<Props, State, {}> {
   };
 
   addRole = () => {
-    PanesUpdater.addRole(this.state.newRole)
+    updater()
+      .addRole(this.state.newRole)
       .then((ok: boolean) => {
         if (!ok) {
           alert("failed to add role");
         }
-        return PanesUpdater.listRoles();
+        return updater().listRoles();
       })
       .then(() => {
-        this.props.update(PanesUpdater.updateState);
+        this.props.update(updater().updatePanes);
       });
   };
 
@@ -332,15 +334,16 @@ export class AdminPane extends React.Component<Props, State, {}> {
       return;
     }
 
-    PanesUpdater.delRole(role)
+    updater()
+      .delRole(role)
       .then((ok: boolean) => {
         if (!ok) {
           alert("failed to delete role");
         }
-        return PanesUpdater.listRoles();
+        return updater().listRoles();
       })
       .then(() => {
-        this.props.update(PanesUpdater.updateState);
+        this.props.update(updater().updatePanes);
       });
   };
 
@@ -350,13 +353,14 @@ export class AdminPane extends React.Component<Props, State, {}> {
       return;
     }
 
-    PanesUpdater.addUser({
-      id: "", // backend will fill it
-      name: this.state.newUserName,
-      pwd: this.state.newUserPwd1,
-      role: this.state.newUserRole,
-      quota: undefined,
-    })
+    updater()
+      .addUser({
+        id: "", // backend will fill it
+        name: this.state.newUserName,
+        pwd: this.state.newUserPwd1,
+        role: this.state.newUserRole,
+        quota: undefined,
+      })
       .then((ok: boolean) => {
         if (!ok) {
           alert("failed to add user");
@@ -367,10 +371,10 @@ export class AdminPane extends React.Component<Props, State, {}> {
           newUserPwd2: "",
           newUserRole: "",
         });
-        return PanesUpdater.listUsers();
+        return updater().listUsers();
       })
       .then(() => {
-        this.props.update(PanesUpdater.updateState);
+        this.props.update(updater().updatePanes);
       });
   };
 
