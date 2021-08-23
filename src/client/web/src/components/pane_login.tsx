@@ -46,7 +46,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
     updater()
       .initIsAuthed()
       .then(() => {
-        this.update(updater().updateAuthPane);
+        this.update(updater().updateLogin);
       });
   };
 
@@ -60,7 +60,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
       )
       .then((ok: boolean) => {
         if (ok) {
-          this.update(updater().updateAuthPane);
+          this.update(updater().updateLogin);
           this.setState({ user: "", pwd: "" });
           // close all the panes
           updater().displayPane("");
@@ -78,7 +78,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
       })
       .then(() => {
         return updater().isSharing(
-          updater().props.panel.browser.dirPath.join("/")
+          updater().props.browser.dirPath.join("/")
         );
       })
       .then(() => {
@@ -92,7 +92,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
   logout = () => {
     updater().logout().then((ok: boolean) => {
       if (ok) {
-        this.update(updater().updateAuthPane);
+        this.update(updater().updateLogin);
       } else {
         alert("Failed to logout.");
       }

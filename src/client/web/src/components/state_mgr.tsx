@@ -29,7 +29,7 @@ export class StateMgr extends React.Component<Props, State, {}> {
         if (!ok) {
           alert("failed to get captcha id");
         } else {
-          this.update(updater().updateAuthPane);
+          this.update(updater().updateLogin);
         }
       });
 
@@ -48,9 +48,7 @@ export class StateMgr extends React.Component<Props, State, {}> {
         return updater().initUploads();
       })
       .then(() => {
-        return updater().isSharing(
-          updater().props.panel.browser.dirPath.join("/")
-        );
+        return updater().isSharing(updater().props.browser.dirPath.join("/"));
       })
       .then(() => {
         return updater().listSharings();
@@ -62,13 +60,13 @@ export class StateMgr extends React.Component<Props, State, {}> {
         return updater().self();
       })
       .then(() => {
-        if (updater().props.panel.panes.userRole === "admin") {
+        if (updater().props.panes.userRole === "admin") {
           // TODO: remove hardcode
           return updater().listRoles();
         }
       })
       .then(() => {
-        if (updater().props.panel.panes.userRole === "admin") {
+        if (updater().props.panes.userRole === "admin") {
           // TODO: remove hardcode
           return updater().listUsers();
         }
@@ -85,11 +83,13 @@ export class StateMgr extends React.Component<Props, State, {}> {
   render() {
     return (
       <RootFrame
-        authPane={this.state.panel.authPane}
-        displaying={this.state.panel.displaying}
+        browser={this.state.browser}
+        panes={{
+          panes: this.state.panes,
+          login: this.state.login,
+          admin: this.state.admin,
+        }}
         update={this.update}
-        browser={this.state.panel.browser}
-        panes={this.state.panel.panes}
       />
     );
   }
