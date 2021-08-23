@@ -7,9 +7,7 @@ import { Panes, Props as PanesProps } from "./panes";
 import { TopBar } from "./topbar";
 
 export interface Props {
-  displaying: string;
   browser: BrowserProps;
-  authPane: PaneLoginProps;
   panes: PanesProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
@@ -25,10 +23,8 @@ export class RootFrame extends React.Component<Props, State, {}> {
       <div className="theme-white desktop">
         <div id="bg" className="bg bg-img font-m">
           <Panes
-            userRole={this.props.panes.userRole}
-            displaying={this.props.panes.displaying}
-            paneNames={this.props.panes.paneNames}
-            login={this.props.authPane}
+            panes={this.props.panes.panes}
+            login={this.props.panes.login}
             admin={this.props.panes.admin}
             update={this.props.update}
           />

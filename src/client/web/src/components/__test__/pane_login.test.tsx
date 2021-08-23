@@ -56,9 +56,9 @@ describe("AuthPane", () => {
       updater().setClients(usersClient, filesClient);
       updater().init(coreState);
       await updater().initIsAuthed();
-      const newState = updater().updateAuthPane(coreState);
+      const newState = updater().updateLogin(coreState);
 
-      expect(newState.panel.authPane.authed).toEqual(tc.isAuthed);
+      expect(newState.login.authed).toEqual(tc.isAuthed);
     }
   });
 });

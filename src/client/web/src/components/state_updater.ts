@@ -28,7 +28,7 @@ export class Updater {
   }
 
   initUploads = () => {
-    this.props.panel.browser.uploadings.forEach((entry) => {
+    this.props.browser.uploadings.forEach((entry) => {
       Up().addStopped(entry.realFilePath, entry.uploaded, entry.size);
     });
     // this.setUploadings(Up().list());
@@ -37,7 +37,7 @@ export class Updater {
   addUploads = (fileList: List<File>) => {
     fileList.forEach((file) => {
       const filePath = getItemPath(
-        this.props.panel.browser.dirPath.join("/"),
+        this.props.browser.dirPath.join("/"),
         file.name
       );
       // do not wait for the promise
@@ -53,7 +53,7 @@ export class Updater {
   };
 
   setUploadings = (infos: Map<string, UploadEntry>) => {
-    this.props.panel.browser.uploadings = List<UploadInfo>(
+    this.props.browser.uploadings = List<UploadInfo>(
       infos.valueSeq().map((v: UploadEntry): UploadInfo => {
         return {
           realFilePath: v.filePath,
@@ -65,7 +65,7 @@ export class Updater {
   };
 
   addSharing = async (): Promise<boolean> => {
-    const dirPath = this.props.panel.browser.dirPath.join("/");
+    const dirPath = this.props.browser.dirPath.join("/");
     const resp = await this.filesClient.addSharing(dirPath);
     return resp.status === 200;
   };
@@ -77,30 +77,30 @@ export class Updater {
 
   isSharing = async (dirPath: string): Promise<boolean> => {
     const resp = await this.filesClient.isSharing(dirPath);
-    this.props.panel.browser.isSharing = resp.status === 200;
+    this.props.browser.isSharing = resp.status === 200;
     return resp.status === 200; // TODO: differentiate 404 and error
   };
 
   setSharing = (shared: boolean) => {
-    this.props.panel.browser.isSharing = shared;
+    this.props.browser.isSharing = shared;
   };
 
   listSharings = async (): Promise<boolean> => {
     const resp = await this.filesClient.listSharings();
-    this.props.panel.browser.sharings =
+    this.props.browser.sharings =
       resp.status === 200
         ? List<string>(resp.data.sharingDirs)
-        : this.props.panel.browser.sharings;
+        : this.props.browser.sharings;
     return resp.status === 200;
   };
 
   refreshUploadings = async (): Promise<boolean> => {
     const luResp = await this.filesClient.listUploadings();
 
-    this.props.panel.browser.uploadings =
+    this.props.browser.uploadings =
       luResp.status === 200
         ? List<UploadInfo>(luResp.data.uploadInfos)
-        : this.props.panel.browser.uploadings;
+        : this.props.browser.uploadings;
     return luResp.status === 200;
   };
 
@@ -143,23 +143,21 @@ export class Updater {
     const dirPath = dirParts.join("/");
     const listResp = await this.filesClient.list(dirPath);
 
-    this.props.panel.browser.dirPath = dirParts;
-    this.props.panel.browser.items =
+    this.props.browser.dirPath = dirParts;
+    this.props.browser.items =
       listResp.status === 200
         ? List<MetadataResp>(listResp.data.metadatas)
-        : this.props.panel.browser.items;
+        : this.props.browser.items;
   };
 
   setHomeItems = async (): Promise<void> => {
     const listResp = await this.filesClient.listHome();
 
-    this.props.panel.browser.dirPath = List<string>(
-      listResp.data.cwd.split("/")
-    );
-    this.props.panel.browser.items =
+    this.props.browser.dirPath = List<string>(listResp.data.cwd.split("/"));
+    this.props.browser.items =
       listResp.status === 200
         ? List<MetadataResp>(listResp.data.metadatas)
-        : this.props.panel.browser.items;
+        : this.props.browser.items;
   };
 
   moveHere = async (
@@ -189,11 +187,11 @@ export class Updater {
   displayPane = (paneName: string) => {
     if (paneName === "") {
       // hide all panes
-      this.props.panel.panes.displaying = "";
+      this.props.panes.displaying = "";
     } else {
-      const pane = this.props.panel.panes.paneNames.get(paneName);
+      const pane = this.props.panes.paneNames.get(paneName);
       if (pane != null) {
-        this.props.panel.panes.displaying = paneName;
+        this.props.panes.displaying = paneName;
       } else {
         alert(`dialgos: pane (${paneName}) not found`);
       }
@@ -203,7 +201,7 @@ export class Updater {
   self = async (): Promise<boolean> => {
     const resp = await this.usersClient.self();
     if (resp.status === 200) {
-      this.props.panel.panes.userRole = resp.data.role;
+      this.props.panes.userRole = resp.data.role;
       return true;
     }
     return false;
@@ -241,7 +239,7 @@ export class Updater {
     lsRes.users.forEach((user: User) => {
       users = users.set(user.name, user);
     });
-    this.props.panel.panes.admin.users = users;
+    this.props.admin.users = users;
 
     return true;
   };
@@ -268,7 +266,7 @@ export class Updater {
     Object.keys(lsRes.roles).forEach((role: string) => {
       roles = roles.add(role);
     });
-    this.props.panel.panes.admin.roles = roles;
+    this.props.admin.roles = roles;
 
     return true;
   };
@@ -309,13 +307,13 @@ export class Updater {
   };
 
   setAuthed = (isAuthed: boolean) => {
-    this.props.panel.authPane.authed = isAuthed;
+    this.props.login.authed = isAuthed;
   };
 
   getCaptchaID = async (): Promise<boolean> => {
     return this.usersClient.getCaptchaID().then((resp) => {
       if (resp.status === 200) {
-        this.props.panel.authPane.captchaID = resp.data.id;
+        this.props.login.captchaID = resp.data.id;
       }
       return resp.status === 200;
     });
@@ -329,38 +327,29 @@ export class Updater {
   updateBrowser = (prevState: ICoreState): ICoreState => {
     return {
       ...prevState,
-      panel: {
-        ...prevState.panel,
-        browser: {
-          dirPath: this.props.panel.browser.dirPath,
-          isSharing: this.props.panel.browser.isSharing,
-          items: this.props.panel.browser.items,
-          uploadings: this.props.panel.browser.uploadings,
-          sharings: this.props.panel.browser.sharings,
-          uploadFiles: this.props.panel.browser.uploadFiles,
-          uploadValue: this.props.panel.browser.uploadValue,
-          isVertical: this.props.panel.browser.isVertical,
-        },
-      },
+      browser: { ...prevState.browser, ...this.props.browser },
     };
   };
 
   updatePanes = (prevState: ICoreState): ICoreState => {
     return {
       ...prevState,
-      panel: {
-        ...prevState.panel,
-        panes: { ...prevState.panel.panes, ...this.props.panel.panes },
-      },
+      panes: { ...prevState.panes, ...this.props.panes },
     };
   };
 
-  updateAuthPane = (preState: ICoreState): ICoreState => {
-    preState.panel.authPane = {
-      ...preState.panel.authPane,
-      ...this.props.panel.authPane,
+  updateLogin = (prevState: ICoreState): ICoreState => {
+    return {
+      ...prevState,
+      login: { ...prevState.login, ...this.props.login },
     };
-    return preState;
+  };
+
+  updateAdmin = (prevState: ICoreState): ICoreState => {
+    return {
+      ...prevState,
+      admin: { ...prevState.admin, ...this.props.admin },
+    };
   };
 }
 

@@ -7,10 +7,13 @@ import { PaneSettings } from "./pane_settings";
 import { AdminPane, Props as AdminPaneProps } from "./pane_admin";
 import { AuthPane, Props as AuthPaneProps } from "./pane_login";
 
-export interface Props {
-  userRole: string;
+export interface PanesProps {
   displaying: string;
+  userRole: string;
   paneNames: Set<string>;
+}
+export interface Props {
+  panes: PanesProps;
   login: AuthPaneProps;
   admin: AdminPaneProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
@@ -23,14 +26,14 @@ export class Panes extends React.Component<Props, State, {}> {
   }
 
   closePane = () => {
-    if (this.props.displaying !== "login") {
+    if (this.props.panes.displaying !== "login") {
       updater().displayPane("");
       this.props.update(updater().updatePanes);
     }
   };
 
   render() {
-    let displaying = this.props.displaying;
+    let displaying = this.props.panes.displaying;
     if (!this.props.login.authed) {
       // TODO: use constant instead
       // TODO: control this with props
@@ -50,7 +53,7 @@ export class Panes extends React.Component<Props, State, {}> {
       ),
     });
 
-    if (this.props.userRole === "admin") {
+    if (this.props.panes.userRole === "admin") {
       panesMap = panesMap.set(
         "admin",
         <AdminPane

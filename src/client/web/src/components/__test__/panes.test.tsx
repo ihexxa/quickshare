@@ -32,7 +32,7 @@ describe("Panes", () => {
     ];
 
     const setState = (patch: any, state: ICoreState): ICoreState => {
-      state.panel.panes = patch.panes;
+      state.panes = patch.panes;
       return state;
     };
 
@@ -40,7 +40,12 @@ describe("Panes", () => {
       const preState = setState(tc.preState, initState());
       const postState = setState(tc.postState, initState());
 
-      const component = new Panes(preState.panel.panes);
+      const component = new Panes({
+        panes: preState.panes,
+        admin: preState.admin,
+        login: preState.login,
+        update: mockUpdate,
+      });
       updater().init(preState);
 
       component.closePane();
