@@ -6,17 +6,28 @@ import { ICoreState, newState } from "./core_state";
 import { RootFrame } from "./root_frame";
 import { FilesClient } from "../client/files";
 import { UsersClient } from "../client/users";
-// import { Updater as LoginPaneUpdater } from "./pane_login";
+import { IUsersClient, IFilesClient } from "../client";
 
 export interface Props {}
 export interface State extends ICoreState {}
 
 export class StateMgr extends React.Component<Props, State, {}> {
+  private usersClient: IUsersClient = new UsersClient("");
+  private filesClient: IFilesClient = new FilesClient("");
+
   constructor(p: Props) {
     super(p);
     this.state = newState();
     this.initUpdater(this.state);
   }
+
+  setUsersClient = (client: IUsersClient) => {
+    this.usersClient = client;
+  };
+
+  setFilesClient = (client: IFilesClient) => {
+    this.filesClient = client;
+  };
 
   initUpdater = (state: ICoreState) => {
     updater().init(state);
