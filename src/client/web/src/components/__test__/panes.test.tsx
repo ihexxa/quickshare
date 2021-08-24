@@ -1,55 +1,31 @@
-import { Set } from "immutable";
+import { mock, instance } from "ts-mockito";
 
-import { ICoreState, initState } from "../core_state";
 import { Panes } from "../panes";
-import { mockUpdate } from "../../test/helpers";
+import { ICoreState, newWithWorker } from "../core_state";
 import { updater } from "../state_updater";
+import { MockWorker } from "../../worker/interface";
 
 describe("Panes", () => {
-  test("Panes: closePane", async () => {
-    interface TestCase {
-      preState: ICoreState;
-      postState: ICoreState;
-    }
+  test("closePane", async () => {
+    const mockWorkerClass = mock(MockWorker);
+    const mockWorker = instance(mockWorkerClass);
 
-    const tcs: any = [
-      {
-        preState: {
-          panes: {
-            displaying: "settings",
-            paneNames: Set<string>(["settings", "login"]),
-            update: mockUpdate,
-          },
-        },
-        postState: {
-          panes: {
-            displaying: "",
-            paneNames: Set<string>(["settings", "login"]),
-            update: mockUpdate,
-          },
-        },
-      },
-    ];
+    const coreState = newWithWorker(mockWorker);
+    const panes = new Panes({
+        panes: coreState.panes,
+        admin: coreState.admin,
+        login: coreState.login,
+        update: (updater: (prevState: ICoreState) => ICoreState) => {},
+    });
 
-    const setState = (patch: any, state: ICoreState): ICoreState => {
-      state.panes = patch.panes;
-      return state;
-    };
+    updater().init(coreState);
 
-    tcs.forEach((tc: TestCase) => {
-      const preState = setState(tc.preState, initState());
-      const postState = setState(tc.postState, initState());
+    panes.closePane();
 
-      const component = new Panes({
-        panes: preState.panes,
-        admin: preState.admin,
-        login: preState.login,
-        update: mockUpdate,
-      });
-      updater().init(preState);
-
-      component.closePane();
-      expect(updater().props).toEqual(postState);
+    expect(updater().props.panes).toEqual({
+      userRole: coreState.panes.userRole,
+      displaying: "",
+      paneNames: coreState.panes.paneNames,
     });
   });
 });

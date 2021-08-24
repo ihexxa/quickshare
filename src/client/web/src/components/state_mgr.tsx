@@ -18,7 +18,6 @@ export class StateMgr extends React.Component<Props, State, {}> {
   constructor(p: Props) {
     super(p);
     this.state = newState();
-    this.initUpdater(this.state);
   }
 
   setUsersClient = (client: IUsersClient) => {
@@ -29,12 +28,16 @@ export class StateMgr extends React.Component<Props, State, {}> {
     this.filesClient = client;
   };
 
-  initUpdater = (state: ICoreState) => {
+  initUpdater = (state: ICoreState): Promise<void> => {
     updater().init(state);
-    updater().setClients(new UsersClient(""), new FilesClient(""));
+    if (this.usersClient == null || this.filesClient == null) {
+      console.error("updater's clients are not inited");
+      return;
+    }
+    updater().setClients(this.usersClient, this.filesClient);
 
     const params = new URLSearchParams(document.location.search.substring(1));
-    updater()
+    return updater()
       .getCaptchaID()
       .then((ok: boolean) => {
         if (!ok) {
@@ -42,10 +45,10 @@ export class StateMgr extends React.Component<Props, State, {}> {
         } else {
           this.update(updater().updateLogin);
         }
-      });
-
-    updater()
-      .refreshUploadings()
+      })
+      .then(() => {
+        return updater().refreshUploadings();
+      })
       .then(() => {
         const dir = params.get("dir");
         if (dir != null && dir !== "") {
@@ -84,6 +87,7 @@ export class StateMgr extends React.Component<Props, State, {}> {
       })
       .then(() => {
         this.update(updater().updatePanes);
+        this.update(updater().updateAdmin);
       });
   };
 

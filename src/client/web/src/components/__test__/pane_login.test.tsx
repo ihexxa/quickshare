@@ -1,64 +1,62 @@
+import { List, Set, Map } from "immutable";
 import { mock, instance } from "ts-mockito";
 
-import { newWithWorker } from "../core_state";
+import { User } from "../../client";
+import { AuthPane } from "../pane_login";
+import { ICoreState, newWithWorker } from "../core_state";
 import { updater } from "../state_updater";
-import { MockUsersClient } from "../../client/users_mock";
-import { FilesClient } from "../../client/files_mock";
-import { Response } from "../../client";
 import { MockWorker } from "../../worker/interface";
+import { MockUsersClient, resps as usersResps } from "../../client/users_mock";
+import { MockFilesClient, resps as filesResps } from "../../client/files_mock";
 
-describe("AuthPane", () => {
-  const mockWorkerClass = mock(MockWorker);
-  const mockWorker = instance(mockWorkerClass);
+describe("Login", () => {
+  test("login", async () => {
+    const mockWorkerClass = mock(MockWorker);
+    const mockWorker = instance(mockWorkerClass);
 
-  const makePromise = (ret: any): Promise<any> => {
-    return new Promise<any>((resolve) => {
-      resolve(ret);
+    const coreState = newWithWorker(mockWorker);
+    const pane = new AuthPane({
+      authed: coreState.login.authed,
+      captchaID: coreState.login.captchaID,
+      update: (updater: (prevState: ICoreState) => ICoreState) => {},
     });
-  };
-  const makeNumberResponse = (status: number): Promise<Response> => {
-    return makePromise({
-      status: status,
-      statusText: "",
-      data: {},
+
+    const usersCl = new MockUsersClient("");
+    const filesCl = new MockFilesClient("");
+    updater().init(coreState);
+    updater().setClients(usersCl, filesCl);
+
+    await pane.login();
+
+    // TODO: state is not checked
+
+    // login
+    expect(updater().props.login).toEqual({
+      authed: true,
+      captchaID: "",
     });
-  };
 
-  test("Updater-initIsAuthed", async () => {
-    const tests = [
-      {
-        loginStatus: 200,
-        logoutStatus: 200,
-        isAuthedStatus: 200,
-        setPwdStatus: 200,
-        isAuthed: true,
-      },
-      {
-        loginStatus: 200,
-        logoutStatus: 200,
-        isAuthedStatus: 500,
-        setPwdStatus: 200,
-        isAuthed: false,
-      },
-    ];
+    // panes
+    expect(updater().props.panes).toEqual({
+      userRole: "admin",
+      displaying: "",
+      paneNames: Set(["settings", "login", "admin"]),
+    });
 
-    const usersClient = new MockUsersClient("");
-    const filesClient = new FilesClient("");
-    for (let i = 0; i < tests.length; i++) {
-      const tc = tests[i];
-
-      usersClient.loginMock(makeNumberResponse(tc.loginStatus));
-      usersClient.logoutMock(makeNumberResponse(tc.logoutStatus));
-      usersClient.isAuthedMock(makeNumberResponse(tc.isAuthedStatus));
-      usersClient.setPwdMock(makeNumberResponse(tc.setPwdStatus));
-
-      const coreState = newWithWorker(mockWorker);
-      updater().setClients(usersClient, filesClient);
-      updater().init(coreState);
-      await updater().initIsAuthed();
-      const newState = updater().updateLogin(coreState);
-
-      expect(newState.login.authed).toEqual(tc.isAuthed);
-    }
+    // admin
+    let usersMap = Map({});
+    usersResps.listUsersMockResp.data.users.forEach((user: User) => {
+      usersMap = usersMap.set(user.name, user);
+    });
+    let roles = Set<string>();
+    Object.keys(usersResps.listRolesMockResp.data.roles).forEach(
+      (role: string) => {
+        roles = roles.add(role);
+      }
+    );
+    expect(updater().props.admin).toEqual({
+      users: usersMap,
+      roles: roles,
+    });
   });
 });

@@ -30,7 +30,7 @@ export function newWithWorker(worker: IWorker): ICoreState {
 }
 
 export function newState(): ICoreState {
-  const worker = Worker == null ? new FgWorker() : new BgWorker();
+  const worker = window.Worker == null ? new FgWorker() : new BgWorker();
   initUploadMgr(worker);
 
   return initState();

@@ -6,10 +6,7 @@ import FileSize from "filesize";
 import { alertMsg, comfirmMsg } from "../common/env";
 import { updater } from "./state_updater";
 import { ICoreState } from "./core_state";
-import {
-  MetadataResp,
-  UploadInfo,
-} from "../client";
+import { MetadataResp, UploadInfo } from "../client";
 import { Up } from "../worker/upload_mgr";
 import { UploadEntry } from "../worker/interface";
 
@@ -181,12 +178,12 @@ export class Browser extends React.Component<Props, State, {}> {
     this.chdir(this.props.dirPath.push(childDirName));
   };
 
-  chdir = (dirPath: List<string>) => {
+  chdir = async (dirPath: List<string>) => {
     if (dirPath === this.props.dirPath) {
       return;
     }
 
-    updater()
+    return updater()
       .setItems(dirPath)
       .then(() => {
         return updater().listSharings();
@@ -238,8 +235,8 @@ export class Browser extends React.Component<Props, State, {}> {
     });
   };
 
-  addSharing = () => {
-    updater()
+  addSharing = async () => {
+    return updater()
       .addSharing()
       .then((ok) => {
         if (!ok) {
@@ -254,8 +251,8 @@ export class Browser extends React.Component<Props, State, {}> {
       });
   };
 
-  deleteSharing = (dirPath: string) => {
-    updater()
+  deleteSharing = async (dirPath: string) => {
+    return updater()
       .deleteSharing(dirPath)
       .then((ok) => {
         if (!ok) {
@@ -270,8 +267,8 @@ export class Browser extends React.Component<Props, State, {}> {
       });
   };
 
-  listSharings = () => {
-    updater()
+  listSharings = async () => {
+    return updater()
       .listSharings()
       .then((ok) => {
         if (ok) {
