@@ -1,11 +1,16 @@
-import { BaseClient, Response, userIDParam } from "./";
+import { BaseClient, Response, userIDParam, Quota } from "./";
 
 export class UsersClient extends BaseClient {
   constructor(url: string) {
     super(url);
   }
 
-  login = (user: string, pwd: string, captchaId: string, captchaInput:string): Promise<Response> => {
+  login = (
+    user: string,
+    pwd: string,
+    captchaId: string,
+    captchaInput: string
+  ): Promise<Response> => {
     return this.do({
       method: "post",
       url: `${this.url}/v1/users/login`,
@@ -39,6 +44,18 @@ export class UsersClient extends BaseClient {
       data: {
         oldPwd,
         newPwd,
+      },
+    });
+  };
+
+  setUser = (id: string, role: string, quota: Quota): Promise<Response> => {
+    return this.do({
+      method: "patch",
+      url: `${this.url}/v1/users/`,
+      data: {
+        id,
+        role,
+        quota,
       },
     });
   };

@@ -10,6 +10,7 @@ import {
   IFilesClient,
   MetadataResp,
   UploadInfo,
+  Quota,
 } from "../client";
 import { FilesClient } from "../client/files";
 import { UsersClient } from "../client/users";
@@ -215,6 +216,11 @@ export class Updater {
 
   delUser = async (userID: string): Promise<boolean> => {
     const resp = await this.usersClient.delUser(userID);
+    return resp.status === 200;
+  };
+
+  setUser = async (userID: string, role: string, quota: Quota): Promise<boolean> => {
+    const resp = await this.usersClient.setUser(userID, role, quota);
     return resp.status === 200;
   };
 
