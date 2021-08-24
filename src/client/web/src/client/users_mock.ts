@@ -1,11 +1,13 @@
 // TODO: replace this with jest mocks
-import { Response } from "./";
+import { Response, Quota } from "./";
+
 
 export interface UsersClientResps {
   loginMockResp: Response;
   logoutMockResp: Response;
   isAuthedMockResp: Response;
   setPwdMockResp: Response;
+  setUserMockResp: Response;
   forceSetPwdMockResp: Response;
   addUserMockResp: Response;
   delUserMockResp: Response;
@@ -22,6 +24,7 @@ export const resps = {
   logoutMockResp: { status: 200, statusText: "", data: {} },
   isAuthedMockResp: { status: 200, statusText: "", data: {} },
   setPwdMockResp: { status: 200, statusText: "", data: {} },
+  setUserMockResp: { status: 200, statusText: "", data: {} },
   forceSetPwdMockResp: { status: 200, statusText: "", data: {} },
   addUserMockResp: { status: 200, statusText: "", data: {} },
   delUserMockResp: { status: 200, statusText: "", data: {} },
@@ -118,6 +121,11 @@ export class MockUsersClient {
   setPwd = (oldPwd: string, newPwd: string): Promise<Response> => {
     return this.wrapPromise(this.resps.setPwdMockResp);
   };
+
+  setUser = (id: string, role: string, quota: Quota): Promise<Response> => {
+    return this.wrapPromise(this.resps.setUserMockResp);
+  };
+  
 
   forceSetPwd = (userID: string, newPwd: string): Promise<Response> => {
     return this.wrapPromise(this.resps.forceSetPwdMockResp);

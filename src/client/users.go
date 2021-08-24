@@ -7,6 +7,7 @@ import (
 
 	"github.com/ihexxa/quickshare/src/handlers"
 	"github.com/ihexxa/quickshare/src/handlers/multiusers"
+	"github.com/ihexxa/quickshare/src/userstore"
 	"github.com/parnurzeal/gorequest"
 )
 
@@ -47,6 +48,17 @@ func (cl *SingleUserClient) SetPwd(oldPwd, newPwd string, token *http.Cookie) (*
 		Send(multiusers.SetPwdReq{
 			OldPwd: oldPwd,
 			NewPwd: newPwd,
+		}).
+		AddCookie(token).
+		End()
+}
+
+func (cl *SingleUserClient) SetUser(ID uint64, role string, quota *userstore.Quota, token *http.Cookie) (*http.Response, string, []error) {
+	return cl.r.Patch(cl.url("/v1/users/")).
+		Send(multiusers.SetUserReq{
+			ID:    ID,
+			Role:  role,
+			Quota: quota,
 		}).
 		AddCookie(token).
 		End()

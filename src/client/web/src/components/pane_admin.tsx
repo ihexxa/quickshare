@@ -109,7 +109,19 @@ export class UserForm extends React.Component<
       });
   };
 
-  setUser = () => {};
+  setUser = async () => {
+    return updater()
+      .setUser(this.props.id, this.props.role, this.props.quota)
+      .then((ok: boolean) => {
+        if (!ok) {
+          alert("failed to set user");
+        }
+        return updater().listUsers();
+      })
+      .then(() => {
+        this.props.update(updater().updateAdmin);
+      });
+  };
 
   delUser = () => {
     updater()
@@ -121,7 +133,7 @@ export class UserForm extends React.Component<
         return updater().listUsers();
       })
       .then((_: boolean) => {
-        this.props.update(updater().updatePanes);
+        this.props.update(updater().updateAdmin);
       });
   };
 
@@ -319,7 +331,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
         return updater().listRoles();
       })
       .then(() => {
-        this.props.update(updater().updatePanes);
+        this.props.update(updater().updateAdmin);
       });
   };
 
@@ -341,7 +353,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
         return updater().listRoles();
       })
       .then(() => {
-        this.props.update(updater().updatePanes);
+        this.props.update(updater().updateAdmin);
       });
   };
 
@@ -372,7 +384,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
         return updater().listUsers();
       })
       .then(() => {
-        this.props.update(updater().updatePanes);
+        this.props.update(updater().updateAdmin);
       });
   };
 
