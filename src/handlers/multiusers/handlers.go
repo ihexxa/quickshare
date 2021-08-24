@@ -40,6 +40,7 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(userstore.AdminRole, "POST", "/v1/users/logout"):         true,
 		apiRuleCname(userstore.AdminRole, "GET", "/v1/users/isauthed"):        true,
 		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/users/pwd"):           true,
+		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/users/"):              true,
 		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/users/pwd/force-set"): true,
 		apiRuleCname(userstore.AdminRole, "POST", "/v1/users/"):               true,
 		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/users/"):             true,
@@ -74,6 +75,7 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(userstore.UserRole, "POST", "/v1/users/logout"):       true,
 		apiRuleCname(userstore.UserRole, "GET", "/v1/users/isauthed"):      true,
 		apiRuleCname(userstore.UserRole, "PATCH", "/v1/users/pwd"):         true,
+		apiRuleCname(userstore.UserRole, "PATCH", "/v1/users/"):            true,
 		apiRuleCname(userstore.UserRole, "GET", "/v1/users/self"):          true,
 		apiRuleCname(userstore.UserRole, "POST", "/v1/fs/files"):           true,
 		apiRuleCname(userstore.UserRole, "DELETE", "/v1/fs/files"):         true,
@@ -583,4 +585,30 @@ func (h *MultiUsersSvc) Self(c *gin.Context) {
 		Role:      claims[q.RoleParam],
 		UsedSpace: user.UsedSpace,
 	})
+}
+
+type SetUserReq struct {
+	ID        uint64           `json:"id,string"`
+	Role      string           `json:"role"`
+	UsedSpace int64            `json:"usedSpace,string"`
+	Quota     *userstore.Quota `json:"quota"`
+}
+
+func (h *MultiUsersSvc) SetUser(c *gin.Context) {
+	req := &SetUserReq{}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
+	err := h.deps.Users().SetInfo(req.ID, &userstore.User{
+		Role:  req.Role,
+		Quota: req.Quota,
+	})
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
+	c.JSON(q.Resp(200))
 }
