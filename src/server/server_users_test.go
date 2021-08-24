@@ -162,7 +162,7 @@ func TestUsersHandlers(t *testing.T) {
 		}
 	})
 
-	t.Run("test users APIs: Login-AddUser-ListUsers-DelUser-ListUsers", func(t *testing.T) {
+	t.Run("test users APIs: Login-AddUser-ListUsers-SetUser-ListUsers-DelUser-ListUsers", func(t *testing.T) {
 		resp, _, errs := usersCl.Login(adminName, adminNewPwd)
 		if len(errs) > 0 {
 			t.Fatal(errs)
@@ -172,7 +172,7 @@ func TestUsersHandlers(t *testing.T) {
 
 		token := client.GetCookie(resp.Cookies(), su.TokenCookie)
 
-		userName, userPwd, userRole := "user_admin", "1234", userstore.UserRole
+		userName, userPwd, userRole := "new_user", "1234", userstore.UserRole
 		resp, auResp, errs := usersCl.AddUser(userName, userPwd, userRole, token)
 		if len(errs) > 0 {
 			t.Fatal(errs)
@@ -207,6 +207,41 @@ func TestUsersHandlers(t *testing.T) {
 				if user.Name != userName ||
 					user.Role != userRole {
 					t.Fatal(fmt.Errorf("incorrect user info (%v)", user))
+				}
+			}
+		}
+
+		newRole, newQuota := userstore.AdminRole, &userstore.Quota{
+			SpaceLimit:         3,
+			UploadSpeedLimit:   3,
+			DownloadSpeedLimit: 3,
+		}
+		resp, _, errs = usersCl.SetUser(newUserID, newRole, newQuota, token)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+
+		resp, lsResp, errs = usersCl.ListUsers(token)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+		for _, user := range lsResp.Users {
+			if user.ID == newUserID {
+				if user.Role != newRole {
+					t.Fatal(fmt.Errorf("incorrect role (%v)", user.Role))
+				}
+				if user.Quota.SpaceLimit != newQuota.SpaceLimit {
+					t.Fatal(fmt.Errorf("incorrect quota (%v)", newQuota.SpaceLimit))
+				}
+				if user.Quota.UploadSpeedLimit != newQuota.UploadSpeedLimit {
+					t.Fatal(fmt.Errorf("incorrect quota (%v)", newQuota.UploadSpeedLimit))
+				}
+				if user.Quota.DownloadSpeedLimit != newQuota.DownloadSpeedLimit {
+					t.Fatal(fmt.Errorf("incorrect quota (%v)", newQuota.DownloadSpeedLimit))
 				}
 			}
 		}

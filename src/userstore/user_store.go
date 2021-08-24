@@ -315,6 +315,7 @@ func (us *KVUserStore) SetInfo(id uint64, user *User) error {
 	if err != nil {
 		return err
 	}
+
 	return us.store.SetStringIn(UsersNs, userID, string(infoBytes))
 }
 
