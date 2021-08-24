@@ -50,8 +50,8 @@ export class AuthPane extends React.Component<Props, State, {}> {
       });
   };
 
-  login = () => {
-    updater()
+  login = async () => {
+    return updater()
       .login(
         this.state.user,
         this.state.pwd,
@@ -72,6 +72,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
           this.setState({ user: "", pwd: "" });
           alert("Failed to login.");
         }
+
       })
       .then(() => {
         return updater().refreshUploadings();
@@ -83,6 +84,23 @@ export class AuthPane extends React.Component<Props, State, {}> {
       })
       .then(() => {
         return updater().listSharings();
+      })
+      .then(() => {
+        return updater().self();
+      })
+      .then(() => {
+        // TODO: should rely on props to get userRole
+        if (updater().props.panes.userRole === "admin") {
+          // TODO: remove hardcode
+          return updater().listRoles();
+        }
+      })
+      .then(() => {
+        // TODO: should rely on props to get userRole
+        if (updater().props.panes.userRole === "admin") {
+          // TODO: remove hardcode
+          return updater().listUsers();
+        }
       })
       .then((_: boolean) => {
         this.update(updater().updateBrowser);

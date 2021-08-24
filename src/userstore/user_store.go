@@ -34,7 +34,7 @@ func IsReachedLimitErr(err error) bool {
 }
 
 type Quota struct {
-	SpaceLimit         int64 `json:"spaceLimit,space"`
+	SpaceLimit         int64 `json:"spaceLimit,string"`
 	UploadSpeedLimit   int   `json:"uploadSpeedLimit"`
 	DownloadSpeedLimit int   `json:"downloadSpeedLimit"`
 }
