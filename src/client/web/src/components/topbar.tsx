@@ -18,9 +18,24 @@ export class TopBar extends React.Component<Props, State, {}> {
     this.props.update(updater().updatePanes);
   };
 
-  showAdmin = () => {
-    updater().displayPane("admin");
-    this.props.update(updater().updatePanes);
+  showAdmin = async () => {
+    return updater()
+      .self()
+      .then(() => {
+        // TODO: use props instead
+        // TODO: remove hardcode role
+        if (
+          updater().props.login.authed &&
+          updater().props.panes.userRole === "admin"
+        ) {
+          return Promise.all([updater().listRoles(), updater().listUsers()]);
+        }
+      })
+      .then(() => {
+        updater().displayPane("admin");
+        this.props.update(updater().updateAdmin);
+        this.props.update(updater().updatePanes);
+      });
   };
 
   render() {
