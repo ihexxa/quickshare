@@ -5,6 +5,7 @@ import { ICoreState } from "./core_state";
 import { updater } from "./state_updater";
 
 export interface Props {
+  userRole: string;
   authed: boolean;
   captchaID: string;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
@@ -48,63 +49,52 @@ export class AuthPane extends React.Component<Props, State, {}> {
         this.props.captchaID,
         this.state.captchaInput
       )
-      .then((ok: boolean) => {
+      .then((ok: boolean): Promise<any> => {
         if (ok) {
           this.update(updater().updateLogin);
-          this.setState({ user: "", pwd: "" });
+          this.setState({ user: "", pwd: "", captchaInput: "" });
           // close all the panes
           updater().displayPane("");
           this.update(updater().updatePanes);
 
           // refresh
-          return updater().setHomeItems();
+          return Promise.all([
+            updater().setHomeItems(),
+            updater().refreshUploadings(),
+            updater().isSharing(updater().props.browser.dirPath.join("/")),
+            updater().listSharings(),
+            updater().self(),
+          ]);
         } else {
-          this.setState({ user: "", pwd: "" });
+          this.setState({ user: "", pwd: "", captchaInput: "" });
           alert("Failed to login.");
-        }
 
-      })
-      .then(() => {
-        return updater().refreshUploadings();
-      })
-      .then(() => {
-        return updater().isSharing(
-          updater().props.browser.dirPath.join("/")
-        );
-      })
-      .then(() => {
-        return updater().listSharings();
-      })
-      .then(() => {
-        return updater().self();
-      })
-      .then(() => {
-        // TODO: should rely on props to get userRole
-        if (updater().props.panes.userRole === "admin") {
-          // TODO: remove hardcode
-          return updater().listRoles();
+          return updater().getCaptchaID();
         }
       })
       .then(() => {
-        // TODO: should rely on props to get userRole
-        if (updater().props.panes.userRole === "admin") {
-          // TODO: remove hardcode
-          return updater().listUsers();
-        }
-      })
-      .then((_: boolean) => {
         this.update(updater().updateBrowser);
       });
   };
 
   logout = () => {
-    updater().logout().then((ok: boolean) => {
-      if (ok) {
-        this.update(updater().updateLogin);
-      } else {
-        alert("Failed to logout.");
-      }
-    });
+    updater()
+      .logout()
+      .then((ok: boolean) => {
+        if (ok) {
+          this.update(updater().updateLogin);
+        } else {
+          alert("Failed to logout.");
+        }
+      });
+  };
+
+  refreshCaptcha = async () => {
+    return updater()
+      .getCaptchaID()
+      .then(() => {
+        this.props.update(updater().updateLogin);
+      });
   };
 
   render() {
@@ -157,6 +147,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
                 <img
                   src={`/v1/captchas/imgs?capid=${this.props.captchaID}`}
                   className="captcha"
+                  onClick={this.refreshCaptcha}
                 />
               </div>
               <div className="flex-list-item-l"></div>

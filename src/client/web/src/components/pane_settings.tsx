@@ -147,6 +147,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               </div>
               <div className="flex-list-item-r">
                 <AuthPane
+                  userRole={this.props.login.userRole}
                   authed={this.props.login.authed}
                   captchaID={this.props.login.captchaID}
                   update={this.update}

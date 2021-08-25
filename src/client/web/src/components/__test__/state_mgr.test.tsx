@@ -43,14 +43,14 @@ describe("State Manager", () => {
 
     // panes
     expect(coreState.panes).toEqual({
-      userRole: "admin",
-      displaying: "browser",
+      displaying: "",
       paneNames: Set(["settings", "login", "admin"]),
     });
 
     // login
     expect(coreState.login).toEqual({
-      authed: false,
+      userRole: "admin",
+      authed: true,
       captchaID: "mockCaptchaID",
     });
 
