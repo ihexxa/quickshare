@@ -6,5 +6,8 @@
   "scripts": {
     "build": "scripts/build.sh",
     "start": "cd src/client/web/ && yarn && yarn build && cd ../../.. && go run cmd/start/main.go -c `pwd`/configs/dev.yml"
+  },
+  "dependencies": {
+    "webpack-bundle-analyzer": "^4.4.2"
   }
 }
