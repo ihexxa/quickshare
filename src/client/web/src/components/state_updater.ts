@@ -16,6 +16,7 @@ import { FilesClient } from "../client/files";
 import { UsersClient } from "../client/users";
 import { UploadEntry } from "../worker/interface";
 import { Up } from "../worker/upload_mgr";
+import { alertMsg } from "../common/env";
 
 export class Updater {
   props: ICoreState;
@@ -112,7 +113,7 @@ export class Updater {
   mkDir = async (dirPath: string): Promise<void> => {
     const resp = await this.filesClient.mkdir(dirPath);
     if (resp.status !== 200) {
-      alert(`failed to make dir ${dirPath}`);
+      alertMsg(`failed to make dir ${dirPath}`);
     }
   };
 
@@ -134,7 +135,7 @@ export class Updater {
     const failedFiles = await Promise.all(delRequests);
     failedFiles.forEach((failedFile) => {
       if (failedFile !== "") {
-        alert(`failed to delete ${failedFile}`);
+        alertMsg(`failed to delete ${failedFile}`);
       }
     });
     return this.setItems(dirParts);
@@ -178,7 +179,7 @@ export class Updater {
     const failedFiles = await Promise.all(moveRequests);
     failedFiles.forEach((failedItem) => {
       if (failedItem !== "") {
-        alert(`failed to move ${failedItem}`);
+        alertMsg(`failed to move ${failedItem}`);
       }
     });
 
@@ -194,7 +195,7 @@ export class Updater {
       if (pane != null) {
         this.props.panes.displaying = paneName;
       } else {
-        alert(`dialgos: pane (${paneName}) not found`);
+        alertMsg(`dialgos: pane (${paneName}) not found`);
       }
     }
   };

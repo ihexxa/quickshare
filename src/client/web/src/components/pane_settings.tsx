@@ -3,6 +3,7 @@ import * as React from "react";
 import { ICoreState } from "./core_state";
 import { AuthPane, Props as LoginProps } from "./pane_login";
 import { updater } from "./state_updater";
+import { alertMsg } from "../common/env";
 
 export interface Props {
   login: LoginProps;
@@ -39,19 +40,19 @@ export class PaneSettings extends React.Component<Props, State, {}> {
 
   setPwd = () => {
     if (this.state.newPwd1 !== this.state.newPwd2) {
-      alert("new passwords are not same");
+      alertMsg("new passwords are not same");
     } else if (this.state.newPwd1 == "") {
-      alert("new passwords can not be empty");
+      alertMsg("new passwords can not be empty");
     } else if (this.state.oldPwd == this.state.newPwd1) {
-      alert("old and new passwords are same");
+      alertMsg("old and new passwords are same");
     } else {
       updater()
         .setPwd(this.state.oldPwd, this.state.newPwd1)
         .then((ok: boolean) => {
           if (ok) {
-            alert("Password is updated");
+            alertMsg("Password is updated");
           } else {
-            alert("Failed to update password");
+            alertMsg("Failed to update password");
           }
           this.setState({
             oldPwd: "",
