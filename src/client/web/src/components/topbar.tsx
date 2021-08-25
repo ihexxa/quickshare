@@ -1,10 +1,12 @@
 import * as React from "react";
 
 import { ICoreState } from "./core_state";
+import { Props as LoginProps } from "./pane_login";
 import { updater } from "./state_updater";
 
 export interface State {}
 export interface Props {
+  login: LoginProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
@@ -22,11 +24,10 @@ export class TopBar extends React.Component<Props, State, {}> {
     return updater()
       .self()
       .then(() => {
-        // TODO: use props instead
         // TODO: remove hardcode role
         if (
-          updater().props.login.authed &&
-          updater().props.panes.userRole === "admin"
+          this.props.login.authed &&
+          this.props.login.userRole === "admin"
         ) {
           return Promise.all([updater().listRoles(), updater().listUsers()]);
         }

@@ -16,6 +16,7 @@ describe("Login", () => {
 
     const coreState = newWithWorker(mockWorker);
     const pane = new AuthPane({
+      userRole: coreState.login.userRole,
       authed: coreState.login.authed,
       captchaID: coreState.login.captchaID,
       update: (updater: (prevState: ICoreState) => ICoreState) => {},
@@ -32,31 +33,15 @@ describe("Login", () => {
 
     // login
     expect(updater().props.login).toEqual({
+      userRole: "admin",
       authed: true,
       captchaID: "",
     });
 
     // panes
     expect(updater().props.panes).toEqual({
-      userRole: "admin",
       displaying: "",
       paneNames: Set(["settings", "login", "admin"]),
-    });
-
-    // admin
-    let usersMap = Map({});
-    usersResps.listUsersMockResp.data.users.forEach((user: User) => {
-      usersMap = usersMap.set(user.name, user);
-    });
-    let roles = Set<string>();
-    Object.keys(usersResps.listRolesMockResp.data.roles).forEach(
-      (role: string) => {
-        roles = roles.add(role);
-      }
-    );
-    expect(updater().props.admin).toEqual({
-      users: usersMap,
-      roles: roles,
     });
   });
 });

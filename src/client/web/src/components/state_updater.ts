@@ -202,7 +202,7 @@ export class Updater {
   self = async (): Promise<boolean> => {
     const resp = await this.usersClient.self();
     if (resp.status === 200) {
-      this.props.panes.userRole = resp.data.role;
+      this.props.login.userRole = resp.data.role;
       return true;
     }
     return false;

@@ -9,7 +9,6 @@ import { AuthPane, Props as AuthPaneProps } from "./pane_login";
 
 export interface PanesProps {
   displaying: string;
-  userRole: string;
   paneNames: Set<string>;
 }
 export interface Props {
@@ -46,6 +45,7 @@ export class Panes extends React.Component<Props, State, {}> {
       ),
       login: (
         <AuthPane
+          userRole={this.props.login.userRole}
           authed={this.props.login.authed}
           captchaID={this.props.login.captchaID}
           update={this.props.update}
@@ -53,7 +53,7 @@ export class Panes extends React.Component<Props, State, {}> {
       ),
     });
 
-    if (this.props.panes.userRole === "admin") {
+    if (this.props.login.userRole === "admin") {
       panesMap = panesMap.set(
         "admin",
         <AdminPane

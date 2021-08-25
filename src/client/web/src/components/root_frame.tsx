@@ -29,7 +29,7 @@ export class RootFrame extends React.Component<Props, State, {}> {
             update={this.props.update}
           />
 
-          <TopBar update={this.props.update}></TopBar>
+          <TopBar login={this.props.panes.login} update={this.props.update}></TopBar>
 
           <div className="container-center">
             <Browser

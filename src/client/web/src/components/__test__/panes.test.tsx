@@ -23,7 +23,6 @@ describe("Panes", () => {
     panes.closePane();
 
     expect(updater().props.panes).toEqual({
-      userRole: coreState.panes.userRole,
       displaying: "",
       paneNames: coreState.panes.paneNames,
     });

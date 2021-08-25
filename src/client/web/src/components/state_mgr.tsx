@@ -88,13 +88,13 @@ export class StateMgr extends React.Component<Props, State, {}> {
         return updater().self();
       })
       .then(() => {
-        if (updater().props.panes.userRole === "admin") {
+        if (updater().props.login.userRole === "admin") {
           // TODO: remove hardcode
           return updater().listRoles();
         }
       })
       .then(() => {
-        if (updater().props.panes.userRole === "admin") {
+        if (updater().props.login.userRole === "admin") {
           // TODO: remove hardcode
           return updater().listUsers();
         }

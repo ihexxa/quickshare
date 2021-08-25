@@ -50,11 +50,11 @@ export function initState(): ICoreState {
       uploadFiles: List<File>([]),
     },
     panes: {
-      userRole: "",
       displaying: "browser",
       paneNames: Set<string>(["settings", "login", "admin"]),
     },
     login: {
+      userRole: "",
       authed: false,
       captchaID: "",
     },
