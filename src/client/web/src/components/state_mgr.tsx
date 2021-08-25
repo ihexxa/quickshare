@@ -18,6 +18,7 @@ export class StateMgr extends React.Component<Props, State, {}> {
   constructor(p: Props) {
     super(p);
     this.state = newState();
+    this.initUpdater(this.state); // don't await
   }
 
   setUsersClient = (client: IUsersClient) => {
@@ -28,7 +29,7 @@ export class StateMgr extends React.Component<Props, State, {}> {
     this.filesClient = client;
   };
 
-  initUpdater = (state: ICoreState): Promise<void> => {
+  initUpdater = async (state: ICoreState): Promise<void> => {
     updater().init(state);
     if (this.usersClient == null || this.filesClient == null) {
       console.error("updater's clients are not inited");
@@ -38,7 +39,20 @@ export class StateMgr extends React.Component<Props, State, {}> {
 
     const params = new URLSearchParams(document.location.search.substring(1));
     return updater()
-      .getCaptchaID()
+      .initIsAuthed()
+      .then(() => {
+        this.update(updater().updateLogin);
+      })
+      .then(() => {
+        if (updater().props.login.authed) {
+          updater().displayPane("");
+        } else {
+          updater().displayPane("login");
+        }
+      })
+      .then(() => {
+        return updater().getCaptchaID();
+      })
       .then((ok: boolean) => {
         if (!ok) {
           alert("failed to get captcha id");

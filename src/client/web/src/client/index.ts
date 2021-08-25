@@ -4,7 +4,7 @@ export const defaultTimeout = 10000;
 export const userIDParam = "uid";
 
 export interface Quota {
-  spaceLimit: number;
+  spaceLimit: string;
   uploadSpeedLimit: number;
   downloadSpeedLimit: number;
 }

@@ -305,7 +305,7 @@ export class Updater {
   };
 
   initIsAuthed = async (): Promise<void> => {
-    return updater()
+    return this
       .isAuthed()
       .then((isAuthed) => {
         updater().setAuthed(isAuthed);

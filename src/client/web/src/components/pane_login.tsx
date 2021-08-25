@@ -26,8 +26,6 @@ export class AuthPane extends React.Component<Props, State, {}> {
       pwd: "",
       captchaInput: "",
     };
-
-    this.initIsAuthed();
   }
 
   changeUser = (ev: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,14 +38,6 @@ export class AuthPane extends React.Component<Props, State, {}> {
 
   changeCaptcha = (ev: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ captchaInput: ev.target.value });
-  };
-
-  initIsAuthed = () => {
-    updater()
-      .initIsAuthed()
-      .then(() => {
-        this.update(updater().updateLogin);
-      });
   };
 
   login = async () => {
