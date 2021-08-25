@@ -259,6 +259,7 @@ func (us *KVUserStore) SetUsed(id uint64, incr bool, capacity int64) error {
 	if !ok {
 		return fmt.Errorf("user (%d) does not exist", id)
 	}
+
 	gotUser := &User{}
 	err := json.Unmarshal([]byte(infoStr), gotUser)
 	if err != nil {
