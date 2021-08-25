@@ -7,6 +7,7 @@ import { RootFrame } from "./root_frame";
 import { FilesClient } from "../client/files";
 import { UsersClient } from "../client/users";
 import { IUsersClient, IFilesClient } from "../client";
+import { alertMsg } from "../common/env";
 
 export interface Props {}
 export interface State extends ICoreState {}
@@ -55,7 +56,7 @@ export class StateMgr extends React.Component<Props, State, {}> {
       })
       .then((ok: boolean) => {
         if (!ok) {
-          alert("failed to get captcha id");
+          alertMsg("failed to get captcha id");
         } else {
           this.update(updater().updateLogin);
         }

@@ -240,7 +240,7 @@ export class Browser extends React.Component<Props, State, {}> {
       .addSharing()
       .then((ok) => {
         if (!ok) {
-          alert("failed to enable sharing");
+          alertMsg("failed to enable sharing");
         } else {
           updater().setSharing(true);
           return this.listSharings();
@@ -256,7 +256,7 @@ export class Browser extends React.Component<Props, State, {}> {
       .deleteSharing(dirPath)
       .then((ok) => {
         if (!ok) {
-          alert("failed to disable sharing");
+          alertMsg("failed to disable sharing");
         } else {
           updater().setSharing(false);
           return this.listSharings();

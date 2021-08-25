@@ -3,6 +3,7 @@ import { List } from "immutable";
 
 import { ICoreState } from "./core_state";
 import { updater } from "./state_updater";
+import { alertMsg } from "../common/env";
 
 export interface Props {
   userRole: string;
@@ -67,7 +68,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
           ]);
         } else {
           this.setState({ user: "", pwd: "", captchaInput: "" });
-          alert("Failed to login.");
+          alertMsg("Failed to login.");
 
           return updater().getCaptchaID();
         }
@@ -84,7 +85,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
         if (ok) {
           this.update(updater().updateLogin);
         } else {
-          alert("Failed to logout.");
+          alertMsg("Failed to logout.");
         }
       });
   };
