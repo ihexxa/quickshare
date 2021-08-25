@@ -89,13 +89,13 @@ func (lk *AutoLocker) Exec(handler func()) {
 }
 
 // related elements: role, user, action(listing, downloading)/sharing
-func (h *FileHandlers) canAccess(userName, role, op, path string) bool {
+func (h *FileHandlers) canAccess(userName, role, op, sharedPath string) bool {
 	if role == userstore.AdminRole {
 		return true
 	}
 
 	// the file path must start with userName: <userName>/...
-	parts := strings.Split(path, "/")
+	parts := strings.Split(sharedPath, "/")
 	if len(parts) < 2 { // the path must be longer than <userName>/files
 		return false
 	} else if parts[0] == userName {
@@ -107,15 +107,9 @@ func (h *FileHandlers) canAccess(userName, role, op, path string) bool {
 	if op != "list" && op != "download" {
 		return false
 	}
-	// TODO: improve performance
-	for i := 1; i <= len(parts); i++ {
-		prefix := strings.Join(parts[0:i], "/")
-		_, ok := h.deps.FileInfos().GetSharing(prefix)
-		if ok {
-			return true
-		}
-	}
-	return false
+
+	_, ok := h.deps.FileInfos().GetSharing(sharedPath)
+	return ok
 }
 
 type CreateReq struct {
