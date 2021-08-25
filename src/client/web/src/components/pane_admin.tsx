@@ -63,7 +63,7 @@ export class UserForm extends React.Component<
   changeSpaceLimit = (ev: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({
       quota: {
-        spaceLimit: parseInt(ev.target.value, 10),
+        spaceLimit: ev.target.value,
         uploadSpeedLimit: this.state.quota.uploadSpeedLimit,
         downloadSpeedLimit: this.state.quota.downloadSpeedLimit,
       },
@@ -111,10 +111,12 @@ export class UserForm extends React.Component<
 
   setUser = async () => {
     return updater()
-      .setUser(this.props.id, this.props.role, this.props.quota)
+      .setUser(this.props.id, this.state.role, this.state.quota)
       .then((ok: boolean) => {
         if (!ok) {
           alert("failed to set user");
+        } else {
+          alert("user is updated");
         }
         return updater().listUsers();
       })
