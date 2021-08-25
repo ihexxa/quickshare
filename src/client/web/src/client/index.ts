@@ -142,6 +142,7 @@ export class BaseClient {
     return new Promise((resolve: (ret: Response) => void) => {
       setTimeout(() => {
         if (!returned) {
+          returned = true;
           src.cancel("request timeout");
           resolve(TimeoutResp);
         }
@@ -149,13 +150,17 @@ export class BaseClient {
 
       axios({ ...config, cancelToken: src.token })
         .then((resp) => {
-          returned = true;
-          resolve(resp);
+          if (!returned) {
+            returned = true;
+            resolve(resp);
+          }
         })
         .catch((e) => {
+          returned = true;
           const errMsg = e.toString();
 
           if (errMsg.includes("ERR_EMPTY")) {
+            // TODO: check if this is compatible with all browsers
             // this means connection is eliminated by server, it may be caused by timeout.
             resolve(EmptyBodyResp);
           } else if (e.response != null) {

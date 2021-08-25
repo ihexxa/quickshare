@@ -40,7 +40,7 @@ export const resps = {
           role: "mock_role0",
           usedSpace: "128",
           quota: {
-            spaceLimit: 1024,
+            spaceLimit: "1024",
             uploadSpeedLimit: 1024,
             downloadSpeedLimit: 1024,
           },
@@ -52,7 +52,7 @@ export const resps = {
           role: "mock_role1",
           usedSpace: "256",
           quota: {
-            spaceLimit: 1024,
+            spaceLimit: "1024",
             uploadSpeedLimit: 1024,
             downloadSpeedLimit: 1024,
           },
