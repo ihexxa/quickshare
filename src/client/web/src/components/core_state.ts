@@ -3,7 +3,6 @@ import { List, Set, Map } from "immutable";
 import BgWorker from "../worker/upload.bg.worker";
 import { FgWorker } from "../worker/upload.fg.worker";
 
-// import { Props as PanelProps } from "./root_frame";
 import { BrowserProps } from "./browser";
 import { PanesProps } from "./panes";
 import { LoginProps } from "./pane_login";
@@ -19,14 +18,12 @@ export interface MsgProps {
   pkg: Map<string, string>;
 }
 export interface ICoreState {
-  // panel: PanelProps;
   isVertical: boolean;
   browser: BrowserProps;
   panes: PanesProps;
   login: LoginProps;
   admin: AdminProps;
   msg: MsgProps;
-  // settings: SettingsProps;
 }
 
 export function newWithWorker(worker: IWorker): ICoreState {
@@ -70,7 +67,7 @@ export function initState(): ICoreState {
     msg: {
       lan: "en_US",
       pkg: MsgPackage.get("en_US"),
-    }
+    },
   };
 }
 

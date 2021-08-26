@@ -37,6 +37,8 @@ export const msgs: Map<string, string> = Map({
   "settings.pwd.old": "current password",
   "settings.pwd.new1": "new password",
   "settings.pwd.new2": "input again password",
+  "settings.chooseLan": "Choose Language",
+  "settings.pwd.update": "Update Password",
   settings: "Settings",
   admin: "Admin",
   "update.ok": "Succeeded to update",
@@ -61,4 +63,6 @@ export const msgs: Map<string, string> = Map({
   "role.add": "Add Role",
   "role.name": "Role Name",
   "admin.roles": "Roles",
+  zhCN: "Chinese (simplified)",
+  enUS: "English (USA)",
 });

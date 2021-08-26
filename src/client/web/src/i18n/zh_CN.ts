@@ -38,6 +38,8 @@ export const msgs: Map<string, string> = Map({
   "settings.pwd.new1": "新密码",
   "settings.pwd.new2": "再次输入新密码",
   settings: "设置",
+  "settings.chooseLan": "选择语言",
+  "settings.pwd.update": "更新密码",
   admin: "管理",
   "update.ok": "更新成功",
   "update.fail": "更新失败",
@@ -60,4 +62,6 @@ export const msgs: Map<string, string> = Map({
   "role.add": "新增角色",
   "role.name": "角色名字",
   "admin.roles": "角色列表",
+  "zhCN": "中文简体",
+  "enUS": "英语美国",
 });

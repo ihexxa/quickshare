@@ -1,5 +1,4 @@
 import * as React from "react";
-import { List } from "immutable";
 
 import { ICoreState, MsgProps } from "./core_state";
 import { updater } from "./state_updater";
