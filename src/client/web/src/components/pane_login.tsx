@@ -1,14 +1,19 @@
 import * as React from "react";
 import { List } from "immutable";
 
-import { ICoreState } from "./core_state";
+import { ICoreState, MsgProps } from "./core_state";
 import { updater } from "./state_updater";
 import { alertMsg } from "../common/env";
 
-export interface Props {
+export interface LoginProps {
   userRole: string;
   authed: boolean;
   captchaID: string;
+}
+
+export interface Props {
+  login: LoginProps;
+  msg: MsgProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
@@ -47,7 +52,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
       .login(
         this.state.user,
         this.state.pwd,
-        this.props.captchaID,
+        this.props.login.captchaID,
         this.state.captchaInput
       )
       .then((ok: boolean): Promise<any> => {
@@ -85,7 +90,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
         if (ok) {
           this.update(updater().updateLogin);
         } else {
-          alertMsg("Failed to logout.");
+          alertMsg(this.props.msg.pkg.get("login.logout.fail"));
         }
       });
   };
@@ -103,7 +108,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
       <span>
         <div
           className="container"
-          style={{ display: this.props.authed ? "none" : "block" }}
+          style={{ display: this.props.login.authed ? "none" : "block" }}
         >
           <div className="padding-l">
             <div className="flex-list-container">
@@ -114,7 +119,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
                   onChange={this.changeUser}
                   value={this.state.user}
                   className="black0-font margin-t-m margin-b-m margin-r-m"
-                  placeholder="user name"
+                  placeholder={this.props.msg.pkg.get("login.username")}
                 />
                 <input
                   name="pwd"
@@ -122,7 +127,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
                   onChange={this.changePwd}
                   value={this.state.pwd}
                   className="black0-font margin-t-m margin-b-m"
-                  placeholder="password"
+                  placeholder={this.props.msg.pkg.get("login.pwd")}
                 />
               </div>
               <div className="flex-list-item-r">
@@ -130,7 +135,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
                   onClick={this.login}
                   className="green0-bg white-font margin-t-m margin-b-m"
                 >
-                  Log in
+                  {this.props.msg.pkg.get("login.login")}
                 </button>
               </div>
             </div>
@@ -143,10 +148,10 @@ export class AuthPane extends React.Component<Props, State, {}> {
                   onChange={this.changeCaptcha}
                   value={this.state.captchaInput}
                   className="black0-font margin-t-m margin-b-m margin-r-m"
-                  placeholder="captcha"
+                  placeholder={this.props.msg.pkg.get("login.captcha")}
                 />
                 <img
-                  src={`/v1/captchas/imgs?capid=${this.props.captchaID}`}
+                  src={`/v1/captchas/imgs?capid=${this.props.login.captchaID}`}
                   className="captcha"
                   onClick={this.refreshCaptcha}
                 />
@@ -156,9 +161,9 @@ export class AuthPane extends React.Component<Props, State, {}> {
           </div>
         </div>
 
-        <span style={{ display: this.props.authed ? "inherit" : "none" }}>
+        <span style={{ display: this.props.login.authed ? "inherit" : "none" }}>
           <button onClick={this.logout} className="grey1-bg white-font">
-            Log out
+            {this.props.msg.pkg.get("login.logout")}
           </button>
         </span>
       </span>

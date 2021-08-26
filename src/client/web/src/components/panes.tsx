@@ -2,10 +2,10 @@ import * as React from "react";
 import { Set, Map } from "immutable";
 
 import { updater } from "./state_updater";
-import { ICoreState } from "./core_state";
+import { ICoreState, MsgProps } from "./core_state";
 import { PaneSettings } from "./pane_settings";
-import { AdminPane, Props as AdminPaneProps } from "./pane_admin";
-import { AuthPane, Props as AuthPaneProps } from "./pane_login";
+import { AdminPane, AdminProps } from "./pane_admin";
+import { AuthPane, LoginProps } from "./pane_login";
 
 export interface PanesProps {
   displaying: string;
@@ -13,8 +13,9 @@ export interface PanesProps {
 }
 export interface Props {
   panes: PanesProps;
-  login: AuthPaneProps;
-  admin: AdminPaneProps;
+  login: LoginProps;
+  admin: AdminProps;
+  msg: MsgProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
@@ -41,14 +42,17 @@ export class Panes extends React.Component<Props, State, {}> {
 
     let panesMap: Map<string, JSX.Element> = Map({
       settings: (
-        <PaneSettings login={this.props.login} update={this.props.update} />
+        <PaneSettings
+          login={this.props.login}
+          msg={this.props.msg}
+          update={this.props.update}
+        />
       ),
       login: (
         <AuthPane
-          userRole={this.props.login.userRole}
-          authed={this.props.login.authed}
-          captchaID={this.props.login.captchaID}
+          login={this.props.login}
           update={this.props.update}
+          msg={this.props.msg}
         />
       ),
     });
@@ -57,8 +61,8 @@ export class Panes extends React.Component<Props, State, {}> {
       panesMap = panesMap.set(
         "admin",
         <AdminPane
-          users={this.props.admin.users}
-          roles={this.props.admin.roles}
+          admin={this.props.admin}
+          msg={this.props.msg}
           update={this.props.update}
         />
       );
@@ -86,7 +90,7 @@ export class Panes extends React.Component<Props, State, {}> {
                   onClick={this.closePane}
                   className={`red0-bg white-font ${btnClass}`}
                 >
-                  Close
+                  {this.props.msg.pkg.get("panes.close")}
                 </button>
               </div>
             </div>

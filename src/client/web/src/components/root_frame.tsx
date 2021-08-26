@@ -1,14 +1,18 @@
 import * as React from "react";
 
-import { ICoreState } from "./core_state";
-import { Browser, Props as BrowserProps } from "./browser";
-import { Props as PaneLoginProps } from "./pane_login";
-import { Panes, Props as PanesProps } from "./panes";
+import { ICoreState, MsgProps } from "./core_state";
+import { Browser, BrowserProps } from "./browser";
+import { LoginProps } from "./pane_login";
+import { Panes, PanesProps } from "./panes";
+import { AdminProps } from "./pane_admin";
 import { TopBar } from "./topbar";
 
 export interface Props {
   browser: BrowserProps;
   panes: PanesProps;
+  admin: AdminProps;
+  login: LoginProps;
+  msg: MsgProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
@@ -23,25 +27,24 @@ export class RootFrame extends React.Component<Props, State, {}> {
       <div className="theme-white desktop">
         <div id="bg" className="bg bg-img font-m">
           <Panes
-            panes={this.props.panes.panes}
-            login={this.props.panes.login}
-            admin={this.props.panes.admin}
+            panes={this.props.panes}
+            login={this.props.login}
+            admin={this.props.admin}
+            msg={this.props.msg}
             update={this.props.update}
           />
 
-          <TopBar login={this.props.panes.login} update={this.props.update}></TopBar>
+          <TopBar
+            login={this.props.login}
+            msg={this.props.msg}
+            update={this.props.update}
+          />
 
           <div className="container-center">
             <Browser
-              dirPath={this.props.browser.dirPath}
-              items={this.props.browser.items}
-              uploadings={this.props.browser.uploadings}
-              sharings={this.props.browser.sharings}
-              isSharing={this.props.browser.isSharing}
+              browser={this.props.browser}
+              msg={this.props.msg}
               update={this.props.update}
-              uploadFiles={this.props.browser.uploadFiles}
-              uploadValue={this.props.browser.uploadValue}
-              isVertical={this.props.browser.isVertical}
             />
           </div>
 

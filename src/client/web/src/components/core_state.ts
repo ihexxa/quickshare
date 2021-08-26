@@ -4,16 +4,20 @@ import BgWorker from "../worker/upload.bg.worker";
 import { FgWorker } from "../worker/upload.fg.worker";
 
 // import { Props as PanelProps } from "./root_frame";
-import { Props as BrowserProps } from "./browser";
-import { PanesProps as PanesProps } from "./panes";
-import { Props as LoginProps } from "./pane_login";
-import { Props as AdminProps } from "./pane_admin";
-import { Props as SettingsProps } from "./pane_settings";
+import { BrowserProps } from "./browser";
+import { PanesProps } from "./panes";
+import { LoginProps } from "./pane_login";
+import { AdminProps } from "./pane_admin";
 
+import { MsgPackage } from "../i18n/msger";
 import { Item } from "./browser";
 import { UploadInfo, User } from "../client";
 import { initUploadMgr, IWorker } from "../worker/upload_mgr";
 
+export interface MsgProps {
+  lan: string;
+  pkg: Map<string, string>;
+}
 export interface ICoreState {
   // panel: PanelProps;
   isVertical: boolean;
@@ -21,6 +25,7 @@ export interface ICoreState {
   panes: PanesProps;
   login: LoginProps;
   admin: AdminProps;
+  msg: MsgProps;
   // settings: SettingsProps;
 }
 
@@ -62,6 +67,10 @@ export function initState(): ICoreState {
       users: Map<string, User>(),
       roles: Set<string>(),
     },
+    msg: {
+      lan: "en_US",
+      pkg: MsgPackage.get("en_US"),
+    }
   };
 }
 

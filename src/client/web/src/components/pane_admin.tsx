@@ -1,13 +1,19 @@
 import * as React from "react";
 import { Map, Set } from "immutable";
 
-import { ICoreState } from "./core_state";
+import { alertMsg } from "../common/env";
+import { ICoreState, MsgProps } from "./core_state";
 import { User, Quota } from "../client";
 import { updater } from "./state_updater";
 
-export interface Props {
+export interface AdminProps {
   users: Map<string, User>;
   roles: Set<string>;
+}
+
+export interface Props {
+  admin: AdminProps;
+  msg: MsgProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
@@ -18,6 +24,7 @@ export interface UserFormProps {
   role: string;
   quota: Quota;
   roles: Set<string>;
+  msg: MsgProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
@@ -90,7 +97,7 @@ export class UserForm extends React.Component<
 
   setPwd = () => {
     if (this.state.newPwd1 !== this.state.newPwd2) {
-      alert("2 passwords do not match, please check.");
+      alertMsg(this.props.msg.pkg.get("settings.pwd.notSame"));
       return;
     }
 
@@ -98,9 +105,9 @@ export class UserForm extends React.Component<
       .forceSetPwd(this.state.id, this.state.newPwd1)
       .then((ok: boolean) => {
         if (ok) {
-          alert("password is updated");
+          alertMsg(this.props.msg.pkg.get("update.ok"));
         } else {
-          alert("failed to update password");
+          alertMsg(this.props.msg.pkg.get("update.fail"));
         }
         this.setState({
           newPwd1: "",
@@ -114,9 +121,9 @@ export class UserForm extends React.Component<
       .setUser(this.props.id, this.state.role, this.state.quota)
       .then((ok: boolean) => {
         if (!ok) {
-          alert("failed to set user");
+          alertMsg(this.props.msg.pkg.get("update.fail"));
         } else {
-          alert("user is updated");
+          alertMsg(this.props.msg.pkg.get("update.ok"));
         }
         return updater().listUsers();
       })
@@ -130,7 +137,7 @@ export class UserForm extends React.Component<
       .delUser(this.state.id)
       .then((ok: boolean) => {
         if (!ok) {
-          alert("failed to delete user");
+          alertMsg(this.props.msg.pkg.get("delete.fail"));
         }
         return updater().listUsers();
       })
@@ -155,8 +162,12 @@ export class UserForm extends React.Component<
               }}
               className="bold item-name"
             >
-              <div>ID: {this.props.id}</div>
-              <div>Name: {this.props.name}</div>
+              <div>
+                {this.props.msg.pkg.get("user.id")} {this.props.id}
+              </div>
+              <div>
+                {this.props.msg.pkg.get("user.name")} {this.props.name}
+              </div>
             </div>
           </div>
 
@@ -172,7 +183,7 @@ export class UserForm extends React.Component<
               onClick={this.delUser}
               className="grey1-bg white-font margin-r-m"
             >
-              Delete User
+              {this.props.msg.pkg.get("delete")}
             </button>
           </div>
         </div>
@@ -196,7 +207,7 @@ export class UserForm extends React.Component<
 
               <div className="margin-t-m">
                 <div className="margin-r-m font-size-s grey1-font">
-                  Space Limit
+                  {this.props.msg.pkg.get("spaceLimit")}
                 </div>
                 <input
                   name={`${this.props.id}-spaceLimit`}
@@ -210,7 +221,7 @@ export class UserForm extends React.Component<
 
               <div className="margin-t-m">
                 <div className="margin-r-m font-size-s grey1-font">
-                  Upload Speed Limit
+                  {this.props.msg.pkg.get("uploadLimit")}
                 </div>
                 <input
                   name={`${this.props.id}-uploadSpeedLimit`}
@@ -224,7 +235,7 @@ export class UserForm extends React.Component<
 
               <div className="margin-t-m">
                 <div className="margin-r-m font-size-s grey1-font">
-                  Download Speed Limit
+                  {this.props.msg.pkg.get("downloadLimit")}
                 </div>
                 <input
                   name={`${this.props.id}-downloadSpeedLimit`}
@@ -242,7 +253,7 @@ export class UserForm extends React.Component<
               onClick={this.setUser}
               className="grey1-bg white-font margin-r-m"
             >
-              Update User
+              {this.props.msg.pkg.get("update")}
             </button>
           </div>
         </div>
@@ -262,7 +273,7 @@ export class UserForm extends React.Component<
               onChange={this.changePwd1}
               value={this.state.newPwd1}
               className="black0-font margin-b-m"
-              placeholder="new password"
+              placeholder={this.props.msg.pkg.get("settings.pwd.new1")}
             />
             <input
               name={`${this.props.id}-pwd2`}
@@ -270,7 +281,7 @@ export class UserForm extends React.Component<
               onChange={this.changePwd2}
               value={this.state.newPwd2}
               className="black0-font margin-b-m"
-              placeholder="repeat password"
+              placeholder={this.props.msg.pkg.get("settings.pwd.new2")}
             />
           </div>
 
@@ -279,7 +290,7 @@ export class UserForm extends React.Component<
               onClick={this.setPwd}
               className="grey1-bg white-font margin-r-m"
             >
-              Update
+              {this.props.msg.pkg.get("update")}
             </button>
           </div>
         </div>
@@ -328,7 +339,9 @@ export class AdminPane extends React.Component<Props, State, {}> {
       .addRole(this.state.newRole)
       .then((ok: boolean) => {
         if (!ok) {
-          alert("failed to add role");
+          alertMsg(this.props.msg.pkg.get("add.fail"));
+        } else {
+          alertMsg(this.props.msg.pkg.get("add.ok"));
         }
         return updater().listRoles();
       })
@@ -340,7 +353,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
   delRole = (role: string) => {
     if (
       !confirm(
-        "After deleting this role, some of users may not be able to login."
+        this.props.msg.pkg.get("role.delete.warning") // "After deleting this role, some of users may not be able to login."
       )
     ) {
       return;
@@ -350,7 +363,9 @@ export class AdminPane extends React.Component<Props, State, {}> {
       .delRole(role)
       .then((ok: boolean) => {
         if (!ok) {
-          alert("failed to delete role");
+          this.props.msg.pkg.get("delete.fail");
+        } else {
+          this.props.msg.pkg.get("delete.ok");
         }
         return updater().listRoles();
       })
@@ -361,7 +376,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
 
   addUser = () => {
     if (this.state.newUserPwd1 !== this.state.newUserPwd2) {
-      alert("2 passwords do not match, please check.");
+      alertMsg(this.props.msg.pkg.get("settings.pwd.notSame"));
       return;
     }
 
@@ -375,7 +390,9 @@ export class AdminPane extends React.Component<Props, State, {}> {
       })
       .then((ok: boolean) => {
         if (!ok) {
-          alert("failed to add user");
+          alertMsg(this.props.msg.pkg.get("add.fail"));
+        } else {
+          alertMsg(this.props.msg.pkg.get("add.ok"));
         }
         this.setState({
           newUserName: "",
@@ -391,7 +408,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
   };
 
   render() {
-    const userList = this.props.users.valueSeq().map((user: User) => {
+    const userList = this.props.admin.users.valueSeq().map((user: User) => {
       return (
         <div key={user.id} className="margin-t-m">
           <UserForm
@@ -400,14 +417,15 @@ export class AdminPane extends React.Component<Props, State, {}> {
             name={user.name}
             role={user.role}
             quota={user.quota}
-            roles={this.props.roles}
+            roles={this.props.admin.roles}
+            msg={this.props.msg}
             update={this.props.update}
           />
         </div>
       );
     });
 
-    const roleList = this.props.roles.valueSeq().map((role: string) => {
+    const roleList = this.props.admin.roles.valueSeq().map((role: string) => {
       return (
         <div key={role} className="flex-list-container margin-b-m">
           <div className="flex-list-item-l">
@@ -421,7 +439,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
               }}
               className="grey1-bg white-font margin-r-m"
             >
-              Delete
+              {this.props.msg.pkg.get("delete")}
             </button>
           </div>
         </div>
@@ -434,7 +452,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
           <div className="flex-list-container bold">
             <span className="flex-list-item-l">
               <span className="dot black-bg"></span>
-              <span>Add New User</span>
+              <span>{this.props.msg.pkg.get("user.add")}</span>
             </span>
             <span className="flex-list-item-r padding-r-m"></span>
           </div>
@@ -452,28 +470,28 @@ export class AdminPane extends React.Component<Props, State, {}> {
                 onChange={this.onChangeUserName}
                 value={this.state.newUserName}
                 className="black0-font margin-b-m"
-                placeholder="new user name"
+                placeholder={this.props.msg.pkg.get("user.name")}
               />
               <input
                 type="text"
                 onChange={this.onChangeUserRole}
                 value={this.state.newUserRole}
                 className="black0-font margin-b-m"
-                placeholder="new user role"
+                placeholder={this.props.msg.pkg.get("user.role")}
               />
               <input
                 type="password"
                 onChange={this.onChangeUserPwd1}
                 value={this.state.newUserPwd1}
                 className="black0-font margin-b-m"
-                placeholder="password"
+                placeholder={this.props.msg.pkg.get("user.password")}
               />
               <input
                 type="password"
                 onChange={this.onChangeUserPwd2}
                 value={this.state.newUserPwd2}
                 className="black0-font margin-b-m"
-                placeholder="repeat password"
+                placeholder={this.props.msg.pkg.get("settings.pwd.new2")}
               />
             </div>
             <div className="flex-list-item-r">
@@ -481,7 +499,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
                 onClick={this.addUser}
                 className="grey1-bg white-font margin-r-m"
               >
-                Create User
+                {this.props.msg.pkg.get("add")}
               </button>
             </div>
           </div>
@@ -492,7 +510,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
             <div className="flex-list-container bold">
               <span className="flex-list-item-l">
                 <span className="dot black-bg"></span>
-                <span>Users</span>
+                <span>{this.props.msg.pkg.get("admin.users")}</span>
               </span>
               <span className="flex-list-item-r padding-r-m"></span>
             </div>
@@ -504,7 +522,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
           <div className="flex-list-container bold">
             <span className="flex-list-item-l">
               <span className="dot black-bg"></span>
-              <span>Add New Role</span>
+              <span>{this.props.msg.pkg.get("role.add")}</span>
             </span>
             <span className="flex-list-item-r padding-r-m"></span>
           </div>
@@ -517,7 +535,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
                   onChange={this.onChangeRole}
                   value={this.state.newRole}
                   className="black0-font margin-r-m"
-                  placeholder="new role name"
+                  placeholder={this.props.msg.pkg.get("role.name")}
                 />
               </span>
             </div>
@@ -526,7 +544,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
                 onClick={this.addRole}
                 className="grey1-bg white-font margin-r-m"
               >
-                Create Role
+                {this.props.msg.pkg.get("add")}
               </button>
             </div>
           </div>
@@ -537,7 +555,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
             <div className="flex-list-container bold margin-b-m">
               <span className="flex-list-item-l">
                 <span className="dot black-bg"></span>
-                <span>Roles</span>
+                <span>{this.props.msg.pkg.get("admin.roles")}</span>
               </span>
               <span className="flex-list-item-r padding-r-m"></span>
             </div>

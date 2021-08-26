@@ -1,12 +1,13 @@
 import * as React from "react";
 
-import { ICoreState } from "./core_state";
-import { Props as LoginProps } from "./pane_login";
+import { ICoreState, MsgProps } from "./core_state";
+import { LoginProps } from "./pane_login";
 import { updater } from "./state_updater";
 
 export interface State {}
 export interface Props {
   login: LoginProps;
+  msg: MsgProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
@@ -57,13 +58,13 @@ export class TopBar extends React.Component<Props, State, {}> {
               onClick={this.showSettings}
               className="grey1-bg white-font margin-r-m"
             >
-              Settings
+              {this.props.msg.pkg.get("settings")}
             </button>
             <button
               onClick={this.showAdmin}
               className="grey1-bg white-font margin-r-m"
             >
-              Admin
+              {this.props.msg.pkg.get("admin")}
             </button>
           </span>
         </div>

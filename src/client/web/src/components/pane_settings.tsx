@@ -1,12 +1,12 @@
 import * as React from "react";
 
-import { ICoreState } from "./core_state";
-import { AuthPane, Props as LoginProps } from "./pane_login";
+import { ICoreState, MsgProps } from "./core_state";
+import { AuthPane, LoginProps } from "./pane_login";
 import { updater } from "./state_updater";
 import { alertMsg } from "../common/env";
-
 export interface Props {
   login: LoginProps;
+  msg: MsgProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
@@ -40,19 +40,19 @@ export class PaneSettings extends React.Component<Props, State, {}> {
 
   setPwd = () => {
     if (this.state.newPwd1 !== this.state.newPwd2) {
-      alertMsg("new passwords are not same");
+      alertMsg(this.props.msg.pkg.get("settings.pwd.notSame"));
     } else if (this.state.newPwd1 == "") {
-      alertMsg("new passwords can not be empty");
+      alertMsg(this.props.msg.pkg.get("settings.pwd.empty"));
     } else if (this.state.oldPwd == this.state.newPwd1) {
-      alertMsg("old and new passwords are same");
+      alertMsg(this.props.msg.pkg.get("settings.pwd.notChanged"));
     } else {
       updater()
         .setPwd(this.state.oldPwd, this.state.newPwd1)
         .then((ok: boolean) => {
           if (ok) {
-            alertMsg("Password is updated");
+            alertMsg(this.props.msg.pkg.get("settings.pwd.updated"));
           } else {
-            alertMsg("Failed to update password");
+            alertMsg(this.props.msg.pkg.get("settings.pwd.fail"));
           }
           this.setState({
             oldPwd: "",
@@ -64,36 +64,6 @@ export class PaneSettings extends React.Component<Props, State, {}> {
   };
 
   render() {
-    const inputs: Array<JSX.Element> = [
-      <input
-        name="old_pwd"
-        type="password"
-        onChange={this.changeOldPwd}
-        value={this.state.oldPwd}
-        className="black0-font margin-t-m margin-b-m"
-        placeholder="old password"
-      />,
-      <input
-        name="new_pwd1"
-        type="password"
-        onChange={this.changeNewPwd1}
-        value={this.state.newPwd1}
-        className="black0-font margin-t-m margin-b-m"
-        placeholder="new password"
-      />,
-      <input
-        name="new_pwd2"
-        type="password"
-        onChange={this.changeNewPwd2}
-        value={this.state.newPwd2}
-        className="black0-font margin-t-m margin-b-m"
-        placeholder="new password again"
-      />,
-      <button onClick={this.setPwd} className="grey1-bg white-font">
-        Update
-      </button>,
-    ];
-
     return (
       <div className="container">
         <div className="padding-l">
@@ -104,7 +74,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               </div>
               <div className="flex-list-item-r">
                 <button onClick={this.setPwd} className="grey1-bg white-font">
-                  Update
+                  {this.props.msg.pkg.get("update")}
                 </button>
               </div>
             </div>
@@ -116,7 +86,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
                 onChange={this.changeOldPwd}
                 value={this.state.oldPwd}
                 className="black0-font margin-t-m margin-b-m"
-                placeholder="old password"
+                placeholder={this.props.msg.pkg.get("settings.pwd.old")}
               />
             </div>
             <div>
@@ -126,7 +96,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
                 onChange={this.changeNewPwd1}
                 value={this.state.newPwd1}
                 className="black0-font margin-t-m margin-b-m margin-r-m"
-                placeholder="new password"
+                placeholder={this.props.msg.pkg.get("settings.pwd.new1")}
               />
               <input
                 name="new_pwd2"
@@ -134,7 +104,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
                 onChange={this.changeNewPwd2}
                 value={this.state.newPwd2}
                 className="black0-font margin-t-m margin-b-m"
-                placeholder="new password again"
+                placeholder={this.props.msg.pkg.get("settings.pwd.new2")}
               />
             </div>
           </div>
@@ -148,9 +118,8 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               </div>
               <div className="flex-list-item-r">
                 <AuthPane
-                  userRole={this.props.login.userRole}
-                  authed={this.props.login.authed}
-                  captchaID={this.props.login.captchaID}
+                  login={this.props.login}
+                  msg={this.props.msg}
                   update={this.update}
                 />
               </div>
