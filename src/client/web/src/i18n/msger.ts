@@ -16,9 +16,9 @@ export class Msger {
 export class MsgPackage {
   static get(key: string): Map<string, string> {
     switch (key) {
-      case "en-US":
+      case "en_US":
         return Map(enMsgs);
-      case "zh-CN":
+      case "zh_CN":
         return Map(cnMsgs);
       default:
         return Map(enMsgs);

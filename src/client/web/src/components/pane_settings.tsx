@@ -63,6 +63,11 @@ export class PaneSettings extends React.Component<Props, State, {}> {
     }
   };
 
+  setLan = (lan: string) => {
+    updater().setLan(lan);
+    this.props.update(updater().updateMsg);
+  };
+
   render() {
     return (
       <div className="container">
@@ -70,7 +75,9 @@ export class PaneSettings extends React.Component<Props, State, {}> {
           <div>
             <div className="flex-list-container">
               <div className="flex-list-item-l">
-                <h5 className="black-font">Update Password</h5>
+                <h5 className="black-font">
+                  {this.props.msg.pkg.get("settings.pwd.update")}
+                </h5>
               </div>
               <div className="flex-list-item-r">
                 <button onClick={this.setPwd} className="grey1-bg white-font">
@@ -111,10 +118,40 @@ export class PaneSettings extends React.Component<Props, State, {}> {
 
           <div className="hr white0-bg margin-t-m margin-b-m"></div>
 
+          <div className="margin-b-m">
+            <div className="flex-list-container">
+              <div className="flex-list-item-l">
+                <h5 className="black-font">
+                  {this.props.msg.pkg.get("settings.chooseLan")}
+                </h5>
+              </div>
+              <div className="flex-list-item-r">
+                <button
+                  onClick={() => {
+                    this.setLan("en_US");
+                  }}
+                  className="margin-r-m white-font"
+                >
+                  {this.props.msg.pkg.get("enUS")}
+                </button>
+                <button
+                  onClick={() => {
+                    this.setLan("zh_CN");
+                  }}
+                  className="white-font"
+                >
+                  {this.props.msg.pkg.get("zhCN")}
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div>
             <div className="flex-list-container">
               <div className="flex-list-item-l">
-                <h5 className="black-font">Logout</h5>
+                <h5 className="black-font">
+                  {this.props.msg.pkg.get("login.logout")}
+                </h5>
               </div>
               <div className="flex-list-item-r">
                 <AuthPane

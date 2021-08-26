@@ -12,10 +12,11 @@ describe("Panes", () => {
 
     const coreState = newWithWorker(mockWorker);
     const panes = new Panes({
-        panes: coreState.panes,
-        admin: coreState.admin,
-        login: coreState.login,
-        update: (updater: (prevState: ICoreState) => ICoreState) => {},
+      panes: coreState.panes,
+      admin: coreState.admin,
+      login: coreState.login,
+      msg: coreState.msg,
+      update: (updater: (prevState: ICoreState) => ICoreState) => {},
     });
 
     updater().init(coreState);
