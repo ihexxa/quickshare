@@ -49,6 +49,8 @@ describe("State Manager", () => {
 
     // login
     expect(coreState.login).toEqual({
+      userID: "0",
+      userName: "mockUser",
       userRole: "admin",
       authed: true,
       captchaID: "mockCaptchaID",

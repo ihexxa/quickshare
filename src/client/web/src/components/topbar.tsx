@@ -26,10 +26,7 @@ export class TopBar extends React.Component<Props, State, {}> {
       .self()
       .then(() => {
         // TODO: remove hardcode role
-        if (
-          this.props.login.authed &&
-          this.props.login.userRole === "admin"
-        ) {
+        if (this.props.login.authed && this.props.login.userRole === "admin") {
           return Promise.all([updater().listRoles(), updater().listUsers()]);
         }
       })
@@ -41,6 +38,15 @@ export class TopBar extends React.Component<Props, State, {}> {
   };
 
   render() {
+    const adminBtn =
+      this.props.login.userRole === "admin" ? (
+        <button
+          onClick={this.showAdmin}
+          className="grey1-bg white-font margin-r-m"
+        >
+          {this.props.msg.pkg.get("admin")}
+        </button>
+      ) : null;
     return (
       <div
         id="top-bar"
@@ -54,18 +60,14 @@ export class TopBar extends React.Component<Props, State, {}> {
             Quickshare
           </a>
           <span className="flex-23col text-right">
+            <span className="user margin-r-m">{this.props.login.userName}</span>
             <button
               onClick={this.showSettings}
               className="grey1-bg white-font margin-r-m"
             >
               {this.props.msg.pkg.get("settings")}
             </button>
-            <button
-              onClick={this.showAdmin}
-              className="grey1-bg white-font margin-r-m"
-            >
-              {this.props.msg.pkg.get("admin")}
-            </button>
+            {adminBtn}
           </span>
         </div>
       </div>

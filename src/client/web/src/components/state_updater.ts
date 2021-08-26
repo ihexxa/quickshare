@@ -205,6 +205,8 @@ export class Updater {
   self = async (): Promise<boolean> => {
     const resp = await this.usersClient.self();
     if (resp.status === 200) {
+      this.props.login.userID = resp.data.id;
+      this.props.login.userName = resp.data.name;
       this.props.login.userRole = resp.data.role;
       return true;
     }

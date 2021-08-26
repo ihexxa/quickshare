@@ -32,6 +32,8 @@ describe("Login", () => {
 
     // login
     expect(updater().props.login).toEqual({
+      userID: "0",
+      userName: "mockUser",
       userRole: "admin",
       authed: true,
       captchaID: "",
