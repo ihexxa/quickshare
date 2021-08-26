@@ -73,7 +73,7 @@ export const resps = {
     status: 200,
     statusText: "",
     data: {
-      id: 0,
+      id: "0",
       name: "mockUser",
       role: "admin",
       usedSpace: "256",

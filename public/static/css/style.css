@@ -666,3 +666,7 @@ div.hr {
   border: solid 1px #95a5a6;
   border-radius: 0.5rem;
 }
+
+.user {
+  font-weight: bold;
+}
