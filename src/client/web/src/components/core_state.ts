@@ -56,6 +56,8 @@ export function initState(): ICoreState {
       paneNames: Set<string>(["settings", "login", "admin"]),
     },
     login: {
+      userID: "",
+      userName: "",
       userRole: "",
       authed: false,
       captchaID: "",
