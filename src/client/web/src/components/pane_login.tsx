@@ -5,6 +5,8 @@ import { updater } from "./state_updater";
 import { alertMsg } from "../common/env";
 
 export interface LoginProps {
+  userID: string;
+  userName: string;
   userRole: string;
   authed: boolean;
   captchaID: string;
