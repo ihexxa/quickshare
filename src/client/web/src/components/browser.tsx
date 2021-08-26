@@ -5,7 +5,7 @@ import FileSize from "filesize";
 
 import { alertMsg, comfirmMsg } from "../common/env";
 import { updater } from "./state_updater";
-import { ICoreState } from "./core_state";
+import { ICoreState, MsgProps } from "./core_state";
 import { MetadataResp, UploadInfo } from "../client";
 import { Up } from "../worker/upload_mgr";
 import { UploadEntry } from "../worker/interface";
@@ -18,7 +18,7 @@ export interface Item {
   selected: boolean;
 }
 
-export interface Props {
+export interface BrowserProps {
   dirPath: List<string>;
   isSharing: boolean;
   items: List<MetadataResp>;
@@ -29,7 +29,11 @@ export interface Props {
   uploadValue: string;
 
   isVertical: boolean;
+}
 
+export interface Props {
+  browser: BrowserProps;
+  msg: MsgProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
@@ -90,7 +94,7 @@ export class Browser extends React.Component<Props, State, {}> {
       .deleteUpload(filePath)
       .then((ok: boolean) => {
         if (!ok) {
-          alertMsg(`Failed to delete uploading ${filePath}`);
+          alertMsg(this.props.msg.pkg.get("browser.upload.del.fail"));
         }
         return updater().refreshUploadings();
       })
@@ -106,19 +110,19 @@ export class Browser extends React.Component<Props, State, {}> {
 
   onMkDir = () => {
     if (this.state.inputValue === "") {
-      alertMsg("folder name can not be empty");
+      alertMsg(this.props.msg.pkg.get("browser.folder.add.fail"));
       return;
     }
 
     const dirPath = getItemPath(
-      this.props.dirPath.join("/"),
+      this.props.browser.dirPath.join("/"),
       this.state.inputValue
     );
     updater()
       .mkDir(dirPath)
       .then(() => {
         this.setState({ inputValue: "" });
-        return updater().setItems(this.props.dirPath);
+        return updater().setItems(this.props.browser.dirPath);
       })
       .then(() => {
         this.update(updater().updateBrowser);
@@ -126,10 +130,10 @@ export class Browser extends React.Component<Props, State, {}> {
   };
 
   delete = () => {
-    if (this.props.dirPath.join("/") !== this.state.selectedSrc) {
-      alertMsg("please select file or folder to delete at first");
+    if (this.props.browser.dirPath.join("/") !== this.state.selectedSrc) {
+      alertMsg(this.props.msg.pkg.get("browser.del.fail"));
       this.setState({
-        selectedSrc: this.props.dirPath.join("/"),
+        selectedSrc: this.props.browser.dirPath.join("/"),
         selectedItems: Map<string, boolean>(),
       });
       return;
@@ -141,7 +145,11 @@ export class Browser extends React.Component<Props, State, {}> {
     }
 
     updater()
-      .delete(this.props.dirPath, this.props.items, this.state.selectedItems)
+      .delete(
+        this.props.browser.dirPath,
+        this.props.browser.items,
+        this.state.selectedItems
+      )
       .then(() => {
         this.update(updater().updateBrowser);
         this.setState({
@@ -153,16 +161,16 @@ export class Browser extends React.Component<Props, State, {}> {
 
   moveHere = () => {
     const oldDir = this.state.selectedSrc;
-    const newDir = this.props.dirPath.join("/");
+    const newDir = this.props.browser.dirPath.join("/");
     if (oldDir === newDir) {
-      alertMsg("source directory is same as destination directory");
+      alertMsg(this.props.msg.pkg.get("browser.move.fail"));
       return;
     }
 
     updater()
       .moveHere(
         this.state.selectedSrc,
-        this.props.dirPath.join("/"),
+        this.props.browser.dirPath.join("/"),
         this.state.selectedItems
       )
       .then(() => {
@@ -175,11 +183,11 @@ export class Browser extends React.Component<Props, State, {}> {
   };
 
   gotoChild = (childDirName: string) => {
-    this.chdir(this.props.dirPath.push(childDirName));
+    this.chdir(this.props.browser.dirPath.push(childDirName));
   };
 
   chdir = async (dirPath: List<string>) => {
-    if (dirPath === this.props.dirPath) {
+    if (dirPath === this.props.browser.dirPath) {
       return;
     }
 
@@ -199,7 +207,7 @@ export class Browser extends React.Component<Props, State, {}> {
   updateProgress = (infos: Map<string, UploadEntry>) => {
     updater().setUploadings(infos);
     updater()
-      .setItems(this.props.dirPath)
+      .setItems(this.props.browser.dirPath)
       .then(() => {
         this.update(updater().updateBrowser);
       });
@@ -211,7 +219,7 @@ export class Browser extends React.Component<Props, State, {}> {
       : this.state.selectedItems.set(itemName, true);
 
     this.setState({
-      selectedSrc: this.props.dirPath.join("/"),
+      selectedSrc: this.props.browser.dirPath.join("/"),
       selectedItems: selectedItems,
     });
   };
@@ -220,17 +228,17 @@ export class Browser extends React.Component<Props, State, {}> {
     let newSelected = Map<string, boolean>();
     const someSelected = this.state.selectedItems.size === 0 ? true : false;
     if (someSelected) {
-      this.props.items.forEach((item) => {
+      this.props.browser.items.forEach((item) => {
         newSelected = newSelected.set(item.name, true);
       });
     } else {
-      this.props.items.forEach((item) => {
+      this.props.browser.items.forEach((item) => {
         newSelected = newSelected.delete(item.name);
       });
     }
 
     this.setState({
-      selectedSrc: this.props.dirPath.join("/"),
+      selectedSrc: this.props.browser.dirPath.join("/"),
       selectedItems: newSelected,
     });
   };
@@ -240,7 +248,7 @@ export class Browser extends React.Component<Props, State, {}> {
       .addSharing()
       .then((ok) => {
         if (!ok) {
-          alertMsg("failed to enable sharing");
+          alertMsg(this.props.msg.pkg.get("browser.share.add.fail"));
         } else {
           updater().setSharing(true);
           return this.listSharings();
@@ -256,7 +264,7 @@ export class Browser extends React.Component<Props, State, {}> {
       .deleteSharing(dirPath)
       .then((ok) => {
         if (!ok) {
-          alertMsg("failed to disable sharing");
+          alertMsg(this.props.msg.pkg.get("browser.share.del.fail"));
         } else {
           updater().setSharing(false);
           return this.listSharings();
@@ -278,13 +286,15 @@ export class Browser extends React.Component<Props, State, {}> {
   };
 
   render() {
-    const breadcrumb = this.props.dirPath.map(
+    const breadcrumb = this.props.browser.dirPath.map(
       (pathPart: string, key: number) => {
         return (
           <span key={pathPart}>
             <button
               type="button"
-              onClick={() => this.chdir(this.props.dirPath.slice(0, key + 1))}
+              onClick={() =>
+                this.chdir(this.props.browser.dirPath.slice(0, key + 1))
+              }
               className="white-font margin-r-m"
               style={{ backgroundColor: "rgba(0, 0, 0, 0.7)" }}
             >
@@ -296,10 +306,14 @@ export class Browser extends React.Component<Props, State, {}> {
     );
 
     const nameCellClass = `item-name item-name-${
-      this.props.isVertical ? "vertical" : "horizontal"
+      this.props.browser.isVertical ? "vertical" : "horizontal"
     } pointer`;
-    const sizeCellClass = this.props.isVertical ? `hidden margin-s` : ``;
-    const modTimeCellClass = this.props.isVertical ? `hidden margin-s` : ``;
+    const sizeCellClass = this.props.browser.isVertical
+      ? `hidden margin-s`
+      : ``;
+    const modTimeCellClass = this.props.browser.isVertical
+      ? `hidden margin-s`
+      : ``;
 
     const ops = (
       <div>
@@ -310,13 +324,13 @@ export class Browser extends React.Component<Props, State, {}> {
               onChange={this.onInputChange}
               value={this.state.inputValue}
               className="black0-font margin-r-m"
-              placeholder="folder name"
+              placeholder={this.props.msg.pkg.get("browser.folder.name")}
             />
             <button
               onClick={this.onMkDir}
               className="grey1-bg white-font margin-r-m"
             >
-              Create Folder
+              {this.props.msg.pkg.get("browser.folder.add")}
             </button>
           </span>
           <span className="inline-block margin-t-m margin-b-m">
@@ -324,13 +338,13 @@ export class Browser extends React.Component<Props, State, {}> {
               onClick={this.onClickUpload}
               className="green0-bg white-font"
             >
-              Upload Files
+              {this.props.msg.pkg.get("browser.upload")}
             </button>
             <input
               type="file"
               onChange={this.addUploads}
               multiple={true}
-              value={this.props.uploadValue}
+              value={this.props.browser.uploadValue}
               ref={this.assignInput}
               className="black0-font hidden"
             />
@@ -345,24 +359,24 @@ export class Browser extends React.Component<Props, State, {}> {
             onClick={() => this.delete()}
             className="red0-bg white-font margin-t-m margin-b-m margin-r-m"
           >
-            Delete Selected
+            {this.props.msg.pkg.get("browser.delete")}
           </button>
           <button
             type="button"
             onClick={() => this.moveHere()}
             className="grey1-bg white-font margin-t-m margin-b-m margin-r-m"
           >
-            Paste
+            {this.props.msg.pkg.get("browser.paste")}
           </button>
-          {this.props.isSharing ? (
+          {this.props.browser.isSharing ? (
             <button
               type="button"
               onClick={() => {
-                this.deleteSharing(this.props.dirPath.join("/"));
+                this.deleteSharing(this.props.browser.dirPath.join("/"));
               }}
               className="red0-bg white-font margin-t-m margin-b-m"
             >
-              Stop Sharing
+              {this.props.msg.pkg.get("browser.share.del")}
             </button>
           ) : (
             <button
@@ -370,16 +384,16 @@ export class Browser extends React.Component<Props, State, {}> {
               onClick={this.addSharing}
               className="green0-bg white-font margin-t-m margin-b-m"
             >
-              Share Folder
+              {this.props.msg.pkg.get("browser.share.add")}
             </button>
           )}
         </div>
       </div>
     );
 
-    const itemList = this.props.items.map((item: MetadataResp) => {
+    const itemList = this.props.browser.items.map((item: MetadataResp) => {
       const isSelected = this.state.selectedItems.has(item.name);
-      const dirPath = this.props.dirPath.join("/");
+      const dirPath = this.props.browser.dirPath.join("/");
       const itemPath = dirPath.endsWith("/")
         ? `${dirPath}${item.name}`
         : `${dirPath}/${item.name}`;
@@ -404,7 +418,9 @@ export class Browser extends React.Component<Props, State, {}> {
                 className={`white-font ${isSelected ? "blue0-bg" : "grey1-bg"}`}
                 style={{ width: "8rem", display: "inline-block" }}
               >
-                {isSelected ? "Deselect" : "Select"}
+                {isSelected
+                  ? this.props.msg.pkg.get("browser.deselect")
+                  : this.props.msg.pkg.get("browser.select")}
               </button>
             </span>
           </span>
@@ -435,7 +451,9 @@ export class Browser extends React.Component<Props, State, {}> {
                 className={`white-font ${isSelected ? "blue0-bg" : "grey1-bg"}`}
                 style={{ width: "8rem", display: "inline-block" }}
               >
-                {isSelected ? "Deselect" : "Select"}
+                {isSelected
+                  ? this.props.msg.pkg.get("browser.deselect")
+                  : this.props.msg.pkg.get("browser.select")}
               </button>
             </span>
           </span>
@@ -443,43 +461,45 @@ export class Browser extends React.Component<Props, State, {}> {
       );
     });
 
-    const uploadingList = this.props.uploadings.map((uploading: UploadInfo) => {
-      const pathParts = uploading.realFilePath.split("/");
-      const fileName = pathParts[pathParts.length - 1];
+    const uploadingList = this.props.browser.uploadings.map(
+      (uploading: UploadInfo) => {
+        const pathParts = uploading.realFilePath.split("/");
+        const fileName = pathParts[pathParts.length - 1];
 
-      return (
-        <div key={fileName} className="flex-list-container">
-          <span className="flex-list-item-l">
-            <span className="vbar blue2-bg"></span>
-            <div className={nameCellClass}>
-              <span className="bold">{fileName}</span>
-              <div className="grey1-font">
-                {FileSize(uploading.uploaded, { round: 0 })}
-                &nbsp;/&nbsp;{FileSize(uploading.size, { round: 0 })}
+        return (
+          <div key={fileName} className="flex-list-container">
+            <span className="flex-list-item-l">
+              <span className="vbar blue2-bg"></span>
+              <div className={nameCellClass}>
+                <span className="bold">{fileName}</span>
+                <div className="grey1-font">
+                  {FileSize(uploading.uploaded, { round: 0 })}
+                  &nbsp;/&nbsp;{FileSize(uploading.size, { round: 0 })}
+                </div>
               </div>
-            </div>
-          </span>
-          <span className="flex-list-item-r padding-r-m">
-            <div className="item-op">
-              <button
-                onClick={() => this.stopUploading(uploading.realFilePath)}
-                className="grey1-bg white-font margin-r-m"
-              >
-                Stop
-              </button>
-              <button
-                onClick={() => this.deleteUpload(uploading.realFilePath)}
-                className="grey1-bg white-font"
-              >
-                Delete
-              </button>
-            </div>
-          </span>
-        </div>
-      );
-    });
+            </span>
+            <span className="flex-list-item-r padding-r-m">
+              <div className="item-op">
+                <button
+                  onClick={() => this.stopUploading(uploading.realFilePath)}
+                  className="grey1-bg white-font margin-r-m"
+                >
+                  {this.props.msg.pkg.get("browser.stop")}
+                </button>
+                <button
+                  onClick={() => this.deleteUpload(uploading.realFilePath)}
+                  className="grey1-bg white-font"
+                >
+                  {this.props.msg.pkg.get("browser.delete")}
+                </button>
+              </div>
+            </span>
+          </div>
+        );
+      }
+    );
 
-    const sharingList = this.props.sharings.map((dirPath: string) => {
+    const sharingList = this.props.browser.sharings.map((dirPath: string) => {
       return (
         <div key={dirPath} className="flex-list-container">
           <span className="flex-list-item-l">
@@ -501,7 +521,7 @@ export class Browser extends React.Component<Props, State, {}> {
               }}
               className="grey1-bg white-font"
             >
-              Disable
+              {this.props.msg.pkg.get("browser.share.del")}
             </button>
           </span>
         </div>
@@ -525,17 +545,17 @@ export class Browser extends React.Component<Props, State, {}> {
                 borderRadius: "0.5rem",
               }}
             >
-              Location:
+              {this.props.msg.pkg.get("browser.location")}
             </span>
             {breadcrumb}
           </div>
 
-          {this.props.uploadings.size === 0 ? null : (
+          {this.props.browser.uploadings.size === 0 ? null : (
             <div className="container">
               <div className="flex-list-container bold">
                 <span className="flex-list-item-l">
                   <span className="dot black-bg"></span>
-                  <span>Uploading Files</span>
+                  <span>{this.props.msg.pkg.get("browser.upload.title")}</span>
                 </span>
                 <span className="flex-list-item-r padding-r-m"></span>
               </div>
@@ -543,12 +563,12 @@ export class Browser extends React.Component<Props, State, {}> {
             </div>
           )}
 
-          {this.props.sharings.size === 0 ? null : (
+          {this.props.browser.sharings.size === 0 ? null : (
             <div className="container">
               <div className="flex-list-container bold">
                 <span className="flex-list-item-l">
                   <span className="dot black-bg"></span>
-                  <span>Sharing Folders</span>
+                  <span>{this.props.msg.pkg.get("browser.share.title")}</span>
                 </span>
                 <span className="flex-list-item-r padding-r-m"></span>
               </div>
@@ -560,9 +580,7 @@ export class Browser extends React.Component<Props, State, {}> {
             <div className="flex-list-container bold">
               <span className="flex-list-item-l">
                 <span className="dot black-bg"></span>
-                <span>Name</span>
-                {/* <span>File Size</span>
-                  <span>Mod Time</span> */}
+                <span>{this.props.msg.pkg.get("browser.item.title")}</span>
               </span>
               <span className="flex-list-item-r padding-r-m">
                 <button
@@ -570,7 +588,7 @@ export class Browser extends React.Component<Props, State, {}> {
                   className={`grey1-bg white-font`}
                   style={{ width: "8rem", display: "inline-block" }}
                 >
-                  Select All
+                  {this.props.msg.pkg.get("browser.selectAll")}
                 </button>
               </span>
             </div>

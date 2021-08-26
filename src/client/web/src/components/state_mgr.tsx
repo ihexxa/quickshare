@@ -56,7 +56,7 @@ export class StateMgr extends React.Component<Props, State, {}> {
       })
       .then((ok: boolean) => {
         if (!ok) {
-          alertMsg("failed to get captcha id");
+          alertMsg(this.state.msg.pkg.get("stateMgr.cap.fail"));
         } else {
           this.update(updater().updateLogin);
         }
@@ -114,11 +114,10 @@ export class StateMgr extends React.Component<Props, State, {}> {
     return (
       <RootFrame
         browser={this.state.browser}
-        panes={{
-          panes: this.state.panes,
-          login: this.state.login,
-          admin: this.state.admin,
-        }}
+        msg={this.state.msg}
+        panes={this.state.panes}
+        login={this.state.login}
+        admin={this.state.admin}
         update={this.update}
       />
     );

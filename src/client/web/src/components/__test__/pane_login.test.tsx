@@ -16,9 +16,8 @@ describe("Login", () => {
 
     const coreState = newWithWorker(mockWorker);
     const pane = new AuthPane({
-      userRole: coreState.login.userRole,
-      authed: coreState.login.authed,
-      captchaID: coreState.login.captchaID,
+      login: coreState.login,
+      msg: coreState.msg,
       update: (updater: (prevState: ICoreState) => ICoreState) => {},
     });
 

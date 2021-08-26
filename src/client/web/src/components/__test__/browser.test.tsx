@@ -22,14 +22,8 @@ describe("Browser", () => {
     updater().setClients(usersCl, filesCl);
 
     const browser = new Browser({
-      dirPath: coreState.browser.dirPath,
-      isSharing: coreState.browser.isSharing,
-      items: coreState.browser.items,
-      uploadings: coreState.browser.uploadings,
-      sharings: coreState.browser.sharings,
-      uploadFiles: coreState.browser.uploadFiles,
-      uploadValue: coreState.browser.uploadValue,
-      isVertical: coreState.browser.isVertical,
+      browser: coreState.browser,
+      msg: coreState.msg,
       update: (updater: (prevState: ICoreState) => ICoreState) => {},
     });
 

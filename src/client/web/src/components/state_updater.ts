@@ -18,6 +18,8 @@ import { UploadEntry } from "../worker/interface";
 import { Up } from "../worker/upload_mgr";
 import { alertMsg } from "../common/env";
 
+import { MsgPackage } from "../i18n/msger";
+
 export class Updater {
   props: ICoreState;
   private usersClient: IUsersClient = new UsersClient("");
@@ -220,7 +222,11 @@ export class Updater {
     return resp.status === 200;
   };
 
-  setUser = async (userID: string, role: string, quota: Quota): Promise<boolean> => {
+  setUser = async (
+    userID: string,
+    role: string,
+    quota: Quota
+  ): Promise<boolean> => {
     const resp = await this.usersClient.setUser(userID, role, quota);
     return resp.status === 200;
   };
@@ -306,11 +312,9 @@ export class Updater {
   };
 
   initIsAuthed = async (): Promise<void> => {
-    return this
-      .isAuthed()
-      .then((isAuthed) => {
-        updater().setAuthed(isAuthed);
-      });
+    return this.isAuthed().then((isAuthed) => {
+      updater().setAuthed(isAuthed);
+    });
   };
 
   setAuthed = (isAuthed: boolean) => {
@@ -329,6 +333,21 @@ export class Updater {
   setPwd = async (oldPwd: string, newPwd: string): Promise<boolean> => {
     const resp = await this.usersClient.setPwd(oldPwd, newPwd);
     return resp.status === 200;
+  };
+
+  setLan = (lan: string) => {
+    switch (lan) {
+      case "en_US":
+        this.props.msg.lan = "en_US";
+        this.props.msg.pkg = MsgPackage.get(lan);
+        break;
+      case "zh_CN":
+        this.props.msg.lan = "zh_CN";
+        this.props.msg.pkg = MsgPackage.get(lan);
+        break;
+      default:
+        alertMsg("language package not found");
+    }
   };
 
   updateBrowser = (prevState: ICoreState): ICoreState => {
@@ -356,6 +375,13 @@ export class Updater {
     return {
       ...prevState,
       admin: { ...prevState.admin, ...this.props.admin },
+    };
+  };
+
+  updateMsg = (prevState: ICoreState): ICoreState => {
+    return {
+      ...prevState,
+      msg: { ...prevState.msg, ...this.props.msg },
     };
   };
 }
