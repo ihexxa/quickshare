@@ -204,13 +204,17 @@ export class Browser extends React.Component<Props, State, {}> {
       });
   };
 
-  updateProgress = (infos: Map<string, UploadEntry>) => {
+  updateProgress = (infos: Map<string, UploadEntry>, refresh: boolean) => {
     updater().setUploadings(infos);
-    updater()
-      .setItems(this.props.browser.dirPath)
-      .then(() => {
-        this.update(updater().updateBrowser);
-      });
+    if (refresh) {
+      updater()
+        .setItems(this.props.browser.dirPath)
+        .then(() => {
+          this.update(updater().updateBrowser);
+        });
+    } else {
+      this.update(updater().updateBrowser);
+    }
   };
 
   select = (itemName: string) => {
