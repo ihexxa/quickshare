@@ -2,7 +2,7 @@ import { Map } from "immutable";
 
 export const msgs: Map<string, string> = Map({
   "stateMgr.cap.fail": "failed to get captcha id",
-  "browser.upload.del.fail": "Failed to delete uploadini item",
+  "browser.upload.del.fail": "Failed to delete uploading item",
   "browser.folder.add.fail": "Folder name can not be empty",
   "browser.del.fail": "Please select file or folder to delete at first",
   "browser.move.fail": "Source directory is same as destination directory",
