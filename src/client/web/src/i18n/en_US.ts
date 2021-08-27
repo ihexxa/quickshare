@@ -65,4 +65,5 @@ export const msgs: Map<string, string> = Map({
   "admin.roles": "Roles",
   zhCN: "Chinese (simplified)",
   enUS: "English (USA)",
+  "move.fail": "Failed to move",
 });

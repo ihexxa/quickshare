@@ -136,11 +136,9 @@ export class Updater {
       })
       .map((selectedItem: MetadataResp): string => {
         return getItemPath(dirParts.join("/"), selectedItem.name);
-        // const resp = await this.filesClient.delete(itemPath);
-        // return resp.status === 200 ? "" : selectedItem.name;
       });
 
-    const batchSize = 5;
+    const batchSize = 3;
     let batch = List<string>();
     let fails = List<string>();
 
@@ -164,7 +162,9 @@ export class Updater {
     }
 
     if (fails.size > 0) {
-      alertMsg(`failed to delete ${fails.join(",\n")}`);
+      alertMsg(
+        `${this.props.msg.pkg.get("delete.fail")}: ${fails.join(",\n")}`
+      );
     }
 
     return this.setItems(dirParts);
@@ -196,21 +196,44 @@ export class Updater {
     dstDir: string,
     selectedItems: Map<string, boolean>
   ): Promise<void> => {
-    const moveRequests = List<string>(selectedItems.keys()).map(
-      async (itemName: string): Promise<string> => {
-        const oldPath = getItemPath(srcDir, itemName);
-        const newPath = getItemPath(dstDir, itemName);
-        const resp = await this.filesClient.move(oldPath, newPath);
-        return resp.status === 200 ? "" : itemName;
+    const itemsToMove = List<string>(selectedItems.keys()).map(
+      (itemName: string): any => {
+        const from = getItemPath(srcDir, itemName);
+        const to = getItemPath(dstDir, itemName);
+        return { from, to };
+        // const resp = await this.filesClient.move(oldPath, newPath);
+        // return resp.status === 200 ? "" : itemName;
       }
     );
 
-    const failedFiles = await Promise.all(moveRequests);
-    failedFiles.forEach((failedItem) => {
-      if (failedItem !== "") {
-        alertMsg(`failed to move ${failedItem}`);
+    const batchSize = 3;
+    let batch = List<any>();
+    let fails = List<string>();
+
+    for (let i = 0; i < itemsToMove.size; i++) {
+      batch = batch.push(itemsToMove.get(i));
+
+      if (batch.size >= batchSize || i == itemsToMove.size - 1) {
+        let promises = batch.map(async (fromTo: any): Promise<Response<any>> => {
+          return this.filesClient.move(fromTo.from, fromTo.to);
+        });
+
+        const resps = await Promise.all(promises.toSeq());
+        resps.forEach((resp: Response<any>, i: number) => {
+          if (resp.status !== 200) {
+            fails = fails.push(batch.get(i).from);
+          }
+        });
+
+        batch = batch.clear();
       }
-    });
+    }
+
+    if (fails.size > 0) {
+      alertMsg(
+        `${this.props.msg.pkg.get("move.fail")}: ${fails.join(",\n")}`
+      );
+    }
 
     return this.setItems(List<string>(dstDir.split("/")));
   };
