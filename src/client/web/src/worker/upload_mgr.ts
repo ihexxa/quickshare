@@ -25,7 +25,7 @@ export class UploadMgr {
   private intervalID: number;
   private worker: IWorker;
   private infos = OrderedMap<string, UploadEntry>();
-  private statusCb = (infos: Map<string, UploadEntry>): void => {};
+  private statusCb = (infos: Map<string, UploadEntry>, refresh: boolean): void => {};
 
   constructor(worker: IWorker) {
     this.worker = worker;
@@ -88,7 +88,7 @@ export class UploadMgr {
     return this.cycle;
   };
 
-  setStatusCb = (cb: (infos: Map<string, UploadEntry>) => void) => {
+  setStatusCb = (cb: (infos: Map<string, UploadEntry>, refresh: boolean) => void) => {
     this.statusCb = cb;
   };
 
@@ -138,7 +138,7 @@ export class UploadMgr {
         );
       }
     }
-    this.statusCb(this.infos.toMap());
+    this.statusCb(this.infos.toMap(), false);
   };
 
   stop = (filePath: string) => {
@@ -153,13 +153,13 @@ export class UploadMgr {
     } else {
       alert(`failed to stop uploading ${filePath}: not found`);
     }
-    this.statusCb(this.infos.toMap());
+    this.statusCb(this.infos.toMap(), false);
   };
 
   delete = (filePath: string) => {
     this.stop(filePath);
     this.infos = this.infos.delete(filePath);
-    this.statusCb(this.infos.toMap());
+    this.statusCb(this.infos.toMap(), false);
   };
 
   list = (): OrderedMap<string, UploadEntry> => {
@@ -185,6 +185,7 @@ export class UploadMgr {
           console.error(`uploading ${errResp.filePath} may already be deleted`);
         }
 
+        this.statusCb(this.infos.toMap(), false);
         break;
       case uploadInfoKind:
         const infoResp = resp as UploadInfoResp;
@@ -193,6 +194,7 @@ export class UploadMgr {
         if (entry != null) {
           if (infoResp.uploaded === entry.size) {
             this.infos = this.infos.delete(infoResp.filePath);
+            this.statusCb(this.infos.toMap(), true);
           } else {
             this.infos = this.infos.set(infoResp.filePath, {
               ...entry,
@@ -203,6 +205,7 @@ export class UploadMgr {
                   ? UploadState.Stopped
                   : infoResp.state,
             });
+            this.statusCb(this.infos.toMap(), false);
           }
         } else {
           // TODO: refine this
@@ -212,11 +215,11 @@ export class UploadMgr {
             }) infos(${this.infos.toObject()})`
           );
         }
+
         break;
       default:
         console.error(`respHandler: response kind not found: ${resp}`);
     }
-    this.statusCb(this.infos.toMap());
   };
 }
 

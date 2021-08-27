@@ -17,8 +17,13 @@ import { UsersClient } from "../client/users";
 import { UploadEntry } from "../worker/interface";
 import { Up } from "../worker/upload_mgr";
 import { alertMsg } from "../common/env";
+import { LocalStorage } from "../common/localstorage";
 
 import { MsgPackage } from "../i18n/msger";
+
+function getCookieLanKey(user: string) {
+  return `qs_${user}_lan`;
+}
 
 export class Updater {
   props: ICoreState;
@@ -337,15 +342,25 @@ export class Updater {
     return resp.status === 200;
   };
 
+  initLan = () => {
+    const lanKey = getCookieLanKey(this.props.login.userName);
+    const lanSaved = LocalStorage.get(lanKey);
+    this.setLan(lanSaved === "" ? "en_US" : lanSaved);
+  };
+
   setLan = (lan: string) => {
+    const lanKey = getCookieLanKey(this.props.login.userName);
+
     switch (lan) {
       case "en_US":
         this.props.msg.lan = "en_US";
         this.props.msg.pkg = MsgPackage.get(lan);
+        LocalStorage.set(lanKey, "en_US");
         break;
       case "zh_CN":
         this.props.msg.lan = "zh_CN";
         this.props.msg.pkg = MsgPackage.get(lan);
+        LocalStorage.set(lanKey, "zh_CN");
         break;
       default:
         alertMsg("language package not found");
