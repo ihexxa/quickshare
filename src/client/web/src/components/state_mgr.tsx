@@ -104,6 +104,9 @@ export class StateMgr extends React.Component<Props, State, {}> {
         this.update(updater().updateLogin);
         this.update(updater().updatePanes);
         this.update(updater().updateAdmin);
+
+        updater().initLan();
+        this.update(updater().updateMsg);
       });
   };
 
