@@ -20,7 +20,8 @@ function translateResp(resp: Response<any>): Response<any> {
       (resp.data.error != null &&
         !resp.data.error.includes("fail to lock the file") &&
         !resp.data.error.includes("offset != uploaded") &&
-        !resp.data.error.includes("i/o timeout"))
+        !resp.data.error.includes("i/o timeout") &&
+        !resp.data.error.includes("too many opened files"))
     ) {
       return FatalErrResp(resp.statusText);
     }
