@@ -11,6 +11,7 @@ import {
   MetadataResp,
   UploadInfo,
   Quota,
+  Response,
 } from "../client";
 import { FilesClient } from "../client/files";
 import { UsersClient } from "../client/users";
@@ -129,22 +130,43 @@ export class Updater {
     items: List<MetadataResp>,
     selectedItems: Map<string, boolean>
   ): Promise<void> => {
-    const delRequests = items
+    const pathsToDel = items
       .filter((item) => {
         return selectedItems.has(item.name);
       })
-      .map(async (selectedItem: MetadataResp): Promise<string> => {
-        const itemPath = getItemPath(dirParts.join("/"), selectedItem.name);
-        const resp = await this.filesClient.delete(itemPath);
-        return resp.status === 200 ? "" : selectedItem.name;
+      .map((selectedItem: MetadataResp): string => {
+        return getItemPath(dirParts.join("/"), selectedItem.name);
+        // const resp = await this.filesClient.delete(itemPath);
+        // return resp.status === 200 ? "" : selectedItem.name;
       });
 
-    const failedFiles = await Promise.all(delRequests);
-    failedFiles.forEach((failedFile) => {
-      if (failedFile !== "") {
-        alertMsg(`failed to delete ${failedFile}`);
+    const batchSize = 5;
+    let batch = List<string>();
+    let fails = List<string>();
+
+    for (let i = 0; i < pathsToDel.size; i++) {
+      batch = batch.push(pathsToDel.get(i));
+
+      if (batch.size >= batchSize || i == pathsToDel.size - 1) {
+        let promises = batch.map(async (itemPath): Promise<Response<any>> => {
+          return this.filesClient.delete(itemPath);
+        });
+
+        const resps = await Promise.all(promises.toSeq());
+        resps.forEach((resp: Response<any>, i: number) => {
+          if (resp.status !== 200) {
+            fails = fails.push(batch.get(i));
+          }
+        });
+
+        batch = batch.clear();
       }
-    });
+    }
+
+    if (fails.size > 0) {
+      alertMsg(`failed to delete ${fails.join(",\n")}`);
+    }
+
     return this.setItems(dirParts);
   };
 
