@@ -562,7 +562,10 @@ export class Browser extends React.Component<Props, State, {}> {
             children={List([
               <Flexbox
                 children={List([
-                  <RiShareForwardBoxFill size="3rem" className="purple0-font margin-r-m" />,
+                  <RiShareForwardBoxFill
+                    size="3rem"
+                    className="purple0-font margin-r-m"
+                  />,
                   <span>{dirPath}</span>,
                 ])}
               />,
@@ -594,26 +597,7 @@ export class Browser extends React.Component<Props, State, {}> {
 
     return (
       <div>
-        <div id="op-bar" className="op-bar">
-          <div className="margin-l-m margin-r-m">{ops}</div>
-        </div>
-
         <div id="item-list">
-          <div className="breadcrumb margin-b-l">
-            <span
-              className="white-font margin-r-m"
-              style={{
-                backgroundColor: "rgba(0, 0, 0, 0.7)",
-                padding: "0.8rem 1rem",
-                fontWeight: "bold",
-                borderRadius: "0.5rem",
-              }}
-            >
-              {this.props.msg.pkg.get("browser.location")}
-            </span>
-            {breadcrumb}
-          </div>
-
           {this.props.browser.uploadings.size === 0 ? null : (
             <div className="container">
               <Flexbox
@@ -677,6 +661,26 @@ export class Browser extends React.Component<Props, State, {}> {
               {sharingList}
             </div>
           )}
+
+          <div className="breadcrumb margin-b-l">
+            <span
+              className="white-font margin-r-m"
+              style={{
+                backgroundColor: "rgba(0, 0, 0, 0.7)",
+                padding: "0.8rem 1rem",
+                fontWeight: "bold",
+                borderRadius: "0.5rem",
+              }}
+            >
+              <RiFolder2Fill size="1.2rem" />
+              {/* {this.props.msg.pkg.get("browser.location")} */}
+            </span>
+            {breadcrumb}
+          </div>
+
+          <div id="op-bar" className="op-bar">
+            <div className="margin-l-m margin-r-m margin-b-m">{ops}</div>
+          </div>
 
           <div className="container">
             <Flexbox
