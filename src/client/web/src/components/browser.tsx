@@ -5,6 +5,10 @@ import FileSize from "filesize";
 import { RiFolder2Fill } from "@react-icons/all-files/ri/RiFolder2Fill";
 import { RiFileList2Fill } from "@react-icons/all-files/ri/RiFileList2Fill";
 import { RiFile2Fill } from "@react-icons/all-files/ri/RiFile2Fill";
+import { RiShareBoxLine } from "@react-icons/all-files/ri/RiShareBoxLine";
+import { RiShareForwardBoxFill } from "@react-icons/all-files/ri/RiShareForwardBoxFill";
+import { RiUploadCloudFill } from "@react-icons/all-files/ri/RiUploadCloudFill";
+import { RiUploadCloudLine } from "@react-icons/all-files/ri/RiUploadCloudLine";
 
 import { alertMsg, comfirmMsg } from "../common/env";
 import { updater } from "./state_updater";
@@ -413,7 +417,10 @@ export class Browser extends React.Component<Props, State, {}> {
             <span className="padding-m">
               <Flexbox
                 children={List([
-                  <RiFolder2Fill size="3rem" className="yellow0-font margin-r-m" />,
+                  <RiFolder2Fill
+                    size="3rem"
+                    className="yellow0-font margin-r-m"
+                  />,
 
                   <span className="">
                     <span className={nameCellClass}>
@@ -437,7 +444,9 @@ export class Browser extends React.Component<Props, State, {}> {
             <span className="padding-m">
               <button
                 onClick={() => this.select(item.name)}
-                className={`${isSelected ? "blue0-bg white-font" : "grey2-bg grey3-font"}`}
+                className={`${
+                  isSelected ? "blue0-bg white-font" : "grey2-bg grey3-font"
+                }`}
                 style={{ width: "8rem", display: "inline-block" }}
               >
                 {isSelected
@@ -481,7 +490,9 @@ export class Browser extends React.Component<Props, State, {}> {
               <button
                 type="button"
                 onClick={() => this.select(item.name)}
-                className={`${isSelected ? "blue0-bg white-font" : "grey2-bg grey3-font"}`}
+                className={`${
+                  isSelected ? "blue0-bg white-font" : "grey2-bg grey3-font"
+                }`}
                 style={{ width: "8rem", display: "inline-block" }}
               >
                 {isSelected
@@ -501,63 +512,82 @@ export class Browser extends React.Component<Props, State, {}> {
         const fileName = pathParts[pathParts.length - 1];
 
         return (
-          <div key={fileName} className="flex-list-container">
-            <span className="flex-list-item-l">
-              <span className="vbar blue2-bg"></span>
-              <div className={nameCellClass}>
-                <span className="bold">{fileName}</span>
-                <div className="grey1-font">
-                  {FileSize(uploading.uploaded, { round: 0 })}
-                  &nbsp;/&nbsp;{FileSize(uploading.size, { round: 0 })}
-                </div>
-              </div>
-            </span>
-            <span className="flex-list-item-r padding-r-m">
-              <div className="item-op">
+          <Flexbox
+            children={List([
+              <span className="padding-m">
+                <Flexbox
+                  children={List([
+                    <RiUploadCloudLine
+                      size="3rem"
+                      className="margin-r-m blue0-font"
+                    />,
+
+                    <div className={`${nameCellClass}`}>
+                      <span className="title-m">{fileName}</span>
+                      <div className="desc-m grey0-font">
+                        {FileSize(uploading.uploaded, { round: 0 })}
+                        &nbsp;/&nbsp;{FileSize(uploading.size, { round: 0 })}
+                      </div>
+                    </div>,
+                  ])}
+                />
+              </span>,
+
+              <div className="item-op padding-m">
                 <button
                   onClick={() => this.stopUploading(uploading.realFilePath)}
-                  className="grey1-bg white-font margin-r-m"
+                  className="grey3-bg grey4-font margin-r-m"
                 >
                   {this.props.msg.pkg.get("browser.stop")}
                 </button>
                 <button
                   onClick={() => this.deleteUpload(uploading.realFilePath)}
-                  className="grey1-bg white-font"
+                  className="grey3-bg grey4-font"
                 >
                   {this.props.msg.pkg.get("browser.delete")}
                 </button>
-              </div>
-            </span>
-          </div>
+              </div>,
+            ])}
+            childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+          />
         );
       }
     );
 
     const sharingList = this.props.browser.sharings.map((dirPath: string) => {
       return (
-        <div key={dirPath} className="flex-list-container">
-          <span className="flex-list-item-l">
-            <span className="dot yellow3-bg"></span>
-            <span className="bold">{dirPath}</span>
-          </span>
-          <span className="flex-list-item-r padding-r-m">
-            <input
-              type="text"
-              readOnly
-              className="margin-r-m"
-              value={`${
-                document.location.href.split("?")[0]
-              }?dir=${encodeURIComponent(dirPath)}`}
-            />
-            <button
-              onClick={() => {
-                this.deleteSharing(dirPath);
-              }}
-              className="grey1-bg white-font"
-            >
-              {this.props.msg.pkg.get("browser.share.del")}
-            </button>
-          </span>
+        <div className="padding-m">
+          <Flexbox
+            key={dirPath}
+            children={List([
+              <Flexbox
+                children={List([
+                  <RiShareForwardBoxFill size="3rem" className="purple0-font margin-r-m" />,
+                  <span>{dirPath}</span>,
+                ])}
+              />,
+
+              <span>
+                <input
+                  type="text"
+                  readOnly
+                  className="margin-r-m"
+                  value={`${
+                    document.location.href.split("?")[0]
+                  }?dir=${encodeURIComponent(dirPath)}`}
+                />
+                <button
+                  onClick={() => {
+                    this.deleteSharing(dirPath);
+                  }}
+                  className="grey3-bg grey4-bg"
+                >
+                  {this.props.msg.pkg.get("browser.share.del")}
+                </button>
+              </span>,
+            ])}
+            childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+          />
         </div>
       );
     });
@@ -588,11 +618,24 @@ export class Browser extends React.Component<Props, State, {}> {
             <div className="container">
               <Flexbox
                 children={List([
-                  <span>
-                    <span className="dot black-bg"></span>
-                    <span className="bold">
-                      {this.props.msg.pkg.get("browser.upload.title")}
-                    </span>
+                  <span className="padding-m">
+                    <Flexbox
+                      children={List([
+                        <RiUploadCloudFill
+                          size="3rem"
+                          className="margin-r-m black-font"
+                        />,
+
+                        <span>
+                          <span className="title-l">
+                            {this.props.msg.pkg.get("browser.upload.title")}
+                          </span>
+                          <span className="desc-l grey0-font">
+                            All files in uploading
+                          </span>
+                        </span>,
+                      ])}
+                    />
                   </span>,
 
                   <span></span>,
@@ -607,11 +650,24 @@ export class Browser extends React.Component<Props, State, {}> {
             <div className="container">
               <Flexbox
                 children={List([
-                  <span>
-                    <span className="dot black-bg"></span>
-                    <span className="bold">
-                      {this.props.msg.pkg.get("browser.share.title")}
-                    </span>
+                  <span className="padding-m">
+                    <Flexbox
+                      children={List([
+                        <RiShareBoxLine
+                          size="3rem"
+                          className="margin-r-m black-font"
+                        />,
+
+                        <span>
+                          <span className="title-l">
+                            {this.props.msg.pkg.get("browser.share.title")}
+                          </span>
+                          <span className="desc-l grey0-font">
+                            Sharing Folders
+                          </span>
+                        </span>,
+                      ])}
+                    />
                   </span>,
 
                   <span></span>,
@@ -629,7 +685,7 @@ export class Browser extends React.Component<Props, State, {}> {
                   <Flexbox
                     children={List([
                       <RiFileList2Fill
-                        size="4rem"
+                        size="3rem"
                         className="margin-r-m black-font"
                       />,
 
