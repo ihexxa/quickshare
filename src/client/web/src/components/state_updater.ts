@@ -214,9 +214,11 @@ export class Updater {
       batch = batch.push(itemsToMove.get(i));
 
       if (batch.size >= batchSize || i == itemsToMove.size - 1) {
-        let promises = batch.map(async (fromTo: any): Promise<Response<any>> => {
-          return this.filesClient.move(fromTo.from, fromTo.to);
-        });
+        let promises = batch.map(
+          async (fromTo: any): Promise<Response<any>> => {
+            return this.filesClient.move(fromTo.from, fromTo.to);
+          }
+        );
 
         const resps = await Promise.all(promises.toSeq());
         resps.forEach((resp: Response<any>, i: number) => {
@@ -230,9 +232,7 @@ export class Updater {
     }
 
     if (fails.size > 0) {
-      alertMsg(
-        `${this.props.msg.pkg.get("move.fail")}: ${fails.join(",\n")}`
-      );
+      alertMsg(`${this.props.msg.pkg.get("move.fail")}: ${fails.join(",\n")}`);
     }
 
     return this.setItems(List<string>(dstDir.split("/")));
@@ -409,6 +409,23 @@ export class Updater {
         break;
       default:
         alertMsg("language package not found");
+    }
+  };
+
+  setTab = (tabName: string) => {
+    switch (tabName) {
+      case "item":
+        this.props.browser.tab = tabName;
+        break;
+      case "uploading":
+        this.props.browser.tab = tabName;
+        break;
+      case "sharing":
+        this.props.browser.tab = tabName;
+        break;
+      default:
+        this.props.browser.tab = "item";
+        break;
     }
   };
 

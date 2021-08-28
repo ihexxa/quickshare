@@ -50,6 +50,7 @@ export function initState(): ICoreState {
       uploadings: List<UploadInfo>([]),
       uploadValue: "",
       uploadFiles: List<File>([]),
+      tab: "",
     },
     panes: {
       displaying: "browser",
