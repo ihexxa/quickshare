@@ -43,5 +43,12 @@ export const Flexbox = (props: Props) => {
     }
   );
 
-  return <div style={{ ...containerStyle, ...props.style }}>{children}</div>;
+  return (
+    <div
+      style={{ ...containerStyle, ...props.style }}
+      className={props.className}
+    >
+      {children}
+    </div>
+  );
 };
