@@ -80,7 +80,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
                 </h5>
               </div>
               <div className="flex-list-item-r">
-                <button onClick={this.setPwd} className="grey1-bg white-font">
+                <button onClick={this.setPwd}>
                   {this.props.msg.pkg.get("update")}
                 </button>
               </div>
@@ -130,7 +130,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
                   onClick={() => {
                     this.setLan("en_US");
                   }}
-                  className="margin-r-m white-font"
+                  className="margin-r-m"
                 >
                   {this.props.msg.pkg.get("enUS")}
                 </button>
@@ -138,7 +138,6 @@ export class PaneSettings extends React.Component<Props, State, {}> {
                   onClick={() => {
                     this.setLan("zh_CN");
                   }}
-                  className="white-font"
                 >
                   {this.props.msg.pkg.get("zhCN")}
                 </button>

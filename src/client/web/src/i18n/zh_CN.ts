@@ -55,7 +55,7 @@ export const msgs: Map<string, string> = Map({
   "user.id": "用户ID",
   "user.add": "新增用户",
   "user.name": "用户名",
-  "user.role": "橘色",
+  "user.role": "角色",
   "user.password": "密码",
   add: "新增",
   "admin.users": "用户列表",
