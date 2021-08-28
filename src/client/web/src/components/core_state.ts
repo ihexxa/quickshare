@@ -17,12 +17,21 @@ export interface MsgProps {
   lan: string;
   pkg: Map<string, string>;
 }
+
+export interface UIProps {
+  // background: url("/static/img/textured_paper.png") repeat fixed center;
+  wallpaper: string;
+  repeat: string;
+  position: string;
+  align: string;
+}
 export interface ICoreState {
   isVertical: boolean;
   browser: BrowserProps;
   panes: PanesProps;
   login: LoginProps;
   admin: AdminProps;
+  ui: UIProps;
   msg: MsgProps;
 }
 
@@ -70,6 +79,12 @@ export function initState(): ICoreState {
     msg: {
       lan: "en_US",
       pkg: MsgPackage.get("en_US"),
+    },
+    ui: {
+      wallpaper: "",
+      repeat: "",
+      position: "",
+      align: "",
     },
   };
 }

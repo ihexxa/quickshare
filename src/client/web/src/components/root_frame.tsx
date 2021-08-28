@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { ICoreState, MsgProps } from "./core_state";
+import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { Browser, BrowserProps } from "./browser";
 import { LoginProps } from "./pane_login";
 import { Panes, PanesProps } from "./panes";
@@ -13,6 +13,7 @@ export interface Props {
   admin: AdminProps;
   login: LoginProps;
   msg: MsgProps;
+  ui: UIProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
@@ -23,9 +24,16 @@ export class RootFrame extends React.Component<Props, State, {}> {
   }
 
   render() {
+    const wallpaperStyle =
+      this.props.ui.wallpaper !== ""
+        ? {
+            background: `url("${this.props.ui.wallpaper}") ${this.props.ui.repeat} ${this.props.ui.position} ${this.props.ui.align}`,
+          }
+        : {};
+
     return (
       <div className="theme-white desktop">
-        <div id="bg" className="bg bg-img font-m">
+        <div id="bg" className="bg bg-img font-m" style={wallpaperStyle}>
           <Panes
             panes={this.props.panes}
             login={this.props.login}

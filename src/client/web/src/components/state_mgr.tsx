@@ -122,6 +122,7 @@ export class StateMgr extends React.Component<Props, State, {}> {
         panes={this.state.panes}
         login={this.state.login}
         admin={this.state.admin}
+        ui={this.state.ui}
         update={this.update}
       />
     );
