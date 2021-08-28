@@ -181,7 +181,7 @@ export class UserForm extends React.Component<
           >
             <button
               onClick={this.delUser}
-              className="grey1-bg white-font margin-r-m"
+              className="margin-r-m"
             >
               {this.props.msg.pkg.get("delete")}
             </button>
@@ -251,7 +251,7 @@ export class UserForm extends React.Component<
           <div className="flex-list-item-r">
             <button
               onClick={this.setUser}
-              className="grey1-bg white-font margin-r-m"
+              className="margin-r-m"
             >
               {this.props.msg.pkg.get("update")}
             </button>
@@ -288,7 +288,7 @@ export class UserForm extends React.Component<
           <div className="flex-list-item-r">
             <button
               onClick={this.setPwd}
-              className="grey1-bg white-font margin-r-m"
+              className="margin-r-m"
             >
               {this.props.msg.pkg.get("update")}
             </button>
@@ -437,7 +437,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
               onClick={() => {
                 this.delRole(role);
               }}
-              className="grey1-bg white-font margin-r-m"
+              className="margin-r-m"
             >
               {this.props.msg.pkg.get("delete")}
             </button>
@@ -497,7 +497,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
             <div className="flex-list-item-r">
               <button
                 onClick={this.addUser}
-                className="grey1-bg white-font margin-r-m"
+                className="margin-r-m"
               >
                 {this.props.msg.pkg.get("add")}
               </button>
@@ -542,7 +542,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
             <div className="flex-list-item-r">
               <button
                 onClick={this.addRole}
-                className="grey1-bg white-font margin-r-m"
+                className="margin-r-m"
               >
                 {this.props.msg.pkg.get("add")}
               </button>

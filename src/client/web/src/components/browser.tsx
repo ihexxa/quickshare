@@ -298,21 +298,18 @@ export class Browser extends React.Component<Props, State, {}> {
   };
 
   render() {
-    const breadcrumb = this.props.browser.dirPath.map(
+    let breadcrumb = this.props.browser.dirPath.map(
       (pathPart: string, key: number) => {
         return (
-          <span key={pathPart}>
-            <button
-              type="button"
-              onClick={() =>
-                this.chdir(this.props.browser.dirPath.slice(0, key + 1))
-              }
-              className="white-font margin-r-m"
-              style={{ backgroundColor: "rgba(0, 0, 0, 0.7)" }}
-            >
-              {pathPart}
-            </button>
-          </span>
+          <button
+            key={pathPart}
+            onClick={() =>
+              this.chdir(this.props.browser.dirPath.slice(0, key + 1))
+            }
+            className="grey3-bg grey4-font margin-r-m"
+          >
+            {pathPart}
+          </button>
         );
       }
     );
@@ -662,22 +659,6 @@ export class Browser extends React.Component<Props, State, {}> {
             </div>
           )}
 
-          <div className="breadcrumb margin-b-l">
-            <span
-              className="white-font margin-r-m"
-              style={{
-                backgroundColor: "rgba(0, 0, 0, 0.7)",
-                padding: "0.8rem 1rem",
-                fontWeight: "bold",
-                borderRadius: "0.5rem",
-              }}
-            >
-              <RiFolder2Fill size="1.2rem" />
-              {/* {this.props.msg.pkg.get("browser.location")} */}
-            </span>
-            {breadcrumb}
-          </div>
-
           <div id="op-bar" className="op-bar">
             <div className="margin-l-m margin-r-m margin-b-m">{ops}</div>
           </div>
@@ -693,15 +674,18 @@ export class Browser extends React.Component<Props, State, {}> {
                         className="margin-r-m black-font"
                       />,
 
-                      <span>
-                        <span className="title-l">
-                          {this.props.msg.pkg.get("browser.item.title")}
-                        </span>
-                        <span className="desc-l grey0-font">
-                          Files and folders in current path
-                        </span>
-                      </span>,
+                      // <span>
+                      //   <span className="title-l">
+                      //     {this.props.msg.pkg.get("browser.item.title")}
+                      //   </span>
+                      //   <span className="desc-l grey0-font">
+                      //     Files and folders in current path
+                      //   </span>
+                      // </span>,
+
+                      <Flexbox children={breadcrumb} />,
                     ])}
+                    // style={{ flex: "column nowrap" }}
                   />
                 </span>,
 

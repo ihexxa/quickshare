@@ -42,11 +42,12 @@ export class TopBar extends React.Component<Props, State, {}> {
       this.props.login.userRole === "admin" ? (
         <button
           onClick={this.showAdmin}
-          className="grey1-bg white-font margin-r-m"
+          className="grey3-bg grey4-font margin-r-m"
         >
           {this.props.msg.pkg.get("admin")}
         </button>
       ) : null;
+
     return (
       <div
         id="top-bar"
@@ -60,10 +61,16 @@ export class TopBar extends React.Component<Props, State, {}> {
             Quickshare
           </a>
           <span className="flex-23col text-right">
-            <span className="user margin-r-m">{this.props.login.userName}</span>
+            <span className="grey3-font font-s">
+              {this.props.login.userName}
+            </span>
+            &nbsp;-&nbsp;
+            <span className="grey0-font font-s margin-r-m">
+              {this.props.login.userRole}
+            </span>
             <button
               onClick={this.showSettings}
-              className="grey1-bg white-font margin-r-m"
+              className="grey3-bg grey4-font margin-r-m"
             >
               {this.props.msg.pkg.get("settings")}
             </button>

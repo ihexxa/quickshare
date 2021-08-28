@@ -167,7 +167,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
         </div>
 
         <span style={{ display: this.props.login.authed ? "inherit" : "none" }}>
-          <button onClick={this.logout} className="grey1-bg white-font">
+          <button onClick={this.logout}>
             {this.props.msg.pkg.get("login.logout")}
           </button>
         </span>
