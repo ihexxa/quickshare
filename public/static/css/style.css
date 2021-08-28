@@ -1,3 +1,7 @@
+body button {
+  font-size: 1.2rem;
+}
+
 #bg {
   position: fixed;
   top: 0;
@@ -669,4 +673,46 @@ div.hr {
 
 .user {
   font-weight: bold;
+}
+
+.title-m {
+  font-size: 1.4rem;
+  /* font-weight: bold; */
+  line-height: 2rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-wrap: break-word;
+  display: block;
+}
+
+.desc-m {
+  font-size: 1.2rem;
+  line-height: 2rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-wrap: break-word;
+  display: block;
+}
+
+.title-l {
+  font-size: 1.8rem;
+  font-weight: bold;
+  line-height: 2rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-wrap: break-word;
+  display: block;
+}
+
+.desc-l {
+  font-size: 1.2rem;
+  line-height: 2rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-wrap: break-word;
+  display: block;
 }
