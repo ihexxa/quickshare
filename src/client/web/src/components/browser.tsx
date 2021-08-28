@@ -9,6 +9,7 @@ import { RiShareBoxLine } from "@react-icons/all-files/ri/RiShareBoxLine";
 import { RiShareForwardBoxFill } from "@react-icons/all-files/ri/RiShareForwardBoxFill";
 import { RiUploadCloudFill } from "@react-icons/all-files/ri/RiUploadCloudFill";
 import { RiUploadCloudLine } from "@react-icons/all-files/ri/RiUploadCloudLine";
+import { RiEmotionSadLine } from "@react-icons/all-files/ri/RiEmotionSadLine";
 
 import { alertMsg, comfirmMsg } from "../common/env";
 import { updater } from "./state_updater";
@@ -341,17 +342,12 @@ export class Browser extends React.Component<Props, State, {}> {
               className="black0-font margin-r-m"
               placeholder={this.props.msg.pkg.get("browser.folder.name")}
             />
-            <button
-              onClick={this.onMkDir}
-              className="margin-r-m"
-            >
+            <button onClick={this.onMkDir} className="margin-r-m">
               {this.props.msg.pkg.get("browser.folder.add")}
             </button>
           </span>
           <span className="inline-block margin-t-m margin-b-m">
-            <button
-              onClick={this.onClickUpload}
-            >
+            <button onClick={this.onClickUpload}>
               {this.props.msg.pkg.get("browser.upload")}
             </button>
             <input
@@ -610,7 +606,29 @@ export class Browser extends React.Component<Props, State, {}> {
     const uploadingListPane =
       this.props.browser.tab === "uploading" ? (
         this.props.browser.uploadings.size === 0 ? (
-          <div>No uploading found</div>
+          <div className="container">
+            <Flexbox
+              children={List([
+                <RiEmotionSadLine
+                  size="4rem"
+                  className="margin-r-m red0-font"
+                />,
+                <span>
+                  <h3 className="title-l">
+                    {this.props.msg.pkg.get("upload.404.title")}
+                  </h3>
+                  <span className="desc-l grey0-font">
+                    {this.props.msg.pkg.get("upload.404.desc")}
+                  </span>
+                </span>,
+              ])}
+              childrenStyles={List([
+                { flex: "auto", justifyContent: "flex-end" },
+                { flex: "auto" },
+              ])}
+              className="padding-l"
+            />
+          </div>
         ) : (
           <div className="container">
             <Flexbox
@@ -624,11 +642,11 @@ export class Browser extends React.Component<Props, State, {}> {
                       />,
 
                       <span>
-                        <span className="title-l">
+                        <span className="title-m bold">
                           {this.props.msg.pkg.get("browser.upload.title")}
                         </span>
-                        <span className="desc-l grey0-font">
-                          All files in uploading
+                        <span className="desc-m grey0-font">
+                          {this.props.msg.pkg.get("browser.upload.desc")}
                         </span>
                       </span>,
                     ])}
@@ -685,10 +703,32 @@ export class Browser extends React.Component<Props, State, {}> {
       );
     });
 
-    const sharingingListPane =
+    const sharingListPane =
       this.props.browser.tab === "sharing" ? (
         this.props.browser.sharings.size === 0 ? (
-          <div>No sharing found</div>
+          <div className="container">
+            <Flexbox
+              children={List([
+                <RiEmotionSadLine
+                  size="4rem"
+                  className="margin-r-m red0-font"
+                />,
+                <span>
+                  <h3 className="title-l">
+                    {this.props.msg.pkg.get("share.404.title")}
+                  </h3>
+                  <span className="desc-l grey0-font">
+                    {this.props.msg.pkg.get("share.404.desc")}
+                  </span>
+                </span>,
+              ])}
+              childrenStyles={List([
+                { flex: "auto", justifyContent: "flex-end" },
+                { flex: "auto" },
+              ])}
+              className="padding-l"
+            />
+          </div>
         ) : (
           <div className="container">
             <Flexbox
@@ -702,11 +742,11 @@ export class Browser extends React.Component<Props, State, {}> {
                       />,
 
                       <span>
-                        <span className="title-l">
+                        <span className="title-m bold">
                           {this.props.msg.pkg.get("browser.share.title")}
                         </span>
-                        <span className="desc-l grey0-font">
-                          Sharing Folders
+                        <span className="desc-m grey0-font">
+                          {this.props.msg.pkg.get("browser.share.desc")}
                         </span>
                       </span>,
                     ])}
@@ -784,7 +824,7 @@ export class Browser extends React.Component<Props, State, {}> {
               </button>
             </div>
           </div>
-          {sharingingListPane}
+          {sharingListPane}
           {uploadingListPane}
           {itemListPane}
         </div>

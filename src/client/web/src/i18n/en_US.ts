@@ -11,7 +11,9 @@ export const msgs: Map<string, string> = Map({
   "browser.share.del": "Stop sharing",
   "browser.share.add": "Share it",
   "browser.share.title": "Sharings",
+  "browser.share.desc": "All folders which are shared",
   "browser.upload.title": "Uploadings",
+  "browser.upload.desc": "All files which are in uploading",
   "browser.folder.name": "Folder name",
   "browser.folder.add": "Add Folder",
   "browser.upload": "Upload",
@@ -67,4 +69,8 @@ export const msgs: Map<string, string> = Map({
   zhCN: "Chinese (simplified)",
   enUS: "English (USA)",
   "move.fail": "Failed to move",
+  "share.404.title": "No folder is in sharing",
+  "share.404.desc": "You can share a folder in the items tab",
+  "upload.404.title": "No uploading is in the progress",
+  "upload.404.desc": "You can upload a file in the items tab",
 });
