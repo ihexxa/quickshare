@@ -1,5 +1,14 @@
 body button {
   font-size: 1.2rem;
+  color: #697384;
+  background-color: #ecf0f6;
+}
+
+body input {
+  font-size: 1.2rem;
+  color: #697384;
+  background-color: #ecf0f6;
+  border: solid 1px #95a5a6;
 }
 
 #bg {
@@ -128,7 +137,7 @@ body button {
   width: 100%;
   color: #34495e;
   font-size: 1.4rem;
-  line-height: 5rem;
+  /* line-height: 5rem; */
   background-color: white;
   border-radius: 0.8rem;
   margin-bottom: 2rem;
