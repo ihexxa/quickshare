@@ -9,6 +9,7 @@ import { ICoreState, MsgProps } from "./core_state";
 import { MetadataResp, UploadInfo } from "../client";
 import { Up } from "../worker/upload_mgr";
 import { UploadEntry } from "../worker/interface";
+import { Flexbox } from "./layout/flexbox";
 
 export interface Item {
   name: string;
@@ -556,13 +557,18 @@ export class Browser extends React.Component<Props, State, {}> {
 
           {this.props.browser.uploadings.size === 0 ? null : (
             <div className="container">
-              <div className="flex-list-container bold">
-                <span className="flex-list-item-l">
-                  <span className="dot black-bg"></span>
-                  <span>{this.props.msg.pkg.get("browser.upload.title")}</span>
-                </span>
-                <span className="flex-list-item-r padding-r-m"></span>
-              </div>
+              <Flexbox
+                children={List([
+                  <span>
+                    <span className="dot black-bg"></span>
+                    <span className="bold">
+                      {this.props.msg.pkg.get("browser.upload.title")}
+                    </span>
+                  </span>,
+                  <span></span>,
+                ])}
+              />
+
               {uploadingList}
             </div>
           )}

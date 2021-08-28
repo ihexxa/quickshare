@@ -3,7 +3,6 @@ import { Map } from "immutable";
 export const msgs: Map<string, string> = Map({
   "stateMgr.cap.fail": "获取captcha id失败",
   "browser.upload.del.fail": "删除上传失败",
-  "browser.upload.title": "正在上传",
   "browser.folder.add.fail": "文件夹名不可为空",
   "browser.del.fail": "至少选择一个文件或文件夹",
   "browser.move.fail": "源与目标相同",
@@ -12,6 +11,7 @@ export const msgs: Map<string, string> = Map({
   "browser.share.del": "停止共享",
   "browser.share.add": "开始共享",
   "browser.share.title": "共享列表",
+  "browser.upload.title": "上传列表",
   "browser.folder.name": "文件夹名",
   "browser.folder.add": "添加文件夹",
   "browser.upload": "上传",
