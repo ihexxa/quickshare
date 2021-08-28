@@ -10,17 +10,16 @@ export interface Props {
 
 const containerStyle = {
   display: "flex",
-  "flex-direction": "row",
-  "flex-wrap": "nowrap",
-  "align-items": "center",
-  "justify-content": "flex-start",
+  flex: "row nowrap",
+  alignItems: "center",
+  justifyContent: "flex-start",
 };
 
 const childrenStyle = {
   flex: "50%",
   display: "flex",
-  "align-items": "flex-start",
-  "justify-content": "flex-start",
+  alignItems: "flex-start",
+  justifyContent: "flex-start",
 };
 
 export const Flexbox = (props: Props) => {

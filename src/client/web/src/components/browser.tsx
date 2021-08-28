@@ -2,6 +2,9 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { List, Map } from "immutable";
 import FileSize from "filesize";
+import { RiFolder2Fill } from "@react-icons/all-files/ri/RiFolder2Fill";
+import { RiFileList2Fill } from "@react-icons/all-files/ri/RiFileList2Fill";
+import { RiFile2Fill } from "@react-icons/all-files/ri/RiFile2Fill";
 
 import { alertMsg, comfirmMsg } from "../common/env";
 import { updater } from "./state_updater";
@@ -404,65 +407,91 @@ export class Browser extends React.Component<Props, State, {}> {
         : `${dirPath}/${item.name}`;
 
       return item.isDir ? (
-        <div key={item.name} className="flex-list-container">
-          <span className="flex-list-item-l">
-            <span className="vbar yellow2-bg"></span>
-            <span className={nameCellClass}>
-              <span className="bold" onClick={() => this.gotoChild(item.name)}>
-                {item.name}
-              </span>
-              <div className="grey1-font">
-                <span>{item.modTime.slice(0, item.modTime.indexOf("T"))}</span>
-              </div>
-            </span>
-          </span>
-          <span className="flex-list-item-r padding-r-m">
-            <span className="item-op">
+        <Flexbox
+          key={item.name}
+          children={List([
+            <span className="padding-m">
+              <Flexbox
+                children={List([
+                  <RiFolder2Fill size="3rem" className="yellow0-font margin-r-m" />,
+
+                  <span className="">
+                    <span className={nameCellClass}>
+                      <span
+                        className="title-m"
+                        onClick={() => this.gotoChild(item.name)}
+                      >
+                        {item.name}
+                      </span>
+                      <div className="desc-m grey0-font">
+                        <span>
+                          {item.modTime.slice(0, item.modTime.indexOf("T"))}
+                        </span>
+                      </div>
+                    </span>
+                  </span>,
+                ])}
+              />
+            </span>,
+
+            <span className="padding-m">
               <button
                 onClick={() => this.select(item.name)}
-                className={`white-font ${isSelected ? "blue0-bg" : "grey1-bg"}`}
+                className={`${isSelected ? "blue0-bg white-font" : "grey2-bg grey3-font"}`}
                 style={{ width: "8rem", display: "inline-block" }}
               >
                 {isSelected
                   ? this.props.msg.pkg.get("browser.deselect")
                   : this.props.msg.pkg.get("browser.select")}
               </button>
-            </span>
-          </span>
-        </div>
+            </span>,
+          ])}
+          childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+        />
       ) : (
-        <div key={item.name} className="flex-list-container">
-          <span className="flex-list-item-l">
-            <span className="vbar green2-bg"></span>
-            <span className={nameCellClass}>
-              <a
-                className="bold"
-                href={`/v1/fs/files?fp=${itemPath}`}
-                target="_blank"
-              >
-                {item.name}
-              </a>
-              <div className="grey1-font">
-                <span>{FileSize(item.size, { round: 0 })}</span>&nbsp;/&nbsp;
-                <span>{item.modTime.slice(0, item.modTime.indexOf("T"))}</span>
-              </div>
-            </span>
-          </span>
-          <span className="flex-list-item-r padding-r-m">
-            <span className="item-op">
+        <Flexbox
+          key={item.name}
+          children={List([
+            <span className="padding-m">
+              <Flexbox
+                children={List([
+                  <RiFile2Fill size="3rem" className="cyan0-font margin-r-m" />,
+
+                  <span className={`${nameCellClass}`}>
+                    <a
+                      className="title-m"
+                      href={`/v1/fs/files?fp=${itemPath}`}
+                      target="_blank"
+                    >
+                      {item.name}
+                    </a>
+                    <div className="desc-m grey0-font">
+                      <span>
+                        {item.modTime.slice(0, item.modTime.indexOf("T"))}
+                      </span>
+                      &nbsp;/&nbsp;
+                      <span>{FileSize(item.size, { round: 0 })}</span>
+                    </div>
+                  </span>,
+                ])}
+              />
+            </span>,
+
+            <span className="item-op padding-m">
               <button
                 type="button"
                 onClick={() => this.select(item.name)}
-                className={`white-font ${isSelected ? "blue0-bg" : "grey1-bg"}`}
+                className={`${isSelected ? "blue0-bg white-font" : "grey2-bg grey3-font"}`}
                 style={{ width: "8rem", display: "inline-block" }}
               >
                 {isSelected
                   ? this.props.msg.pkg.get("browser.deselect")
                   : this.props.msg.pkg.get("browser.select")}
               </button>
-            </span>
-          </span>
-        </div>
+            </span>,
+          ])}
+          childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+        />
       );
     });
 
@@ -565,6 +594,7 @@ export class Browser extends React.Component<Props, State, {}> {
                       {this.props.msg.pkg.get("browser.upload.title")}
                     </span>
                   </span>,
+
                   <span></span>,
                 ])}
               />
@@ -575,33 +605,59 @@ export class Browser extends React.Component<Props, State, {}> {
 
           {this.props.browser.sharings.size === 0 ? null : (
             <div className="container">
-              <div className="flex-list-container bold">
-                <span className="flex-list-item-l">
-                  <span className="dot black-bg"></span>
-                  <span>{this.props.msg.pkg.get("browser.share.title")}</span>
-                </span>
-                <span className="flex-list-item-r padding-r-m"></span>
-              </div>
+              <Flexbox
+                children={List([
+                  <span>
+                    <span className="dot black-bg"></span>
+                    <span className="bold">
+                      {this.props.msg.pkg.get("browser.share.title")}
+                    </span>
+                  </span>,
+
+                  <span></span>,
+                ])}
+              />
+
               {sharingList}
             </div>
           )}
 
           <div className="container">
-            <div className="flex-list-container bold">
-              <span className="flex-list-item-l">
-                <span className="dot black-bg"></span>
-                <span>{this.props.msg.pkg.get("browser.item.title")}</span>
-              </span>
-              <span className="flex-list-item-r padding-r-m">
-                <button
-                  onClick={() => this.selectAll()}
-                  className={`grey1-bg white-font`}
-                  style={{ width: "8rem", display: "inline-block" }}
-                >
-                  {this.props.msg.pkg.get("browser.selectAll")}
-                </button>
-              </span>
-            </div>
+            <Flexbox
+              children={List([
+                <span className="padding-m">
+                  <Flexbox
+                    children={List([
+                      <RiFileList2Fill
+                        size="4rem"
+                        className="margin-r-m black-font"
+                      />,
+
+                      <span>
+                        <span className="title-l">
+                          {this.props.msg.pkg.get("browser.item.title")}
+                        </span>
+                        <span className="desc-l grey0-font">
+                          Files and folders in current path
+                        </span>
+                      </span>,
+                    ])}
+                  />
+                </span>,
+
+                <span className="padding-m">
+                  <button
+                    onClick={() => this.selectAll()}
+                    className={`grey1-bg white-font`}
+                    style={{ width: "8rem", display: "inline-block" }}
+                  >
+                    {this.props.msg.pkg.get("browser.selectAll")}
+                  </button>
+                </span>,
+              ])}
+              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+            />
+
             {itemList}
           </div>
         </div>

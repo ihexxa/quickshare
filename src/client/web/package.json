@@ -49,6 +49,7 @@
     "worker-loader": "^3.0.7"
   },
   "dependencies": {
+    "@react-icons/all-files": "^4.1.0",
     "@types/axios": "^0.14.0",
     "@types/immutable": "^3.8.7",
     "@types/react": "^16.8.13",

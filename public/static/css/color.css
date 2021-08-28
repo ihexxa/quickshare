@@ -78,6 +78,14 @@
     color: #7f8c8d;
 }
 
+.grey2-font {
+    color: #ecf0f6;
+}
+
+.grey3-font {
+    color: #697384;
+}
+
 .black-font {
     color: #000;
 }
@@ -177,6 +185,13 @@
 
 .grey1-bg {
     background-color: #7f8c8d;
+}
+.grey2-bg {
+    background-color: #ecf0f6;
+}
+
+.grey3-bg {
+    color: #697384;
 }
 
 .black-bg {
