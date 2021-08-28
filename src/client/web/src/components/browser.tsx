@@ -37,6 +37,7 @@ export interface BrowserProps {
   uploadValue: string;
 
   isVertical: boolean;
+  tab: string;
 }
 
 export interface Props {
@@ -297,6 +298,11 @@ export class Browser extends React.Component<Props, State, {}> {
       });
   };
 
+  setTab = (tabName: string) => {
+    updater().setTab(tabName);
+    this.props.update(updater().updateBrowser);
+  };
+
   render() {
     let breadcrumb = this.props.browser.dirPath.map(
       (pathPart: string, key: number) => {
@@ -337,7 +343,7 @@ export class Browser extends React.Component<Props, State, {}> {
             />
             <button
               onClick={this.onMkDir}
-              className="grey1-bg white-font margin-r-m"
+              className="margin-r-m"
             >
               {this.props.msg.pkg.get("browser.folder.add")}
             </button>
@@ -345,7 +351,6 @@ export class Browser extends React.Component<Props, State, {}> {
           <span className="inline-block margin-t-m margin-b-m">
             <button
               onClick={this.onClickUpload}
-              className="green0-bg white-font"
             >
               {this.props.msg.pkg.get("browser.upload")}
             </button>
@@ -373,7 +378,7 @@ export class Browser extends React.Component<Props, State, {}> {
           <button
             type="button"
             onClick={() => this.moveHere()}
-            className="grey1-bg white-font margin-t-m margin-b-m margin-r-m"
+            className="margin-t-m margin-b-m margin-r-m"
           >
             {this.props.msg.pkg.get("browser.paste")}
           </button>
@@ -503,6 +508,57 @@ export class Browser extends React.Component<Props, State, {}> {
       );
     });
 
+    const itemListPane =
+      this.props.browser.tab === "" || this.props.browser.tab === "item" ? (
+        <div>
+          <div id="op-bar" className="op-bar">
+            <div className="margin-l-m margin-r-m margin-b-m">{ops}</div>
+          </div>
+
+          <div className="container">
+            <Flexbox
+              children={List([
+                <span className="padding-m">
+                  <Flexbox
+                    children={List([
+                      <RiFileList2Fill
+                        size="3rem"
+                        className="margin-r-m black-font"
+                      />,
+
+                      // <span>
+                      //   <span className="title-l">
+                      //     {this.props.msg.pkg.get("browser.item.title")}
+                      //   </span>
+                      //   <span className="desc-l grey0-font">
+                      //     Files and folders in current path
+                      //   </span>
+                      // </span>,
+
+                      <Flexbox children={breadcrumb} />,
+                    ])}
+                    // style={{ flex: "column nowrap" }}
+                  />
+                </span>,
+
+                <span className="padding-m">
+                  <button
+                    onClick={() => this.selectAll()}
+                    className={`grey1-bg white-font`}
+                    style={{ width: "8rem", display: "inline-block" }}
+                  >
+                    {this.props.msg.pkg.get("browser.selectAll")}
+                  </button>
+                </span>,
+              ])}
+              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+            />
+
+            {itemList}
+          </div>
+        </div>
+      ) : null;
+
     const uploadingList = this.props.browser.uploadings.map(
       (uploading: UploadInfo) => {
         const pathParts = uploading.realFilePath.split("/");
@@ -551,6 +607,43 @@ export class Browser extends React.Component<Props, State, {}> {
       }
     );
 
+    const uploadingListPane =
+      this.props.browser.tab === "uploading" ? (
+        this.props.browser.uploadings.size === 0 ? (
+          <div>No uploading found</div>
+        ) : (
+          <div className="container">
+            <Flexbox
+              children={List([
+                <span className="padding-m">
+                  <Flexbox
+                    children={List([
+                      <RiUploadCloudFill
+                        size="3rem"
+                        className="margin-r-m black-font"
+                      />,
+
+                      <span>
+                        <span className="title-l">
+                          {this.props.msg.pkg.get("browser.upload.title")}
+                        </span>
+                        <span className="desc-l grey0-font">
+                          All files in uploading
+                        </span>
+                      </span>,
+                    ])}
+                  />
+                </span>,
+
+                <span></span>,
+              ])}
+            />
+
+            {uploadingList}
+          </div>
+        )
+      ) : null;
+
     const sharingList = this.props.browser.sharings.map((dirPath: string) => {
       return (
         <div className="padding-m">
@@ -592,118 +685,108 @@ export class Browser extends React.Component<Props, State, {}> {
       );
     });
 
-    return (
-      <div>
-        <div id="item-list">
-          {this.props.browser.uploadings.size === 0 ? null : (
-            <div className="container">
-              <Flexbox
-                children={List([
-                  <span className="padding-m">
-                    <Flexbox
-                      children={List([
-                        <RiUploadCloudFill
-                          size="3rem"
-                          className="margin-r-m black-font"
-                        />,
-
-                        <span>
-                          <span className="title-l">
-                            {this.props.msg.pkg.get("browser.upload.title")}
-                          </span>
-                          <span className="desc-l grey0-font">
-                            All files in uploading
-                          </span>
-                        </span>,
-                      ])}
-                    />
-                  </span>,
-
-                  <span></span>,
-                ])}
-              />
-
-              {uploadingList}
-            </div>
-          )}
-
-          {this.props.browser.sharings.size === 0 ? null : (
-            <div className="container">
-              <Flexbox
-                children={List([
-                  <span className="padding-m">
-                    <Flexbox
-                      children={List([
-                        <RiShareBoxLine
-                          size="3rem"
-                          className="margin-r-m black-font"
-                        />,
-
-                        <span>
-                          <span className="title-l">
-                            {this.props.msg.pkg.get("browser.share.title")}
-                          </span>
-                          <span className="desc-l grey0-font">
-                            Sharing Folders
-                          </span>
-                        </span>,
-                      ])}
-                    />
-                  </span>,
-
-                  <span></span>,
-                ])}
-              />
-
-              {sharingList}
-            </div>
-          )}
-
-          <div id="op-bar" className="op-bar">
-            <div className="margin-l-m margin-r-m margin-b-m">{ops}</div>
-          </div>
-
+    const sharingingListPane =
+      this.props.browser.tab === "sharing" ? (
+        this.props.browser.sharings.size === 0 ? (
+          <div>No sharing found</div>
+        ) : (
           <div className="container">
             <Flexbox
               children={List([
                 <span className="padding-m">
                   <Flexbox
                     children={List([
-                      <RiFileList2Fill
+                      <RiShareBoxLine
                         size="3rem"
                         className="margin-r-m black-font"
                       />,
 
-                      // <span>
-                      //   <span className="title-l">
-                      //     {this.props.msg.pkg.get("browser.item.title")}
-                      //   </span>
-                      //   <span className="desc-l grey0-font">
-                      //     Files and folders in current path
-                      //   </span>
-                      // </span>,
-
-                      <Flexbox children={breadcrumb} />,
+                      <span>
+                        <span className="title-l">
+                          {this.props.msg.pkg.get("browser.share.title")}
+                        </span>
+                        <span className="desc-l grey0-font">
+                          Sharing Folders
+                        </span>
+                      </span>,
                     ])}
-                    // style={{ flex: "column nowrap" }}
                   />
                 </span>,
 
-                <span className="padding-m">
-                  <button
-                    onClick={() => this.selectAll()}
-                    className={`grey1-bg white-font`}
-                    style={{ width: "8rem", display: "inline-block" }}
-                  >
-                    {this.props.msg.pkg.get("browser.selectAll")}
-                  </button>
-                </span>,
+                <span></span>,
               ])}
-              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
             />
 
-            {itemList}
+            {sharingList}
           </div>
+        )
+      ) : null;
+
+    return (
+      <div>
+        <div id="item-list">
+          <div className="container">
+            <div className="padding-m">
+              <button
+                onClick={() => {
+                  this.setTab("item");
+                }}
+                className="margin-r-m"
+              >
+                <Flexbox
+                  children={List([
+                    <RiFolder2Fill
+                      size="1.6rem"
+                      className="margin-r-s cyan0-font"
+                    />,
+                    <span>{this.props.msg.pkg.get("browser.item.title")}</span>,
+                  ])}
+                  childrenStyles={List([{ flex: "30%" }, { flex: "70%" }])}
+                />
+              </button>
+              <button
+                onClick={() => {
+                  this.setTab("uploading");
+                }}
+                className="margin-r-m"
+              >
+                <Flexbox
+                  children={List([
+                    <RiUploadCloudFill
+                      size="1.6rem"
+                      className="margin-r-s blue0-font"
+                    />,
+                    <span>
+                      {this.props.msg.pkg.get("browser.upload.title")}
+                    </span>,
+                  ])}
+                  childrenStyles={List([{ flex: "30%" }, { flex: "70%" }])}
+                />
+              </button>
+              <button
+                onClick={() => {
+                  this.setTab("sharing");
+                }}
+                className="margin-r-m"
+              >
+                <Flexbox
+                  children={List([
+                    <RiShareBoxLine
+                      size="1.6rem"
+                      className="margin-r-s purple0-font"
+                    />,
+                    <span>
+                      {this.props.msg.pkg.get("browser.share.title")}
+                    </span>,
+                  ])}
+                  childrenStyles={List([{ flex: "30%" }, { flex: "70%" }])}
+                />
+              </button>
+            </div>
+          </div>
+          {sharingingListPane}
+          {uploadingListPane}
+          {itemListPane}
         </div>
       </div>
     );
