@@ -11,6 +11,7 @@ export const msgs: Map<string, string> = Map({
   "browser.share.del": "Stop sharing",
   "browser.share.add": "Share it",
   "browser.share.title": "Sharings",
+  "browser.upload.title": "Uploadings",
   "browser.folder.name": "Folder name",
   "browser.folder.add": "Add Folder",
   "browser.upload": "Upload",
