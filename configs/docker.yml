@@ -8,7 +8,7 @@ server:
   debug: false
   host: "0.0.0.0"
   port: 8686
-  readTimeout: 2000
+  readTimeout: 3000
   writerTimeout: 86400000 # 1 day
   maxHeaderBytes: 512
   publicPath: "/quickshare/public"
