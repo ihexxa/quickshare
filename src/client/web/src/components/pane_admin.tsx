@@ -1,10 +1,12 @@
 import * as React from "react";
-import { Map, Set } from "immutable";
+import { List, Map, Set } from "immutable";
+import FileSize from "filesize";
 
 import { alertMsg } from "../common/env";
 import { ICoreState, MsgProps } from "./core_state";
 import { User, Quota } from "../client";
 import { updater } from "./state_updater";
+import { Flexbox } from "./layout/flexbox";
 
 export interface AdminProps {
   users: Map<string, User>;
@@ -154,47 +156,39 @@ export class UserForm extends React.Component<
           padding: "1rem",
         }}
       >
-        <div className="flex-list-container">
-          <div className="flex-list-item-l">
-            <div
-              style={{
-                flexDirection: "column",
-              }}
-              className="bold item-name"
-            >
-              <div>
-                {this.props.msg.pkg.get("user.id")} {this.props.id}
-              </div>
-              <div>
+        <Flexbox
+          children={List([
+            <div>
+              <span className="bold">
                 {this.props.msg.pkg.get("user.name")} {this.props.name}
-              </div>
-            </div>
-          </div>
+              </span>
+              &nbsp;/&nbsp;
+              <span className="grey0-font">
+                {this.props.msg.pkg.get("user.id")} {this.props.id}
+              </span>
+            </div>,
 
-          <div
-            className="flex-list-item-r"
-            style={{
-              flexDirection: "column",
-              flexBasis: "80%",
-              alignItems: "flex-end",
-            }}
-          >
-            <button
-              onClick={this.delUser}
-              className="margin-r-m"
-            >
+            <button onClick={this.delUser} className="margin-r-m">
               {this.props.msg.pkg.get("delete")}
-            </button>
-          </div>
-        </div>
+            </button>,
+          ])}
+          childrenStyles={List([
+            { alignItems: "flex-start", flexBasis: "70%" },
+            {
+              justifyContent: "flex-end",
+            },
+          ])}
+        />
 
         <div className="hr white0-bg margin-t-m margin-b-m"></div>
 
-        <div className="flex-list-container">
-          <div className="flex-list-item-l" style={{ flex: "70%" }}>
+        <Flexbox
+          children={List([
             <div>
-              <div>
-                <div className="margin-r-m font-size-s grey1-font">Role</div>
+              <span className="inline-block">
+                <div className="margin-r-m font-size-s grey1-font">
+                  {this.props.msg.pkg.get("user.role")}
+                </div>
                 <input
                   name={`${this.props.id}-role`}
                   type="text"
@@ -203,11 +197,14 @@ export class UserForm extends React.Component<
                   className="black0-font margin-r-m"
                   placeholder={this.state.role}
                 />
-              </div>
+              </span>
 
-              <div className="margin-t-m">
+              <span className="margin-t-m inline-block">
                 <div className="margin-r-m font-size-s grey1-font">
-                  {this.props.msg.pkg.get("spaceLimit")}
+                  {`${this.props.msg.pkg.get("spaceLimit")} (${FileSize(
+                    parseInt(this.state.quota.spaceLimit, 10),
+                    { round: 0 }
+                  )})`}
                 </div>
                 <input
                   name={`${this.props.id}-spaceLimit`}
@@ -217,11 +214,14 @@ export class UserForm extends React.Component<
                   className="black0-font margin-r-m"
                   placeholder={`${this.state.quota.spaceLimit}`}
                 />
-              </div>
+              </span>
 
-              <div className="margin-t-m">
+              <span className="margin-t-m inline-block">
                 <div className="margin-r-m font-size-s grey1-font">
-                  {this.props.msg.pkg.get("uploadLimit")}
+                  {`${this.props.msg.pkg.get("uploadLimit")} (${FileSize(
+                    this.state.quota.uploadSpeedLimit,
+                    { round: 0 }
+                  )})`}
                 </div>
                 <input
                   name={`${this.props.id}-uploadSpeedLimit`}
@@ -231,11 +231,14 @@ export class UserForm extends React.Component<
                   className="black0-font margin-r-m"
                   placeholder={`${this.state.quota.uploadSpeedLimit}`}
                 />
-              </div>
+              </span>
 
-              <div className="margin-t-m">
+              <span className="margin-t-m inline-block">
                 <div className="margin-r-m font-size-s grey1-font">
-                  {this.props.msg.pkg.get("downloadLimit")}
+                  {`${this.props.msg.pkg.get("downloadLimit")} (${FileSize(
+                    this.state.quota.downloadSpeedLimit,
+                    { round: 0 }
+                  )})`}
                 </div>
                 <input
                   name={`${this.props.id}-downloadSpeedLimit`}
@@ -245,55 +248,61 @@ export class UserForm extends React.Component<
                   className="black0-font margin-r-m"
                   placeholder={`${this.state.quota.downloadSpeedLimit}`}
                 />
-              </div>
-            </div>
-          </div>
-          <div className="flex-list-item-r">
-            <button
-              onClick={this.setUser}
-              className="margin-r-m"
-            >
+              </span>
+            </div>,
+
+            <button onClick={this.setUser} className="margin-r-m">
               {this.props.msg.pkg.get("update")}
-            </button>
-          </div>
-        </div>
+            </button>,
+          ])}
+          childrenStyles={List([
+            { alignItems: "flex-start", flexBasis: "70%" },
+            {
+              justifyContent: "flex-end",
+              flexBasis: "30%",
+            },
+          ])}
+        />
 
         <div className="hr white0-bg margin-t-m margin-b-m"></div>
 
-        <div className="flex-list-container margin-t-m">
-          <div
-            className="flex-list-item-l"
-            style={{ flexDirection: "column", alignItems: "flex-start" }}
-          >
-            <div className="font-size-s grey1-font">Password</div>
+        <Flexbox
+          children={List([
+            <div>
+              <div className="font-size-s grey1-font">
+                {this.props.msg.pkg.get("user.password")}
+              </div>
 
-            <input
-              name={`${this.props.id}-pwd1`}
-              type="password"
-              onChange={this.changePwd1}
-              value={this.state.newPwd1}
-              className="black0-font margin-b-m"
-              placeholder={this.props.msg.pkg.get("settings.pwd.new1")}
-            />
-            <input
-              name={`${this.props.id}-pwd2`}
-              type="password"
-              onChange={this.changePwd2}
-              value={this.state.newPwd2}
-              className="black0-font margin-b-m"
-              placeholder={this.props.msg.pkg.get("settings.pwd.new2")}
-            />
-          </div>
+              <input
+                name={`${this.props.id}-pwd1`}
+                type="password"
+                onChange={this.changePwd1}
+                value={this.state.newPwd1}
+                className="black0-font margin-b-m margin-r-m"
+                placeholder={this.props.msg.pkg.get("settings.pwd.new1")}
+              />
+              <input
+                name={`${this.props.id}-pwd2`}
+                type="password"
+                onChange={this.changePwd2}
+                value={this.state.newPwd2}
+                className="black0-font margin-b-m"
+                placeholder={this.props.msg.pkg.get("settings.pwd.new2")}
+              />
+            </div>,
 
-          <div className="flex-list-item-r">
-            <button
-              onClick={this.setPwd}
-              className="margin-r-m"
-            >
+            <button onClick={this.setPwd} className="margin-r-m">
               {this.props.msg.pkg.get("update")}
-            </button>
-          </div>
-        </div>
+            </button>,
+          ])}
+          childrenStyles={List([
+            { alignItems: "flex-start", flexBasis: "70%" },
+            {
+              justifyContent: "flex-end",
+            },
+          ])}
+          className="margin-t-m"
+        />
       </div>
     );
   }
@@ -429,7 +438,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
       return (
         <div key={role} className="flex-list-container margin-b-m">
           <div className="flex-list-item-l">
-            <span className="bold">{role}</span>
+            <span>{role}</span>
           </div>
           <div className="flex-list-item-r">
             <button
@@ -448,114 +457,112 @@ export class AdminPane extends React.Component<Props, State, {}> {
     return (
       <div className="font-size-m">
         <div className="container padding-l">
-          <div className="flex-list-container bold">
-            <span className="flex-list-item-l">
-              <span>{this.props.msg.pkg.get("user.add")}</span>
-            </span>
-            <span className="flex-list-item-r padding-r-m"></span>
-          </div>
+          <Flexbox
+            children={List([
+              <span>{this.props.msg.pkg.get("user.add")}</span>,
+              <span></span>,
+            ])}
+            className="title-m bold margin-b-m"
+          />
 
-          <div className="flex-list-container margin-t-m">
-            <div
-              className="flex-list-item-l"
-              style={{
-                flexDirection: "column",
-                alignItems: "flex-start",
-              }}
-            >
-              <input
-                type="text"
-                onChange={this.onChangeUserName}
-                value={this.state.newUserName}
-                className="black0-font margin-b-m"
-                placeholder={this.props.msg.pkg.get("user.name")}
-              />
-              <input
-                type="text"
-                onChange={this.onChangeUserRole}
-                value={this.state.newUserRole}
-                className="black0-font margin-b-m"
-                placeholder={this.props.msg.pkg.get("user.role")}
-              />
-              <input
-                type="password"
-                onChange={this.onChangeUserPwd1}
-                value={this.state.newUserPwd1}
-                className="black0-font margin-b-m"
-                placeholder={this.props.msg.pkg.get("user.password")}
-              />
-              <input
-                type="password"
-                onChange={this.onChangeUserPwd2}
-                value={this.state.newUserPwd2}
-                className="black0-font margin-b-m"
-                placeholder={this.props.msg.pkg.get("settings.pwd.new2")}
-              />
-            </div>
-            <div className="flex-list-item-r">
-              <button
-                onClick={this.addUser}
-                className="margin-r-m"
-              >
+          <Flexbox
+            children={List([
+              <span>
+                <input
+                  type="text"
+                  onChange={this.onChangeUserName}
+                  value={this.state.newUserName}
+                  className="black0-font margin-r-m margin-b-m"
+                  placeholder={this.props.msg.pkg.get("user.name")}
+                />
+                <input
+                  type="text"
+                  onChange={this.onChangeUserRole}
+                  value={this.state.newUserRole}
+                  className="black0-font margin-r-m margin-b-m"
+                  placeholder={this.props.msg.pkg.get("user.role")}
+                />
+                <input
+                  type="password"
+                  onChange={this.onChangeUserPwd1}
+                  value={this.state.newUserPwd1}
+                  className="black0-font margin-r-m margin-b-m"
+                  placeholder={this.props.msg.pkg.get("user.password")}
+                />
+                <input
+                  type="password"
+                  onChange={this.onChangeUserPwd2}
+                  value={this.state.newUserPwd2}
+                  className="black0-font margin-r-m margin-b-m"
+                  placeholder={this.props.msg.pkg.get("settings.pwd.new2")}
+                />
+              </span>,
+
+              <button onClick={this.addUser} className="margin-r-m">
                 {this.props.msg.pkg.get("add")}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="container">
-          <div className="padding-l">
-            <div className="flex-list-container bold">
-              <span className="flex-list-item-l">
-                <span>{this.props.msg.pkg.get("admin.users")}</span>
-              </span>
-              <span className="flex-list-item-r padding-r-m"></span>
-            </div>
-            {userList}
-          </div>
+              </button>,
+            ])}
+            childrenStyles={List([
+              {
+                alignItems: "flex-start",
+              },
+              { justifyContent: "flex-end" },
+            ])}
+            className="margin-t-m"
+          />
         </div>
 
         <div className="container padding-l">
-          <div className="flex-list-container bold">
-            <span className="flex-list-item-l">
-              <span>{this.props.msg.pkg.get("role.add")}</span>
-            </span>
-            <span className="flex-list-item-r padding-r-m"></span>
-          </div>
+          <Flexbox
+            children={List([
+              <span>{this.props.msg.pkg.get("admin.users")}</span>,
+              <span></span>,
+            ])}
+            className="title-m bold margin-b-m"
+          />
 
-          <div className="flex-list-container">
-            <div className="flex-list-item-l">
-              <span className="inline-block margin-t-m margin-b-m">
-                <input
-                  type="text"
-                  onChange={this.onChangeRole}
-                  value={this.state.newRole}
-                  className="black0-font margin-r-m"
-                  placeholder={this.props.msg.pkg.get("role.name")}
-                />
-              </span>
-            </div>
-            <div className="flex-list-item-r">
-              <button
-                onClick={this.addRole}
-                className="margin-r-m"
-              >
-                {this.props.msg.pkg.get("add")}
-              </button>
-            </div>
-          </div>
+          {userList}
         </div>
 
-        <div className="container">
-          <div className="padding-l">
-            <div className="flex-list-container bold margin-b-m">
-              <span className="flex-list-item-l">
-                <span>{this.props.msg.pkg.get("admin.roles")}</span>
-              </span>
-              <span className="flex-list-item-r padding-r-m"></span>
-            </div>
-            {roleList}
+        <div className="container padding-l">
+          <div>
+            <Flexbox
+              children={List([
+                <span>{this.props.msg.pkg.get("role.add")}</span>,
+                <span></span>,
+              ])}
+              className="title-m bold margin-b-m"
+            />
+
+            <Flexbox
+              children={List([
+                <span className="inline-block margin-t-m margin-b-m">
+                  <input
+                    type="text"
+                    onChange={this.onChangeRole}
+                    value={this.state.newRole}
+                    className="black0-font margin-r-m"
+                    placeholder={this.props.msg.pkg.get("role.name")}
+                  />
+                </span>,
+                <button onClick={this.addRole} className="margin-r-m">
+                  {this.props.msg.pkg.get("add")}
+                </button>,
+              ])}
+              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+            />
           </div>
+
+          <div className="hr white0-bg margin-t-m margin-b-m"></div>
+
+          <Flexbox
+            children={List([
+              <span>{this.props.msg.pkg.get("admin.roles")}</span>,
+              <span></span>,
+            ])}
+            className="title-m bold margin-b-m"
+          />
+          {roleList}
         </div>
       </div>
     );
