@@ -1,7 +1,6 @@
 // TODO: replace this with jest mocks
 import { Response, Quota } from "./";
 
-
 export interface UsersClientResps {
   loginMockResp: Response;
   logoutMockResp: Response;
@@ -77,6 +76,11 @@ export const resps = {
       name: "mockUser",
       role: "admin",
       usedSpace: "256",
+      quota: {
+        spaceLimit: "7",
+        uploadSpeedLimit: 3,
+        downloadSpeedLimit: 3,
+      },
     },
   },
   getCaptchaIDMockResp: {
@@ -125,7 +129,6 @@ export class MockUsersClient {
   setUser = (id: string, role: string, quota: Quota): Promise<Response> => {
     return this.wrapPromise(this.resps.setUserMockResp);
   };
-  
 
   forceSetPwd = (userID: string, newPwd: string): Promise<Response> => {
     return this.wrapPromise(this.resps.forceSetPwdMockResp);

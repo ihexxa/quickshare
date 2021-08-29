@@ -36,6 +36,12 @@ describe("Login", () => {
       userName: "mockUser",
       userRole: "admin",
       authed: true,
+      usedSpace: "256",
+      quota: {
+        spaceLimit: "7",
+        uploadSpeedLimit: 3,
+        downloadSpeedLimit: 3,
+      },
       captchaID: "",
     });
 

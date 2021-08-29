@@ -3,11 +3,14 @@ import * as React from "react";
 import { ICoreState, MsgProps } from "./core_state";
 import { updater } from "./state_updater";
 import { alertMsg } from "../common/env";
+import { Quota } from "../client";
 
 export interface LoginProps {
   userID: string;
   userName: string;
   userRole: string;
+  usedSpace: string;
+  quota: Quota;
   authed: boolean;
   captchaID: string;
 }
@@ -85,11 +88,17 @@ export class AuthPane extends React.Component<Props, State, {}> {
 
         updater().initLan();
         this.update(updater().updateMsg);
+      })
+      .then(() => {
+        return updater().isSharing(updater().props.browser.dirPath.join("/"));
+      })
+      .then(() => {
+        this.update(updater().updateBrowser);
       });
   };
 
-  logout = () => {
-    updater()
+  logout = async () => {
+    return updater()
       .logout()
       .then((ok: boolean) => {
         if (ok) {
@@ -97,6 +106,9 @@ export class AuthPane extends React.Component<Props, State, {}> {
         } else {
           alertMsg(this.props.msg.pkg.get("login.logout.fail"));
         }
+      })
+      .then(() => {
+        return this.refreshCaptcha();
       });
   };
 

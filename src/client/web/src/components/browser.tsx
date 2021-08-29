@@ -6,7 +6,7 @@ import { RiFolder2Fill } from "@react-icons/all-files/ri/RiFolder2Fill";
 import { RiFileList2Fill } from "@react-icons/all-files/ri/RiFileList2Fill";
 import { RiFile2Fill } from "@react-icons/all-files/ri/RiFile2Fill";
 import { RiShareBoxLine } from "@react-icons/all-files/ri/RiShareBoxLine";
-import { RiShareForwardBoxFill } from "@react-icons/all-files/ri/RiShareForwardBoxFill";
+import { RiFolderSharedFill } from "@react-icons/all-files/ri/RiFolderSharedFill";
 import { RiUploadCloudFill } from "@react-icons/all-files/ri/RiUploadCloudFill";
 import { RiUploadCloudLine } from "@react-icons/all-files/ri/RiUploadCloudLine";
 import { RiEmotionSadLine } from "@react-icons/all-files/ri/RiEmotionSadLine";
@@ -14,6 +14,7 @@ import { RiEmotionSadLine } from "@react-icons/all-files/ri/RiEmotionSadLine";
 import { alertMsg, comfirmMsg } from "../common/env";
 import { updater } from "./state_updater";
 import { ICoreState, MsgProps } from "./core_state";
+import { LoginProps } from "./pane_login";
 import { MetadataResp, UploadInfo } from "../client";
 import { Up } from "../worker/upload_mgr";
 import { UploadEntry } from "../worker/interface";
@@ -44,6 +45,7 @@ export interface BrowserProps {
 export interface Props {
   browser: BrowserProps;
   msg: MsgProps;
+  login: LoginProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
@@ -477,6 +479,15 @@ export class Browser extends React.Component<Props, State, {}> {
       );
     });
 
+    const usedSpace = FileSize(parseInt(this.props.login.usedSpace, 10), {
+      round: 0,
+    });
+    const spaceLimit = FileSize(
+      parseInt(this.props.login.quota.spaceLimit, 10),
+      {
+        round: 0,
+      }
+    );
     const itemListPane =
       this.props.browser.tab === "" || this.props.browser.tab === "item" ? (
         <div>
@@ -485,49 +496,61 @@ export class Browser extends React.Component<Props, State, {}> {
           </div>
 
           <div className="container">
-            <div className="padding-m">
-              {this.props.browser.isSharing ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    this.deleteSharing(this.props.browser.dirPath.join("/"));
-                  }}
-                  className="red0-bg white-font margin-r-m"
-                >
-                  {this.props.msg.pkg.get("browser.share.del")}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={this.addSharing}
-                  className="green0-bg white-font margin-r-m"
-                >
-                  {this.props.msg.pkg.get("browser.share.add")}
-                </button>
-              )}
-
-              {this.state.selectedItems.size > 0 ? (
+            <Flexbox
+              children={List([
                 <span>
-                  <button
-                    type="button"
-                    onClick={() => this.delete()}
-                    className="red0-bg white-font margin-r-m"
-                  >
-                    {this.props.msg.pkg.get("browser.delete")}
-                  </button>
+                  {this.props.browser.isSharing ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        this.deleteSharing(
+                          this.props.browser.dirPath.join("/")
+                        );
+                      }}
+                      className="red0-bg white-font margin-r-m"
+                    >
+                      {this.props.msg.pkg.get("browser.share.del")}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={this.addSharing}
+                      className="green0-bg white-font margin-r-m"
+                    >
+                      {this.props.msg.pkg.get("browser.share.add")}
+                    </button>
+                  )}
 
-                  <button
-                    type="button"
-                    onClick={() => this.moveHere()}
-                    className="margin-r-m"
-                  >
-                    {this.props.msg.pkg.get("browser.paste")}
-                  </button>
-                </span>
-              ) : null}
+                  {this.state.selectedItems.size > 0 ? (
+                    <span>
+                      <button
+                        type="button"
+                        onClick={() => this.delete()}
+                        className="red0-bg white-font margin-r-m"
+                      >
+                        {this.props.msg.pkg.get("browser.delete")}
+                      </button>
 
-              <div className="hr white0-bg margin-t-m"></div>
-            </div>
+                      <button
+                        type="button"
+                        onClick={() => this.moveHere()}
+                        className="margin-r-m"
+                      >
+                        {this.props.msg.pkg.get("browser.paste")}
+                      </button>
+                    </span>
+                  ) : null}
+                </span>,
+
+                <span>
+                  <span className="desc-m grey0-font">{`${this.props.msg.pkg.get(
+                    "browser.used"
+                  )} ${usedSpace} / ${spaceLimit}`}</span>
+                </span>,
+              ])}
+              className="padding-m"
+              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+            />
 
             <Flexbox
               children={List([
@@ -539,18 +562,8 @@ export class Browser extends React.Component<Props, State, {}> {
                         className="margin-r-m black-font"
                       />,
 
-                      // <span>
-                      //   <span className="title-l">
-                      //     {this.props.msg.pkg.get("browser.item.title")}
-                      //   </span>
-                      //   <span className="desc-l grey0-font">
-                      //     Files and folders in current path
-                      //   </span>
-                      // </span>,
-
                       <Flexbox children={breadcrumb} />,
                     ])}
-                    // style={{ flex: "column nowrap" }}
                   />
                 </span>,
 
@@ -687,7 +700,7 @@ export class Browser extends React.Component<Props, State, {}> {
             children={List([
               <Flexbox
                 children={List([
-                  <RiShareForwardBoxFill
+                  <RiFolderSharedFill
                     size="3rem"
                     className="purple0-font margin-r-m"
                   />,
