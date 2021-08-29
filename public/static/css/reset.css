@@ -18,7 +18,8 @@ html {
   background-color: #ecf0f1;
   /* background: url("bg.jpg") no-repeat left center fixed;
     background-size: auto 100%; */
-  font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  font-family: "Helvetica Neue", "Helvetica", "PingFang SC", "Microsoft YaHei",
+    "Arial", sans-serif;
   font-size: 62.5%;
 }
 body {
@@ -101,7 +102,7 @@ button {
   border: none;
   border-radius: 0.5rem;
   padding: 0.8rem 1rem;
-  
+
   background-color: rgba(0, 0, 0, 0.3);
 
   font-weight: bold;

@@ -560,10 +560,11 @@ func (h *MultiUsersSvc) isValidRole(role string) error {
 }
 
 type SelfResp struct {
-	ID        string `json:"id"`
-	Name      string `json:"name"`
-	Role      string `json:"role"`
-	UsedSpace int64  `json:"usedSpace,string"`
+	ID        string           `json:"id"`
+	Name      string           `json:"name"`
+	Role      string           `json:"role"`
+	Quota     *userstore.Quota `json:"quota"`
+	UsedSpace int64            `json:"usedSpace,string"`
 }
 
 func (h *MultiUsersSvc) Self(c *gin.Context) {
@@ -583,6 +584,7 @@ func (h *MultiUsersSvc) Self(c *gin.Context) {
 		ID:        claims[q.UserIDParam],
 		Name:      claims[q.UserParam],
 		Role:      claims[q.RoleParam],
+		Quota:     user.Quota,
 		UsedSpace: user.UsedSpace,
 	})
 }
