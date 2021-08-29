@@ -396,6 +396,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
         pwd: this.state.newUserPwd1,
         role: this.state.newUserRole,
         quota: undefined,
+        usedSpace: "0",
       })
       .then((ok: boolean) => {
         if (!ok) {
