@@ -69,6 +69,12 @@ export function initState(): ICoreState {
       userID: "",
       userName: "",
       userRole: "",
+      usedSpace: "0",
+      quota: {
+        spaceLimit: "0",
+        uploadSpeedLimit: 0,
+        downloadSpeedLimit: 0,
+      },
       authed: false,
       captchaID: "",
     },

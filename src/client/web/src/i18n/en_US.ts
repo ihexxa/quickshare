@@ -26,6 +26,7 @@ export const msgs: Map<string, string> = Map({
   "browser.disable": "Disable",
   "browser.location": "Location",
   "browser.item.title": "Items",
+  "browser.used": "Used Space",
   "panes.close": "Close",
   "login.logout.fail": "Failed to log out",
   "login.username": "User Name",

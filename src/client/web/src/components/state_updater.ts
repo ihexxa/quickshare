@@ -258,6 +258,8 @@ export class Updater {
       this.props.login.userID = resp.data.id;
       this.props.login.userName = resp.data.name;
       this.props.login.userRole = resp.data.role;
+      this.props.login.usedSpace = resp.data.usedSpace;
+      this.props.login.quota = resp.data.quota;
       return true;
     }
     return false;

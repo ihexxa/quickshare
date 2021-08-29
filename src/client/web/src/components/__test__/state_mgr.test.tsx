@@ -22,8 +22,8 @@ describe("State Manager", () => {
 
     // TODO: depress warning
     mgr.update = (apply: (prevState: ICoreState) => ICoreState): void => {
-        // no op
-    }; 
+      // no op
+    };
 
     const coreState = newWithWorker(mockWorker);
     await mgr.initUpdater(coreState);
@@ -52,6 +52,12 @@ describe("State Manager", () => {
       userID: "0",
       userName: "mockUser",
       userRole: "admin",
+      usedSpace: "256",
+      quota: {
+        spaceLimit: "7",
+        uploadSpeedLimit: 3,
+        downloadSpeedLimit: 3,
+      },
       authed: true,
       captchaID: "mockCaptchaID",
     });

@@ -52,13 +52,14 @@ export class RootFrame extends React.Component<Props, State, {}> {
             <Browser
               browser={this.props.browser}
               msg={this.props.msg}
+              login={this.props.login}
               update={this.props.update}
             />
           </div>
 
           <div id="tail" className="container-center black0-font">
             <a href="https://github.com/ihexxa/quickshare">Quickshare</a> -
-            sharing in simple way.
+            quick and simple file sharing.
           </div>
         </div>
       </div>

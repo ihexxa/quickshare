@@ -25,6 +25,7 @@ export const msgs: Map<string, string> = Map({
   "browser.stop": "停止",
   "browser.location": "位置",
   "browser.item.title": "列表",
+  "browser.used": "已用空间",
   "panes.close": "关闭",
   "login.logout.fail": "登出失败",
   "login.username": "用户名",
