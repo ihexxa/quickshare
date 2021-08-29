@@ -363,7 +363,18 @@ export class Browser extends React.Component<Props, State, {}> {
       </div>
     );
 
-    const itemList = this.props.browser.items.map((item: MetadataResp) => {
+    const sortedItems = this.props.browser.items.sort(
+      (item1: MetadataResp, item2: MetadataResp) => {
+        if (item1.isDir && !item2.isDir) {
+          return -1;
+        } else if (!item1.isDir && item2.isDir) {
+          return 1;
+        }
+        return 0;
+      }
+    );
+
+    const itemList = sortedItems.map((item: MetadataResp) => {
       const isSelected = this.state.selectedItems.has(item.name);
       const dirPath = this.props.browser.dirPath.join("/");
       const itemPath = dirPath.endsWith("/")
