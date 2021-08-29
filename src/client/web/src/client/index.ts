@@ -15,6 +15,7 @@ export interface User {
   pwd: string;
   role: string;
   quota: Quota;
+  usedSpace: string;
 }
 
 export interface ListUsersResp {
@@ -55,11 +56,16 @@ export interface ListUploadingsResp {
 }
 
 export interface ListSharingsResp {
-	sharingDirs: string[];
+  sharingDirs: string[];
 }
 
 export interface IUsersClient {
-  login: (user: string, pwd: string, captchaId: string, captchaInput:string) => Promise<Response>;
+  login: (
+    user: string,
+    pwd: string,
+    captchaId: string,
+    captchaInput: string
+  ) => Promise<Response>;
   logout: () => Promise<Response>;
   isAuthed: () => Promise<Response>;
   self: () => Promise<Response>;
