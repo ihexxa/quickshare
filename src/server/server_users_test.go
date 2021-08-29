@@ -75,7 +75,12 @@ func TestUsersHandlers(t *testing.T) {
 			t.Fatal(resp.StatusCode)
 		} else if selfResp.ID != "0" ||
 			selfResp.Name != adminName ||
-			selfResp.Role != userstore.AdminRole {
+			selfResp.Role != userstore.AdminRole ||
+			selfResp.UsedSpace != 0 ||
+			selfResp.Quota.SpaceLimit != 1024*1024*1024 ||
+			selfResp.Quota.UploadSpeedLimit != 50*1024*1024 ||
+			selfResp.Quota.DownloadSpeedLimit != 50*1024*1024 {
+			// TODO: expose default values from userstore
 			t.Fatalf("user infos don't match %v", selfResp)
 		}
 
