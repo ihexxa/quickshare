@@ -24,6 +24,7 @@ describe("Browser", () => {
     const browser = new Browser({
       browser: coreState.browser,
       msg: coreState.msg,
+      login: coreState.login,
       update: (updater: (prevState: ICoreState) => ICoreState) => {},
     });
 
