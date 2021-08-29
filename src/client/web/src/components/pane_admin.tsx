@@ -429,7 +429,6 @@ export class AdminPane extends React.Component<Props, State, {}> {
       return (
         <div key={role} className="flex-list-container margin-b-m">
           <div className="flex-list-item-l">
-            <span className="dot red0-bg"></span>
             <span className="bold">{role}</span>
           </div>
           <div className="flex-list-item-r">
@@ -451,7 +450,6 @@ export class AdminPane extends React.Component<Props, State, {}> {
         <div className="container padding-l">
           <div className="flex-list-container bold">
             <span className="flex-list-item-l">
-              <span className="dot black-bg"></span>
               <span>{this.props.msg.pkg.get("user.add")}</span>
             </span>
             <span className="flex-list-item-r padding-r-m"></span>
@@ -509,7 +507,6 @@ export class AdminPane extends React.Component<Props, State, {}> {
           <div className="padding-l">
             <div className="flex-list-container bold">
               <span className="flex-list-item-l">
-                <span className="dot black-bg"></span>
                 <span>{this.props.msg.pkg.get("admin.users")}</span>
               </span>
               <span className="flex-list-item-r padding-r-m"></span>
@@ -521,7 +518,6 @@ export class AdminPane extends React.Component<Props, State, {}> {
         <div className="container padding-l">
           <div className="flex-list-container bold">
             <span className="flex-list-item-l">
-              <span className="dot black-bg"></span>
               <span>{this.props.msg.pkg.get("role.add")}</span>
             </span>
             <span className="flex-list-item-r padding-r-m"></span>
@@ -554,7 +550,6 @@ export class AdminPane extends React.Component<Props, State, {}> {
           <div className="padding-l">
             <div className="flex-list-container bold margin-b-m">
               <span className="flex-list-item-l">
-                <span className="dot black-bg"></span>
                 <span>{this.props.msg.pkg.get("admin.roles")}</span>
               </span>
               <span className="flex-list-item-r padding-r-m"></span>
