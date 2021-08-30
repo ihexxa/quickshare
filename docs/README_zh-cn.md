@@ -16,9 +16,7 @@
   </a>
 <p>
 
-![Quickshare on desktop](./imgs/desktop.jpeg)
-
-![Quickshare on mobile](./imgs/mobile.jpeg)
+![Quickshare on desktop](./imgs/desktop_2.jpeg)
 
 选择语言: [English](../README.md) | 简体中文
 
