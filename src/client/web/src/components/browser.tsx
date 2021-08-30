@@ -3,7 +3,7 @@ import * as ReactDOM from "react-dom";
 import { List, Map } from "immutable";
 import FileSize from "filesize";
 import { RiFolder2Fill } from "@react-icons/all-files/ri/RiFolder2Fill";
-import { RiFileList2Fill } from "@react-icons/all-files/ri/RiFileList2Fill";
+import { RiHomeSmileFill } from "@react-icons/all-files/ri/RiHomeSmileFill";
 import { RiFile2Fill } from "@react-icons/all-files/ri/RiFile2Fill";
 import { RiShareBoxLine } from "@react-icons/all-files/ri/RiShareBoxLine";
 import { RiFolderSharedFill } from "@react-icons/all-files/ri/RiFolderSharedFill";
@@ -557,7 +557,7 @@ export class Browser extends React.Component<Props, State, {}> {
                 <span className="padding-m">
                   <Flexbox
                     children={List([
-                      <RiFileList2Fill
+                      <RiHomeSmileFill
                         size="3rem"
                         className="margin-r-m black-font"
                       />,

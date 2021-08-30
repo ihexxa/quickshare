@@ -24,15 +24,25 @@
 
 ## 主要功能
 
-- 在多个设备之间共享和存取文件 (自适应 UI)
-- 兼容 Linux, Mac 和 Windows
-- 上传下载都支持断点续传
-- 在 Web 浏览器 中完成上传下载
-- 通过浏览器或者OS管理文件
-
+- 文件管理
+  - 无需客户端
+  - 无文件大小限制
+  - 上传下载的断点续传
+  - 将目录共享他人
+  - 一次上传上百个文件
+  - 流式上传: 使它可工作在 CDN 或 反向代理 之后
+  - 也可通过操作系统管理文件
+- 用户管理
+  - 支持多用户
+  - 用户home目录
+  - 用户级别的上传下载速度限制
+  - 用户级别的空间限制
+- 其他
+  - 自适应UI
+  - 跨平台: 支持Linux, Mac and Windows
 ## 快速开始
 
-### 在Docker内运行
+### 通过Docker运行 (推荐)
 
 下面会启动一个 `quickshare` docker 并监听 `8686` 端口.
 
@@ -40,12 +50,13 @@
 
 ```
 docker run \
-    --name quickshare \
-    -d -p 8686:8686 \
-    -v `pwd`/quickshare/root:/quickshare/root \
-    -e DEFAULTADMIN=qs \
-    -e DEFAULTADMINPWD=1234 \
-    hexxa/quickshare
+  --name quickshare \
+  -d -p 8686:8686 \
+  -v `pwd`/quickshare/root:/quickshare/root \
+  -e DEFAULTADMIN=qs \
+  -e DEFAULTADMINPWD=1234 \
+  --user $(id -u):$(id -g) \
+  hexxa/quickshare
 ```
 
 - `DEFAULTADMIN` 是默认的用户名
@@ -54,7 +65,7 @@ docker run \
 
 ### 运行源代码
 
-在开始之前, 请确认 Go/Golang (>1.15), Node.js 和 Yarn 已经安装在您的机器.
+在开始之前, 请确认 Go/Golang (>=1.15), Node.js 和 Yarn 已经安装在您的机器.
 
 ```
 # clone this repo
