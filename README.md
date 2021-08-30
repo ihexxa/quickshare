@@ -22,17 +22,29 @@
 
 Choose Language: English | [简体中文](./docs/README_zh-cn.md)
 
-## Main Features
+## Features
 
-- Sharing and accessing from different devices (Adaptive UI)
-- Be compatible with Linux, Mac and Windows
-- Stopping and resuming uploading/downloading
-- Do uploading and downloading in web browser
-- Manage files through browser or OS
+- File Management
+  - No client needed
+  - No limit on file size
+  - Stop and resume uploading/downloading in the middle
+  - Share directories to others
+  - Upload hundreds of files at once
+  - Steaming uploading: make it work behind CDN or reverse proxy
+  - Files can also be managed from OS
+- User Management
+  - Support multiple users
+  - User home directory
+  - Per-user download & upload speed limiting
+  - Per-user space quota
+- MISC
+  - Adaptive UI
+  - Cross-platform: support Linux, Mac and Windows
+
 
 ## Quick Start
 
-### Run in Docker
+### Run in Docker (Recommended)
 
 Following will start a `quickshare` docker and listen to `8686` port.
 
@@ -40,12 +52,13 @@ Then you can open `http://127.0.0.1:8686` and log in with user name `qs` and pas
 
 ```
 docker run \
-    --name quickshare \
-    -d -p 8686:8686 \
-    -v `pwd`/quickshare/root:/quickshare/root \
-    -e DEFAULTADMIN=qs \
-    -e DEFAULTADMINPWD=1234 \
-    hexxa/quickshare
+  --name quickshare \
+  -d -p 8686:8686 \
+  -v `pwd`/quickshare/root:/quickshare/root \
+  -e DEFAULTADMIN=qs \
+  -e DEFAULTADMINPWD=1234 \
+  --user $(id -u):$(id -g) \
+  hexxa/quickshare
 ```
 
 - `DEFAULTADMIN` is the default user name
@@ -54,7 +67,7 @@ docker run \
 
 ### Run from source code
 
-Before start, please confirm Go/Golang (>1.15), Node.js and Yarn are installed on your machine.
+Before start, please confirm that Go/Golang (>=1.15), Node.js and Yarn are installed on your machine.
 
 ```
 # clone this repo
