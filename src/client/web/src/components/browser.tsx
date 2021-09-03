@@ -592,6 +592,7 @@ export class Browser extends React.Component<Props, State, {}> {
 
         return (
           <Flexbox
+            key={uploading.realFilePath}
             children={List([
               <span className="padding-m">
                 <Flexbox
