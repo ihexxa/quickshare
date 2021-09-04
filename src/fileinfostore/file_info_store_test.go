@@ -13,6 +13,8 @@ func TestUserStores(t *testing.T) {
 	testSharingMethods := func(t *testing.T, store IFileInfoStore) {
 		dirPaths := []string{"admin/path1", "admin/path1/path2"}
 		var err error
+
+		// add sharings
 		for _, dirPath := range dirPaths {
 			err = store.AddSharing(dirPath)
 			if err != nil {
@@ -20,12 +22,12 @@ func TestUserStores(t *testing.T) {
 			}
 		}
 
+		// list sharings
 		prefix := "admin"
 		sharingMap, err := store.ListSharings(prefix)
 		if err != nil {
 			t.Fatal(err)
 		}
-
 		for _, sharingDir := range dirPaths {
 			if !sharingMap[sharingDir] {
 				t.Fatalf("sharing(%s) not found", sharingDir)
@@ -36,6 +38,7 @@ func TestUserStores(t *testing.T) {
 			}
 		}
 
+		// del sharings
 		for _, dirPath := range dirPaths {
 			err = store.DelSharing(dirPath)
 			if err != nil {
@@ -48,12 +51,63 @@ func TestUserStores(t *testing.T) {
 			t.Fatal(err)
 		}
 		for _, dirPath := range dirPaths {
-			if sharingMap[dirPath] {
+			if _, ok := sharingMap[dirPath]; ok {
 				t.Fatalf("sharing(%s) should not exist", dirPath)
 			}
-			_, exist := store.GetSharing(dirPath)
-			if exist {
-				t.Fatalf("get sharing(%t) should not exit", exist)
+			shared, exist := store.GetSharing(dirPath)
+			if shared {
+				t.Fatalf("get sharing(%t, %t) should not shared but exist", shared, exist)
+			}
+		}
+	}
+
+	testInfoMethods := func(t *testing.T, store IFileInfoStore) {
+		pathInfos := map[string]*FileInfo{
+			"admin/item": &FileInfo{
+				Shared: false,
+				IsDir:  false,
+				Sha1:   "file",
+			},
+			"admin/dir": &FileInfo{
+				Shared: true,
+				IsDir:  true,
+				Sha1:   "dir",
+			},
+		}
+		var err error
+
+		// add infos
+		for itemPath, info := range pathInfos {
+			err = store.SetInfo(itemPath, info)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+
+		// get infos
+		for itemPath, expected := range pathInfos {
+			info, err := store.GetInfo(itemPath)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if info.Shared != expected.Shared || info.IsDir != expected.IsDir || info.Sha1 != expected.Sha1 {
+				t.Fatalf("info not equaled (%v) (%v)", expected, info)
+			}
+		}
+
+		// del sharings
+		for itemPath := range pathInfos {
+			err = store.DelInfo(itemPath)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+
+		// get infos
+		for itemPath := range pathInfos {
+			_, err := store.GetInfo(itemPath)
+			if !IsNotFound(err) {
+				t.Fatal(err)
 			}
 		}
 	}
@@ -74,5 +128,6 @@ func TestUserStores(t *testing.T) {
 		}
 
 		testSharingMethods(t, store)
+		testInfoMethods(t, store)
 	})
 }

@@ -171,6 +171,21 @@ func TestKVStoreProviders(t *testing.T) {
 		} else if stringVGot != stringV {
 			t.Error(fmt.Sprintln("value not equal", stringVGot, stringV))
 		}
+		err = store.SetStringIn(ns, key2, stringV)
+		if err != nil {
+			t.Errorf("there should be no error %v", err)
+		}
+		kvs, err := store.ListStringsByPrefixIn("key", ns)
+		if err != nil {
+			t.Errorf("there should be no error %v", err)
+		}
+		if kvs[key] != stringV {
+			t.Errorf("list str key not found")
+		}
+		if kvs[key2] != stringV {
+			t.Errorf("list str key not found")
+		}
+
 		err = store.DelStringIn(ns, key)
 		if err != nil {
 			t.Errorf("there should be no error %v", err)

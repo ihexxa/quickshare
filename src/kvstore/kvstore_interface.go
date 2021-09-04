@@ -38,6 +38,7 @@ type IKVStore interface {
 	GetStringIn(ns, key string) (string, bool)
 	SetStringIn(ns, key, val string) error
 	ListStringsIn(ns string) (map[string]string, error)
+	ListStringsByPrefixIn(prefix, ns string) (map[string]string, error)
 	TryLock(key string) error
 	Unlock(key string) error
 }
