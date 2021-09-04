@@ -413,3 +413,22 @@ func (bp *BoltPvd) ListStringsIn(ns string) (map[string]string, error) {
 
 	return kv, err
 }
+
+func (bp *BoltPvd) ListStringsByPrefixIn(prefix, ns string) (map[string]string, error) {
+	results := map[string]string{}
+
+	err := bp.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(ns)).Cursor()
+		if b == nil {
+			return ErrBucketNotFound
+		}
+
+		prefixBytes := []byte(prefix)
+		for k, v := b.Seek(prefixBytes); k != nil && bytes.HasPrefix(k, prefixBytes); k, v = b.Next() {
+			results[string(k)] = string(v)
+		}
+		return nil
+	})
+
+	return results, err
+}

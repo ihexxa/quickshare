@@ -1,20 +1,42 @@
 package fileinfostore
 
 import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"time"
+
 	"github.com/ihexxa/quickshare/src/kvstore"
 )
 
 const (
 	InitNs      = "Init"
-	SharingNs   = "sharing"
+	InfoNs      = "sharing"
 	InitTimeKey = "initTime"
 )
+
+var (
+	ErrNotFound = errors.New("file info not found")
+)
+
+func IsNotFound(err error) bool {
+	return err == ErrNotFound
+}
+
+type FileInfo struct {
+	IsDir  bool   `json:"isDir"`
+	Shared bool   `json:"shared"`
+	Sha1   string `json:"sha1"`
+}
 
 type IFileInfoStore interface {
 	AddSharing(dirPath string) error
 	DelSharing(dirPath string) error
 	GetSharing(dirPath string) (bool, bool)
 	ListSharings(prefix string) (map[string]bool, error)
+	GetInfo(itemPath string) (*FileInfo, error)
+	SetInfo(itemPath string, info *FileInfo) error
+	DelInfo(itemPath string) error
 }
 
 type FileInfoStore struct {
@@ -27,7 +49,7 @@ func NewFileInfoStore(store kvstore.IKVStore) (*FileInfoStore, error) {
 		var err error
 		for _, nsName := range []string{
 			InitNs,
-			SharingNs,
+			InfoNs,
 		} {
 			if err = store.AddNamespace(nsName); err != nil {
 				return nil, err
@@ -35,23 +57,96 @@ func NewFileInfoStore(store kvstore.IKVStore) (*FileInfoStore, error) {
 		}
 	}
 
+	err := store.SetStringIn(InitNs, InitTimeKey, fmt.Sprintf("%d", time.Now().Unix()))
+	if err != nil {
+		return nil, err
+	}
+
 	return &FileInfoStore{
 		store: store,
 	}, nil
 }
 
-func (us *FileInfoStore) AddSharing(dirPath string) error {
-	return us.store.SetBoolIn(SharingNs, dirPath, true)
+func (fi *FileInfoStore) AddSharing(dirPath string) error {
+	info, err := fi.GetInfo(dirPath)
+	if err != nil {
+		if !IsNotFound(err) {
+			return err
+		}
+		info = &FileInfo{
+			IsDir: true,
+		}
+	}
+	info.Shared = true
+	return fi.SetInfo(dirPath, info)
 }
 
-func (us *FileInfoStore) DelSharing(dirPath string) error {
-	return us.store.DelBoolIn(SharingNs, dirPath)
+func (fi *FileInfoStore) DelSharing(dirPath string) error {
+	info, err := fi.GetInfo(dirPath)
+	if err != nil {
+		return err
+	}
+	info.Shared = false
+	return fi.SetInfo(dirPath, info)
 }
 
-func (us *FileInfoStore) GetSharing(dirPath string) (bool, bool) {
-	return us.store.GetBoolIn(SharingNs, dirPath)
+func (fi *FileInfoStore) GetSharing(dirPath string) (bool, bool) {
+	info, err := fi.GetInfo(dirPath)
+	if err != nil {
+		// TODO: error is ignored
+		return false, false
+	}
+	return info.IsDir && info.Shared, true
 }
 
-func (us *FileInfoStore) ListSharings(prefix string) (map[string]bool, error) {
-	return us.store.ListBoolsByPrefixIn(prefix, SharingNs)
+func (fi *FileInfoStore) ListSharings(prefix string) (map[string]bool, error) {
+	infoStrs, err := fi.store.ListStringsByPrefixIn(prefix, InfoNs)
+	if err != nil {
+		return nil, err
+	}
+
+	info := &FileInfo{}
+	sharings := map[string]bool{}
+	for itemPath, infoStr := range infoStrs {
+		err = json.Unmarshal([]byte(infoStr), info)
+		if err != nil {
+			return nil, fmt.Errorf("list sharing error: %w", err)
+		}
+		if info.IsDir && info.Shared {
+			sharings[itemPath] = true
+		}
+	}
+
+	return sharings, nil
+}
+
+func (fi *FileInfoStore) GetInfo(itemPath string) (*FileInfo, error) {
+	infoStr, ok := fi.store.GetStringIn(InfoNs, itemPath)
+	if !ok {
+		return nil, ErrNotFound
+	}
+
+	info := &FileInfo{}
+	err := json.Unmarshal([]byte(infoStr), info)
+	if err != nil {
+		return nil, fmt.Errorf("get file info: %w", err)
+	}
+	return info, nil
+}
+
+func (fi *FileInfoStore) SetInfo(itemPath string, info *FileInfo) error {
+	infoStr, err := json.Marshal(info)
+	if err != nil {
+		return fmt.Errorf("set file info: %w", err)
+	}
+
+	err = fi.store.SetStringIn(InfoNs, itemPath, string(infoStr))
+	if err != nil {
+		return fmt.Errorf("set file info: %w", err)
+	}
+	return nil
+}
+
+func (fi *FileInfoStore) DelInfo(itemPath string) error {
+	return fi.store.DelStringIn(InfoNs, itemPath)
 }
