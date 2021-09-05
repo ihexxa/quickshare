@@ -1,0 +1,31 @@
+fs:
+  root: "tmp"
+  opensLimit: 128
+  openTTL: 60 # 1 min
+secrets:
+  tokenSecret: ""
+server:
+  debug: true
+  host: "0.0.0.0"
+  port: 8686
+  readTimeout: 2000
+  writerTimeout: 86400000 # 1 day
+  maxHeaderBytes: 512
+  publicPath: "public"
+  captchaWidth: 256
+  captchaHeight: 60
+  captchaEnabled: true
+  uploadSpeedLimit: 409600 # 400KB/limiterCyc
+  downloadSpeedLimit: 409600 # 400KB/limiterCyc
+  spaceLimit: 104857600 # 100MB
+  limiterCapacity: 1000
+  limiterCyc: 1000 # 1s
+users:
+  enableAuth: true
+  defaultAdmin: ""
+  defaultAdminPwd: ""
+  cookieTTL: 604800 # 1 week
+  cookieSecure: false
+  cookieHttpOnly: true
+  minUserNameLen: 2
+  minPwdLen: 4

@@ -20,6 +20,8 @@ import (
 	"github.com/ihexxa/quickshare/src/depidx"
 	q "github.com/ihexxa/quickshare/src/handlers"
 	"github.com/ihexxa/quickshare/src/userstore"
+	"github.com/ihexxa/quickshare/src/worker"
+	"github.com/ihexxa/quickshare/src/worker/localworker"
 )
 
 var (
@@ -39,13 +41,15 @@ type FileHandlers struct {
 	cfg       gocfg.ICfg
 	deps      *depidx.Deps
 	uploadMgr *UploadMgr
+	workers   worker.IWorkerPool
 }
 
-func NewFileHandlers(cfg gocfg.ICfg, deps *depidx.Deps) (*FileHandlers, error) {
+func NewFileHandlers(cfg gocfg.ICfg, deps *depidx.Deps, workers worker.IWorkerPool) (*FileHandlers, error) {
 	return &FileHandlers{
 		cfg:       cfg,
 		deps:      deps,
 		uploadMgr: NewUploadMgr(deps.KV()),
+		workers:   workers,
 	}, nil
 }
 
@@ -406,6 +410,18 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 				return
 			}
 			err = h.uploadMgr.DelInfo(userID, tmpFilePath)
+			if err != nil {
+				c.JSON(q.ErrResp(c, 500, err))
+				return
+			}
+
+			err = h.workers.TryPut(
+				localworker.NewMsg(
+					h.deps.ID().Gen(),
+					map[string]string{localworker.MsgTypeKey: "sha1"},
+					fsFilePath,
+				),
+			)
 			if err != nil {
 				c.JSON(q.ErrResp(c, 500, err))
 				return

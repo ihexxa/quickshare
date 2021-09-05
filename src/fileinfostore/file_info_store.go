@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/ihexxa/quickshare/src/kvstore"
@@ -37,9 +38,11 @@ type IFileInfoStore interface {
 	GetInfo(itemPath string) (*FileInfo, error)
 	SetInfo(itemPath string, info *FileInfo) error
 	DelInfo(itemPath string) error
+	SetSha1(itemPath, sign string) error
 }
 
 type FileInfoStore struct {
+	mtx   *sync.RWMutex
 	store kvstore.IKVStore
 }
 
@@ -64,10 +67,14 @@ func NewFileInfoStore(store kvstore.IKVStore) (*FileInfoStore, error) {
 
 	return &FileInfoStore{
 		store: store,
+		mtx:   &sync.RWMutex{},
 	}, nil
 }
 
 func (fi *FileInfoStore) AddSharing(dirPath string) error {
+	fi.mtx.Lock()
+	defer fi.mtx.Unlock()
+
 	info, err := fi.GetInfo(dirPath)
 	if err != nil {
 		if !IsNotFound(err) {
@@ -82,6 +89,9 @@ func (fi *FileInfoStore) AddSharing(dirPath string) error {
 }
 
 func (fi *FileInfoStore) DelSharing(dirPath string) error {
+	fi.mtx.Lock()
+	defer fi.mtx.Unlock()
+
 	info, err := fi.GetInfo(dirPath)
 	if err != nil {
 		return err
@@ -91,6 +101,7 @@ func (fi *FileInfoStore) DelSharing(dirPath string) error {
 }
 
 func (fi *FileInfoStore) GetSharing(dirPath string) (bool, bool) {
+	// TODO: add lock
 	info, err := fi.GetInfo(dirPath)
 	if err != nil {
 		// TODO: error is ignored
@@ -149,4 +160,22 @@ func (fi *FileInfoStore) SetInfo(itemPath string, info *FileInfo) error {
 
 func (fi *FileInfoStore) DelInfo(itemPath string) error {
 	return fi.store.DelStringIn(InfoNs, itemPath)
+}
+
+func (fi *FileInfoStore) SetSha1(itemPath, sign string) error {
+	fi.mtx.Lock()
+	defer fi.mtx.Unlock()
+
+	info, err := fi.GetInfo(itemPath)
+	if err != nil {
+		if !IsNotFound(err) {
+			return err
+		}
+		info = &FileInfo{
+			IsDir:  false,
+			Shared: false,
+		}
+	}
+	info.Sha1 = sign
+	return fi.SetInfo(itemPath, info)
 }
