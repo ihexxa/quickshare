@@ -32,12 +32,15 @@ import (
 	"github.com/ihexxa/quickshare/src/kvstore"
 	"github.com/ihexxa/quickshare/src/kvstore/boltdbpvd"
 	"github.com/ihexxa/quickshare/src/userstore"
+	"github.com/ihexxa/quickshare/src/worker"
+	"github.com/ihexxa/quickshare/src/worker/localworker"
 )
 
 type Server struct {
-	server *http.Server
-	cfg    gocfg.ICfg
-	deps   *depidx.Deps
+	server  *http.Server
+	cfg     gocfg.ICfg
+	deps    *depidx.Deps
+	workers worker.IWorkerPool
 }
 
 func NewServer(cfg gocfg.ICfg) (*Server, error) {
@@ -128,6 +131,10 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 }
 
 func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.Engine, error) {
+	// workers
+	workers := localworker.NewWorkerPool(1024, 5000, 2, deps)
+
+	// handlers
 	userHdrs, err := multiusers.NewMultiUsersSvc(cfg, deps)
 	if err != nil {
 		return nil, err
@@ -161,7 +168,7 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 		deps.Log().Infof("user (%s) is created\n", adminName)
 	}
 
-	fileHdrs, err := fileshdr.NewFileHandlers(cfg, deps)
+	fileHdrs, err := fileshdr.NewFileHandlers(cfg, deps, workers)
 	if err != nil {
 		return nil, err
 	}

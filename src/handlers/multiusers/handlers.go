@@ -239,13 +239,13 @@ func (h *MultiUsersSvc) SetPwd(c *gin.Context) {
 	}
 	user, err := h.deps.Users().GetUser(uid)
 	if err != nil {
-		c.JSON(q.ErrResp(c, 401, err))
+		c.JSON(q.ErrResp(c, 402, err))
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Pwd), []byte(req.OldPwd))
 	if err != nil {
-		c.JSON(q.ErrResp(c, 401, ErrInvalidUser))
+		c.JSON(q.ErrResp(c, 403, ErrInvalidUser))
 		return
 	}
 
