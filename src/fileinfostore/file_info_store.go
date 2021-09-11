@@ -39,6 +39,7 @@ type IFileInfoStore interface {
 	SetInfo(itemPath string, info *FileInfo) error
 	DelInfo(itemPath string) error
 	SetSha1(itemPath, sign string) error
+	GetInfos(itemPaths []string) (map[string]*FileInfo, error)
 }
 
 type FileInfoStore struct {
@@ -143,6 +144,22 @@ func (fi *FileInfoStore) GetInfo(itemPath string) (*FileInfo, error) {
 		return nil, fmt.Errorf("get file info: %w", err)
 	}
 	return info, nil
+}
+
+func (fi *FileInfoStore) GetInfos(itemPaths []string) (map[string]*FileInfo, error) {
+	infos := map[string]*FileInfo{}
+	for _, itemPath := range itemPaths {
+		info, err := fi.GetInfo(itemPath)
+		if err != nil {
+			if !IsNotFound(err) {
+				return nil, err
+			}
+			continue
+		}
+		infos[itemPath] = info
+	}
+
+	return infos, nil
 }
 
 func (fi *FileInfoStore) SetInfo(itemPath string, info *FileInfo) error {

@@ -88,7 +88,12 @@ func (wp *WorkerPool) Start() {
 }
 
 func (wp *WorkerPool) Stop() {
+	defer close(wp.queue)
 	wp.on = false
+	for wp.started > 0 {
+		wp.deps.Log().Errorf(fmt.Sprintf("%d workers still in working", wp.started))
+		time.Sleep(time.Duration(1) * time.Second)
+	}
 }
 
 func (wp *WorkerPool) startWorker() {
