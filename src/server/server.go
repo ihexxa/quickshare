@@ -8,7 +8,9 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"syscall"
 	"time"
 
 	"github.com/gin-contrib/static"
@@ -37,10 +39,11 @@ import (
 )
 
 type Server struct {
-	server  *http.Server
-	cfg     gocfg.ICfg
-	deps    *depidx.Deps
-	workers worker.IWorkerPool
+	server     *http.Server
+	cfg        gocfg.ICfg
+	deps       *depidx.Deps
+	workers    worker.IWorkerPool
+	signalChan chan os.Signal
 }
 
 func NewServer(cfg gocfg.ICfg) (*Server, error) {
@@ -49,8 +52,9 @@ func NewServer(cfg gocfg.ICfg) (*Server, error) {
 	}
 
 	deps := initDeps(cfg)
+	workers := localworker.NewWorkerPool(1024, 5000, 2, deps)
 	router := gin.Default()
-	router, err := initHandlers(router, cfg, deps)
+	router, err := initHandlers(router, cfg, deps, workers)
 	if err != nil {
 		return nil, err
 	}
@@ -64,9 +68,10 @@ func NewServer(cfg gocfg.ICfg) (*Server, error) {
 	}
 
 	return &Server{
-		server: srv,
-		deps:   deps,
-		cfg:    cfg,
+		server:  srv,
+		deps:    deps,
+		cfg:     cfg,
+		workers: workers,
 	}, nil
 }
 
@@ -130,10 +135,7 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	return deps
 }
 
-func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.Engine, error) {
-	// workers
-	workers := localworker.NewWorkerPool(1024, 5000, 2, deps)
-
+func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps, workers worker.IWorkerPool) (*gin.Engine, error) {
 	// handlers
 	userHdrs, err := multiusers.NewMultiUsersSvc(cfg, deps)
 	if err != nil {
@@ -237,6 +239,8 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 
 	filesAPI.GET("/metadata", fileHdrs.Metadata)
 
+	filesAPI.POST("/hashes/sha1", fileHdrs.GenerateHash)
+
 	settingsAPI := v1.Group("/settings")
 	settingsAPI.OPTIONS("/health", settingsSvc.Health)
 
@@ -263,6 +267,18 @@ func initLogger(cfg gocfg.ICfg) *zap.SugaredLogger {
 }
 
 func (s *Server) Start() error {
+	s.signalChan = make(chan os.Signal, 4)
+	signal.Notify(s.signalChan, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		sig := <-s.signalChan
+		if sig != nil {
+			s.deps.Log().Infow(
+				fmt.Sprintf("received signal %s: shutting down\n", sig.String()),
+			)
+		}
+		s.Shutdown()
+	}()
+
 	s.deps.Log().Infow(
 		"quickshare is starting",
 		"hostname:port",
@@ -282,6 +298,7 @@ func (s *Server) Start() error {
 
 func (s *Server) Shutdown() error {
 	// TODO: add timeout
+	s.workers.Stop()
 	s.deps.Log().Sync()
 	return s.server.Shutdown(context.Background())
 }

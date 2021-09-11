@@ -31,6 +31,7 @@ export interface MetadataResp {
   size: number;
   modTime: string;
   isDir: boolean;
+  sha1: string;
 }
 
 export interface UploadStatusResp {

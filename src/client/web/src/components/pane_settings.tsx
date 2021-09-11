@@ -50,9 +50,9 @@ export class PaneSettings extends React.Component<Props, State, {}> {
         .setPwd(this.state.oldPwd, this.state.newPwd1)
         .then((ok: boolean) => {
           if (ok) {
-            alertMsg(this.props.msg.pkg.get("settings.pwd.updated"));
+            alertMsg(this.props.msg.pkg.get("update.ok"));
           } else {
-            alertMsg(this.props.msg.pkg.get("settings.pwd.fail"));
+            alertMsg(this.props.msg.pkg.get("update.fail"));
           }
           this.setState({
             oldPwd: "",

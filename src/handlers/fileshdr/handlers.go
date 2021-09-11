@@ -232,6 +232,7 @@ type MetadataResp struct {
 	Size    int64     `json:"size"`
 	ModTime time.Time `json:"modTime"`
 	IsDir   bool      `json:"isDir"`
+	Sha1    string    `json"sha1"`
 }
 
 func (h *FileHandlers) Metadata(c *gin.Context) {
@@ -610,6 +611,37 @@ type ListResp struct {
 	Metadatas []*MetadataResp `json:"metadatas"`
 }
 
+func (h *FileHandlers) MergeFileInfos(dirPath string, infos []os.FileInfo) ([]*MetadataResp, error) {
+	filePaths := []string{}
+	metadatas := []*MetadataResp{}
+	for _, info := range infos {
+		if !info.IsDir() {
+			filePaths = append(filePaths, filepath.Join(dirPath, info.Name()))
+		}
+		metadatas = append(metadatas, &MetadataResp{
+			Name:    info.Name(),
+			Size:    info.Size(),
+			ModTime: info.ModTime(),
+			IsDir:   info.IsDir(),
+		})
+	}
+
+	dbInfos, err := h.deps.FileInfos().GetInfos(filePaths)
+	if err != nil {
+		return nil, err
+	}
+	for _, metadata := range metadatas {
+		if !metadata.IsDir {
+			dbInfo, ok := dbInfos[filepath.Join(dirPath, metadata.Name)]
+			if ok {
+				metadata.Sha1 = dbInfo.Sha1
+			}
+		}
+	}
+
+	return metadatas, nil
+}
+
 func (h *FileHandlers) List(c *gin.Context) {
 	dirPath := c.Query(ListDirQuery)
 	if dirPath == "" {
@@ -628,14 +660,11 @@ func (h *FileHandlers) List(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
-	metadatas := []*MetadataResp{}
-	for _, info := range infos {
-		metadatas = append(metadatas, &MetadataResp{
-			Name:    info.Name(),
-			Size:    info.Size(),
-			ModTime: info.ModTime(),
-			IsDir:   info.IsDir(),
-		})
+
+	metadatas, err := h.MergeFileInfos(dirPath, infos)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
 	}
 
 	c.JSON(200, &ListResp{
@@ -647,19 +676,17 @@ func (h *FileHandlers) List(c *gin.Context) {
 func (h *FileHandlers) ListHome(c *gin.Context) {
 	userName := c.MustGet(q.UserParam).(string)
 	fsPath := q.FsRootPath(userName, "/")
+
 	infos, err := h.deps.FS().ListDir(fsPath)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
-	metadatas := []*MetadataResp{}
-	for _, info := range infos {
-		metadatas = append(metadatas, &MetadataResp{
-			Name:    info.Name(),
-			Size:    info.Size(),
-			ModTime: info.ModTime(),
-			IsDir:   info.IsDir(),
-		})
+
+	metadatas, err := h.MergeFileInfos(fsPath, infos)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
 	}
 
 	c.JSON(200, &ListResp{
@@ -830,6 +857,38 @@ func (h *FileHandlers) ListSharings(c *gin.Context) {
 		dirs = append(dirs, sharingDir)
 	}
 	c.JSON(200, &SharingResp{SharingDirs: dirs})
+}
+
+type HashBody struct {
+	FilePath string `json:"filePath"`
+}
+
+func (h *FileHandlers) GenerateHash(c *gin.Context) {
+	req := &HashBody{}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(q.ErrResp(c, 400, err))
+		return
+	}
+
+	role := c.MustGet(q.RoleParam).(string)
+	userName := c.MustGet(q.UserParam).(string)
+	if !h.canAccess(userName, role, "hash.gen", req.FilePath) {
+		c.JSON(q.ErrResp(c, 403, q.ErrAccessDenied))
+		return
+	}
+
+	err := h.workers.TryPut(
+		localworker.NewMsg(
+			h.deps.ID().Gen(),
+			map[string]string{localworker.MsgTypeKey: "sha1"},
+			req.FilePath,
+		),
+	)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+	c.JSON(q.Resp(200))
 }
 
 func (h *FileHandlers) GetStreamReader(userID uint64, fd io.Reader) (io.Reader, error) {

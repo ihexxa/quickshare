@@ -453,6 +453,8 @@ export class Browser extends React.Component<Props, State, {}> {
                       </span>
                       &nbsp;/&nbsp;
                       <span>{FileSize(item.size, { round: 0 })}</span>
+                      &nbsp;/&nbsp;
+                      <span>{item.sha1}</span>
                     </div>
                   </span>,
                 ])}
