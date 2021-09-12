@@ -423,18 +423,14 @@ func TestFileHandlers(t *testing.T) {
 			assertDownloadOK(t, filePath, content, addr, token)
 		}
 
-		i := 0
 		for filePath := range files {
-			if i++; i%2 == 0 {
-				dirPath := filepath.Dir(filePath)
-				delete(sharedPaths, dirPath)
+			dirPath := filepath.Dir(filePath)
 
-				res, _, errs := cl.DelSharing(dirPath)
-				if len(errs) > 0 {
-					t.Fatal(errs)
-				} else if res.StatusCode != 200 {
-					t.Fatal(res.StatusCode)
-				}
+			res, _, errs := cl.DelSharing(dirPath)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if res.StatusCode != 200 {
+				t.Fatal(res.StatusCode)
 			}
 		}
 
@@ -446,8 +442,17 @@ func TestFileHandlers(t *testing.T) {
 			t.Fatal(res.StatusCode)
 		}
 		for _, dirPath := range shRes.SharingDirs {
-			if !sharedPaths[dirPath] {
-				t.Fatalf("sharing %s not found", dirPath)
+			if sharedPaths[dirPath] {
+				t.Fatalf("sharing %s should be deleted", dirPath)
+			}
+		}
+
+		for dirPath := range sharedPaths {
+			res, _, errs := cl.IsSharing(dirPath)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if res.StatusCode != 404 {
+				t.Fatal(res.StatusCode)
 			}
 		}
 	})

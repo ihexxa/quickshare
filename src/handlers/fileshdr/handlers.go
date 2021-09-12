@@ -839,8 +839,8 @@ func (h *FileHandlers) IsSharing(c *gin.Context) {
 		return
 	}
 
-	_, ok := h.deps.FileInfos().GetSharing(dirPath)
-	if ok {
+	exist, ok := h.deps.FileInfos().GetSharing(dirPath)
+	if exist && ok {
 		c.JSON(q.Resp(200))
 	} else {
 		c.JSON(q.Resp(404))
