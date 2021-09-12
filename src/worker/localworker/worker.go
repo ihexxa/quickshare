@@ -91,12 +91,22 @@ func (wp *WorkerPool) Stop() {
 	defer wp.mtx.Unlock()
 
 	// TODO: avoid sending and panic
+	for len(wp.queue) > 0 {
+		wp.logger.Infof(
+			fmt.Sprintf(
+				"draining: %d messages left",
+				len(wp.queue),
+			),
+		)
+		time.Sleep(time.Duration(1) * time.Second)
+	}
 	close(wp.queue)
+
 	wp.on = false
 	for wp.started > 0 {
-		wp.logger.Errorf(
+		wp.logger.Infof(
 			fmt.Sprintf(
-				"%d workers (sleep %d second) still in working/sleeping",
+				"stopping: %d workers (sleep %d second) still in working/sleeping",
 				wp.sleep,
 				wp.started,
 			),
@@ -117,12 +127,11 @@ func (wp *WorkerPool) startWorker() {
 				}
 			}()
 
-
 			msg, ok := <-wp.queue
 			if !ok {
 				return
 			}
-			
+
 			headers := msg.Headers()
 			msgType, ok := headers[MsgTypeKey]
 			if !ok {
