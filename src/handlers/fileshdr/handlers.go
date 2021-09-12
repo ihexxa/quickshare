@@ -158,7 +158,13 @@ func (h *FileHandlers) Create(c *gin.Context) {
 		err = h.deps.FS().Create(tmpFilePath)
 		if err != nil {
 			if os.IsExist(err) {
-				c.JSON(q.ErrResp(c, 304, err))
+				// avoid adding file size more than once
+				err = h.deps.Users().SetUsed(userIDInt, false, req.FileSize)
+				if err != nil {
+					c.JSON(q.ErrResp(c, 500, err))
+				} else {
+					c.JSON(q.ErrResp(c, 304, err))
+				}
 			} else {
 				c.JSON(q.ErrResp(c, 500, err))
 			}
@@ -727,6 +733,9 @@ func (h *FileHandlers) ListUploadings(c *gin.Context) {
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
+	}
+	if infos == nil {
+		infos = []*UploadInfo{}
 	}
 	c.JSON(200, &ListUploadingsResp{UploadInfos: infos})
 }
