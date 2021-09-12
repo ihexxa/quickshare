@@ -25,6 +25,7 @@ type LocalFS struct {
 	opensMtx       *sync.RWMutex
 	opensCleanSize int
 	openTTL        time.Duration
+	readersMtx     *sync.RWMutex
 	readers        map[string]*fileInfo
 }
 
@@ -47,6 +48,7 @@ func NewLocalFS(root string, defaultPerm uint32, opensLimit, openTTL int) *Local
 		openTTL:        time.Duration(openTTL) * time.Second,
 		opensMtx:       &sync.RWMutex{},
 		opensCleanSize: 10,
+		readersMtx:     &sync.RWMutex{},
 		readers:        map[string]*fileInfo{}, // TODO: track readers and close idles
 	}
 }
@@ -306,6 +308,9 @@ func (fs *LocalFS) GetFileReader(path string) (fs.ReadCloseSeeker, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	fs.readersMtx.Lock()
+	defer fs.readersMtx.Unlock()
 
 	fs.readers[fullpath] = &fileInfo{
 		fd:         fd,
