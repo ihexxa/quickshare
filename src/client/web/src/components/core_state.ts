@@ -10,7 +10,7 @@ import { AdminProps } from "./pane_admin";
 
 import { MsgPackage } from "../i18n/msger";
 import { Item } from "./browser";
-import { UploadInfo, User } from "../client";
+import { UploadInfo, User, MetadataResp } from "../client";
 import { initUploadMgr, IWorker } from "../worker/upload_mgr";
 
 export interface MsgProps {
@@ -53,7 +53,7 @@ export function initState(): ICoreState {
     browser: {
       isVertical: isVertical(),
       dirPath: List<string>(["."]),
-      items: List<Item>([]),
+      items: List<MetadataResp>([]),
       sharings: List<string>([]),
       isSharing: false,
       uploadings: List<UploadInfo>([]),

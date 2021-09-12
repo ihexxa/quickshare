@@ -34,7 +34,6 @@ import (
 	"github.com/ihexxa/quickshare/src/kvstore"
 	"github.com/ihexxa/quickshare/src/kvstore/boltdbpvd"
 	"github.com/ihexxa/quickshare/src/userstore"
-	"github.com/ihexxa/quickshare/src/worker"
 	"github.com/ihexxa/quickshare/src/worker/localworker"
 )
 
@@ -42,7 +41,6 @@ type Server struct {
 	server     *http.Server
 	cfg        gocfg.ICfg
 	deps       *depidx.Deps
-	workers    worker.IWorkerPool
 	signalChan chan os.Signal
 }
 
@@ -52,9 +50,8 @@ func NewServer(cfg gocfg.ICfg) (*Server, error) {
 	}
 
 	deps := initDeps(cfg)
-	workers := localworker.NewWorkerPool(1024, 5000, 2, deps)
 	router := gin.Default()
-	router, err := initHandlers(router, cfg, deps, workers)
+	router, err := initHandlers(router, cfg, deps)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +68,6 @@ func NewServer(cfg gocfg.ICfg) (*Server, error) {
 		server:  srv,
 		deps:    deps,
 		cfg:     cfg,
-		workers: workers,
 	}, nil
 }
 
@@ -132,10 +128,19 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	deps.SetLog(logger)
 	deps.SetLimiter(limiter)
 
+	queueSize := cfg.GrabInt("Workers.QueueSize")
+	sleepCyc := cfg.GrabInt("Workers.SleepCyc")
+	workerCount := cfg.GrabInt("Workers.WorkerCount")
+	fmt.Println(queueSize, sleepCyc, workerCount)
+
+	workers := localworker.NewWorkerPool(queueSize, sleepCyc, workerCount, logger)
+	workers.Start()
+	deps.SetWorkers(workers)
+
 	return deps
 }
 
-func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps, workers worker.IWorkerPool) (*gin.Engine, error) {
+func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.Engine, error) {
 	// handlers
 	userHdrs, err := multiusers.NewMultiUsersSvc(cfg, deps)
 	if err != nil {
@@ -170,7 +175,7 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps, workers
 		deps.Log().Infof("user (%s) is created\n", adminName)
 	}
 
-	fileHdrs, err := fileshdr.NewFileHandlers(cfg, deps, workers)
+	fileHdrs, err := fileshdr.NewFileHandlers(cfg, deps)
 	if err != nil {
 		return nil, err
 	}
@@ -298,7 +303,7 @@ func (s *Server) Start() error {
 
 func (s *Server) Shutdown() error {
 	// TODO: add timeout
-	s.workers.Stop()
+	s.deps.Workers().Stop()
 	s.deps.Log().Sync()
 	return s.server.Shutdown(context.Background())
 }

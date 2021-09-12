@@ -29,3 +29,7 @@ users:
   cookieHttpOnly: true
   minUserNameLen: 2
   minPwdLen: 4
+workers:
+  queueSize: 1024
+  sleepCyc: 1 # in second
+  workerCount: 2

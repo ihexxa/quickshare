@@ -1,30 +1,18 @@
 package localworker
 
 import (
-	"crypto/sha1"
-	"encoding/json"
 	"fmt"
-	"io"
 	"sync"
 	"time"
 
-	"github.com/ihexxa/quickshare/src/depidx"
+	"go.uber.org/zap"
+
 	"github.com/ihexxa/quickshare/src/worker"
 )
 
 const (
 	MsgTypeKey = "msg-type"
 )
-
-type WorkerPool struct {
-	on          bool
-	queue       chan worker.IMsg
-	sleep       int
-	workerCount int
-	started     int
-	mtx         *sync.RWMutex
-	deps        *depidx.Deps
-}
 
 type Msg struct {
 	id      uint64
@@ -52,19 +40,31 @@ func (m *Msg) Body() string {
 	return m.body
 }
 
-func NewWorkerPool(queueSize, sleep, workerCount int, deps *depidx.Deps) *WorkerPool {
+type WorkerPool struct {
+	on          bool
+	queue       chan worker.IMsg
+	sleep       int
+	workerCount int
+	started     int
+	mtx         *sync.RWMutex
+	logger      *zap.SugaredLogger
+	msgHandlers map[string]worker.MsgHandler
+}
+
+func NewWorkerPool(queueSize, sleep, workerCount int, logger *zap.SugaredLogger) *WorkerPool {
 	return &WorkerPool{
 		on:          true,
-		deps:        deps,
+		logger:      logger,
 		mtx:         &sync.RWMutex{},
 		sleep:       sleep,
 		workerCount: workerCount,
 		queue:       make(chan worker.IMsg, queueSize),
+		msgHandlers: map[string]worker.MsgHandler{},
 	}
 }
 
 func (wp *WorkerPool) TryPut(task worker.IMsg) error {
-	// this close the window that queue can be full after checking
+	// this closes the window that queue can be full after checking
 	wp.mtx.Lock()
 	defer wp.mtx.Unlock()
 
@@ -75,11 +75,10 @@ func (wp *WorkerPool) TryPut(task worker.IMsg) error {
 	return nil
 }
 
-type Sha1Params struct {
-	FilePath string
-}
-
 func (wp *WorkerPool) Start() {
+	wp.mtx.Lock()
+	defer wp.mtx.Unlock()
+
 	wp.on = true
 	for wp.started < wp.workerCount {
 		go wp.startWorker()
@@ -88,10 +87,20 @@ func (wp *WorkerPool) Start() {
 }
 
 func (wp *WorkerPool) Stop() {
-	defer close(wp.queue)
+	wp.mtx.Lock()
+	defer wp.mtx.Unlock()
+
+	// TODO: avoid sending and panic
+	close(wp.queue)
 	wp.on = false
 	for wp.started > 0 {
-		wp.deps.Log().Errorf(fmt.Sprintf("%d workers still in working", wp.started))
+		wp.logger.Errorf(
+			fmt.Sprintf(
+				"%d workers (sleep %d second) still in working/sleeping",
+				wp.sleep,
+				wp.started,
+			),
+		)
 		time.Sleep(time.Duration(1) * time.Second)
 	}
 }
@@ -104,30 +113,31 @@ func (wp *WorkerPool) startWorker() {
 		func() {
 			defer func() {
 				if p := recover(); p != nil {
-					wp.deps.Log().Errorf("worker panic: %s", p)
+					wp.logger.Errorf("worker panic: %s", p)
 				}
 			}()
 
-			msg := <-wp.queue
+
+			msg, ok := <-wp.queue
+			if !ok {
+				return
+			}
+			
 			headers := msg.Headers()
 			msgType, ok := headers[MsgTypeKey]
 			if !ok {
-				wp.deps.Log().Errorf("msg type not found: %v", headers)
+				wp.logger.Errorf("msg type not found: %v", headers)
+				return
 			}
 
-			switch msgType {
-			case "sha1":
-				sha1Params := &Sha1Params{}
-				err = json.Unmarshal([]byte(msg.Body()), sha1Params)
-				if err != nil {
-					wp.deps.Log().Errorf("fail to unmarshal sha1 msg: %s", err)
-				}
-				err = wp.sha1Task(sha1Params.FilePath)
-				if err != nil {
-					wp.deps.Log().Errorf("fail to do sha1: %s", err)
-				}
-			default:
-				wp.deps.Log().Errorf("unknown message tyope: %s", msgType)
+			handler, ok := wp.msgHandlers[msgType]
+			if !ok {
+				wp.logger.Errorf("no handler for the message type: %s", msgType)
+				return
+			}
+
+			if err = handler(msg); err != nil {
+				wp.logger.Errorf("async task(%s) failed: %s", msgType, err)
 			}
 		}()
 
@@ -137,23 +147,11 @@ func (wp *WorkerPool) startWorker() {
 	wp.started--
 }
 
-func (wp *WorkerPool) sha1Task(filePath string) error {
-	f, err := wp.deps.FS().GetFileReader(filePath)
-	if err != nil {
-		return fmt.Errorf("fail to get reader: %s", err)
-	}
+func (wp *WorkerPool) AddHandler(msgType string, handler worker.MsgHandler) {
+	// existing task type will be overwritten
+	wp.msgHandlers[msgType] = handler
+}
 
-	h := sha1.New()
-	buf := make([]byte, 4096)
-	_, err = io.CopyBuffer(h, f, buf)
-	if err != nil {
-		return err
-	}
-
-	sha1Sign := fmt.Sprintf("% x", h.Sum(nil))
-	err = wp.deps.FileInfos().SetSha1(filePath, sha1Sign)
-	if err != nil {
-		return fmt.Errorf("fail to set sha1: %s", err)
-	}
-	return nil
+func (wp *WorkerPool) DelHandler(msgType string) {
+	delete(wp.msgHandlers, msgType)
 }

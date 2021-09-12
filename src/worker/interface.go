@@ -14,8 +14,12 @@ type IMsg interface {
 	Body() string
 }
 
+type MsgHandler = func(msg IMsg) error
+
 type IWorkerPool interface {
 	TryPut(task IMsg) error
 	Start()
 	Stop()
+	AddHandler(msgType string, handler MsgHandler)
+	DelHandler(msgType string)
 }

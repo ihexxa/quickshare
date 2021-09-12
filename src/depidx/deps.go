@@ -11,6 +11,7 @@ import (
 	"github.com/ihexxa/quickshare/src/iolimiter"
 	"github.com/ihexxa/quickshare/src/kvstore"
 	"github.com/ihexxa/quickshare/src/userstore"
+	"github.com/ihexxa/quickshare/src/worker"
 )
 
 type IUploader interface {
@@ -27,10 +28,10 @@ type Deps struct {
 	kv        kvstore.IKVStore
 	users     userstore.IUserStore
 	fileInfos fileinfostore.IFileInfoStore
-	uploader  IUploader
 	id        idgen.IIDGen
 	logger    *zap.SugaredLogger
 	limiter   iolimiter.ILimiter
+	workers   worker.IWorkerPool
 }
 
 func NewDeps(cfg gocfg.ICfg) *Deps {
@@ -99,4 +100,12 @@ func (deps *Deps) Limiter() iolimiter.ILimiter {
 
 func (deps *Deps) SetLimiter(limiter iolimiter.ILimiter) {
 	deps.limiter = limiter
+}
+
+func (deps *Deps) Workers() worker.IWorkerPool {
+	return deps.workers
+}
+
+func (deps *Deps) SetWorkers(workers worker.IWorkerPool) {
+	deps.workers = workers
 }
