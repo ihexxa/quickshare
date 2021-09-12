@@ -15,7 +15,7 @@ import {
 } from "../client";
 import { FilesClient } from "../client/files";
 import { UsersClient } from "../client/users";
-import { UploadEntry } from "../worker/interface";
+import { UploadEntry, UploadState } from "../worker/interface";
 import { Up } from "../worker/upload_mgr";
 import { alertMsg } from "../common/env";
 import { LocalStorage } from "../common/localstorage";
@@ -110,25 +110,32 @@ export class Updater {
       return false;
     }
 
-    let remoteUploads = Map<string, UploadInfo>([]);
-    luResp.data.uploadInfos.forEach((info: UploadInfo) => {
-      remoteUploads = remoteUploads.set(info.realFilePath, info);
+    let localUploads = Map<string, UploadEntry>([]);
+    this.props.browser.uploadings.forEach((entry: UploadEntry) => {
+      localUploads = localUploads.set(entry.filePath, entry);
     })
 
+
     let updatedUploads = List<UploadEntry>([]);
-    this.props.browser.uploadings.forEach((localInfo: UploadEntry) => {
-      const remoteInfo = remoteUploads.get(localInfo.filePath);
-      if (remoteInfo == null) {
-        // TODO: i18n
-        localInfo.err = "not found in server";
-      } else {
-        updatedUploads.push({
-          file: localInfo.file,
-          filePath: localInfo.filePath,
+    luResp.data.uploadInfos.forEach((remoteInfo: UploadInfo) => {
+      const localEntry = localUploads.get(remoteInfo.realFilePath);
+      if (localEntry == null) {
+        updatedUploads = updatedUploads.push({
+          file: undefined,
+          filePath: remoteInfo.realFilePath,
           size: remoteInfo.size,
           uploaded: remoteInfo.uploaded,
-          state: localInfo.state,
-          err: localInfo.err,
+          state: UploadState.Ready,
+          err: "",
+        });
+      } else {
+        updatedUploads = updatedUploads.push({
+          file: localEntry.file,
+          filePath: localEntry.filePath,
+          size: remoteInfo.size,
+          uploaded: remoteInfo.uploaded,
+          state: localEntry.state,
+          err: localEntry.err,
         });
       }
     });

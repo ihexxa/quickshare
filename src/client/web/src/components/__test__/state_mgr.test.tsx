@@ -2,11 +2,11 @@ import { List, Set, Map } from "immutable";
 import { mock, instance } from "ts-mockito";
 
 import { StateMgr } from "../state_mgr";
-import { User } from "../../client";
+import { User, UploadInfo } from "../../client";
 import { MockFilesClient, resps as filesResps } from "../../client/files_mock";
 import { MockUsersClient, resps as usersResps } from "../../client/users_mock";
 import { ICoreState, newWithWorker } from "../core_state";
-import { MockWorker } from "../../worker/interface";
+import { MockWorker, UploadState, UploadEntry } from "../../worker/interface";
 
 describe("State Manager", () => {
   test("initUpdater", async () => {
@@ -35,8 +35,20 @@ describe("State Manager", () => {
       List(filesResps.listSharingsMockResp.data.sharingDirs)
     );
     expect(coreState.browser.uploadings).toEqual(
-      List(filesResps.listUploadingsMockResp.data.uploadInfos)
+      List<UploadEntry>(
+        filesResps.listUploadingsMockResp.data.uploadInfos.map((info: UploadInfo) => {
+          return {
+            file: undefined,
+            filePath: info.realFilePath,
+            size: info.size,
+            uploaded: info.uploaded,
+            state: UploadState.Ready,
+            err: "",
+          };
+        })
+      )
     );
+
     expect(coreState.browser.items).toEqual(
       List(filesResps.listHomeMockResp.data.metadatas)
     );
