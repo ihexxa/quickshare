@@ -26,6 +26,7 @@ export interface Item {
   modTime: string;
   isDir: boolean;
   selected: boolean;
+  sha1: string;
 }
 
 export interface BrowserProps {
@@ -163,7 +164,11 @@ export class Browser extends React.Component<Props, State, {}> {
         this.state.selectedItems
       )
       .then(() => {
+        return updater().self();
+      })
+      .then(() => {
         this.update(updater().updateBrowser);
+        this.update(updater().updateLogin);
         this.setState({
           selectedSrc: "",
           selectedItems: Map<string, boolean>(),

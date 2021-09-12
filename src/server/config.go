@@ -41,11 +41,18 @@ type ServerCfg struct {
 	PublicPath     string `json:"publicPath" yaml:"publicPath"`
 }
 
+type WorkerPoolCfg struct {
+	QueueSize   int `json:"queueSize" yaml:"queueSize"`
+	SleepCyc    int `json:"sleepCyc" yaml:"sleepCyc"`
+	WorkerCount int `json:"workerCount" yaml:"workerCount"`
+}
+
 type Config struct {
-	Fs      *FSConfig  `json:"fs" yaml:"fs"`
-	Secrets *Secrets   `json:"secrets" yaml:"secrets"`
-	Server  *ServerCfg `json:"server" yaml:"server"`
-	Users   *UsersCfg  `json:"users" yaml:"users"`
+	Fs      *FSConfig      `json:"fs" yaml:"fs"`
+	Secrets *Secrets       `json:"secrets" yaml:"secrets"`
+	Server  *ServerCfg     `json:"server" yaml:"server"`
+	Users   *UsersCfg      `json:"users" yaml:"users"`
+	Workers *WorkerPoolCfg `json:"workers" yaml:"workers"`
 }
 
 func NewConfig() *Config {
@@ -88,6 +95,11 @@ func DefaultConfig() (string, error) {
 			WriteTimeout:   1000 * 3600 * 24, // 1 day
 			MaxHeaderBytes: 512,
 			PublicPath:     "public",
+		},
+		Workers: &WorkerPoolCfg{
+			QueueSize:   1024,
+			SleepCyc:    1,
+			WorkerCount: 2,
 		},
 	}
 
