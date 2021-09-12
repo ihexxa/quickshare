@@ -112,7 +112,11 @@ export class Browser extends React.Component<Props, State, {}> {
         return updater().refreshUploadings();
       })
       .then(() => {
+        return updater().self();
+      })
+      .then(() => {
         this.update(updater().updateBrowser);
+        this.update(updater().updateLogin);
       });
   };
 
