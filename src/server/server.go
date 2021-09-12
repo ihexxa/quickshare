@@ -131,7 +131,6 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	queueSize := cfg.GrabInt("Workers.QueueSize")
 	sleepCyc := cfg.GrabInt("Workers.SleepCyc")
 	workerCount := cfg.GrabInt("Workers.WorkerCount")
-	fmt.Println(queueSize, sleepCyc, workerCount)
 
 	workers := localworker.NewWorkerPool(queueSize, sleepCyc, workerCount, logger)
 	workers.Start()

@@ -102,10 +102,11 @@ func (fi *FileInfoStore) DelSharing(dirPath string) error {
 }
 
 func (fi *FileInfoStore) GetSharing(dirPath string) (bool, bool) {
-	// TODO: add lock
+	fi.mtx.Lock()
+	defer fi.mtx.Unlock()
+
 	info, err := fi.GetInfo(dirPath)
 	if err != nil {
-		// TODO: error is ignored
 		return false, false
 	}
 	return info.IsDir && info.Shared, true
