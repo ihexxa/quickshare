@@ -2,6 +2,7 @@ import { List, Set, Map } from "immutable";
 
 import BgWorker from "../worker/upload.bg.worker";
 import { FgWorker } from "../worker/upload.fg.worker";
+import { UploadEntry } from "../worker/interface";
 
 import { BrowserProps } from "./browser";
 import { PanesProps } from "./panes";
@@ -9,8 +10,7 @@ import { LoginProps } from "./pane_login";
 import { AdminProps } from "./pane_admin";
 
 import { MsgPackage } from "../i18n/msger";
-import { Item } from "./browser";
-import { UploadInfo, User, MetadataResp } from "../client";
+import { User, MetadataResp } from "../client";
 import { initUploadMgr, IWorker } from "../worker/upload_mgr";
 
 export interface MsgProps {
@@ -56,7 +56,7 @@ export function initState(): ICoreState {
       items: List<MetadataResp>([]),
       sharings: List<string>([]),
       isSharing: false,
-      uploadings: List<UploadInfo>([]),
+      uploadings: List<UploadEntry>([]),
       uploadValue: "",
       uploadFiles: List<File>([]),
       tab: "",

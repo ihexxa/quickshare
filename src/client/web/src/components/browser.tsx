@@ -33,7 +33,7 @@ export interface BrowserProps {
   dirPath: List<string>;
   isSharing: boolean;
   items: List<MetadataResp>;
-  uploadings: List<UploadInfo>;
+  uploadings: List<UploadEntry>;
   sharings: List<string>;
 
   uploadFiles: List<File>;
@@ -328,9 +328,8 @@ export class Browser extends React.Component<Props, State, {}> {
       }
     );
 
-    const nameCellClass = `item-name item-name-${
-      this.props.browser.isVertical ? "vertical" : "horizontal"
-    } pointer`;
+    const nameCellClass = `item-name item-name-${this.props.browser.isVertical ? "vertical" : "horizontal"
+      } pointer`;
     const sizeCellClass = this.props.browser.isVertical
       ? `hidden margin-s`
       : ``;
@@ -422,9 +421,8 @@ export class Browser extends React.Component<Props, State, {}> {
             <span className="padding-m">
               <button
                 onClick={() => this.select(item.name)}
-                className={`${
-                  isSelected ? "blue0-bg white-font" : "grey2-bg grey3-font"
-                }`}
+                className={`${isSelected ? "blue0-bg white-font" : "grey2-bg grey3-font"
+                  }`}
                 style={{ width: "8rem", display: "inline-block" }}
               >
                 {isSelected
@@ -470,9 +468,8 @@ export class Browser extends React.Component<Props, State, {}> {
               <button
                 type="button"
                 onClick={() => this.select(item.name)}
-                className={`${
-                  isSelected ? "blue0-bg white-font" : "grey2-bg grey3-font"
-                }`}
+                className={`${isSelected ? "blue0-bg white-font" : "grey2-bg grey3-font"
+                  }`}
                 style={{ width: "8rem", display: "inline-block" }}
               >
                 {isSelected
@@ -593,50 +590,58 @@ export class Browser extends React.Component<Props, State, {}> {
       ) : null;
 
     const uploadingList = this.props.browser.uploadings.map(
-      (uploading: UploadInfo) => {
-        const pathParts = uploading.realFilePath.split("/");
+      (uploading: UploadEntry) => {
+        const pathParts = uploading.filePath.split("/");
         const fileName = pathParts[pathParts.length - 1];
 
         return (
-          <Flexbox
-            key={uploading.realFilePath}
-            children={List([
-              <span className="padding-m">
-                <Flexbox
-                  children={List([
-                    <RiUploadCloudLine
-                      size="3rem"
-                      className="margin-r-m blue0-font"
-                    />,
+          <div key={uploading.filePath}>
+            <Flexbox
+              children={List([
+                <span className="padding-m">
+                  <Flexbox
+                    children={List([
+                      <RiUploadCloudLine
+                        size="3rem"
+                        className="margin-r-m blue0-font"
+                      />,
 
-                    <div className={`${nameCellClass}`}>
-                      <span className="title-m">{fileName}</span>
-                      <div className="desc-m grey0-font">
-                        {FileSize(uploading.uploaded, { round: 0 })}
-                        &nbsp;/&nbsp;{FileSize(uploading.size, { round: 0 })}
-                      </div>
-                    </div>,
-                  ])}
-                />
-              </span>,
+                      <div className={`${nameCellClass}`}>
+                        <span className="title-m">{fileName}</span>
+                        <div className="desc-m grey0-font">
+                          {FileSize(uploading.uploaded, { round: 0 })}
+                          &nbsp;/&nbsp;{FileSize(uploading.size, { round: 0 })}
+                        </div>
+                      </div>,
+                    ])}
+                  />
+                </span>,
 
-              <div className="item-op padding-m">
-                <button
-                  onClick={() => this.stopUploading(uploading.realFilePath)}
-                  className="grey3-bg grey4-font margin-r-m"
-                >
-                  {this.props.msg.pkg.get("browser.stop")}
-                </button>
-                <button
-                  onClick={() => this.deleteUpload(uploading.realFilePath)}
-                  className="grey3-bg grey4-font"
-                >
-                  {this.props.msg.pkg.get("browser.delete")}
-                </button>
-              </div>,
-            ])}
-            childrenStyles={List([{}, { justifyContent: "flex-end" }])}
-          />
+                <div className="item-op padding-m">
+                  <button
+                    onClick={() => this.stopUploading(uploading.filePath)}
+                    className="grey3-bg grey4-font margin-r-m"
+                  >
+                    {this.props.msg.pkg.get("browser.stop")}
+                  </button>
+                  <button
+                    onClick={() => this.deleteUpload(uploading.filePath)}
+                    className="grey3-bg grey4-font"
+                  >
+                    {this.props.msg.pkg.get("browser.delete")}
+                  </button>
+                </div>,
+              ])}
+              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+            />
+            {uploading.err.trim() === "" ? null : (
+              <div className="alert-red margin-s">
+                <span className="padding-m">
+                  {uploading.err.trim()}
+                </span>
+              </div>
+            )}
+          </div>
         );
       }
     );
@@ -668,7 +673,7 @@ export class Browser extends React.Component<Props, State, {}> {
             />
           </div>
         ) : (
-          <div className="container">
+          <div className="container padding-b-m">
             <Flexbox
               children={List([
                 <span className="padding-m">
@@ -721,9 +726,8 @@ export class Browser extends React.Component<Props, State, {}> {
                   type="text"
                   readOnly
                   className="margin-r-m"
-                  value={`${
-                    document.location.href.split("?")[0]
-                  }?dir=${encodeURIComponent(dirPath)}`}
+                  value={`${document.location.href.split("?")[0]
+                    }?dir=${encodeURIComponent(dirPath)}`}
                 />
                 <button
                   onClick={() => {

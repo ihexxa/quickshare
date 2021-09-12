@@ -725,3 +725,9 @@ div.hr {
   overflow-wrap: break-word;
   display: block;
 }
+
+.alert-red {
+  border: dashed 1px #e74c3c;
+  color: #e74c3c;
+  border-radius: 0.5rem;
+}

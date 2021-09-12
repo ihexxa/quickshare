@@ -8,7 +8,7 @@ server:
   debug: true
   host: "127.0.0.1"
   port: 8686
-  readTimeout: 2000
+  readTimeout: 4000
   writerTimeout: 86400000 # 1 day
   maxHeaderBytes: 512
   publicPath: "public"
