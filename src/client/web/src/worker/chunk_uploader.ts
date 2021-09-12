@@ -6,7 +6,8 @@ import { UploadStatus, UploadState } from "./interface";
 // TODO: move chunk copying to worker
 const defaultChunkLen = 1024 * 1024 * 1;
 const speedDownRatio = 0.5;
-const speedUpRatio = 1.05;
+const speedUpRatio = 1.1;
+const speedLimit = 1024 * 1024 * 10; // 10MB
 const createRetryLimit = 2;
 const uploadRetryLimit = 1024;
 const backoffMax = 2000;
@@ -17,12 +18,11 @@ export interface ReaderResult {
 }
 
 export class ChunkUploader {
-  private reader = new FileReader();
   private client: IFilesClient = new FilesClient("");
 
   private chunkLen: number = defaultChunkLen;
 
-  constructor() {}
+  constructor() { }
 
   setClient = (client: IFilesClient) => {
     this.client = client;
@@ -70,6 +70,8 @@ export class ChunkUploader {
   ): Promise<UploadStatus> => {
     if (this.chunkLen === 0) {
       this.chunkLen = 1; // reset it to 1B
+    } else if (this.chunkLen > speedLimit) {
+      this.chunkLen = speedLimit;
     } else if (uploaded > file.size) {
       return {
         filePath,
@@ -79,13 +81,14 @@ export class ChunkUploader {
       };
     }
 
+    const reader = new FileReader();
     const readerPromise = new Promise<ReaderResult>(
       (resolve: (result: ReaderResult) => void) => {
-        this.reader.onerror = (_: ProgressEvent<FileReader>) => {
-          resolve({ err: this.reader.error });
+        reader.onerror = (_: ProgressEvent<FileReader>) => {
+          resolve({ err: reader.error });
         };
 
-        this.reader.onloadend = (ev: ProgressEvent<FileReader>) => {
+        reader.onloadend = (ev: ProgressEvent<FileReader>) => {
           const dataURL = ev.target.result as string; // readAsDataURL
           const base64Chunk = dataURL.slice(dataURL.indexOf(",") + 1);
           resolve({ chunk: base64Chunk });
@@ -93,12 +96,22 @@ export class ChunkUploader {
       }
     );
 
-    const chunkRightPos =
-      uploaded + this.chunkLen > file.size
-        ? file.size
-        : uploaded + this.chunkLen;
-    const blob = file.slice(uploaded, chunkRightPos);
-    this.reader.readAsDataURL(blob);
+    for (let i = 0; i < 3; i++) {
+      try {
+        const chunkRightPos =
+          uploaded + this.chunkLen > file.size
+            ? file.size
+            : uploaded + this.chunkLen;
+        const blob = file.slice(uploaded, chunkRightPos);
+        reader.readAsDataURL(blob);
+        break;
+      } catch (e) {
+        // The object is already busy reading Blobs
+        console.error(e);
+        await this.backOff();
+        continue;
+      }
+    }
 
     const result = await readerPromise;
     if (result.err != null) {
@@ -140,17 +153,17 @@ export class ChunkUploader {
       const uploadStatusResp = await this.client.uploadStatus(filePath);
       return uploadStatusResp.status === 200
         ? {
-            filePath,
-            uploaded: uploadStatusResp.data.uploaded,
-            state: UploadState.Ready,
-            err: "",
-          }
+          filePath,
+          uploaded: uploadStatusResp.data.uploaded,
+          state: UploadState.Ready,
+          err: "",
+        }
         : {
-            filePath,
-            uploaded: uploaded,
-            state: UploadState.Error,
-            err: `failed to get upload status: ${uploadStatusResp.statusText}`,
-          };
+          filePath,
+          uploaded: uploaded,
+          state: UploadState.Error,
+          err: `failed to get upload status: ${uploadStatusResp.statusText}`,
+        };
     } catch (e) {
       return {
         filePath,

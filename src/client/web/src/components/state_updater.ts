@@ -39,7 +39,7 @@ export class Updater {
 
   initUploads = () => {
     this.props.browser.uploadings.forEach((entry) => {
-      Up().addStopped(entry.realFilePath, entry.uploaded, entry.size);
+      Up().addStopped(entry.filePath, entry.uploaded, entry.size);
     });
     // this.setUploadings(Up().list());
   };
@@ -63,13 +63,9 @@ export class Updater {
   };
 
   setUploadings = (infos: Map<string, UploadEntry>) => {
-    this.props.browser.uploadings = List<UploadInfo>(
-      infos.valueSeq().map((v: UploadEntry): UploadInfo => {
-        return {
-          realFilePath: v.filePath,
-          size: v.size,
-          uploaded: v.uploaded,
-        };
+    this.props.browser.uploadings = List<UploadEntry>(
+      infos.valueSeq().map((entry: UploadEntry): UploadEntry => {
+        return entry;
       })
     );
   };
@@ -105,13 +101,40 @@ export class Updater {
   };
 
   refreshUploadings = async (): Promise<boolean> => {
+    // this function get information from server and merge them with local information
+    // because some information (error) can only be detected from local
     const luResp = await this.filesClient.listUploadings();
+    if (luResp.status !== 200) {
+      // TODO: i18n
+      console.error(luResp.data);
+      return false;
+    }
 
-    this.props.browser.uploadings =
-      luResp.status === 200
-        ? List<UploadInfo>(luResp.data.uploadInfos)
-        : this.props.browser.uploadings;
-    return luResp.status === 200;
+    let remoteUploads = Map<string, UploadInfo>([]);
+    luResp.data.uploadInfos.forEach((info: UploadInfo) => {
+      remoteUploads = remoteUploads.set(info.realFilePath, info);
+    })
+
+    let updatedUploads = List<UploadEntry>([]);
+    this.props.browser.uploadings.forEach((localInfo: UploadEntry) => {
+      const remoteInfo = remoteUploads.get(localInfo.filePath);
+      if (remoteInfo == null) {
+        // TODO: i18n
+        localInfo.err = "not found in server";
+      } else {
+        updatedUploads.push({
+          file: localInfo.file,
+          filePath: localInfo.filePath,
+          size: remoteInfo.size,
+          uploaded: remoteInfo.uploaded,
+          state: localInfo.state,
+          err: localInfo.err,
+        });
+      }
+    });
+
+    this.props.browser.uploadings = updatedUploads;
+    return true;
   };
 
   stopUploading = (filePath: string) => {
