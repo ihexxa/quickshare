@@ -62,6 +62,12 @@ func compareFileContent(fs fspkg.ISimpleFS, uid, filePath string, expectedConten
 	if err != nil {
 		return false, err
 	}
+	defer func() {
+		err = fs.CloseReader(filePath)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}()
 
 	gotContent, err := ioutil.ReadAll(reader)
 	if err != nil {

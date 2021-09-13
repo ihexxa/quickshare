@@ -8,7 +8,7 @@ const defaultChunkLen = 1024 * 1024 * 1;
 const speedDownRatio = 0.5;
 const speedUpRatio = 1.1;
 const speedLimit = 1024 * 1024 * 10; // 10MB
-const createRetryLimit = 2;
+const createRetryLimit = 3;
 const uploadRetryLimit = 1024;
 const backoffMax = 2000;
 
@@ -143,7 +143,7 @@ export class ChunkUploader {
           filePath,
           uploaded,
           state: UploadState.Error,
-          err: `failed to upload chunk: ${uploadResp.statusText}`,
+          err: `failed to upload chunk: ${uploadResp.statusText}, ${JSON.stringify(uploadResp.data)}`,
         };
       }
 
@@ -156,7 +156,7 @@ export class ChunkUploader {
           filePath,
           uploaded: uploadStatusResp.data.uploaded,
           state: UploadState.Ready,
-          err: "",
+          err: `retrying, error: ${JSON.stringify(uploadResp.data)}`,
         }
         : {
           filePath,
