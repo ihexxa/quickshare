@@ -214,22 +214,17 @@ func (h *FileHandlers) Delete(c *gin.Context) {
 			return
 		}
 
-		err = h.deps.Users().SetUsed(userIDInt, false, info.Size())
-		if err != nil {
-			if userstore.IsReachedLimitErr(err) {
-				c.JSON(q.ErrResp(c, 429, err))
-			} else {
-				c.JSON(q.ErrResp(c, 500, err))
-			}
-			return
-		}
-
 		err = h.deps.FS().Remove(filePath)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
 		}
 
+		err = h.deps.Users().SetUsed(userIDInt, false, info.Size())
+		if err != nil {
+			c.JSON(q.ErrResp(c, 500, err))
+			return
+		}
 		c.JSON(q.Resp(200))
 	})
 }
@@ -578,6 +573,12 @@ func (h *FileHandlers) Download(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
+	defer func() {
+		err := h.deps.FS().CloseReader(filePath)
+		if err != nil {
+			h.deps.Log().Errorf("failed to close: %s", err)
+		}
+	}()
 
 	extraHeaders := map[string]string{
 		"Content-Disposition": fmt.Sprintf(`attachment; filename="%s"`, info.Name()),
@@ -764,17 +765,13 @@ func (h *FileHandlers) DelUploading(c *gin.Context) {
 			return
 		}
 
-		err = h.deps.Users().SetUsed(userIDInt, false, size)
+		err = h.deps.FS().Remove(tmpFilePath)
 		if err != nil {
-			if userstore.IsReachedLimitErr(err) {
-				c.JSON(q.ErrResp(c, 429, err))
-			} else {
-				c.JSON(q.ErrResp(c, 500, err))
-			}
+			c.JSON(q.ErrResp(c, 500, err))
 			return
 		}
 
-		err = h.deps.FS().Remove(tmpFilePath)
+		err = h.deps.Users().SetUsed(userIDInt, false, size)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return

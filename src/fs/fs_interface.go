@@ -23,6 +23,7 @@ type ISimpleFS interface {
 	Close() error
 	Sync() error
 	GetFileReader(path string) (ReadCloseSeeker, error)
+	CloseReader(path string) error
 	Root() string
 	ListDir(path string) ([]os.FileInfo, error)
 }

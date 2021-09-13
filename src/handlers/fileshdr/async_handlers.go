@@ -8,6 +8,7 @@ import (
 
 	"github.com/ihexxa/quickshare/src/worker"
 )
+
 const MsgTypeSha1 = "sha1"
 
 type Sha1Params struct {
@@ -25,6 +26,12 @@ func (h *FileHandlers) genSha1(msg worker.IMsg) error {
 	if err != nil {
 		return fmt.Errorf("fail to get reader: %s", err)
 	}
+	defer func() {
+		err := h.deps.FS().CloseReader(taskInputs.FilePath)
+		if err != nil {
+			h.deps.Log().Errorf("failed to close file: %s", err)
+		}
+	}()
 
 	hasher := sha1.New()
 	buf := make([]byte, 4096)
