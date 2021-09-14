@@ -4,9 +4,9 @@
     "src/client/web"
   ],
   "scripts": {
-    "build:fe": "bash scripts/copy_js.sh && webpack --config src/client/web/webpack.app.prod.js",
-    "build:fe:dev": "bash scripts/copy_js_dev.sh && webpack --config src/client/web/webpack.app.dev.js --watch",
-    "build:fe:watch": "bash scripts/copy_js.sh && webpack --config src/client/web/webpack.app.prod.js --watch",
+    "build:fe": "yarn && bash scripts/copy_js.sh && webpack --config src/client/web/webpack.app.prod.js",
+    "build:fe:dev": "yarn && bash scripts/copy_js_dev.sh && webpack --config src/client/web/webpack.app.dev.js --watch",
+    "build:fe:watch": "yarn && bash scripts/copy_js.sh && webpack --config src/client/web/webpack.app.prod.js --watch",
     "start": "yarn build:fe && go run cmd/start/main.go -c `pwd`/configs/dev.yml",
 
     "build": "yarn build:fe && bash scripts/build_be.sh",
