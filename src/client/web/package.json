@@ -4,20 +4,11 @@
   "description": "web client for quickshare",
   "main": "",
   "scripts": {
-    "build": "yarn prod:addjs && yarn build:prod:wp",
-    "build:prod:wp": "webpack --config webpack.app.prod.js",
+    "build": "webpack --config webpack.app.prod.js",
     "build:watch": "webpack --config webpack.app.prod.js --watch",
-    "build:dev": "yarn dev:addjs && webpack --config webpack.app.dev.js --watch",
+    "build:dev": "webpack --config webpack.app.dev.js --watch",
     "test": "jest test --maxWorkers=2",
-    "test:watch": "jest test --watch --maxWorkers=2",
-    "dev:addjs": "yarn && yarn dev:copy-immutable && yarn dev:copy-react-dom && yarn dev:copy-react",
-    "dev:copy-immutable": "cp ../../../node_modules/immutable/dist/immutable.min.js ../../../public/static/js/",
-    "dev:copy-react-dom": "cp ../../../node_modules/react-dom/umd/react-dom.development.js ../../../public/static/js/",
-    "dev:copy-react": "cp ../../../node_modules/react/umd/react.development.js ../../../public/static/js/",
-    "prod:addjs": "yarn && yarn prod:copy-immutable && yarn prod:copy-react-dom && yarn prod:copy-react",
-    "prod:copy-immutable": "cp ../../../node_modules/immutable/dist/immutable.min.js ../../../public/static/js/",
-    "prod:copy-react-dom": "cp ../../../node_modules/react-dom/umd/react-dom.production.min.js ../../../public/static/js/",
-    "prod:copy-react": "cp ../../../node_modules/react/umd/react.production.min.js ../../../public/static/js/"
+    "test:watch": "jest test --watch --maxWorkers=2"
   },
   "author": "hexxa",
   "license": "LGPL-3.0",

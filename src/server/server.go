@@ -59,7 +59,7 @@ func NewServer(cfg gocfg.ICfg) (*Server, error) {
 
 	port := cfg.GrabInt("Server.Port")
 	portStr, ok := cfg.String("ENV.PORT")
-	if ok {
+	if ok && portStr != "" {
 		port, err = strconv.Atoi(portStr)
 		if err != nil {
 			panic(fmt.Sprintf("invalid port: %s", portStr))
