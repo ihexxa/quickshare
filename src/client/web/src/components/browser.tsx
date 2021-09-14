@@ -230,7 +230,7 @@ export class Browser extends React.Component<Props, State, {}> {
     if (refresh) {
       updater()
         .setItems(this.props.browser.dirPath)
-        .then(() => {
+        .then((ok:boolean) => {
           this.update(updater().updateBrowser);
         });
     } else {
