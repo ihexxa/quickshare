@@ -568,13 +568,13 @@ func (h *FileHandlers) Download(c *gin.Context) {
 	}
 	contentType := http.DetectContentType(fileHeadBuf[:read])
 
-	fd, err := h.deps.FS().GetFileReader(filePath)
+	fd, id, err := h.deps.FS().GetFileReader(filePath)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
 	defer func() {
-		err := h.deps.FS().CloseReader(filePath)
+		err := h.deps.FS().CloseReader(fmt.Sprint(id))
 		if err != nil {
 			h.deps.Log().Errorf("failed to close: %s", err)
 		}

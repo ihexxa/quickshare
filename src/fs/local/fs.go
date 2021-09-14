@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/ihexxa/quickshare/src/fs"
+	"github.com/ihexxa/quickshare/src/idgen"
 )
 
 var ErrTooManyOpens = errors.New("too many opened files")
@@ -25,8 +26,9 @@ type LocalFS struct {
 	opensMtx       *sync.RWMutex
 	opensCleanSize int
 	openTTL        time.Duration
-	readersMtx     *sync.RWMutex
+	readerTTL      time.Duration
 	readers        map[string]*fileInfo
+	ider           idgen.IIDGen
 }
 
 type fileInfo struct {
@@ -34,21 +36,22 @@ type fileInfo struct {
 	fd         *os.File
 }
 
-func NewLocalFS(root string, defaultPerm uint32, opensLimit, openTTL int) *LocalFS {
+func NewLocalFS(root string, defaultPerm uint32, opensLimit, openTTL, readerTTL int, ider idgen.IIDGen) *LocalFS {
 	if root == "" {
 		root = "."
 	}
 
 	return &LocalFS{
+		ider:           ider,
 		root:           root,
 		defaultPerm:    os.FileMode(defaultPerm),
 		defaultDirPerm: os.FileMode(0775),
 		opens:          map[string]*fileInfo{},
 		opensLimit:     opensLimit,
 		openTTL:        time.Duration(openTTL) * time.Second,
+		readerTTL:      time.Duration(readerTTL) * time.Second,
 		opensMtx:       &sync.RWMutex{},
 		opensCleanSize: 3,
-		readersMtx:     &sync.RWMutex{},
 		readers:        map[string]*fileInfo{}, // TODO: track readers and close idles
 	}
 }
@@ -63,29 +66,49 @@ func (fs *LocalFS) isTooManyOpens() bool {
 }
 
 // closeOpens assumes that it is called after opensMtx.Lock()
-func (fs *LocalFS) closeOpens(closeAll, forced bool, exclude map[string]bool) (int, error) {
+func (fs *LocalFS) closeOpens(iterateAll, forced bool, exclude map[string]bool) (int, error) {
 	batch := fs.opensCleanSize
 
 	var err error
 	closed := 0
-	for key, info := range fs.opens {
-		if exclude[key] {
+	for filePath, info := range fs.opens {
+		if !iterateAll && exclude[filePath] {
 			continue
 		}
 
-		if !closeAll && batch <= 0 {
+		if !iterateAll && batch <= 0 {
 			break
 		}
 		batch--
 
 		if forced || info.lastAccess.Add(fs.openTTL).Before(time.Now()) {
+			if err = fs.closeInfo(filePath, info); err != nil {
+				return closed, err
+			}
+			closed++
+		}
+	}
+
+	batch = fs.opensCleanSize
+	for id, info := range fs.readers {
+		if !iterateAll && exclude[id] {
+			continue
+		}
+
+		if !iterateAll && batch <= 0 {
+			break
+		}
+		batch--
+
+		if forced || info.lastAccess.Add(fs.readerTTL).Before(time.Now()) {
+			var err error
 			if err = info.fd.Sync(); err != nil {
-				return 0, err
+				return closed, err
 			}
 			if err := info.fd.Close(); err != nil {
-				return 0, err
+				return closed, err
 			}
-			delete(fs.opens, key)
+			delete(fs.readers, id)
 			closed++
 		}
 	}
@@ -93,11 +116,28 @@ func (fs *LocalFS) closeOpens(closeAll, forced bool, exclude map[string]bool) (i
 	return closed, nil
 }
 
+func (fs *LocalFS) closeInfo(key string, info *fileInfo) error {
+	var err error
+	if err = info.fd.Sync(); err != nil {
+		return err
+	}
+	if err := info.fd.Close(); err != nil {
+		return err
+	}
+	delete(fs.opens, key)
+	return nil
+}
+
 func (fs *LocalFS) Sync() error {
 	fs.opensMtx.Lock()
 	defer fs.opensMtx.Unlock()
+
 	_, err := fs.closeOpens(true, true, map[string]bool{})
 	return err
+}
+
+func (fs *LocalFS) Close() error {
+	return fs.Sync()
 }
 
 // check refers implementation of Dir.Open() in http package
@@ -113,9 +153,9 @@ func (fs *LocalFS) Create(path string) error {
 	defer fs.opensMtx.Unlock()
 
 	if fs.isTooManyOpens() {
-		_, err := fs.closeOpens(false, true, map[string]bool{})
-		if err != nil {
-			return fmt.Errorf("too many opens and fail to clean: %w", err)
+		closed, err := fs.closeOpens(false, false, map[string]bool{})
+		if err != nil || closed == 0 {
+			return fmt.Errorf("too many opens and fail to clean(%d): %w", closed, err)
 		}
 	}
 
@@ -124,11 +164,15 @@ func (fs *LocalFS) Create(path string) error {
 		return err
 	}
 
+	_, ok := fs.opens[fullpath]
+	if ok {
+		return os.ErrExist
+	}
+
 	fd, err := os.OpenFile(fullpath, os.O_CREATE|os.O_RDWR|os.O_EXCL, fs.defaultPerm)
 	if err != nil {
 		return err
 	}
-
 	fs.opens[fullpath] = &fileInfo{
 		lastAccess: time.Now(),
 		fd:         fd,
@@ -153,6 +197,8 @@ func (fs *LocalFS) Remove(entryPath string) error {
 }
 
 func (fs *LocalFS) Rename(oldpath, newpath string) error {
+	// TODO: if the rename will be implemented without Rename
+	// we must check if the files are in reading/writing
 	fullOldPath, err := fs.translate(oldpath)
 	if err != nil {
 		return err
@@ -161,17 +207,8 @@ func (fs *LocalFS) Rename(oldpath, newpath string) error {
 	if err != nil {
 		return err
 	}
-
-	if fs.isTooManyOpens() {
-		_, err := fs.closeOpens(false, true, map[string]bool{})
-		if err != nil {
-			return fmt.Errorf("too many opens and fail to clean: %w", err)
-		}
-	}
-
-	_, err = os.Stat(fullOldPath)
-	if err != nil {
-		return err
+	if fullOldPath == fullNewPath {
+		return nil
 	}
 
 	// avoid replacing existing file/folder
@@ -198,9 +235,9 @@ func (fs *LocalFS) ReadAt(path string, b []byte, off int64) (int, error) {
 		info, ok := fs.opens[fullpath]
 		if !ok {
 			if fs.isTooManyOpens() {
-				_, err := fs.closeOpens(false, true, map[string]bool{})
-				if err != nil {
-					return nil, fmt.Errorf("too many opens and fail to clean: %w", err)
+				closed, err := fs.closeOpens(false, false, map[string]bool{})
+				if err != nil || closed == 0 {
+					return nil, fmt.Errorf("too many opens and fail to clean (%d): %w", closed, err)
 				}
 			}
 
@@ -214,7 +251,8 @@ func (fs *LocalFS) ReadAt(path string, b []byte, off int64) (int, error) {
 				lastAccess: time.Now(),
 			}
 			fs.opens[fullpath] = info
-			// fs.closeOpens(false, true, map[string]bool{fullpath: true})
+		} else {
+			info.lastAccess = time.Now()
 		}
 
 		return info, nil
@@ -247,9 +285,10 @@ func (fs *LocalFS) WriteAt(path string, b []byte, off int64) (int, error) {
 		info, ok := fs.opens[fullpath]
 		if !ok {
 			if fs.isTooManyOpens() {
-				_, err := fs.closeOpens(false, true, map[string]bool{})
-				if err != nil {
-					return nil, fmt.Errorf("too many opens and fail to clean: %w", err)
+				closed, err := fs.closeOpens(false, false, map[string]bool{})
+				if err != nil || closed == 0 {
+					// TODO: return Eagain and make client retry later
+					return nil, fmt.Errorf("too many opens and fail to clean (%d): %w", closed, err)
 				}
 			}
 
@@ -263,6 +302,8 @@ func (fs *LocalFS) WriteAt(path string, b []byte, off int64) (int, error) {
 				lastAccess: time.Now(),
 			}
 			fs.opens[fullpath] = info
+		} else {
+			info.lastAccess = time.Now()
 		}
 
 		return info, nil
@@ -297,71 +338,53 @@ func (fs *LocalFS) Stat(path string) (os.FileInfo, error) {
 	return os.Stat(fullpath)
 }
 
-func (fs *LocalFS) Close() error {
+// readers are not tracked by opens
+func (fs *LocalFS) GetFileReader(path string) (fs.ReadCloseSeeker, uint64, error) {
+	fullpath, err := fs.translate(path)
+	if err != nil {
+		return nil, 0, err
+	}
+
 	fs.opensMtx.Lock()
 	defer fs.opensMtx.Unlock()
 
-	var err error
-	for filePath, info := range fs.opens {
-		err = info.fd.Sync()
-		if err != nil {
-			return err
-		}
-		err = info.fd.Close()
-		if err != nil {
-			return err
-		}
-		delete(fs.opens, filePath)
-	}
-
-	return nil
-}
-
-// readers are not tracked by opens
-func (fs *LocalFS) GetFileReader(path string) (fs.ReadCloseSeeker, error) {
-	fullpath, err := fs.translate(path)
-	if err != nil {
-		return nil, err
-	}
-
 	if fs.isTooManyOpens() {
-		return nil, ErrTooManyOpens
+		closed, err := fs.closeOpens(false, false, map[string]bool{})
+		if err != nil || closed == 0 {
+			return nil, 0, fmt.Errorf("too many opens and fail to clean (%d): %w", closed, err)
+		}
 	}
 
 	fd, err := os.OpenFile(fullpath, os.O_RDONLY, fs.defaultPerm)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	fs.readersMtx.Lock()
-	defer fs.readersMtx.Unlock()
-
-	fs.readers[fullpath] = &fileInfo{
+	id := fs.ider.Gen()
+	fs.readers[fmt.Sprint(id)] = &fileInfo{
 		fd:         fd,
 		lastAccess: time.Now(),
 	}
-	return fd, nil
+	return fd, id, nil
 }
 
-func (fs *LocalFS) CloseReader(path string) error {
-	fullpath, err := fs.translate(path)
-	if err != nil {
+func (fs *LocalFS) CloseReader(id string) error {
+	fs.opensMtx.Lock()
+	defer fs.opensMtx.Unlock()
+
+	info, ok := fs.readers[id]
+	if !ok {
+		return fmt.Errorf("reader not found: %s", id)
+	}
+
+	var err error
+	if err = info.fd.Sync(); err != nil {
 		return err
 	}
-
-	fs.readersMtx.Lock()
-	defer fs.readersMtx.Unlock()
-	info, ok := fs.readers[fullpath]
-	if !ok {
-		return fmt.Errorf("reader not found: %s", path)
+	if err := info.fd.Close(); err != nil {
+		return err
 	}
-
-	err = info.fd.Close()
-	if err != nil {
-		return fmt.Errorf("close reader failed: %w", err)
-	}
-
-	delete(fs.readers, fullpath)
+	delete(fs.readers, id)
 	return nil
 }
 

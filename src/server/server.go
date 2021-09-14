@@ -110,9 +110,10 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	mkRoot(rootPath)
 	opensLimit := cfg.GrabInt("Fs.OpensLimit")
 	openTTL := cfg.GrabInt("Fs.OpenTTL")
+	readerTTL := cfg.GrabInt("Server.WriteTimeout") / 1000 // millisecond -> second
 
 	ider := simpleidgen.New()
-	filesystem := local.NewLocalFS(rootPath, 0660, opensLimit, openTTL)
+	filesystem := local.NewLocalFS(rootPath, 0660, opensLimit, openTTL, readerTTL, ider)
 	jwtEncDec := jwt.NewJWTEncDec(secret)
 	kv := boltdbpvd.New(rootPath, 1024)
 	users, err := userstore.NewKVUserStore(kv)
@@ -313,6 +314,7 @@ func (s *Server) Start() error {
 func (s *Server) Shutdown() error {
 	// TODO: add timeout
 	s.deps.Workers().Stop()
+	s.deps.FS().Close()
 	s.deps.Log().Sync()
 	return s.server.Shutdown(context.Background())
 }
