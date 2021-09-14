@@ -22,8 +22,8 @@ type ISimpleFS interface {
 	Stat(path string) (os.FileInfo, error)
 	Close() error
 	Sync() error
-	GetFileReader(path string) (ReadCloseSeeker, error)
-	CloseReader(path string) error
+	GetFileReader(path string) (ReadCloseSeeker, uint64, error)
+	CloseReader(id string) error
 	Root() string
 	ListDir(path string) ([]os.FileInfo, error)
 }

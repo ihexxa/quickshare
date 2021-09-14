@@ -58,12 +58,12 @@ func waitForReady(addr string) bool {
 }
 
 func compareFileContent(fs fspkg.ISimpleFS, uid, filePath string, expectedContent string) (bool, error) {
-	reader, err := fs.GetFileReader(filePath)
+	reader, id, err := fs.GetFileReader(filePath)
 	if err != nil {
 		return false, err
 	}
 	defer func() {
-		err = fs.CloseReader(filePath)
+		err = fs.CloseReader(fmt.Sprint(id))
 		if err != nil {
 			fmt.Println(err)
 		}

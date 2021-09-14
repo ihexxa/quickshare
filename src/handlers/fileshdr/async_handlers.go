@@ -22,12 +22,12 @@ func (h *FileHandlers) genSha1(msg worker.IMsg) error {
 		return fmt.Errorf("fail to unmarshal sha1 msg: %w", err)
 	}
 
-	f, err := h.deps.FS().GetFileReader(taskInputs.FilePath)
+	f, id, err := h.deps.FS().GetFileReader(taskInputs.FilePath)
 	if err != nil {
 		return fmt.Errorf("fail to get reader: %s", err)
 	}
 	defer func() {
-		err := h.deps.FS().CloseReader(taskInputs.FilePath)
+		err := h.deps.FS().CloseReader(fmt.Sprint(id))
 		if err != nil {
 			h.deps.Log().Errorf("failed to close file: %s", err)
 		}

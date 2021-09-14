@@ -89,7 +89,7 @@ func TestSpaceLimit(t *testing.T) {
 		t.Fatal(resp.StatusCode)
 	}
 
-	t.Run("test space limitiong: Upload", func(t *testing.T) {
+	t.Run("test space limiting: Upload", func(t *testing.T) {
 		usersCl := client.NewSingleUserClient(addr)
 		resp, _, errs := usersCl.Login(getUserName(0), userPwd)
 		if len(errs) > 0 {
@@ -105,9 +105,9 @@ func TestSpaceLimit(t *testing.T) {
 		}
 
 		for i := 0; i < 10; i++ {
-			ok := assertUploadOK(t, fmt.Sprintf("%s/spacelimit/f_%d", getUserName(0), 0), fileContent, addr, token)
+			ok := assertUploadOK(t, fmt.Sprintf("%s/files/spacelimit/f_%d", getUserName(0), i), fileContent, addr, token)
 			if !ok {
-				t.Fatalf("space limit failed at %d", 0)
+				t.Fatalf("space limit failed at %d", i)
 			}
 
 			resp, selfResp, errs := usersCl.Self(token)
@@ -121,7 +121,7 @@ func TestSpaceLimit(t *testing.T) {
 		}
 
 		cl := client.NewFilesClient(addr, token)
-		filePath := fmt.Sprintf("%s/spacelimit/f_%d", getUserName(0), 11)
+		filePath := fmt.Sprintf("%s/files/spacelimit/f_%d", getUserName(0), 11)
 		res, _, errs := cl.Create(filePath, 1)
 		if len(errs) > 0 {
 			t.Fatal(errs)

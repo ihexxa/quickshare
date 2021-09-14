@@ -575,7 +575,7 @@ func TestFileHandlers(t *testing.T) {
 		// cl := client.NewFilesClient(addr)
 
 		files := map[string]string{
-			"qs/files/uploadings/path1/f1": "12345678",
+			"qs/files/uploadings1/path1/f1": "12345678",
 		}
 
 		for filePath, content := range files {
@@ -594,18 +594,13 @@ func TestFileHandlers(t *testing.T) {
 			offset := int64(0)
 			for _, chunk := range chunks {
 				base64Content := base64.StdEncoding.EncodeToString(chunk)
-				res, _, errs = cl.UploadChunk(filePath, base64Content, offset)
+				res, bodyStr, errs := cl.UploadChunk(filePath, base64Content, offset)
 				offset += int64(len(chunk))
 
 				if len(errs) > 0 {
 					t.Fatal(errs)
 				} else if res.StatusCode != 200 {
-					t.Fatal(res.StatusCode)
-				}
-
-				err = fs.Close()
-				if err != nil {
-					t.Fatal(err)
+					t.Fatal(fmt.Sprintln(res.StatusCode, bodyStr))
 				}
 			}
 
@@ -662,11 +657,6 @@ func TestFileHandlers(t *testing.T) {
 					t.Fatal(errs)
 				} else if res.StatusCode != 200 {
 					t.Fatal(res.StatusCode)
-				}
-
-				err = fs.Close()
-				if err != nil {
-					t.Fatal(err)
 				}
 			}
 
