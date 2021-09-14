@@ -1,4 +1,4 @@
-name: quickshare-ci
+name: ci-quickshare
 
 # Controls when the action will run.
 on:
