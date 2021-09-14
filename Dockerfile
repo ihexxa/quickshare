@@ -10,7 +10,7 @@ RUN yarn install \
     && yarn --cwd "src/client/web" run build \
     && cp -R /quickshare/public /quickshare/dist/quickshare
 
-FROM gcr.io/distroless/base-debian10
+FROM debian:stable-slim
 COPY --from=build-fe /quickshare/dist/quickshare /quickshare
 ADD configs/docker.yml /quickshare
 CMD ["/quickshare/start", "-c", "/quickshare/docker.yml"]
