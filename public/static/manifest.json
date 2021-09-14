@@ -1,0 +1,11 @@
+{
+    "name": "Quickshare",
+    "short_name": "Quickshare",
+    "icons": [{
+        "src": "img/favicon.png",
+        "sizes": "512x512"
+    }],
+    "background_color": "#16a085",
+    "theme_color": "#ffffff",
+    "display": "fullscreen"
+}
