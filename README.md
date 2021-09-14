@@ -50,13 +50,12 @@ Then you can open `http://127.0.0.1:8686` and log in with user name `qs` and pas
 
 ```
 docker run \
-  --name quickshare \
-  -d -p 8686:8686 \
-  -v `pwd`/quickshare/root:/quickshare/root \
-  -e DEFAULTADMIN=qs \
-  -e DEFAULTADMINPWD=1234 \
-  --user $(id -u):$(id -g) \
-  hexxa/quickshare
+--name quickshare \
+-d -p 8686:8686 \
+-v `pwd`/quickshare/root:/quickshare/root \
+-e DEFAULTADMIN=qs \
+-e DEFAULTADMINPWD=1234 \
+hexxa/quickshare
 ```
 
 - `DEFAULTADMIN` is the default user name
