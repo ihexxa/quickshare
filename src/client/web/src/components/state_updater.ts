@@ -159,7 +159,7 @@ export class Updater {
     dirParts: List<string>,
     items: List<MetadataResp>,
     selectedItems: Map<string, boolean>
-  ): Promise<void> => {
+  ): Promise<boolean> => {
     const pathsToDel = items
       .filter((item) => {
         return selectedItems.has(item.name);
@@ -200,32 +200,34 @@ export class Updater {
     return this.setItems(dirParts);
   };
 
-  setItems = async (dirParts: List<string>): Promise<void> => {
+  setItems = async (dirParts: List<string>): Promise<boolean> => {
     const dirPath = dirParts.join("/");
     const listResp = await this.filesClient.list(dirPath);
 
-    this.props.browser.dirPath = dirParts;
-    this.props.browser.items =
-      listResp.status === 200
-        ? List<MetadataResp>(listResp.data.metadatas)
-        : this.props.browser.items;
+    if (listResp.status === 200) {
+      this.props.browser.dirPath = dirParts;
+      this.props.browser.items = List<MetadataResp>(listResp.data.metadatas);
+      return true;
+    }
+    return false;
   };
 
-  setHomeItems = async (): Promise<void> => {
+  setHomeItems = async (): Promise<boolean> => {
     const listResp = await this.filesClient.listHome();
 
-    this.props.browser.dirPath = List<string>(listResp.data.cwd.split("/"));
-    this.props.browser.items =
-      listResp.status === 200
-        ? List<MetadataResp>(listResp.data.metadatas)
-        : this.props.browser.items;
+    if (listResp.status === 200) {
+      this.props.browser.dirPath = List<string>(listResp.data.cwd.split("/"));
+      this.props.browser.items = List<MetadataResp>(listResp.data.metadatas);
+      return true;
+    }
+    return false;
   };
 
   moveHere = async (
     srcDir: string,
     dstDir: string,
     selectedItems: Map<string, boolean>
-  ): Promise<void> => {
+  ): Promise<boolean> => {
     const itemsToMove = List<string>(selectedItems.keys()).map(
       (itemName: string): any => {
         const from = getItemPath(srcDir, itemName);
