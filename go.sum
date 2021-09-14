@@ -59,6 +59,8 @@ github.com/hashicorp/go-version v1.0.0 h1:21MVWPKDphxa7ineQQTrCU5brh7OuVVAzGOCnn
 github.com/hashicorp/go-version v1.0.0/go.mod h1:fltr4n8CU8Ke44wwGCBoEymUuxUHl09ZGVZPK5anwXA=
 github.com/ihexxa/gocfg v0.0.0-20201206115732-ab537e3b1086 h1:1IzU4pzD8NyEHgJGLOS3Iq56b0zlAylRwbJq+08PD9Y=
 github.com/ihexxa/gocfg v0.0.0-20201206115732-ab537e3b1086/go.mod h1:oqDTq1ywx4Qi9DdhFwwMHoPCYv6Txrfj2SY5WWcgiJs=
+github.com/ihexxa/gocfg v0.0.0-20210914021417-6ba19520f0ff h1:rsaVb8KIlg3gd7CEPTV/Qi5cf6i4C12EmbnsRMjGxkY=
+github.com/ihexxa/gocfg v0.0.0-20210914021417-6ba19520f0ff/go.mod h1:oqDTq1ywx4Qi9DdhFwwMHoPCYv6Txrfj2SY5WWcgiJs=
 github.com/ihexxa/multipart v0.0.0-20201207132919-72f6e0e58b25 h1:gQCaP2qoFWCTz17jj9EUhE/plgqJwk3nHbcS4RHQYCw=
 github.com/ihexxa/multipart v0.0.0-20201207132919-72f6e0e58b25/go.mod h1:rhOAe/52S/J1fq1VnXvKX8FHuo65I+IcYUozW4M7+wE=
 github.com/jessevdk/go-flags v1.4.0 h1:4IU2WS7AumrZ/40jfhf4QVDMsQwqA7VEHozFRrGARJA=

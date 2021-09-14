@@ -34,7 +34,7 @@ type Secrets struct {
 type ServerCfg struct {
 	Debug          bool   `json:"debug" yaml:"debug"`
 	Host           string `json:"host" yaml:"host"`
-	Port           int    `json:"port" yaml:"port"`
+	Port           int    `json:"port" yaml:"port" cfg:"env"`
 	ReadTimeout    int    `json:"readTimeout" yaml:"readTimeout"`
 	WriteTimeout   int    `json:"writeTimeout" yaml:"writeTimeout"`
 	MaxHeaderBytes int    `json:"maxHeaderBytes" yaml:"maxHeaderBytes"`
