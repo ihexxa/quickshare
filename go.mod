@@ -12,7 +12,7 @@ require (
 	github.com/go-playground/validator/v10 v10.9.0 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/ihexxa/gocfg v0.0.0-20201206115732-ab537e3b1086
+	github.com/ihexxa/gocfg v0.0.0-20210914021417-6ba19520f0ff
 	github.com/ihexxa/multipart v0.0.0-20201207132919-72f6e0e58b25
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/json-iterator/go v1.1.11 // indirect

@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -53,11 +54,20 @@ func NewServer(cfg gocfg.ICfg) (*Server, error) {
 	router := gin.Default()
 	router, err := initHandlers(router, cfg, deps)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("init handlers error: %w", err)
 	}
 
+	port := cfg.GrabInt("Server.Port")
+	portStr, ok := cfg.String("ENV.PORT")
+	if ok {
+		port, err = strconv.Atoi(portStr)
+		if err != nil {
+			panic(fmt.Sprintf("invalid port: %s", portStr))
+		}
+		cfg.SetInt("Server.Port", port)
+	}
 	srv := &http.Server{
-		Addr:           fmt.Sprintf("%s:%d", cfg.GrabString("Server.Host"), cfg.GrabInt("Server.Port")),
+		Addr:           fmt.Sprintf("%s:%d", cfg.GrabString("Server.Host"), port),
 		Handler:        router,
 		ReadTimeout:    time.Duration(cfg.GrabInt("Server.ReadTimeout")) * time.Millisecond,
 		WriteTimeout:   time.Duration(cfg.GrabInt("Server.WriteTimeout")) * time.Millisecond,
@@ -65,9 +75,9 @@ func NewServer(cfg gocfg.ICfg) (*Server, error) {
 	}
 
 	return &Server{
-		server:  srv,
-		deps:    deps,
-		cfg:     cfg,
+		server: srv,
+		deps:   deps,
+		cfg:    cfg,
 	}, nil
 }
 
@@ -77,10 +87,10 @@ func mkRoot(rootPath string) {
 		if os.IsNotExist(err) {
 			err = os.MkdirAll(rootPath, 0760)
 			if err != nil {
-				panic(err)
+				panic(fmt.Sprintf("mk root path error: %s", err))
 			}
 		} else {
-			panic(err)
+			panic(fmt.Sprintf("stat root Path error: %s", err))
 		}
 	} else if !info.IsDir() {
 		panic(fmt.Sprintf("can not create %s folder: there is a file with same name", rootPath))
@@ -143,7 +153,7 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 	// handlers
 	userHdrs, err := multiusers.NewMultiUsersSvc(cfg, deps)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("new users svc error: %w", err)
 	}
 	if cfg.BoolOr("Users.EnableAuth", true) && !userHdrs.IsInited() {
 		adminName, ok := cfg.String("ENV.DEFAULTADMIN")
@@ -157,7 +167,7 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 		if adminPwd == "" {
 			adminPwd, err = generatePwd()
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("generate pwd error: %w", err)
 			}
 			// only write to stdout
 			fmt.Printf("password is generated: %s, please update it after login\n", adminPwd)
@@ -165,10 +175,10 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 
 		pwdHash, err := bcrypt.GenerateFromPassword([]byte(adminPwd), 10)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("generate pwd error: %w", err)
 		}
 		if _, err := userHdrs.Init(adminName, string(pwdHash)); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("init admin error: %w", err)
 		}
 
 		deps.Log().Infof("user (%s) is created\n", adminName)
@@ -176,12 +186,12 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 
 	fileHdrs, err := fileshdr.NewFileHandlers(cfg, deps)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("new files service error: %w", err)
 	}
 
 	settingsSvc, err := settings.NewSettingsSvc(cfg, deps)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("new setting service error: %w", err)
 	}
 
 	publicPath, ok := cfg.String("Server.PublicPath")
@@ -295,7 +305,7 @@ func (s *Server) Start() error {
 
 	err := s.server.ListenAndServe()
 	if err != http.ErrServerClosed {
-		return err
+		return fmt.Errorf("listen error: %w", err)
 	}
 	return nil
 }
@@ -319,7 +329,7 @@ func makeRandToken() string {
 	b := make([]byte, 32)
 	_, err := rand.Read(b)
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("make rand token error: %s", err))
 	}
 	return string(b)
 }
@@ -329,7 +339,7 @@ func generatePwd() (string, error) {
 	buf := make([]byte, size)
 	size, err := rand.Read(buf)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("generate pwd error: %w", err)
 	}
 
 	return fmt.Sprintf("%x", sha1.Sum(buf[:size]))[:6], nil
