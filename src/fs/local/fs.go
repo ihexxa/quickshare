@@ -101,7 +101,6 @@ func (fs *LocalFS) closeOpens(iterateAll, forced bool, exclude map[string]bool) 
 		batch--
 
 		if forced || info.lastAccess.Add(fs.readerTTL).Before(time.Now()) {
-			fmt.Println("closing reader2", id, forced)
 			var err error
 			if err = info.fd.Sync(); err != nil {
 				return closed, err
@@ -383,15 +382,12 @@ func (fs *LocalFS) GetFileReader(path string) (fs.ReadCloseSeeker, uint64, error
 		lastAccess: time.Now(),
 	}
 
-	fmt.Println("new reader", id, path, fs.readers)
 	return fd, id, nil
 }
 
 func (fs *LocalFS) CloseReader(id string) error {
 	fs.opensMtx.Lock()
 	defer fs.opensMtx.Unlock()
-
-	fmt.Println("close reader", id)
 
 	info, ok := fs.readers[id]
 	if !ok {
