@@ -83,20 +83,20 @@ func assertUploadOK(t *testing.T, filePath, content, addr string, token *http.Co
 	fileSize := int64(len([]byte(content)))
 	res, _, errs := cl.Create(filePath, fileSize)
 	if len(errs) > 0 {
-		t.Error(errs)
+		t.Fatal(errs)
 		return false
 	} else if res.StatusCode != 200 {
-		t.Error(res.StatusCode)
+		t.Fatal(res.StatusCode)
 		return false
 	}
 
 	base64Content := base64.StdEncoding.EncodeToString([]byte(content))
 	res, _, errs = cl.UploadChunk(filePath, base64Content, 0)
 	if len(errs) > 0 {
-		t.Error(errs)
+		t.Fatal(errs)
 		return false
 	} else if res.StatusCode != 200 {
-		t.Error(res.StatusCode)
+		t.Fatal(res.StatusCode)
 		return false
 	}
 

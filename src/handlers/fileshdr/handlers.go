@@ -163,7 +163,7 @@ func (h *FileHandlers) Create(c *gin.Context) {
 				if err != nil {
 					c.JSON(q.ErrResp(c, 500, err))
 				} else {
-					c.JSON(q.ErrResp(c, 304, err))
+					c.JSON(q.ErrResp(c, 304, fmt.Errorf("file(%s) exists", tmpFilePath)))
 				}
 			} else {
 				c.JSON(q.ErrResp(c, 500, err))
@@ -252,7 +252,11 @@ func (h *FileHandlers) Metadata(c *gin.Context) {
 
 	info, err := h.deps.FS().Stat(filePath)
 	if err != nil {
-		c.JSON(q.ErrResp(c, 500, err))
+		if os.IsNotExist(err) {
+			c.JSON(q.ErrResp(c, 404, os.ErrNotExist))
+		} else {
+			c.JSON(q.ErrResp(c, 500, err))
+		}
 		return
 	}
 
@@ -591,6 +595,12 @@ func (h *FileHandlers) Download(c *gin.Context) {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
 		}
+		defer func() {
+			err := limitedReader.Close()
+			if err != nil {
+				h.deps.Log().Errorf("failed to close limitedReader: %s", err)
+			}
+		}()
 
 		c.DataFromReader(200, info.Size(), contentType, limitedReader, extraHeaders)
 		return
@@ -603,20 +613,34 @@ func (h *FileHandlers) Download(c *gin.Context) {
 		return
 	}
 
-	mw, contentLength, err := multipart.NewResponseWriter(fd, parts, false)
+	mr, err := multipart.NewMultipartReader(fd, parts)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
+	mr.SetOutputHeaders(false)
+	contentLength := mr.ContentLength()
+	defer func() {
+		err := mr.Close()
+		if err != nil {
+			h.deps.Log().Errorf("failed to close multipart reader: %s", err)
+		}
+	}()
 
 	// TODO: reader will be closed by multipart response writer？
-	go mw.Write()
+	go mr.Start()
 
-	limitedReader, err := h.GetStreamReader(userIDInt, mw)
+	limitedReader, err := h.GetStreamReader(userIDInt, mr)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
+	defer func() {
+		err := limitedReader.Close()
+		if err != nil {
+			h.deps.Log().Errorf("failed to close limitedReader: %s", err)
+		}
+	}()
 
 	// it takes the \r\n before body into account, so contentLength+2
 	c.DataFromReader(206, contentLength+2, contentType, limitedReader, extraHeaders)
@@ -914,13 +938,11 @@ func (h *FileHandlers) GenerateHash(c *gin.Context) {
 	c.JSON(q.Resp(200))
 }
 
-func (h *FileHandlers) GetStreamReader(userID uint64, fd io.Reader) (io.Reader, error) {
+func (h *FileHandlers) GetStreamReader(userID uint64, fd io.Reader) (io.ReadCloser, error) {
 	pr, pw := io.Pipe()
 	chunkSize := 100 * 1024 // notice: it can not be greater than limiter's token count
 
 	go func() {
-		defer pw.Close()
-
 		for {
 			ok, err := h.deps.Limiter().CanRead(userID, chunkSize)
 			if err != nil {
@@ -935,6 +957,8 @@ func (h *FileHandlers) GetStreamReader(userID uint64, fd io.Reader) (io.Reader, 
 			if err != nil {
 				if err != io.EOF {
 					pw.CloseWithError(err)
+				} else {
+					pw.CloseWithError(nil)
 				}
 				break
 			}

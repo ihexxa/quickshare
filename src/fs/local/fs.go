@@ -101,6 +101,7 @@ func (fs *LocalFS) closeOpens(iterateAll, forced bool, exclude map[string]bool) 
 		batch--
 
 		if forced || info.lastAccess.Add(fs.readerTTL).Before(time.Now()) {
+			fmt.Println("closing reader2", id, forced)
 			var err error
 			if err = info.fd.Sync(); err != nil {
 				return closed, err
@@ -132,12 +133,28 @@ func (fs *LocalFS) Sync() error {
 	fs.opensMtx.Lock()
 	defer fs.opensMtx.Unlock()
 
-	_, err := fs.closeOpens(true, true, map[string]bool{})
-	return err
+	var err error
+	for _, info := range fs.opens {
+		if err = info.fd.Sync(); err != nil {
+			return err
+		}
+	}
+
+	for _, info := range fs.readers {
+		if err = info.fd.Sync(); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (fs *LocalFS) Close() error {
-	return fs.Sync()
+	fs.opensMtx.Lock()
+	defer fs.opensMtx.Unlock()
+
+	_, err := fs.closeOpens(true, true, map[string]bool{})
+	return err
 }
 
 // check refers implementation of Dir.Open() in http package
@@ -365,6 +382,8 @@ func (fs *LocalFS) GetFileReader(path string) (fs.ReadCloseSeeker, uint64, error
 		fd:         fd,
 		lastAccess: time.Now(),
 	}
+
+	fmt.Println("new reader", id, path, fs.readers)
 	return fd, id, nil
 }
 
@@ -372,9 +391,11 @@ func (fs *LocalFS) CloseReader(id string) error {
 	fs.opensMtx.Lock()
 	defer fs.opensMtx.Unlock()
 
+	fmt.Println("close reader", id)
+
 	info, ok := fs.readers[id]
 	if !ok {
-		return fmt.Errorf("reader not found: %s", id)
+		return fmt.Errorf("reader not found: %s %v", id, fs.readers)
 	}
 
 	var err error

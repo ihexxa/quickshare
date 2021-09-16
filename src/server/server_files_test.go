@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/ihexxa/quickshare/src/client"
 	q "github.com/ihexxa/quickshare/src/handlers"
@@ -130,7 +131,13 @@ func TestFileHandlers(t *testing.T) {
 			for i := 0; i < 2; i++ {
 				assertUploadOK(t, filePath, content, addr, token)
 
-				err = fs.Sync()
+				// file operation(deleting tmp file) may be async
+				// so creating tmp file in the 2nd time may conflict with the first time if it is not deleted yet
+				// checking file until it is deleted
+				// TODO: use fs.Stat() to avoid flaky testing...
+				time.Sleep(1000)
+
+				err = fs.Close()
 				if err != nil {
 					t.Fatal(err)
 				}
