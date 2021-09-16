@@ -5,7 +5,7 @@
 **/files
 **/node_modules/*
 **/yarn-error
-**/public/static/**/*.js
+**/public/static/*.js
 **/public/index.html
 **/**/*.d.ts.map
 
