@@ -63,6 +63,8 @@ github.com/ihexxa/gocfg v0.0.0-20210914021417-6ba19520f0ff h1:rsaVb8KIlg3gd7CEPT
 github.com/ihexxa/gocfg v0.0.0-20210914021417-6ba19520f0ff/go.mod h1:oqDTq1ywx4Qi9DdhFwwMHoPCYv6Txrfj2SY5WWcgiJs=
 github.com/ihexxa/multipart v0.0.0-20201207132919-72f6e0e58b25 h1:gQCaP2qoFWCTz17jj9EUhE/plgqJwk3nHbcS4RHQYCw=
 github.com/ihexxa/multipart v0.0.0-20201207132919-72f6e0e58b25/go.mod h1:rhOAe/52S/J1fq1VnXvKX8FHuo65I+IcYUozW4M7+wE=
+github.com/ihexxa/multipart v0.0.0-20210916083128-8584a3f00d1d h1:+v33khYHVDPEuuWO/JE1IzhoIu5uNvEcSs5GmXc5Sjw=
+github.com/ihexxa/multipart v0.0.0-20210916083128-8584a3f00d1d/go.mod h1:rhOAe/52S/J1fq1VnXvKX8FHuo65I+IcYUozW4M7+wE=
 github.com/jessevdk/go-flags v1.4.0 h1:4IU2WS7AumrZ/40jfhf4QVDMsQwqA7VEHozFRrGARJA=
 github.com/jessevdk/go-flags v1.4.0/go.mod h1:4FA24M0QyGHXBuZZK/XkWh8h0e1EYbRYJSGM75WSRxI=
 github.com/json-iterator/go v1.1.7/go.mod h1:KdQUCv79m/52Kvf8AW2vK1V8akMuk1QjK/uOdHXbAo4=
