@@ -39,6 +39,7 @@ Choose Language: English | [简体中文](./docs/README_zh-cn.md)
   - Per-user space quota
 - MISC
   - Adaptive UI
+  - I18n support
   - Cross-platform: support Linux, Mac and Windows
 
 

@@ -39,6 +39,12 @@ type Quota struct {
 	DownloadSpeedLimit int   `json:"downloadSpeedLimit"`
 }
 
+type UserCfg struct {
+	Name string `json:"name"`
+	Role string `json:"role"`
+	Pwd  string `json:"pwd"`
+}
+
 type User struct {
 	ID        uint64 `json:"id,string"`
 	Name      string `json:"name"`

@@ -182,7 +182,7 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 			return nil, fmt.Errorf("init admin error: %w", err)
 		}
 
-		deps.Log().Infof("user (%s) is created\n", adminName)
+		deps.Log().Infof("admin(%s) is created", adminName)
 	}
 
 	fileHdrs, err := fileshdr.NewFileHandlers(cfg, deps)
