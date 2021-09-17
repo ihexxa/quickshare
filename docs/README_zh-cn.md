@@ -16,6 +16,8 @@
   </a>
 <p>
 
+这是一个 [Heroku上的演示](https://hexxa-quickshare.herokuapp.com/).
+(用户名是 `demo`, 密码是 `Quicksh@re`, 上传/下载速度被限制在大约100KB.)
 ![Quickshare on desktop](./imgs/desktop_2.jpeg)
 
 选择语言: [English](../README.md) | 简体中文
