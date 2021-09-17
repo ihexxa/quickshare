@@ -133,7 +133,58 @@ func (h *MultiUsersSvc) Init(adminName, adminPwd string) (string, error) {
 
 	// TODO: return "" for being compatible with singleuser service, should remove this
 	err = h.deps.Users().Init(adminName, adminPwd)
-	return "", err
+	if err != nil {
+		return "", err
+	}
+
+	usersInterface, ok := h.cfg.Slice("Users.PredefinedUsers")
+	spaceLimit := int64(h.cfg.IntOr("Users.SpaceLimit", 100*1024*1024))
+	uploadSpeedLimit := h.cfg.IntOr("Users.UploadSpeedLimit", 100*1024)
+	downloadSpeedLimit := h.cfg.IntOr("Users.DownloadSpeedLimit", 100*1024)
+	if ok {
+		userCfgs, ok := usersInterface.([]*userstore.UserCfg)
+		if !ok {
+			return "", fmt.Errorf("predefined user is invalid: %s", err)
+		}
+		for _, userCfg := range userCfgs {
+			// TODO: following operations must be atomic
+			// TODO: check if the folders already exists
+			fsRootFolder := q.FsRootPath(userCfg.Name, "/")
+			if err = h.deps.FS().MkdirAll(fsRootFolder); err != nil {
+
+				return "", err
+			}
+			uploadFolder := q.UploadFolder(userCfg.Name)
+			if err = h.deps.FS().MkdirAll(uploadFolder); err != nil {
+				return "", err
+			}
+
+			pwdHash, err := bcrypt.GenerateFromPassword([]byte(userCfg.Pwd), 10)
+			if err != nil {
+				return "", err
+			}
+
+			user := &userstore.User{
+				ID:   h.deps.ID().Gen(),
+				Name: userCfg.Name,
+				Pwd:  string(pwdHash),
+				Role: userCfg.Role,
+				Quota: &userstore.Quota{
+					SpaceLimit:         spaceLimit,
+					UploadSpeedLimit:   uploadSpeedLimit,
+					DownloadSpeedLimit: downloadSpeedLimit,
+				},
+			}
+
+			err = h.deps.Users().AddUser(user)
+			if err != nil {
+				h.deps.Log().Warn("warning: failed to add user(%s): %s", user, err)
+				return "", err
+			}
+			h.deps.Log().Infof("user(%s) is added", user.Name)
+		}
+	}
+	return "", nil
 }
 
 func (h *MultiUsersSvc) IsInited() bool {

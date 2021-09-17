@@ -25,7 +25,14 @@ func TestUsersHandlers(t *testing.T) {
 			"downloadSpeedLimit": 409600,
 			"spaceLimit": 1024,
 			"limiterCapacity": 1000,
-			"limiterCyc": 1000
+			"limiterCyc": 1000,
+			"predefinedUsers": [
+				{
+					"name": "demo",
+					"pwd": "Quicksh@re",
+					"role": "user"
+				}
+			]
 		},
 		"server": {
 			"debug": true,
@@ -59,50 +66,85 @@ func TestUsersHandlers(t *testing.T) {
 	}
 
 	t.Run("test users APIs: Login-Self-SetPwd-Logout-Login", func(t *testing.T) {
-		resp, _, errs := usersCl.Login(adminName, adminPwd)
-		if len(errs) > 0 {
-			t.Fatal(errs)
-		} else if resp.StatusCode != 200 {
-			t.Fatal(resp.StatusCode)
+		users := []*userstore.User{
+			{
+				ID:        0,
+				Name:      adminName,
+				Pwd:       adminPwd,
+				Role:      userstore.AdminRole,
+				UsedSpace: 0,
+				Quota: &userstore.Quota{
+					UploadSpeedLimit:   50 * 1024 * 1024,
+					DownloadSpeedLimit: 50 * 1024 * 1024,
+					SpaceLimit:         1024 * 1024 * 1024,
+				},
+			},
+			{
+				ID:        0,
+				Name:      "demo",
+				Pwd:       "Quicksh@re",
+				Role:      userstore.UserRole,
+				UsedSpace: 0,
+				Quota: &userstore.Quota{
+					UploadSpeedLimit:   409600,
+					DownloadSpeedLimit: 409600,
+					SpaceLimit:         1024,
+				},
+			},
 		}
 
-		token := client.GetCookie(resp.Cookies(), su.TokenCookie)
+		for _, user := range users {
+			usersCl := client.NewSingleUserClient(addr)
 
-		resp, selfResp, errs := usersCl.Self(token)
-		if len(errs) > 0 {
-			t.Fatal(errs)
-		} else if resp.StatusCode != 200 {
-			t.Fatal(resp.StatusCode)
-		} else if selfResp.ID != "0" ||
-			selfResp.Name != adminName ||
-			selfResp.Role != userstore.AdminRole ||
-			selfResp.UsedSpace != 0 ||
-			selfResp.Quota.SpaceLimit != 1024*1024*1024 ||
-			selfResp.Quota.UploadSpeedLimit != 50*1024*1024 ||
-			selfResp.Quota.DownloadSpeedLimit != 50*1024*1024 {
-			// TODO: expose default values from userstore
-			t.Fatalf("user infos don't match %v", selfResp)
-		}
+			resp, _, errs := usersCl.Login(user.Name, user.Pwd)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if resp.StatusCode != 200 {
+				t.Fatal(resp.StatusCode)
+			}
 
-		resp, _, errs = usersCl.SetPwd(adminPwd, adminNewPwd, token)
-		if len(errs) > 0 {
-			t.Fatal(errs)
-		} else if resp.StatusCode != 200 {
-			t.Fatal(resp.StatusCode)
-		}
+			token := client.GetCookie(resp.Cookies(), su.TokenCookie)
 
-		resp, _, errs = usersCl.Logout(token)
-		if len(errs) > 0 {
-			t.Fatal(errs)
-		} else if resp.StatusCode != 200 {
-			t.Fatal(resp.StatusCode)
-		}
+			resp, selfResp, errs := usersCl.Self(token)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if resp.StatusCode != 200 {
+				t.Fatal(resp.StatusCode)
+			} else if selfResp.Name != user.Name ||
+				selfResp.Role != user.Role ||
+				selfResp.UsedSpace != 0 ||
+				selfResp.Quota.UploadSpeedLimit != user.Quota.UploadSpeedLimit ||
+				selfResp.Quota.DownloadSpeedLimit != user.Quota.DownloadSpeedLimit ||
+				selfResp.Quota.SpaceLimit != user.Quota.SpaceLimit {
+				// TODO: expose default values from userstore
+				t.Fatalf("user infos don't match %v", selfResp)
+			}
+			if selfResp.Role == userstore.AdminRole {
+				if selfResp.ID != "0" {
+					t.Fatalf("user id don't match %v", selfResp)
+				}
+			}
 
-		resp, _, errs = usersCl.Login(adminName, adminNewPwd)
-		if len(errs) > 0 {
-			t.Fatal(errs)
-		} else if resp.StatusCode != 200 {
-			t.Fatal(resp.StatusCode)
+			resp, _, errs = usersCl.SetPwd(user.Pwd, adminNewPwd, token)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if resp.StatusCode != 200 {
+				t.Fatal(resp.StatusCode)
+			}
+
+			resp, _, errs = usersCl.Logout(token)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if resp.StatusCode != 200 {
+				t.Fatal(resp.StatusCode)
+			}
+
+			resp, _, errs = usersCl.Login(user.Name, adminNewPwd)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if resp.StatusCode != 200 {
+				t.Fatal(resp.StatusCode)
+			}
 		}
 	})
 
@@ -198,7 +240,7 @@ func TestUsersHandlers(t *testing.T) {
 			t.Fatal(resp.StatusCode)
 		}
 
-		if len(lsResp.Users) != 2 {
+		if len(lsResp.Users) != 3 {
 			t.Fatal(fmt.Errorf("incorrect users size (%d)", len(lsResp.Users)))
 		}
 		for _, user := range lsResp.Users {
@@ -264,7 +306,7 @@ func TestUsersHandlers(t *testing.T) {
 		} else if resp.StatusCode != 200 {
 			t.Fatal(resp.StatusCode)
 		}
-		if len(lsResp.Users) != 1 {
+		if len(lsResp.Users) != 2 {
 			t.Fatal(fmt.Errorf("incorrect users size (%d)", len(lsResp.Users)))
 		} else if lsResp.Users[0].ID != 0 ||
 			lsResp.Users[0].Name != adminName ||

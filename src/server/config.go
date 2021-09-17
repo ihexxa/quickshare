@@ -1,6 +1,10 @@
 package server
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"github.com/ihexxa/quickshare/src/userstore"
+)
 
 type FSConfig struct {
 	Root       string `json:"root"`
@@ -9,22 +13,23 @@ type FSConfig struct {
 }
 
 type UsersCfg struct {
-	EnableAuth         bool   `json:"enableAuth" yaml:"enableAuth"`
-	DefaultAdmin       string `json:"defaultAdmin" yaml:"defaultAdmin" cfg:"env"`
-	DefaultAdminPwd    string `json:"defaultAdminPwd" yaml:"defaultAdminPwd" cfg:"env"`
-	CookieTTL          int    `json:"cookieTTL" yaml:"cookieTTL"`
-	CookieSecure       bool   `json:"cookieSecure" yaml:"cookieSecure"`
-	CookieHttpOnly     bool   `json:"cookieHttpOnly" yaml:"cookieHttpOnly"`
-	MinUserNameLen     int    `json:"minUserNameLen" yaml:"minUserNameLen"`
-	MinPwdLen          int    `json:"minPwdLen" yaml:"minPwdLen"`
-	CaptchaWidth       int    `json:"captchaWidth" yaml:"captchaWidth"`
-	CaptchaHeight      int    `json:"captchaHeight" yaml:"captchaHeight"`
-	CaptchaEnabled     bool   `json:"captchaEnabled" yaml:"captchaEnabled"`
-	UploadSpeedLimit   int    `json:"uploadSpeedLimit" yaml:"uploadSpeedLimit"`
-	DownloadSpeedLimit int    `json:"downloadSpeedLimit" yaml:"downloadSpeedLimit"`
-	SpaceLimit         int    `json:"spaceLimit" yaml:"spaceLimit"`
-	LimiterCapacity    int    `json:"limiterCapacity" yaml:"limiterCapacity"`
-	LimiterCyc         int    `json:"limiterCyc" yaml:"limiterCyc"`
+	EnableAuth         bool                 `json:"enableAuth" yaml:"enableAuth"`
+	DefaultAdmin       string               `json:"defaultAdmin" yaml:"defaultAdmin" cfg:"env"`
+	DefaultAdminPwd    string               `json:"defaultAdminPwd" yaml:"defaultAdminPwd" cfg:"env"`
+	CookieTTL          int                  `json:"cookieTTL" yaml:"cookieTTL"`
+	CookieSecure       bool                 `json:"cookieSecure" yaml:"cookieSecure"`
+	CookieHttpOnly     bool                 `json:"cookieHttpOnly" yaml:"cookieHttpOnly"`
+	MinUserNameLen     int                  `json:"minUserNameLen" yaml:"minUserNameLen"`
+	MinPwdLen          int                  `json:"minPwdLen" yaml:"minPwdLen"`
+	CaptchaWidth       int                  `json:"captchaWidth" yaml:"captchaWidth"`
+	CaptchaHeight      int                  `json:"captchaHeight" yaml:"captchaHeight"`
+	CaptchaEnabled     bool                 `json:"captchaEnabled" yaml:"captchaEnabled"`
+	UploadSpeedLimit   int                  `json:"uploadSpeedLimit" yaml:"uploadSpeedLimit"`
+	DownloadSpeedLimit int                  `json:"downloadSpeedLimit" yaml:"downloadSpeedLimit"`
+	SpaceLimit         int                  `json:"spaceLimit" yaml:"spaceLimit"`
+	LimiterCapacity    int                  `json:"limiterCapacity" yaml:"limiterCapacity"`
+	LimiterCyc         int                  `json:"limiterCyc" yaml:"limiterCyc"`
+	PredefinedUsers    []*userstore.UserCfg `json:"predefinedUsers" yaml:"predefinedUsers"`
 }
 
 type Secrets struct {

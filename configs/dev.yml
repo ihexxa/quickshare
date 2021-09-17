@@ -29,6 +29,10 @@ users:
   cookieHttpOnly: true
   minUserNameLen: 2
   minPwdLen: 4
+  predefinedUsers:
+    - name: "demo"
+      pwd: "Quicksh@re"
+      role: "user"
 workers:
   queueSize: 1024
   sleepCyc: 1 # in second
