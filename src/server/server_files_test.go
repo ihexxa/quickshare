@@ -155,6 +155,39 @@ func TestFileHandlers(t *testing.T) {
 		}
 	})
 
+	t.Run("test: Upload-Delete-Upload: fd are closed correctly", func(t *testing.T) {
+		files := map[string]string{
+			"qs/files/close_Fd/dup_file1": "12345678",
+		}
+
+		for i := 0; i < 2; i++ {
+			for filePath, content := range files {
+				assertUploadOK(t, filePath, content, addr, token)
+
+				// file operation(deleting tmp file) may be async
+				// so creating tmp file in the 2nd time may conflict with the first time if it is not deleted yet
+				// checking file until it is deleted
+				// TODO: use fs.Stat() to avoid flaky testing...
+				time.Sleep(1000)
+
+				err = fs.Close()
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				res, _, errs := cl.Delete(filePath)
+				if len(errs) > 0 {
+					t.Fatal(errs)
+				} else if res.StatusCode != 200 {
+					t.Fatal(res.StatusCode)
+				}
+
+				// tmpFile fd is closed, so follow must succeed
+				assertUploadOK(t, filePath, content, addr, token)
+			}
+		}
+	})
+
 	t.Run("test files APIs: Create-UploadChunk-UploadStatus-Metadata-Delete", func(t *testing.T) {
 		for filePath, content := range map[string]string{
 			"qs/files/path1/f1.md":       "1111 1111 1111 1111",
