@@ -157,6 +157,7 @@ func (h *FileHandlers) Create(c *gin.Context) {
 
 		err = h.deps.FS().Create(tmpFilePath)
 		if err != nil {
+			fmt.Println("\nexist,", err, tmpFilePath)
 			if os.IsExist(err) {
 				// avoid adding file size more than once
 				err = h.deps.Users().SetUsed(userIDInt, false, req.FileSize)

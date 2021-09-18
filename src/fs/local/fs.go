@@ -15,7 +15,7 @@ import (
 	"github.com/ihexxa/quickshare/src/idgen"
 )
 
-var ErrTooManyOpens = errors.New("too many opened files")
+var ErrTooManyOpens = errors.New("too many opened files and failed to clean")
 
 type LocalFS struct {
 	root           string
@@ -148,6 +148,35 @@ func (fs *LocalFS) Sync() error {
 	return nil
 }
 
+func (fs *LocalFS) CloseFDs(filePaths map[string]bool) error {
+	fs.opensMtx.Lock()
+	defer fs.opensMtx.Unlock()
+	return fs.closeFDs(filePaths)
+}
+
+func (fs *LocalFS) closeFDs(filePaths map[string]bool) error {
+	var err error
+	for filePath := range filePaths {
+		info, ok := fs.opens[filePath]
+		if ok {
+			err = fs.closeInfo(filePath, info)
+			if err != nil {
+				return err
+			}
+		}
+
+		info, ok = fs.readers[filePath]
+		if ok {
+			err = fs.closeInfo(filePath, info)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 func (fs *LocalFS) Close() error {
 	fs.opensMtx.Lock()
 	defer fs.opensMtx.Unlock()
@@ -171,7 +200,7 @@ func (fs *LocalFS) Create(path string) error {
 	if fs.isTooManyOpens() {
 		closed, err := fs.closeOpens(false, false, map[string]bool{})
 		if err != nil || closed == 0 {
-			return fmt.Errorf("too many opens and fail to clean(%d): %w", closed, err)
+			return ErrTooManyOpens
 		}
 	}
 
@@ -209,7 +238,12 @@ func (fs *LocalFS) Remove(entryPath string) error {
 	if err != nil {
 		return err
 	}
-	return os.RemoveAll(fullpath)
+
+	err = os.RemoveAll(fullpath)
+	if err != nil {
+		return err
+	}
+	return fs.CloseFDs(map[string]bool{fullpath: true})
 }
 
 func (fs *LocalFS) Rename(oldpath, newpath string) error {
@@ -231,7 +265,14 @@ func (fs *LocalFS) Rename(oldpath, newpath string) error {
 	_, err = os.Stat(fullNewPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return os.Rename(fullOldPath, fullNewPath)
+			err = os.Rename(fullOldPath, fullNewPath)
+			if err != nil {
+				return err
+			}
+			err = fs.CloseFDs(map[string]bool{fullOldPath: true})
+			if err != nil {
+				return err
+			}
 		}
 		return err
 	}
@@ -253,7 +294,7 @@ func (fs *LocalFS) ReadAt(path string, b []byte, off int64) (int, error) {
 			if fs.isTooManyOpens() {
 				closed, err := fs.closeOpens(false, false, map[string]bool{})
 				if err != nil || closed == 0 {
-					return nil, fmt.Errorf("too many opens and fail to clean (%d): %w", closed, err)
+					return nil, ErrTooManyOpens
 				}
 			}
 
@@ -304,7 +345,7 @@ func (fs *LocalFS) WriteAt(path string, b []byte, off int64) (int, error) {
 				closed, err := fs.closeOpens(false, false, map[string]bool{})
 				if err != nil || closed == 0 {
 					// TODO: return Eagain and make client retry later
-					return nil, fmt.Errorf("too many opens and fail to clean (%d): %w", closed, err)
+					return nil, ErrTooManyOpens
 				}
 			}
 
@@ -367,7 +408,7 @@ func (fs *LocalFS) GetFileReader(path string) (fs.ReadCloseSeeker, uint64, error
 	if fs.isTooManyOpens() {
 		closed, err := fs.closeOpens(false, false, map[string]bool{})
 		if err != nil || closed == 0 {
-			return nil, 0, fmt.Errorf("too many opens and fail to clean (%d): %w", closed, err)
+			return nil, 0, ErrTooManyOpens
 		}
 	}
 
