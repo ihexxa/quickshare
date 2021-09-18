@@ -308,10 +308,6 @@ func TestUsersHandlers(t *testing.T) {
 		}
 		if len(lsResp.Users) != 2 {
 			t.Fatal(fmt.Errorf("incorrect users size (%d)", len(lsResp.Users)))
-		} else if lsResp.Users[0].ID != 0 ||
-			lsResp.Users[0].Name != adminName ||
-			lsResp.Users[0].Role != userstore.AdminRole {
-			t.Fatal(fmt.Errorf("incorrect root info (%v)", lsResp.Users[0]))
 		}
 
 		resp, _, errs = usersCl.Logout(token)
