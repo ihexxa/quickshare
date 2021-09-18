@@ -61,6 +61,8 @@
     "worker-loader": "^3.0.7"
   },
   "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "jsdom",
     "testMatch": [
       "**/src/**/__test__/**/*.test.ts",
       "**/src/**/__test__/**/*.test.tsx"
