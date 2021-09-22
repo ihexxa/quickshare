@@ -230,7 +230,7 @@ export class Browser extends React.Component<Props, State, {}> {
     if (refresh) {
       updater()
         .setItems(this.props.browser.dirPath)
-        .then((ok:boolean) => {
+        .then((ok: boolean) => {
           this.update(updater().updateBrowser);
         });
     } else {
@@ -438,52 +438,62 @@ export class Browser extends React.Component<Props, State, {}> {
           childrenStyles={List([{}, { justifyContent: "flex-end" }])}
         />
       ) : (
-        <Flexbox
-          key={item.name}
-          children={List([
-            <span className="padding-m">
-              <Flexbox
-                children={List([
-                  <RiFile2Fill size="3rem" className="cyan0-font margin-r-m" />,
+        <div>
 
-                  <span className={`${nameCellClass}`}>
-                    <a
-                      className="title-m"
-                      href={`/v1/fs/files?fp=${itemPath}`}
-                      target="_blank"
-                    >
-                      {item.name}
-                    </a>
-                    <div className="desc-m grey0-font">
-                      <span>
-                        {item.modTime.slice(0, item.modTime.indexOf("T"))}
-                      </span>
-                      &nbsp;/&nbsp;
-                      <span>{FileSize(item.size, { round: 0 })}</span>
-                      &nbsp;/&nbsp;
-                      <span>{item.sha1}</span>
-                    </div>
-                  </span>,
-                ])}
-              />
-            </span>,
+          <Flexbox
+            key={item.name}
+            children={List([
+              <span className="padding-m">
+                <Flexbox
+                  children={List([
+                    <RiFile2Fill size="3rem" className="cyan0-font margin-r-m" />,
 
-            <span className="item-op padding-m">
-              <button
-                type="button"
-                onClick={() => this.select(item.name)}
-                className={`${isSelected ? "blue0-bg white-font" : "grey2-bg grey3-font"
-                  }`}
-                style={{ width: "8rem", display: "inline-block" }}
-              >
-                {isSelected
-                  ? this.props.msg.pkg.get("browser.deselect")
-                  : this.props.msg.pkg.get("browser.select")}
-              </button>
-            </span>,
-          ])}
-          childrenStyles={List([{}, { justifyContent: "flex-end" }])}
-        />
+                    <span className={`${nameCellClass}`}>
+                      <a
+                        className="title-m"
+                        href={`/v1/fs/files?fp=${itemPath}`}
+                        target="_blank"
+                      >
+                        {item.name}
+                      </a>
+                      <div className="desc-m grey0-font">
+                        <span>
+                          {item.modTime.slice(0, item.modTime.indexOf("T"))}
+                        </span>
+                        &nbsp;/&nbsp;
+                        <span>{FileSize(item.size, { round: 0 })}</span>
+                      </div>
+                    </span>,
+                  ])}
+                />
+              </span>,
+
+              <span className="item-op padding-m">
+                <button
+                  type="button"
+                  onClick={() => this.select(item.name)}
+                  className={`${isSelected ? "blue0-bg white-font" : "grey2-bg grey3-font"
+                    }`}
+                  style={{ width: "8rem", display: "inline-block" }}
+                >
+                  {isSelected
+                    ? this.props.msg.pkg.get("browser.deselect")
+                    : this.props.msg.pkg.get("browser.select")}
+                </button>
+              </span>,
+            ])}
+            childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+          />
+          <div
+            style={{
+              border: "dashed 1px #ccc",
+              padding: "1rem",
+              margin: "1rem",
+            }}
+          >
+            <span>{item.sha1}</span>
+          </div>
+        </div>
       );
     });
 
