@@ -6,7 +6,7 @@ import { ICoreState, newState } from "./core_state";
 import { RootFrame } from "./root_frame";
 import { FilesClient } from "../client/files";
 import { UsersClient } from "../client/users";
-import { IUsersClient, IFilesClient } from "../client";
+import { IUsersClient, IFilesClient, roleAdmin, roleVisitor } from "../client";
 import { alertMsg } from "../common/env";
 
 export interface Props {}
@@ -39,30 +39,11 @@ export class StateMgr extends React.Component<Props, State, {}> {
     updater().setClients(this.usersClient, this.filesClient);
 
     const params = new URLSearchParams(document.location.search.substring(1));
+
     return updater()
       .initIsAuthed()
       .then(() => {
-        this.update(updater().updateLogin);
-      })
-      .then(() => {
-        if (updater().props.login.authed) {
-          updater().displayPane("");
-        } else {
-          updater().displayPane("login");
-        }
-      })
-      .then(() => {
-        return updater().getCaptchaID();
-      })
-      .then((ok: boolean) => {
-        if (!ok) {
-          alertMsg(this.state.msg.pkg.get("stateMgr.cap.fail"));
-        } else {
-          this.update(updater().updateLogin);
-        }
-      })
-      .then(() => {
-        return updater().refreshUploadings();
+        return updater().self();
       })
       .then(() => {
         const dir = params.get("dir");
@@ -74,33 +55,38 @@ export class StateMgr extends React.Component<Props, State, {}> {
         }
       })
       .then(() => {
-        return updater().initUploads();
-      })
-      .then(() => {
         return updater().isSharing(updater().props.browser.dirPath.join("/"));
       })
       .then(() => {
-        return updater().listSharings();
+        // init browser content
+        if (updater().props.login.userRole === roleVisitor) {
+          if (updater().props.browser.isSharing) {
+            // sharing with visitor
+            updater().displayPane("");
+            return Promise.all([]);
+          }
+
+          // redirect to login
+          updater().displayPane("login");
+          return Promise.all([updater().getCaptchaID()]);
+        }
+
+        updater().displayPane("");
+        return Promise.all([
+          updater().refreshUploadings(),
+          updater().initUploads(),
+          updater().listSharings(),
+        ]);
+      })
+      .then(() => {
+        // init admin content
+        if (updater().props.login.userRole === roleAdmin) {
+          return Promise.all([updater().listRoles(), updater().listUsers()]);
+        }
+        return;
       })
       .then(() => {
         this.update(updater().updateBrowser);
-      })
-      .then(() => {
-        return updater().self();
-      })
-      .then(() => {
-        if (updater().props.login.userRole === "admin") {
-          // TODO: remove hardcode
-          return updater().listRoles();
-        }
-      })
-      .then(() => {
-        if (updater().props.login.userRole === "admin") {
-          // TODO: remove hardcode
-          return updater().listUsers();
-        }
-      })
-      .then(() => {
         this.update(updater().updateLogin);
         this.update(updater().updatePanes);
         this.update(updater().updateAdmin);

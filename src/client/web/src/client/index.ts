@@ -3,6 +3,10 @@ import axios, { AxiosRequestConfig } from "axios";
 export const defaultTimeout = 10000;
 export const userIDParam = "uid";
 
+export const roleAdmin = "admin";
+export const roleUser = "user";
+export const roleVisitor = "visitor";
+
 export interface Quota {
   spaceLimit: string;
   uploadSpeedLimit: number;
