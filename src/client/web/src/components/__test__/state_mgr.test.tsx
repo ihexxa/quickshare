@@ -9,7 +9,7 @@ import { ICoreState, newWithWorker } from "../core_state";
 import { MockWorker, UploadState, UploadEntry } from "../../worker/interface";
 
 describe("State Manager", () => {
-  test("initUpdater", async () => {
+  test("initUpdater for admin", async () => {
     const usersCl = new MockUsersClient("");
     const filesCl = new MockFilesClient("");
 
@@ -36,16 +36,18 @@ describe("State Manager", () => {
     );
     expect(coreState.browser.uploadings).toEqual(
       List<UploadEntry>(
-        filesResps.listUploadingsMockResp.data.uploadInfos.map((info: UploadInfo) => {
-          return {
-            file: undefined,
-            filePath: info.realFilePath,
-            size: info.size,
-            uploaded: info.uploaded,
-            state: UploadState.Ready,
-            err: "",
-          };
-        })
+        filesResps.listUploadingsMockResp.data.uploadInfos.map(
+          (info: UploadInfo) => {
+            return {
+              file: undefined,
+              filePath: info.realFilePath,
+              size: info.size,
+              uploaded: info.uploaded,
+              state: UploadState.Ready,
+              err: "",
+            };
+          }
+        )
       )
     );
 
@@ -71,7 +73,7 @@ describe("State Manager", () => {
         downloadSpeedLimit: 3,
       },
       authed: true,
-      captchaID: "mockCaptchaID",
+      captchaID: "",
     });
 
     // admin
@@ -88,6 +90,79 @@ describe("State Manager", () => {
     expect(coreState.admin).toEqual({
       users: usersMap,
       roles: roles,
+    });
+  });
+
+  test("initUpdater for visitor in sharing mode", async () => {
+    const usersCl = new MockUsersClient("");
+    const filesCl = new MockFilesClient("");
+    const mockSelfResp = {
+      status: 200,
+      statusText: "",
+      data: {
+        id: "-1",
+        name: "visitor",
+        role: "visitor",
+        usedSpace: "0",
+        quota: {
+          spaceLimit: "0",
+          uploadSpeedLimit: 0,
+          downloadSpeedLimit: 0,
+        },
+      },
+    };
+    const mockIsAuthedResp = { status: 401, statusText: "", data: {} };
+    const mockUserResps = {
+      ...usersResps,
+      isAuthedMockResp: mockIsAuthedResp,
+      selfMockResp: mockSelfResp,
+    };
+    usersCl.setMock(mockUserResps);
+
+    const mockWorkerClass = mock(MockWorker);
+    const mockWorker = instance(mockWorkerClass);
+    const coreState = newWithWorker(mockWorker);
+
+    const mgr = new StateMgr({}); // it will call initUpdater
+    mgr.setUsersClient(usersCl);
+    mgr.setFilesClient(filesCl);
+    // TODO: depress warning
+    mgr.update = (apply: (prevState: ICoreState) => ICoreState): void => {
+      // no op
+    };
+    await mgr.initUpdater(coreState);
+
+    // browser
+    // TODO: mock query to get dir parm
+    expect(coreState.browser.dirPath.join("/")).toEqual("mock_home/files");
+    expect(coreState.browser.isSharing).toEqual(true);
+    expect(coreState.browser.sharings).toEqual(List([]));
+    expect(coreState.browser.uploadings).toEqual(List<UploadEntry>([]));
+    expect(coreState.browser.items).toEqual(
+      List(filesResps.listHomeMockResp.data.metadatas)
+    );
+
+    // panes
+    expect(coreState.panes).toEqual({
+      displaying: "",
+      paneNames: Set(["settings", "login", "admin"]),
+    });
+
+    // login
+    expect(coreState.login).toEqual({
+      userID: mockSelfResp.data.id,
+      userName: mockSelfResp.data.name,
+      userRole: mockSelfResp.data.role,
+      quota: mockSelfResp.data.quota,
+      usedSpace: mockSelfResp.data.usedSpace,
+      authed: false,
+      captchaID: "",
+    });
+
+    // admin
+    expect(coreState.admin).toEqual({
+      users: Map({}),
+      roles: Set<string>(),
     });
   });
 });

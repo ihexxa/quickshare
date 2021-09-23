@@ -2,6 +2,7 @@ import * as React from "react";
 import { Set, Map } from "immutable";
 
 import { updater } from "./state_updater";
+import { roleAdmin, roleVisitor } from "../client";
 import { ICoreState, MsgProps } from "./core_state";
 import { PaneSettings } from "./pane_settings";
 import { AdminPane, AdminProps } from "./pane_admin";
@@ -40,23 +41,25 @@ export class Panes extends React.Component<Props, State, {}> {
       displaying = "login";
     }
 
-    let panesMap: Map<string, JSX.Element> = Map({
-      settings: (
+    let panesMap: Map<string, JSX.Element> = Map({});
+    if (this.props.login.userRole !== roleVisitor) {
+      panesMap = panesMap.set(
+        "settings",
         <PaneSettings
           login={this.props.login}
           msg={this.props.msg}
           update={this.props.update}
         />
-      ),
-      login: (
+      );
+      panesMap = panesMap.set(
+        "login",
         <AuthPane
           login={this.props.login}
           update={this.props.update}
           msg={this.props.msg}
         />
-      ),
-    });
-
+      );
+    }
     if (this.props.login.userRole === "admin") {
       panesMap = panesMap.set(
         "admin",
