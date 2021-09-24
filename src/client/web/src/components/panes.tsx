@@ -2,7 +2,7 @@ import * as React from "react";
 import { Set, Map } from "immutable";
 
 import { updater } from "./state_updater";
-import { roleAdmin, roleVisitor } from "../client";
+import { roleAdmin, roleUser, roleVisitor } from "../client";
 import { ICoreState, MsgProps } from "./core_state";
 import { PaneSettings } from "./pane_settings";
 import { AdminPane, AdminProps } from "./pane_admin";
@@ -35,40 +35,43 @@ export class Panes extends React.Component<Props, State, {}> {
 
   render() {
     let displaying = this.props.panes.displaying;
-    // if (!this.props.login.authed) {
-      // TODO: use constant instead
-      // TODO: control this with props
-    //   displaying = "login";
-    // }
 
     let panesMap: Map<string, JSX.Element> = Map({});
-    if (this.props.login.userRole !== roleVisitor) {
-      panesMap = panesMap.set(
-        "settings",
-        <PaneSettings
-          login={this.props.login}
-          msg={this.props.msg}
-          update={this.props.update}
-        />
-      );
-      panesMap = panesMap.set(
-        "login",
-        <AuthPane
-          login={this.props.login}
-          update={this.props.update}
-          msg={this.props.msg}
-        />
-      );
-    }
-    if (this.props.login.userRole === roleAdmin) {
-      panesMap = panesMap.set(
-        "admin",
-        <AdminPane
-          admin={this.props.admin}
-          msg={this.props.msg}
-          update={this.props.update}
-        />
-      );
+    const settingsPane = (
+      <PaneSettings
+        login={this.props.login}
+        msg={this.props.msg}
+        update={this.props.update}
+      />
+    );
+    const loginPane = (
+      <AuthPane
+        login={this.props.login}
+        update={this.props.update}
+        msg={this.props.msg}
+      />
+    );
+    const adminPane = (
+      <AdminPane
+        admin={this.props.admin}
+        msg={this.props.msg}
+        update={this.props.update}
+      />
+    );
+
+    switch(this.props.login.userRole) {
+    case roleAdmin:
+      panesMap = panesMap.set("settings", settingsPane);
+      panesMap = panesMap.set("admin", adminPane);
+      panesMap = panesMap.set("login", loginPane);
+      break;
+    case roleUser:
+      panesMap = panesMap.set("settings", settingsPane);
+      panesMap = panesMap.set("login", loginPane);
+      break;
+    default:
+      panesMap = panesMap.set("login", loginPane);
+      break;
     }
 
     const panes = panesMap.keySeq().map((paneName: string): JSX.Element => {

@@ -65,7 +65,6 @@ export class TopBar extends React.Component<Props, State, {}> {
               className="h5"
             >
               Quickshare
-              {/* <RiGithubFill size="2rem" className="grey4-font margin-r-m" /> */}
             </a>,
 
             <Flexbox
@@ -98,35 +97,6 @@ export class TopBar extends React.Component<Props, State, {}> {
             { justifyContent: "flex-end", alignItems: "center" },
           ])}
         />
-        {/* <div className="flex-2col-parent">
-          <a
-            href="https://github.com/ihexxa/quickshare"
-            className="flex-13col h5"
-          >
-            Quickshare
-          </a>
-          <span className="flex-23col text-right">
-            <span className="grey3-font font-s">
-              {this.props.login.userName}
-            </span>
-            &nbsp;-&nbsp;
-            <span className="grey0-font font-s margin-r-m">
-              {this.props.login.userRole}
-            </span>
-            <button
-              onClick={this.showSettings}
-              className="grey3-bg grey4-font margin-r-m"
-            >
-              {this.props.msg.pkg.get("settings")}
-            </button>
-            {adminBtn}
-
-            <RiGithubFill
-              size="2rem"
-              className="grey4-font margin-r-m"
-            />
-          </span>
-        </div> */}
       </div>
     );
   }
