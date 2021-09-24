@@ -35,11 +35,11 @@ export class Panes extends React.Component<Props, State, {}> {
 
   render() {
     let displaying = this.props.panes.displaying;
-    if (!this.props.login.authed) {
+    // if (!this.props.login.authed) {
       // TODO: use constant instead
       // TODO: control this with props
-      displaying = "login";
-    }
+    //   displaying = "login";
+    // }
 
     let panesMap: Map<string, JSX.Element> = Map({});
     if (this.props.login.userRole !== roleVisitor) {
@@ -60,7 +60,7 @@ export class Panes extends React.Component<Props, State, {}> {
         />
       );
     }
-    if (this.props.login.userRole === "admin") {
+    if (this.props.login.userRole === roleAdmin) {
       panesMap = panesMap.set(
         "admin",
         <AdminPane

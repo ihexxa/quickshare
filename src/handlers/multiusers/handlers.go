@@ -107,6 +107,7 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(userstore.VisitorRole, "GET", "/v1/users/isauthed"):      true,
 		apiRuleCname(userstore.VisitorRole, "GET", "/v1/users/self"):          true,
 		apiRuleCname(userstore.VisitorRole, "GET", "/v1/fs/files"):            true,
+		apiRuleCname(userstore.VisitorRole, "GET", "/v1/fs/dirs"):             true,
 		apiRuleCname(userstore.VisitorRole, "OPTIONS", "/v1/settings/health"): true,
 		apiRuleCname(userstore.VisitorRole, "GET", "/v1/captchas/"):           true,
 		apiRuleCname(userstore.VisitorRole, "GET", "/v1/captchas/imgs"):       true,

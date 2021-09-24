@@ -540,11 +540,16 @@ func (h *FileHandlers) Download(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 403, q.ErrAccessDenied))
 		return
 	}
-	userID := c.MustGet(q.UserIDParam).(string)
-	userIDInt, err := strconv.ParseUint(userID, 10, 64)
-	if err != nil {
-		c.JSON(q.ErrResp(c, 500, err))
-		return
+
+	var err error
+	userIDInt := userstore.VisitorID
+	if role != userstore.VisitorRole {
+		userID := c.MustGet(q.UserIDParam).(string)
+		userIDInt, err = strconv.ParseUint(userID, 10, 64)
+		if err != nil {
+			c.JSON(q.ErrResp(c, 500, err))
+			return
+		}
 	}
 
 	// TODO: when sharing is introduced, move following logics to a separeted method

@@ -19,10 +19,14 @@ const (
 	UsersNs     = "users"
 	RoleListNs  = "roleList"
 	InitTimeKey = "initTime"
+	VisitorID   = uint64(1)
+	VisitorName = "visitor"
 
 	defaultSpaceLimit         = 1024 * 1024 * 1024 // 1GB
 	defaultUploadSpeedLimit   = 50 * 1024 * 1024   // 50MB
 	defaultDownloadSpeedLimit = 50 * 1024 * 1024   // 50MB
+	visitorUploadSpeedLimit   = 10 * 1024 * 1024   // 50MB
+	visitorDownloadSpeedLimit = 10 * 1024 * 1024   // 50MB
 )
 
 var (
@@ -99,7 +103,7 @@ func NewKVUserStore(store kvstore.IKVStore) (*KVUserStore, error) {
 
 func (us *KVUserStore) Init(rootName, rootPwd string) error {
 	var err error
-	err = us.AddUser(&User{
+	admin := &User{
 		ID:   0,
 		Name: rootName,
 		Pwd:  rootPwd,
@@ -109,9 +113,24 @@ func (us *KVUserStore) Init(rootName, rootPwd string) error {
 			UploadSpeedLimit:   defaultUploadSpeedLimit,
 			DownloadSpeedLimit: defaultDownloadSpeedLimit,
 		},
-	})
-	if err != nil {
-		return err
+	}
+	visitor := &User{
+		ID:   VisitorID,
+		Name: VisitorName,
+		Pwd:  rootPwd,
+		Role: VisitorRole,
+		Quota: &Quota{
+			SpaceLimit:         0,
+			UploadSpeedLimit:   visitorUploadSpeedLimit,
+			DownloadSpeedLimit: visitorDownloadSpeedLimit,
+		},
+	}
+
+	for _, user := range []*User{admin, visitor} {
+		err = us.AddUser(user)
+		if err != nil {
+			return err
+		}
 	}
 
 	for _, role := range []string{AdminRole, UserRole, VisitorRole} {

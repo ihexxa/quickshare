@@ -240,7 +240,7 @@ func TestUsersHandlers(t *testing.T) {
 			t.Fatal(resp.StatusCode)
 		}
 
-		if len(lsResp.Users) != 3 {
+		if len(lsResp.Users) != 4 {
 			t.Fatal(fmt.Errorf("incorrect users size (%d)", len(lsResp.Users)))
 		}
 		for _, user := range lsResp.Users {
@@ -306,7 +306,7 @@ func TestUsersHandlers(t *testing.T) {
 		} else if resp.StatusCode != 200 {
 			t.Fatal(resp.StatusCode)
 		}
-		if len(lsResp.Users) != 2 {
+		if len(lsResp.Users) != 3 {
 			t.Fatal(fmt.Errorf("incorrect users size (%d)", len(lsResp.Users)))
 		}
 
