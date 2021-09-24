@@ -25,8 +25,8 @@ const (
 	defaultSpaceLimit         = 1024 * 1024 * 1024 // 1GB
 	defaultUploadSpeedLimit   = 50 * 1024 * 1024   // 50MB
 	defaultDownloadSpeedLimit = 50 * 1024 * 1024   // 50MB
-	visitorUploadSpeedLimit   = 10 * 1024 * 1024   // 50MB
-	visitorDownloadSpeedLimit = 10 * 1024 * 1024   // 50MB
+	visitorUploadSpeedLimit   = 10 * 1024 * 1024   // 10MB
+	visitorDownloadSpeedLimit = 10 * 1024 * 1024   // 10MB
 )
 
 var (
