@@ -12,6 +12,7 @@ import {
   UploadInfo,
   Quota,
   Response,
+  roleVisitor,
 } from "../client";
 import { FilesClient } from "../client/files";
 import { UsersClient } from "../client/users";
@@ -279,9 +280,13 @@ export class Updater {
       if (pane != null) {
         this.props.panes.displaying = paneName;
       } else {
-        alertMsg(`dialgos: pane (${paneName}) not found`);
+        alertMsg(`pane (${paneName}) not found`);
       }
     }
+  };
+
+  setPanes = (paneNames: Set<string>) => {
+    this.props.panes.paneNames = paneNames;
   };
 
   self = async (): Promise<boolean> => {
@@ -294,6 +299,7 @@ export class Updater {
       this.props.login.quota = resp.data.quota;
       return true;
     }
+    this.props.login.userRole = roleVisitor;
     return false;
   };
 

@@ -97,21 +97,6 @@ export class AuthPane extends React.Component<Props, State, {}> {
       });
   };
 
-  logout = async () => {
-    return updater()
-      .logout()
-      .then((ok: boolean) => {
-        if (ok) {
-          this.update(updater().updateLogin);
-        } else {
-          alertMsg(this.props.msg.pkg.get("login.logout.fail"));
-        }
-      })
-      .then(() => {
-        return this.refreshCaptcha();
-      });
-  };
-
   refreshCaptcha = async () => {
     return updater()
       .getCaptchaID()
@@ -177,12 +162,6 @@ export class AuthPane extends React.Component<Props, State, {}> {
             </div>
           </div>
         </div>
-
-        <span style={{ display: this.props.login.authed ? "inherit" : "none" }}>
-          <button onClick={this.logout}>
-            {this.props.msg.pkg.get("login.logout")}
-          </button>
-        </span>
       </span>
     );
   }
