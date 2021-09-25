@@ -13,6 +13,7 @@ import {
   Quota,
   Response,
   roleVisitor,
+  roleAdmin,
 } from "../client";
 import { FilesClient } from "../client/files";
 import { UsersClient } from "../client/users";
@@ -210,6 +211,8 @@ export class Updater {
       this.props.browser.items = List<MetadataResp>(listResp.data.metadatas);
       return true;
     }
+    this.props.browser.dirPath = List<string>([]);
+    this.props.browser.items = List<MetadataResp>([]);
     return false;
   };
 
@@ -221,6 +224,8 @@ export class Updater {
       this.props.browser.items = List<MetadataResp>(listResp.data.metadatas);
       return true;
     }
+    this.props.browser.dirPath = List<string>([]);
+    this.props.browser.items = List<MetadataResp>([]);
     return false;
   };
 
@@ -287,6 +292,66 @@ export class Updater {
 
   setPanes = (paneNames: Set<string>) => {
     this.props.panes.paneNames = paneNames;
+  };
+
+  initPanes = async (): Promise<Array<any>> => {
+    // init browser content
+    if (this.props.login.userRole === roleVisitor) {
+      if (this.props.browser.isSharing) {
+        // sharing with visitor
+        this.setPanes(Set<string>(["login"]));
+        this.displayPane("");
+        return Promise.all([]);
+      }
+
+      // redirect to login
+      this.setPanes(Set<string>(["login"]));
+      this.displayPane("login");
+      return Promise.all([this.getCaptchaID()]);
+    }
+
+    if (this.props.login.userRole === roleAdmin) {
+      this.setPanes(Set<string>(["login", "settings", "admin"]));
+    } else {
+      this.setPanes(Set<string>(["login", "settings"]));
+    }
+    this.displayPane("");
+
+    return Promise.all([
+      this.refreshUploadings(),
+      this.initUploads(),
+      this.listSharings(),
+    ]);
+  };
+
+  initAll = async (params: URLSearchParams): Promise<any> => {
+    return this.initIsAuthed()
+      .then(() => {
+        return this.self();
+      })
+      .then(() => {
+        const dir = params.get("dir");
+        if (dir != null && dir !== "") {
+          const dirPath = List(dir.split("/"));
+          return this.setItems(dirPath);
+        } else {
+          return this.setHomeItems();
+        }
+      })
+      .then(() => {
+        return this.isSharing(this.props.browser.dirPath.join("/"));
+      })
+      .then(() => {
+        // init panes
+        return this.initPanes();
+      })
+      .then(() => {
+        // init admin content
+        if (this.props.login.userRole === roleAdmin) {
+          return Promise.all([this.listRoles(), this.listUsers()]);
+        }
+        return;
+      })
   };
 
   self = async (): Promise<boolean> => {

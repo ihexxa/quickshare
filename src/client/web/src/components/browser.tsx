@@ -15,7 +15,7 @@ import { alertMsg, comfirmMsg } from "../common/env";
 import { updater } from "./state_updater";
 import { ICoreState, MsgProps } from "./core_state";
 import { LoginProps } from "./pane_login";
-import { MetadataResp, UploadInfo } from "../client";
+import { MetadataResp, roleVisitor } from "../client";
 import { Up } from "../worker/upload_mgr";
 import { UploadEntry } from "../worker/interface";
 import { Flexbox } from "./layout/flexbox";
@@ -316,6 +316,8 @@ export class Browser extends React.Component<Props, State, {}> {
   };
 
   render() {
+    const showOp = this.props.login.userRole === roleVisitor ? "hidden" : "";
+
     let breadcrumb = this.props.browser.dirPath.map(
       (pathPart: string, key: number) => {
         return (
@@ -422,7 +424,7 @@ export class Browser extends React.Component<Props, State, {}> {
               />
             </span>,
 
-            <span className="padding-m">
+            <span className={`padding-m ${showOp}`}>
               <button
                 onClick={() => this.select(item.name)}
                 className={`${isSelected ? "blue0-bg white-font" : "grey2-bg grey3-font"
@@ -438,10 +440,9 @@ export class Browser extends React.Component<Props, State, {}> {
           childrenStyles={List([{}, { justifyContent: "flex-end" }])}
         />
       ) : (
-        <div>
+        <div key={item.name}>
 
           <Flexbox
-            key={item.name}
             children={List([
               <span className="padding-m">
                 <Flexbox
@@ -468,7 +469,7 @@ export class Browser extends React.Component<Props, State, {}> {
                 />
               </span>,
 
-              <span className="item-op padding-m">
+              <span className={`item-op padding-m ${showOp}`}>
                 <button
                   type="button"
                   onClick={() => this.select(item.name)}
@@ -506,69 +507,72 @@ export class Browser extends React.Component<Props, State, {}> {
         round: 0,
       }
     );
+
     const itemListPane =
       this.props.browser.tab === "" || this.props.browser.tab === "item" ? (
         <div>
-          <div id="op-bar" className="op-bar">
+          <div id="op-bar" className={`op-bar ${showOp}`}>
             <div className="margin-l-m margin-r-m margin-b-m">{ops}</div>
           </div>
 
           <div className="container">
-            <Flexbox
-              children={List([
-                <span>
-                  {this.props.browser.isSharing ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        this.deleteSharing(
-                          this.props.browser.dirPath.join("/")
-                        );
-                      }}
-                      className="red0-bg white-font margin-r-m"
-                    >
-                      {this.props.msg.pkg.get("browser.share.del")}
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={this.addSharing}
-                      className="green0-bg white-font margin-r-m"
-                    >
-                      {this.props.msg.pkg.get("browser.share.add")}
-                    </button>
-                  )}
-
-                  {this.state.selectedItems.size > 0 ? (
-                    <span>
+            <div className={`${showOp}`} >
+              <Flexbox
+                children={List([
+                  <span>
+                    {this.props.browser.isSharing ? (
                       <button
                         type="button"
-                        onClick={() => this.delete()}
+                        onClick={() => {
+                          this.deleteSharing(
+                            this.props.browser.dirPath.join("/")
+                          );
+                        }}
                         className="red0-bg white-font margin-r-m"
                       >
-                        {this.props.msg.pkg.get("browser.delete")}
+                        {this.props.msg.pkg.get("browser.share.del")}
                       </button>
-
+                    ) : (
                       <button
                         type="button"
-                        onClick={() => this.moveHere()}
-                        className="margin-r-m"
+                        onClick={this.addSharing}
+                        className="green0-bg white-font margin-r-m"
                       >
-                        {this.props.msg.pkg.get("browser.paste")}
+                        {this.props.msg.pkg.get("browser.share.add")}
                       </button>
-                    </span>
-                  ) : null}
-                </span>,
+                    )}
 
-                <span>
-                  <span className="desc-m grey0-font">{`${this.props.msg.pkg.get(
-                    "browser.used"
-                  )} ${usedSpace} / ${spaceLimit}`}</span>
-                </span>,
-              ])}
-              className="padding-m"
-              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
-            />
+                    {this.state.selectedItems.size > 0 ? (
+                      <span>
+                        <button
+                          type="button"
+                          onClick={() => this.delete()}
+                          className="red0-bg white-font margin-r-m"
+                        >
+                          {this.props.msg.pkg.get("browser.delete")}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => this.moveHere()}
+                          className="margin-r-m"
+                        >
+                          {this.props.msg.pkg.get("browser.paste")}
+                        </button>
+                      </span>
+                    ) : null}
+                  </span>,
+
+                  <span>
+                    <span className="desc-m grey0-font">{`${this.props.msg.pkg.get(
+                      "browser.used"
+                    )} ${usedSpace} / ${spaceLimit}`}</span>
+                  </span>,
+                ])}
+                className="padding-m"
+                childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+              />
+            </div>
 
             <Flexbox
               children={List([
@@ -585,7 +589,7 @@ export class Browser extends React.Component<Props, State, {}> {
                   />
                 </span>,
 
-                <span className="padding-m">
+                <span className={`padding-m ${showOp}`}>
                   <button
                     onClick={() => this.selectAll()}
                     className={`grey1-bg white-font`}
@@ -721,9 +725,8 @@ export class Browser extends React.Component<Props, State, {}> {
 
     const sharingList = this.props.browser.sharings.map((dirPath: string) => {
       return (
-        <div className="padding-m">
+        <div key={dirPath} className="padding-m">
           <Flexbox
-            key={dirPath}
             children={List([
               <Flexbox
                 children={List([
@@ -818,10 +821,11 @@ export class Browser extends React.Component<Props, State, {}> {
         )
       ) : null;
 
+    const showTabs = this.props.login.userRole === roleVisitor ? "hidden" : "";
     return (
       <div>
         <div id="item-list">
-          <div className="container">
+          <div className={`container ${showTabs}`}>
             <div className="padding-m">
               <button
                 onClick={() => {
@@ -880,8 +884,12 @@ export class Browser extends React.Component<Props, State, {}> {
               </button>
             </div>
           </div>
-          {sharingListPane}
-          {uploadingListPane}
+          <div>
+            {sharingListPane}
+          </div>
+          <div>
+            {uploadingListPane}
+          </div>
           {itemListPane}
         </div>
       </div>

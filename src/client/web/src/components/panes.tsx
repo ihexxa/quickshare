@@ -55,6 +55,7 @@ export class Panes extends React.Component<Props, State, {}> {
                   {this.props.msg.pkg.get("panes.close")}
                 </button>
               </div>
+
             </div>
           </div>
 
