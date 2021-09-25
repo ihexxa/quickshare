@@ -1,13 +1,11 @@
 import * as React from "react";
-import { List, Set } from "immutable";
 
 import { updater } from "./state_updater";
 import { ICoreState, newState } from "./core_state";
 import { RootFrame } from "./root_frame";
 import { FilesClient } from "../client/files";
 import { UsersClient } from "../client/users";
-import { IUsersClient, IFilesClient, roleAdmin, roleVisitor } from "../client";
-import { alertMsg } from "../common/env";
+import { IUsersClient, IFilesClient } from "../client";
 
 export interface Props { }
 export interface State extends ICoreState { }
@@ -39,7 +37,6 @@ export class StateMgr extends React.Component<Props, State, {}> {
     updater().setClients(this.usersClient, this.filesClient);
 
     const params = new URLSearchParams(document.location.search.substring(1));
-
     return updater()
       .initAll(params)
       .then(() => {

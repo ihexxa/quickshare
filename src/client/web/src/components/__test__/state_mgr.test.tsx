@@ -145,7 +145,7 @@ describe("State Manager", () => {
     // panes
     expect(coreState.panes).toEqual({
       displaying: "",
-      paneNames: Set(["settings", "login", "admin"]),
+      paneNames: Set(["login"]),
     });
 
     // login

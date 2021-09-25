@@ -6,6 +6,7 @@ export const userIDParam = "uid";
 export const roleAdmin = "admin";
 export const roleUser = "user";
 export const roleVisitor = "visitor";
+export const visitorID = "1";
 
 export interface Quota {
   spaceLimit: string;
