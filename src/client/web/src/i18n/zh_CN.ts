@@ -72,4 +72,5 @@ export const msgs: Map<string, string> = Map({
   "share.404.desc": "在列表面板可以共享文件夹",
   "upload.404.title": "没有正在上传的文件",
   "upload.404.desc": "在列表面板可以上传文件",
+  "detail": "详细",
 });
