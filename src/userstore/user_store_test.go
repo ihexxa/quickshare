@@ -36,7 +36,30 @@ func TestUserStores(t *testing.T) {
 			t.Fatalf("incorrect root DownloadSpeedLimit")
 		}
 
-		id, name1 := uint64(1), "test_user1"
+		visitor, err := store.GetUser(1)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if visitor.Name != VisitorName {
+			t.Fatal("visitor not found")
+		}
+		if visitor.Pwd != rootPwd {
+			t.Fatalf("passwords not match %s", err)
+		}
+		if visitor.Role != VisitorRole {
+			t.Fatalf("incorrect visitor role")
+		}
+		if visitor.Quota.SpaceLimit != 0 {
+			t.Fatalf("incorrect visitor SpaceLimit")
+		}
+		if visitor.Quota.UploadSpeedLimit != visitorUploadSpeedLimit {
+			t.Fatalf("incorrect visitor UploadSpeedLimit")
+		}
+		if visitor.Quota.DownloadSpeedLimit != visitorDownloadSpeedLimit {
+			t.Fatalf("incorrect visitor DownloadSpeedLimit")
+		}
+
+		id, name1 := uint64(2), "test_user1"
 		pwd1, pwd2 := "666", "888"
 		role1, role2 := UserRole, AdminRole
 		spaceLimit1, upLimit1, downLimit1 := int64(17), 5, 7
@@ -53,6 +76,9 @@ func TestUserStores(t *testing.T) {
 				DownloadSpeedLimit: downLimit1,
 			},
 		})
+		if err != nil {
+			t.Fatal("there should be no error")
+		}
 
 		user, err := store.GetUser(id)
 		if err != nil {
@@ -81,8 +107,8 @@ func TestUserStores(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if len(users) != 2 {
-			t.Fatalf("users size should be 2 (%d)", len(users))
+		if len(users) != 3 {
+			t.Fatalf("users size should be 3 (%d)", len(users))
 		}
 		for _, user := range users {
 			if user.ID == 0 {
@@ -90,7 +116,7 @@ func TestUserStores(t *testing.T) {
 					t.Fatalf("incorrect root info %v", user)
 				}
 			}
-			if user.ID == 1 {
+			if user.ID == id {
 				if user.Name != name1 || user.Role != role1 {
 					t.Fatalf("incorrect user info %v", user)
 				}
@@ -181,7 +207,7 @@ func TestUserStores(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if len(users) != 1 {
+		if len(users) != 2 {
 			t.Fatalf("users size should be 2 (%d)", len(users))
 		}
 		if users[0].ID != 0 || users[0].Name != rootName || users[0].Role != AdminRole {
