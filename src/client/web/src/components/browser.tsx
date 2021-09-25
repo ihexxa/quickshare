@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { List, Map } from "immutable";
+import { List, Map, Set } from "immutable";
 import FileSize from "filesize";
 import { RiFolder2Fill } from "@react-icons/all-files/ri/RiFolder2Fill";
 import { RiHomeSmileFill } from "@react-icons/all-files/ri/RiHomeSmileFill";
@@ -60,6 +60,7 @@ export interface State {
   inputValue: string;
   selectedSrc: string;
   selectedItems: Map<string, boolean>;
+  showDetail: Set<string>;
 }
 
 export class Browser extends React.Component<Props, State, {}> {
@@ -75,6 +76,7 @@ export class Browser extends React.Component<Props, State, {}> {
       inputValue: "",
       selectedSrc: "",
       selectedItems: Map<string, boolean>(),
+      showDetail: Set<string>(),
     };
 
     Up().setStatusCb(this.updateProgress);
@@ -315,6 +317,11 @@ export class Browser extends React.Component<Props, State, {}> {
     this.props.update(updater().updateBrowser);
   };
 
+  toggleDetail = (name: string) => {
+    const showDetail = this.state.showDetail.has(name) ? this.state.showDetail.delete(name) : this.state.showDetail.add(name);
+    this.setState({ showDetail });
+  };
+
   render() {
     const showOp = this.props.login.userRole === roleVisitor ? "hidden" : "";
 
@@ -435,6 +442,13 @@ export class Browser extends React.Component<Props, State, {}> {
                   ? this.props.msg.pkg.get("browser.deselect")
                   : this.props.msg.pkg.get("browser.select")}
               </button>
+              {/* <button
+                onClick={() => this.toggleDetail(item.name)}
+                className="grey2-bg grey3-font"
+                style={{ width: "8rem", display: "inline-block" }}
+              >
+                {this.props.msg.pkg.get("detail")}
+              </button> */}
             </span>,
           ])}
           childrenStyles={List([{}, { justifyContent: "flex-end" }])}
@@ -471,6 +485,14 @@ export class Browser extends React.Component<Props, State, {}> {
 
               <span className={`item-op padding-m ${showOp}`}>
                 <button
+                  onClick={() => this.toggleDetail(item.name)}
+                  className="grey2-bg grey3-font"
+                  style={{ width: "8rem", display: "inline-block" }}
+                >
+                  {this.props.msg.pkg.get("detail")}
+                </button>
+
+                <button
                   type="button"
                   onClick={() => this.select(item.name)}
                   className={`${isSelected ? "blue0-bg white-font" : "grey2-bg grey3-font"
@@ -486,13 +508,9 @@ export class Browser extends React.Component<Props, State, {}> {
             childrenStyles={List([{}, { justifyContent: "flex-end" }])}
           />
           <div
-            style={{
-              border: "dashed 1px #ccc",
-              padding: "1rem",
-              margin: "1rem",
-            }}
+            className={`grey2-bg grey3-font margin-l ${this.state.showDetail.has(item.name) ? "" : "hidden"}`}
           >
-            <span>{item.sha1}</span>
+            <span className="margin-l">{`SHA1: ${item.sha1}`}</span>
           </div>
         </div>
       );
@@ -515,7 +533,7 @@ export class Browser extends React.Component<Props, State, {}> {
             <div className="margin-l-m margin-r-m margin-b-m">{ops}</div>
           </div>
 
-          <div className="container">
+          <div className="container" style={{ paddingBottom: "1rem" }}>
             <div className={`${showOp}`} >
               <Flexbox
                 children={List([

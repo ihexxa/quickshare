@@ -145,22 +145,6 @@ export class PaneSettings extends React.Component<Props, State, {}> {
             </div>
           </div>
 
-          <div>
-            <div className="flex-list-container">
-              <div className="flex-list-item-l">
-                <h5 className="black-font">
-                  {this.props.msg.pkg.get("login.logout")}
-                </h5>
-              </div>
-              <div className="flex-list-item-r">
-                <AuthPane
-                  login={this.props.login}
-                  msg={this.props.msg}
-                  update={this.update}
-                />
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     );
