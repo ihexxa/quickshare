@@ -1,5 +1,5 @@
 import * as React from "react";
-import { List } from "immutable";
+import { List, Set } from "immutable";
 import { alertMsg } from "../common/env";
 
 import { ICoreState, MsgProps } from "./core_state";
@@ -42,18 +42,28 @@ export class TopBar extends React.Component<Props, State, {}> {
       });
   };
 
-  logout = async () => {
+  logout = async (): Promise<void> => {
     return updater()
       .logout()
       .then((ok: boolean) => {
         if (ok) {
-          this.props.update(updater().updateLogin);
+          const params = new URLSearchParams(document.location.search.substring(1));
+          return updater().initAll(params);
         } else {
           alertMsg(this.props.msg.pkg.get("login.logout.fail"));
         }
       })
       .then(() => {
         return this.refreshCaptcha();
+      })
+      .then(() => {
+        this.props.update(updater().updateBrowser);
+        this.props.update(updater().updateLogin);
+        this.props.update(updater().updatePanes);
+        this.props.update(updater().updateAdmin);
+
+        updater().initLan();
+        this.props.update(updater().updateMsg);
       });
   };
 

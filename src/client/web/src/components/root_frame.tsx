@@ -6,6 +6,8 @@ import { LoginProps } from "./pane_login";
 import { Panes, PanesProps } from "./panes";
 import { AdminProps } from "./pane_admin";
 import { TopBar } from "./topbar";
+import { roleVisitor } from "../client";
+
 
 export interface Props {
   browser: BrowserProps;
@@ -17,7 +19,7 @@ export interface Props {
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
-export interface State {}
+export interface State { }
 export class RootFrame extends React.Component<Props, State, {}> {
   constructor(p: Props) {
     super(p);
@@ -27,9 +29,11 @@ export class RootFrame extends React.Component<Props, State, {}> {
     const wallpaperStyle =
       this.props.ui.wallpaper !== ""
         ? {
-            background: `url("${this.props.ui.wallpaper}") ${this.props.ui.repeat} ${this.props.ui.position} ${this.props.ui.align}`,
-          }
+          background: `url("${this.props.ui.wallpaper}") ${this.props.ui.repeat} ${this.props.ui.position} ${this.props.ui.align}`,
+        }
         : {};
+
+    const showBrowser = this.props.login.userRole === roleVisitor && !this.props.browser.isSharing ? "hidden" : "";
 
     return (
       <div className="theme-white desktop">
@@ -49,7 +53,7 @@ export class RootFrame extends React.Component<Props, State, {}> {
             update={this.props.update}
           />
 
-          <div className="container-center">
+          <div className={`container-center ${showBrowser}`}>
             <Browser
               browser={this.props.browser}
               msg={this.props.msg}

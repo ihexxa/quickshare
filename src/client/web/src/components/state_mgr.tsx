@@ -41,58 +41,7 @@ export class StateMgr extends React.Component<Props, State, {}> {
     const params = new URLSearchParams(document.location.search.substring(1));
 
     return updater()
-      .initIsAuthed()
-      .then(() => {
-        return updater().self();
-      })
-      .then(() => {
-        const dir = params.get("dir");
-        if (dir != null && dir !== "") {
-          const dirPath = List(dir.split("/"));
-          return updater().setItems(dirPath);
-        } else {
-          return updater().setHomeItems();
-        }
-      })
-      .then(() => {
-        return updater().isSharing(updater().props.browser.dirPath.join("/"));
-      })
-      .then(() => {
-        // init browser content
-        if (updater().props.login.userRole === roleVisitor) {
-          if (updater().props.browser.isSharing) {
-            // sharing with visitor
-            updater().setPanes(Set<string>(["login"]));
-            updater().displayPane("");
-            return Promise.all([]);
-          }
-
-          // redirect to login
-          updater().setPanes(Set<string>(["login"]));
-          updater().displayPane("login");
-          return Promise.all([updater().getCaptchaID()]);
-        }
-
-        if (updater().props.login.userRole === roleAdmin) {
-          updater().setPanes(Set<string>(["login", "settings", "admin"]));
-        } else {
-          updater().setPanes(Set<string>(["login", "settings"]));
-        }
-        updater().displayPane("");
-
-        return Promise.all([
-          updater().refreshUploadings(),
-          updater().initUploads(),
-          updater().listSharings(),
-        ]);
-      })
-      .then(() => {
-        // init admin content
-        if (updater().props.login.userRole === roleAdmin) {
-          return Promise.all([updater().listRoles(), updater().listUsers()]);
-        }
-        return;
-      })
+      .initAll(params)
       .then(() => {
         this.update(updater().updateBrowser);
         this.update(updater().updateLogin);

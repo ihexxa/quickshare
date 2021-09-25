@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Set } from "immutable";
 
 import { ICoreState, MsgProps } from "./core_state";
 import { updater } from "./state_updater";
@@ -61,39 +62,22 @@ export class AuthPane extends React.Component<Props, State, {}> {
       )
       .then((ok: boolean): Promise<any> => {
         if (ok) {
-          this.update(updater().updateLogin);
-          this.setState({ user: "", pwd: "", captchaInput: "" });
-          // close all the panes
-          updater().displayPane("");
-          this.update(updater().updatePanes);
-
-          // refresh
-          return Promise.all([
-            updater().setHomeItems(),
-            updater().refreshUploadings(),
-            updater().isSharing(updater().props.browser.dirPath.join("/")),
-            updater().listSharings(),
-            updater().self(),
-          ]);
+          const params = new URLSearchParams(document.location.search.substring(1));
+          return updater().initAll(params);
         } else {
           this.setState({ user: "", pwd: "", captchaInput: "" });
           alertMsg("Failed to login.");
-
           return updater().getCaptchaID();
         }
       })
       .then(() => {
         this.update(updater().updateBrowser);
         this.update(updater().updateLogin);
+        this.update(updater().updatePanes);
+        this.update(updater().updateAdmin);
 
         updater().initLan();
         this.update(updater().updateMsg);
-      })
-      .then(() => {
-        return updater().isSharing(updater().props.browser.dirPath.join("/"));
-      })
-      .then(() => {
-        this.update(updater().updateBrowser);
       });
   };
 
