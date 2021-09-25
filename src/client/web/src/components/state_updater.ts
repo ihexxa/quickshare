@@ -14,6 +14,7 @@ import {
   Response,
   roleVisitor,
   roleAdmin,
+  visitorID,
 } from "../client";
 import { FilesClient } from "../client/files";
 import { UsersClient } from "../client/users";
@@ -354,6 +355,18 @@ export class Updater {
       })
   };
 
+  resetUser = () => {
+    this.props.login.userID = visitorID;
+    this.props.login.userName = "visitor";
+    this.props.login.userRole = roleVisitor;
+    this.props.login.usedSpace = "0";
+    this.props.login.quota = {
+      uploadSpeedLimit: 0,
+      downloadSpeedLimit: 0,
+      spaceLimit: "0",
+    };
+  }
+
   self = async (): Promise<boolean> => {
     const resp = await this.usersClient.self();
     if (resp.status === 200) {
@@ -364,7 +377,7 @@ export class Updater {
       this.props.login.quota = resp.data.quota;
       return true;
     }
-    this.props.login.userRole = roleVisitor;
+    this.resetUser()
     return false;
   };
 
@@ -460,6 +473,7 @@ export class Updater {
   logout = async (): Promise<boolean> => {
     const resp = await this.usersClient.logout();
     updater().setAuthed(false);
+    this.resetUser();
     return resp.status === 200;
   };
 
