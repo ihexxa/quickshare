@@ -19,7 +19,6 @@ export interface MsgProps {
 }
 
 export interface UIProps {
-  // background: url("/static/img/textured_paper.png") repeat fixed center;
   wallpaper: string;
   repeat: string;
   position: string;
@@ -63,7 +62,7 @@ export function initState(): ICoreState {
     },
     panes: {
       displaying: "browser",
-      paneNames: Set<string>(["settings", "login", "admin"]),
+      paneNames: Set<string>([]), // "settings", "login", "admin"
     },
     login: {
       userID: "",

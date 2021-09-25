@@ -1,15 +1,17 @@
 import * as React from "react";
 import { List } from "immutable";
-import { RiGithubFill } from "@react-icons/all-files/ri/RiGithubFill";
+import { alertMsg } from "../common/env";
 
 import { ICoreState, MsgProps } from "./core_state";
 import { LoginProps } from "./pane_login";
+import { PanesProps } from "./panes";
 import { updater } from "./state_updater";
 import { Flexbox } from "./layout/flexbox";
 
-export interface State {}
+export interface State { }
 export interface Props {
   login: LoginProps;
+  panes: PanesProps;
   msg: MsgProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
@@ -40,17 +42,34 @@ export class TopBar extends React.Component<Props, State, {}> {
       });
   };
 
+  logout = async () => {
+    return updater()
+      .logout()
+      .then((ok: boolean) => {
+        if (ok) {
+          this.props.update(updater().updateLogin);
+        } else {
+          alertMsg(this.props.msg.pkg.get("login.logout.fail"));
+        }
+      })
+      .then(() => {
+        return this.refreshCaptcha();
+      });
+  };
+
+  refreshCaptcha = async () => {
+    return updater()
+      .getCaptchaID()
+      .then(() => {
+        this.props.update(updater().updateLogin);
+      });
+  };
+
   render() {
-    const adminBtn =
-      this.props.login.userRole === "admin" ? (
-        <button
-          onClick={this.showAdmin}
-          className="grey3-bg grey4-font margin-r-m"
-          style={{ minWidth: "7rem" }}
-        >
-          {this.props.msg.pkg.get("admin")}
-        </button>
-      ) : null;
+    const showUserInfo = this.props.login.authed ? "" : "hidden";
+    const showLogin = this.props.login.authed ? "" : "hidden";
+    const showSettings = this.props.panes.paneNames.get("settings") ? "" : "hidden";
+    const showAdmin = this.props.panes.paneNames.get("admin") ? "" : "hidden";
 
     return (
       <div
@@ -69,7 +88,7 @@ export class TopBar extends React.Component<Props, State, {}> {
 
             <Flexbox
               children={List([
-                <span>
+                <span className={`${showUserInfo}`}>
                   <span className="grey3-font font-s">
                     {this.props.login.userName}
                   </span>
@@ -81,13 +100,23 @@ export class TopBar extends React.Component<Props, State, {}> {
 
                 <button
                   onClick={this.showSettings}
-                  className="grey3-bg grey4-font margin-r-m"
+                  className={`grey3-bg grey4-font margin-r-m ${showSettings}`}
                   style={{ minWidth: "7rem" }}
                 >
                   {this.props.msg.pkg.get("settings")}
                 </button>,
 
-                adminBtn,
+                <button
+                  onClick={this.showAdmin}
+                  className={`grey3-bg grey4-font margin-r-m ${showAdmin}`}
+                  style={{ minWidth: "7rem" }}
+                >
+                  {this.props.msg.pkg.get("admin")}
+                </button>,
+
+                <button onClick={this.logout} className={`${showLogin}`}>
+                  {this.props.msg.pkg.get("login.logout")}
+                </button>,
               ])}
               childrenStyles={List([{}, {}, {}, {}])}
             />,

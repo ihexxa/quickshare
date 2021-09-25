@@ -111,6 +111,7 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(userstore.VisitorRole, "OPTIONS", "/v1/settings/health"): true,
 		apiRuleCname(userstore.VisitorRole, "GET", "/v1/captchas/"):           true,
 		apiRuleCname(userstore.VisitorRole, "GET", "/v1/captchas/imgs"):       true,
+		apiRuleCname(userstore.VisitorRole, "GET", "/v1/fs/sharings/exist"):   true,
 	}
 
 	return &MultiUsersSvc{

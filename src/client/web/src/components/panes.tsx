@@ -20,7 +20,7 @@ export interface Props {
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
-export interface State {}
+export interface State { }
 export class Panes extends React.Component<Props, State, {}> {
   constructor(p: Props) {
     super(p);
@@ -35,55 +35,11 @@ export class Panes extends React.Component<Props, State, {}> {
 
   render() {
     let displaying = this.props.panes.displaying;
-
-    let panesMap: Map<string, JSX.Element> = Map({});
-    const settingsPane = (
-      <PaneSettings
-        login={this.props.login}
-        msg={this.props.msg}
-        update={this.props.update}
-      />
-    );
-    const loginPane = (
-      <AuthPane
-        login={this.props.login}
-        update={this.props.update}
-        msg={this.props.msg}
-      />
-    );
-    const adminPane = (
-      <AdminPane
-        admin={this.props.admin}
-        msg={this.props.msg}
-        update={this.props.update}
-      />
-    );
-
-    switch(this.props.login.userRole) {
-    case roleAdmin:
-      panesMap = panesMap.set("settings", settingsPane);
-      panesMap = panesMap.set("admin", adminPane);
-      panesMap = panesMap.set("login", loginPane);
-      break;
-    case roleUser:
-      panesMap = panesMap.set("settings", settingsPane);
-      panesMap = panesMap.set("login", loginPane);
-      break;
-    default:
-      panesMap = panesMap.set("login", loginPane);
-      break;
-    }
-
-    const panes = panesMap.keySeq().map((paneName: string): JSX.Element => {
-      const isDisplay = displaying === paneName ? "" : "hidden";
-      return (
-        <div key={paneName} className={`${isDisplay}`}>
-          {panesMap.get(paneName)}
-        </div>
-      );
-    });
-
     const btnClass = displaying === "login" ? "hidden" : "";
+    const showSettings = this.props.panes.paneNames.get("settings") && displaying === "settings" ? "" : "hidden";
+    const showLogin = this.props.panes.paneNames.get("login") && displaying === "login" ? "" : "hidden";
+    const showAdmin = this.props.panes.paneNames.get("admin") && displaying === "admin" ? "" : "hidden";
+
     return (
       <div id="panes" className={displaying === "" ? "hidden" : ""}>
         <div className="root-container">
@@ -102,7 +58,30 @@ export class Panes extends React.Component<Props, State, {}> {
             </div>
           </div>
 
-          {panes}
+          <div className={`${showSettings}`}>
+            <PaneSettings
+              login={this.props.login}
+              msg={this.props.msg}
+              update={this.props.update}
+            />
+          </div>
+
+          <div className={`${showLogin}`}>
+            <AuthPane
+              login={this.props.login}
+              update={this.props.update}
+              msg={this.props.msg}
+            />
+          </div>
+
+          <div className={`${showAdmin}`}>
+            <AdminPane
+              admin={this.props.admin}
+              msg={this.props.msg}
+              update={this.props.update}
+            />
+          </div>
+
         </div>
       </div>
     );

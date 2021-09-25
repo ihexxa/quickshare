@@ -1,5 +1,5 @@
 import * as React from "react";
-import { List } from "immutable";
+import { List, Set } from "immutable";
 
 import { updater } from "./state_updater";
 import { ICoreState, newState } from "./core_state";
@@ -9,8 +9,8 @@ import { UsersClient } from "../client/users";
 import { IUsersClient, IFilesClient, roleAdmin, roleVisitor } from "../client";
 import { alertMsg } from "../common/env";
 
-export interface Props {}
-export interface State extends ICoreState {}
+export interface Props { }
+export interface State extends ICoreState { }
 
 export class StateMgr extends React.Component<Props, State, {}> {
   private usersClient: IUsersClient = new UsersClient("");
@@ -62,16 +62,24 @@ export class StateMgr extends React.Component<Props, State, {}> {
         if (updater().props.login.userRole === roleVisitor) {
           if (updater().props.browser.isSharing) {
             // sharing with visitor
+            updater().setPanes(Set<string>(["login"]));
             updater().displayPane("");
             return Promise.all([]);
           }
 
           // redirect to login
+          updater().setPanes(Set<string>(["login"]));
           updater().displayPane("login");
           return Promise.all([updater().getCaptchaID()]);
         }
 
+        if (updater().props.login.userRole === roleAdmin) {
+          updater().setPanes(Set<string>(["login", "settings", "admin"]));
+        } else {
+          updater().setPanes(Set<string>(["login", "settings"]));
+        }
         updater().displayPane("");
+
         return Promise.all([
           updater().refreshUploadings(),
           updater().initUploads(),

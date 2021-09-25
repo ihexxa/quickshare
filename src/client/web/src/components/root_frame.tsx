@@ -44,6 +44,7 @@ export class RootFrame extends React.Component<Props, State, {}> {
 
           <TopBar
             login={this.props.login}
+            panes={this.props.panes}
             msg={this.props.msg}
             update={this.props.update}
           />
