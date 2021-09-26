@@ -198,4 +198,14 @@ export class FilesClient extends BaseClient {
       url: `${this.url}/v1/fs/sharings`,
     });
   };
+
+  generateHash = (filePath: string): Promise<Response> => {
+    return this.do({
+      method: "post",
+      url: `${this.url}/v1/fs/hashes/sha1`,
+      data: {
+        filePath: filePath,
+      },
+    });
+  };
 }

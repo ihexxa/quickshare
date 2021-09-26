@@ -107,6 +107,7 @@ export interface IFilesClient {
   deleteSharing: (dirPath: string) => Promise<Response>;
   isSharing: (dirPath: string) => Promise<Response>;
   listSharings: () => Promise<Response<ListSharingsResp>>;
+  generateHash: (filePath: string) => Promise<Response>;
 }
 
 export interface Response<T = any> {

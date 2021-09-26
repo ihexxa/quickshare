@@ -25,6 +25,7 @@ export interface FilesClientResps {
   deleteSharingMockResp?: Response;
   listSharingsMockResp?: Response<ListSharingsResp>;
   isSharingMockResp?: Response;
+  generateHashMockResp?: Response;
 }
 
 export const resps = {
@@ -130,7 +131,9 @@ export const resps = {
     },
   },
   isSharingMockResp: { status: 200, statusText: "", data: {} },
+  generateHashMockResp: { status: 200, statusText: "", data: {} },
 };
+
 export class MockFilesClient {
   private url: string;
   private resps: FilesClientResps;
@@ -212,5 +215,9 @@ export class MockFilesClient {
 
   isSharing = (dirPath: string): Promise<Response> => {
     return this.wrapPromise(this.resps.isSharingMockResp);
+  };
+
+  generateHash = (filePath: string): Promise<Response> => {
+    return this.wrapPromise(this.resps.generateHashMockResp);
   };
 }

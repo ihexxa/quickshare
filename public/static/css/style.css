@@ -731,3 +731,11 @@ div.hr {
   color: #e74c3c;
   border-radius: 0.5rem;
 }
+
+.detail {
+  font-size: 1.2rem;
+  line-height: 2rem;
+  margin: 0 1rem 1rem 1rem;
+  padding: 1rem;
+  border-top: dashed 1px #7f8c8d;
+}

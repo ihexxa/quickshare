@@ -2,6 +2,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { List, Map, Set } from "immutable";
 import FileSize from "filesize";
+
 import { RiFolder2Fill } from "@react-icons/all-files/ri/RiFolder2Fill";
 import { RiHomeSmileFill } from "@react-icons/all-files/ri/RiHomeSmileFill";
 import { RiFile2Fill } from "@react-icons/all-files/ri/RiFile2Fill";
@@ -318,8 +319,15 @@ export class Browser extends React.Component<Props, State, {}> {
   };
 
   toggleDetail = (name: string) => {
-    const showDetail = this.state.showDetail.has(name) ? this.state.showDetail.delete(name) : this.state.showDetail.add(name);
+    const showDetail = this.state.showDetail.has(name)
+      ? this.state.showDetail.delete(name)
+      : this.state.showDetail.add(name);
     this.setState({ showDetail });
+  };
+
+  generateHash = async (filePath: string): Promise<boolean> => {
+    alertMsg(this.props.msg.pkg.get("refresh-hint"));
+    return updater().generateHash(filePath);
   };
 
   render() {
@@ -341,8 +349,9 @@ export class Browser extends React.Component<Props, State, {}> {
       }
     );
 
-    const nameCellClass = `item-name item-name-${this.props.browser.isVertical ? "vertical" : "horizontal"
-      } pointer`;
+    const nameCellClass = `item-name item-name-${
+      this.props.browser.isVertical ? "vertical" : "horizontal"
+    } pointer`;
     const sizeCellClass = this.props.browser.isVertical
       ? `hidden margin-s`
       : ``;
@@ -434,34 +443,30 @@ export class Browser extends React.Component<Props, State, {}> {
             <span className={`padding-m ${showOp}`}>
               <button
                 onClick={() => this.select(item.name)}
-                className={`${isSelected ? "blue0-bg white-font" : "grey2-bg grey3-font"
-                  }`}
+                className={`${
+                  isSelected ? "blue0-bg white-font" : "grey2-bg grey3-font"
+                }`}
                 style={{ width: "8rem", display: "inline-block" }}
               >
                 {isSelected
                   ? this.props.msg.pkg.get("browser.deselect")
                   : this.props.msg.pkg.get("browser.select")}
               </button>
-              {/* <button
-                onClick={() => this.toggleDetail(item.name)}
-                className="grey2-bg grey3-font"
-                style={{ width: "8rem", display: "inline-block" }}
-              >
-                {this.props.msg.pkg.get("detail")}
-              </button> */}
             </span>,
           ])}
           childrenStyles={List([{}, { justifyContent: "flex-end" }])}
         />
       ) : (
         <div key={item.name}>
-
           <Flexbox
             children={List([
               <span className="padding-m">
                 <Flexbox
                   children={List([
-                    <RiFile2Fill size="3rem" className="cyan0-font margin-r-m" />,
+                    <RiFile2Fill
+                      size="3rem"
+                      className="cyan0-font margin-r-m"
+                    />,
 
                     <span className={`${nameCellClass}`}>
                       <a
@@ -486,7 +491,7 @@ export class Browser extends React.Component<Props, State, {}> {
               <span className={`item-op padding-m ${showOp}`}>
                 <button
                   onClick={() => this.toggleDetail(item.name)}
-                  className="grey2-bg grey3-font"
+                  className="grey2-bg grey3-font margin-r-m"
                   style={{ width: "8rem", display: "inline-block" }}
                 >
                   {this.props.msg.pkg.get("detail")}
@@ -495,8 +500,9 @@ export class Browser extends React.Component<Props, State, {}> {
                 <button
                   type="button"
                   onClick={() => this.select(item.name)}
-                  className={`${isSelected ? "blue0-bg white-font" : "grey2-bg grey3-font"
-                    }`}
+                  className={`${
+                    isSelected ? "blue0-bg white-font" : "grey2-bg grey3-font"
+                  }`}
                   style={{ width: "8rem", display: "inline-block" }}
                 >
                   {isSelected
@@ -508,9 +514,27 @@ export class Browser extends React.Component<Props, State, {}> {
             childrenStyles={List([{}, { justifyContent: "flex-end" }])}
           />
           <div
-            className={`grey2-bg grey3-font margin-l ${this.state.showDetail.has(item.name) ? "" : "hidden"}`}
+            className={`${
+              this.state.showDetail.has(item.name) ? "" : "hidden"
+            }`}
           >
-            <span className="margin-l">{`SHA1: ${item.sha1}`}</span>
+            <Flexbox
+              children={List([
+                <span>
+                  <b>SHA1:</b>
+                  {` ${item.sha1}`}
+                </span>,
+                <button
+                  onClick={() => this.generateHash(itemPath)}
+                  className="black-bg white-font margin-l-m"
+                  style={{ display: "inline-block" }}
+                >
+                  {this.props.msg.pkg.get("refresh")}
+                </button>,
+              ])}
+              className={`grey2-bg grey3-font detail margin-r-m`}
+              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+            />
           </div>
         </div>
       );
@@ -534,7 +558,7 @@ export class Browser extends React.Component<Props, State, {}> {
           </div>
 
           <div className="container" style={{ paddingBottom: "1rem" }}>
-            <div className={`${showOp}`} >
+            <div className={`${showOp}`}>
               <Flexbox
                 children={List([
                   <span>
@@ -672,9 +696,7 @@ export class Browser extends React.Component<Props, State, {}> {
             />
             {uploading.err.trim() === "" ? null : (
               <div className="alert-red margin-s">
-                <span className="padding-m">
-                  {uploading.err.trim()}
-                </span>
+                <span className="padding-m">{uploading.err.trim()}</span>
               </div>
             )}
           </div>
@@ -761,8 +783,9 @@ export class Browser extends React.Component<Props, State, {}> {
                   type="text"
                   readOnly
                   className="margin-r-m"
-                  value={`${document.location.href.split("?")[0]
-                    }?dir=${encodeURIComponent(dirPath)}`}
+                  value={`${
+                    document.location.href.split("?")[0]
+                  }?dir=${encodeURIComponent(dirPath)}`}
                 />
                 <button
                   onClick={() => {
@@ -902,12 +925,8 @@ export class Browser extends React.Component<Props, State, {}> {
               </button>
             </div>
           </div>
-          <div>
-            {sharingListPane}
-          </div>
-          <div>
-            {uploadingListPane}
-          </div>
+          <div>{sharingListPane}</div>
+          <div>{uploadingListPane}</div>
           {itemListPane}
         </div>
       </div>

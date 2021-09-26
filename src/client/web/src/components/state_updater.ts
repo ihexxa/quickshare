@@ -548,6 +548,11 @@ export class Updater {
     }
   };
 
+  generateHash = async (filePath: string): Promise<boolean> => {
+    const resp = await this.filesClient.generateHash(filePath);
+    return resp.status === 200;
+  };
+
   updateBrowser = (prevState: ICoreState): ICoreState => {
     return {
       ...prevState,

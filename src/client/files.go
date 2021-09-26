@@ -205,3 +205,12 @@ func (cl *FilesClient) ListSharings() (*http.Response, *fileshdr.SharingResp, []
 	}
 	return resp, shResp, nil
 }
+
+func (cl *FilesClient) GenerateHash(filepath string) (*http.Response, string, []error) {
+	return cl.r.Post(cl.url("/v1/fs/hashes/sha1")).
+		AddCookie(cl.token).
+		Send(fileshdr.GenerateHashReq{
+			FilePath: filepath,
+		}).
+		End()
+}
