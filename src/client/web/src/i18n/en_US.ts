@@ -75,4 +75,6 @@ export const msgs: Map<string, string> = Map({
   "upload.404.title": "No uploading is in the progress",
   "upload.404.desc": "You can upload a file in the items tab",
   "detail": "Detail",
+  "refresh": "Refresh",
+  "refresh-hint": "Please refresh later to see the result",
 });

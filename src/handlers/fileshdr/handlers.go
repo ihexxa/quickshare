@@ -903,12 +903,12 @@ func (h *FileHandlers) ListSharings(c *gin.Context) {
 	c.JSON(200, &SharingResp{SharingDirs: dirs})
 }
 
-type HashBody struct {
+type GenerateHashReq struct {
 	FilePath string `json:"filePath"`
 }
 
 func (h *FileHandlers) GenerateHash(c *gin.Context) {
-	req := &HashBody{}
+	req := &GenerateHashReq{}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(q.ErrResp(c, 400, err))
 		return
