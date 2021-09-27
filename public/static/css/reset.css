@@ -97,6 +97,10 @@ input:focus {
   box-shadow: 0 0.1rem 1rem rgba(0, 0, 0, 0.1);
 }
 
+::placeholder {
+  color: #95a5a6;
+}
+
 button {
   cursor: pointer;
   border: none;

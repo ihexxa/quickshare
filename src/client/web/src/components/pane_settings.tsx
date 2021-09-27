@@ -1,9 +1,11 @@
 import * as React from "react";
 
 import { ICoreState, MsgProps } from "./core_state";
-import { AuthPane, LoginProps } from "./pane_login";
+import { LoginProps } from "./pane_login";
+import { Flexbox } from "./layout/flexbox";
 import { updater } from "./state_updater";
 import { alertMsg } from "../common/env";
+import { List } from "immutable";
 export interface Props {
   login: LoginProps;
   msg: MsgProps;
@@ -38,15 +40,19 @@ export class PaneSettings extends React.Component<Props, State, {}> {
     };
   }
 
-  setPwd = () => {
+  setPwd = async (): Promise<any> => {
     if (this.state.newPwd1 !== this.state.newPwd2) {
       alertMsg(this.props.msg.pkg.get("settings.pwd.notSame"));
-    } else if (this.state.newPwd1 == "") {
+    } else if (
+      this.state.oldPwd == "" ||
+      this.state.newPwd1 == "" ||
+      this.state.newPwd2 == ""
+    ) {
       alertMsg(this.props.msg.pkg.get("settings.pwd.empty"));
     } else if (this.state.oldPwd == this.state.newPwd1) {
       alertMsg(this.props.msg.pkg.get("settings.pwd.notChanged"));
     } else {
-      updater()
+      return updater()
         .setPwd(this.state.oldPwd, this.state.newPwd1)
         .then((ok: boolean) => {
           if (ok) {
@@ -73,78 +79,90 @@ export class PaneSettings extends React.Component<Props, State, {}> {
       <div className="container">
         <div className="padding-l">
           <div>
-            <div className="flex-list-container">
-              <div className="flex-list-item-l">
+            <Flexbox
+              children={List([
                 <h5 className="black-font">
                   {this.props.msg.pkg.get("settings.pwd.update")}
-                </h5>
-              </div>
-              <div className="flex-list-item-r">
+                </h5>,
                 <button onClick={this.setPwd}>
                   {this.props.msg.pkg.get("update")}
-                </button>
-              </div>
-            </div>
+                </button>,
+              ])}
+              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+            />
 
-            <div>
+            <span className="inline-block margin-r-m margin-b-m">
+              <div className="font-size-s grey1-font">
+                {this.props.msg.pkg.get("settings.pwd.old")}
+              </div>
               <input
                 name="old_pwd"
                 type="password"
                 onChange={this.changeOldPwd}
                 value={this.state.oldPwd}
-                className="black0-font margin-t-m margin-b-m"
+                className="black0-font margin-t-m"
                 placeholder={this.props.msg.pkg.get("settings.pwd.old")}
               />
-            </div>
-            <div>
+            </span>
+
+            <span className="inline-block margin-r-m  margin-b-m">
+              <div className="font-size-s grey1-font">
+                {this.props.msg.pkg.get("settings.pwd.new1")}
+              </div>
               <input
                 name="new_pwd1"
                 type="password"
                 onChange={this.changeNewPwd1}
                 value={this.state.newPwd1}
-                className="black0-font margin-t-m margin-b-m margin-r-m"
+                className="black0-font margin-t-m"
                 placeholder={this.props.msg.pkg.get("settings.pwd.new1")}
               />
+            </span>
+
+            <span className="inline-block margin-r-m margin-b-m">
+              <div className="font-size-s grey1-font">
+                {this.props.msg.pkg.get("settings.pwd.new2")}
+              </div>
               <input
                 name="new_pwd2"
                 type="password"
                 onChange={this.changeNewPwd2}
                 value={this.state.newPwd2}
-                className="black0-font margin-t-m margin-b-m"
+                className="black0-font margin-t-m"
                 placeholder={this.props.msg.pkg.get("settings.pwd.new2")}
               />
-            </div>
+            </span>
           </div>
 
           <div className="hr white0-bg margin-t-m margin-b-m"></div>
 
           <div className="margin-b-m">
-            <div className="flex-list-container">
-              <div className="flex-list-item-l">
+            <Flexbox
+              children={List([
                 <h5 className="black-font">
                   {this.props.msg.pkg.get("settings.chooseLan")}
-                </h5>
-              </div>
-              <div className="flex-list-item-r">
-                <button
-                  onClick={() => {
-                    this.setLan("en_US");
-                  }}
-                  className="margin-r-m"
-                >
-                  {this.props.msg.pkg.get("enUS")}
-                </button>
-                <button
-                  onClick={() => {
-                    this.setLan("zh_CN");
-                  }}
-                >
-                  {this.props.msg.pkg.get("zhCN")}
-                </button>
-              </div>
-            </div>
+                </h5>,
+                <span>
+                  <button
+                    onClick={() => {
+                      this.setLan("en_US");
+                    }}
+                    className="margin-r-m"
+                  >
+                    {this.props.msg.pkg.get("enUS")}
+                  </button>
+                  <button
+                    onClick={() => {
+                      this.setLan("zh_CN");
+                    }}
+                  >
+                    {this.props.msg.pkg.get("zhCN")}
+                  </button>
+                </span>,
+              ])}
+              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+            />
           </div>
-
         </div>
       </div>
     );
