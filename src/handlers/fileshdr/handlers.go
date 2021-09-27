@@ -145,26 +145,19 @@ func (h *FileHandlers) Create(c *gin.Context) {
 	tmpFilePath := q.UploadPath(userName, req.Path)
 	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {
-		err = h.deps.Users().SetUsed(userIDInt, true, req.FileSize)
+		ok, err := h.deps.Users().CanIncrUsed(userIDInt, req.FileSize)
 		if err != nil {
-			if userstore.IsReachedLimitErr(err) {
-				c.JSON(q.ErrResp(c, 429, err))
-			} else {
-				c.JSON(q.ErrResp(c, 500, err))
-			}
+			c.JSON(q.ErrResp(c, 500, err))
+			return
+		} else if !ok {
+			c.JSON(q.ErrResp(c, 429, err))
 			return
 		}
 
 		err = h.deps.FS().Create(tmpFilePath)
 		if err != nil {
 			if os.IsExist(err) {
-				// avoid adding file size more than once
-				err = h.deps.Users().SetUsed(userIDInt, false, req.FileSize)
-				if err != nil {
-					c.JSON(q.ErrResp(c, 500, err))
-				} else {
-					c.JSON(q.ErrResp(c, 304, fmt.Errorf("file(%s) exists", tmpFilePath)))
-				}
+				c.JSON(q.ErrResp(c, 304, fmt.Errorf("file(%s) exists", tmpFilePath)))
 			} else {
 				c.JSON(q.ErrResp(c, 500, err))
 			}
@@ -177,6 +170,12 @@ func (h *FileHandlers) Create(c *gin.Context) {
 		}
 
 		err = h.deps.FS().MkdirAll(filepath.Dir(req.Path))
+		if err != nil {
+			c.JSON(q.ErrResp(c, 500, err))
+			return
+		}
+
+		err = h.deps.Users().SetUsed(userIDInt, true, req.FileSize)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
@@ -800,13 +799,13 @@ func (h *FileHandlers) DelUploading(c *gin.Context) {
 			return
 		}
 
-		err = h.deps.Users().SetUsed(userIDInt, false, size)
+		err = h.uploadMgr.DelInfo(userID, tmpFilePath)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
 		}
 
-		err = h.uploadMgr.DelInfo(userID, tmpFilePath)
+		err = h.deps.Users().SetUsed(userIDInt, false, size)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
