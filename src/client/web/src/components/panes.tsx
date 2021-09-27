@@ -1,8 +1,8 @@
 import * as React from "react";
-import { Set, Map } from "immutable";
+import { Set, List } from "immutable";
 
 import { updater } from "./state_updater";
-import { roleAdmin, roleUser, roleVisitor } from "../client";
+import { Flexbox } from "./layout/flexbox";
 import { ICoreState, MsgProps } from "./core_state";
 import { PaneSettings } from "./pane_settings";
 import { AdminPane, AdminProps } from "./pane_admin";
@@ -20,7 +20,7 @@ export interface Props {
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
-export interface State { }
+export interface State {}
 export class Panes extends React.Component<Props, State, {}> {
   constructor(p: Props) {
     super(p);
@@ -34,29 +34,39 @@ export class Panes extends React.Component<Props, State, {}> {
   };
 
   render() {
-    let displaying = this.props.panes.displaying;
+    const displaying = this.props.panes.displaying;
+    const title = this.props.msg.pkg.get(`pane.${this.props.panes.displaying}`);
     const btnClass = displaying === "login" ? "hidden" : "";
-    const showSettings = this.props.panes.paneNames.get("settings") && displaying === "settings" ? "" : "hidden";
-    const showLogin = this.props.panes.paneNames.get("login") && displaying === "login" ? "" : "hidden";
-    const showAdmin = this.props.panes.paneNames.get("admin") && displaying === "admin" ? "" : "hidden";
+    const showSettings =
+      this.props.panes.paneNames.get("settings") && displaying === "settings"
+        ? ""
+        : "hidden";
+    const showLogin =
+      this.props.panes.paneNames.get("login") && displaying === "login"
+        ? ""
+        : "hidden";
+    const showAdmin =
+      this.props.panes.paneNames.get("admin") && displaying === "admin"
+        ? ""
+        : "hidden";
 
     return (
       <div id="panes" className={displaying === "" ? "hidden" : ""}>
         <div className="root-container">
           <div className="container">
-            <div className="flex-list-container padding-l">
-              <h3 className="flex-list-item-l txt-cap">{displaying}</h3>
-
-              <div className="flex-list-item-r">
+            <Flexbox
+              children={List([
+                <h3 className="flex-list-item-l txt-cap">{title}</h3>,
                 <button
                   onClick={this.closePane}
                   className={`red0-bg white-font ${btnClass}`}
                 >
                   {this.props.msg.pkg.get("panes.close")}
-                </button>
-              </div>
-
-            </div>
+                </button>,
+              ])}
+              className="padding-l"
+              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+            />
           </div>
 
           <div className={`${showSettings}`}>
@@ -82,7 +92,6 @@ export class Panes extends React.Component<Props, State, {}> {
               update={this.props.update}
             />
           </div>
-
         </div>
       </div>
     );
