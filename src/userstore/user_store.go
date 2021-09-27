@@ -66,6 +66,7 @@ type IUserStore interface {
 	GetUser(id uint64) (*User, error)
 	GetUserByName(name string) (*User, error)
 	SetInfo(id uint64, user *User) error
+	CanIncrUsed(id uint64, capacity int64) (bool, error)
 	SetUsed(id uint64, incr bool, capacity int64) error
 	SetPwd(id uint64, pwd string) error
 	ListUsers() ([]*User, error)
@@ -273,6 +274,27 @@ func (us *KVUserStore) SetPwd(id uint64, pwd string) error {
 		return err
 	}
 	return us.store.SetStringIn(UsersNs, userID, string(infoBytes))
+}
+
+func (us *KVUserStore) CanIncrUsed(id uint64, capacity int64) (bool, error) {
+	us.mtx.Lock()
+	defer us.mtx.Unlock()
+
+	userID := fmt.Sprint(id)
+	infoStr, ok := us.store.GetStringIn(UsersNs, userID)
+	if !ok {
+		return false, fmt.Errorf("user (%d) does not exist", id)
+	}
+
+	gotUser := &User{}
+	err := json.Unmarshal([]byte(infoStr), gotUser)
+	if err != nil {
+		return false, err
+	} else if gotUser.ID != id {
+		return false, fmt.Errorf("user id key(%d) info(%d) does match", id, gotUser.ID)
+	}
+
+	return gotUser.UsedSpace+capacity <= int64(gotUser.Quota.SpaceLimit), nil
 }
 
 func (us *KVUserStore) SetUsed(id uint64, incr bool, capacity int64) error {

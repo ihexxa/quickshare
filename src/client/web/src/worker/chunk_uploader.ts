@@ -8,7 +8,7 @@ const defaultChunkLen = 1024 * 1024 * 1;
 const speedDownRatio = 0.5;
 const speedUpRatio = 1.1;
 const speedLimit = 1024 * 1024 * 10; // 10MB
-const createRetryLimit = 3;
+const createRetryLimit = 512;
 const uploadRetryLimit = 1024;
 const backoffMax = 2000;
 
