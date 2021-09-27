@@ -40,7 +40,7 @@ export const msgs: Map<string, string> = Map({
   update: "Update",
   "settings.pwd.old": "current password",
   "settings.pwd.new1": "new password",
-  "settings.pwd.new2": "input again password",
+  "settings.pwd.new2": "input again the new password",
   "settings.chooseLan": "Choose Language",
   "settings.pwd.update": "Update Password",
   settings: "Settings",
@@ -80,4 +80,7 @@ export const msgs: Map<string, string> = Map({
   "pane.login": "Login",
   "pane.admin": "Administration",
   "pane.settings": "Settings",
+  "logout.confirm": "Are you going to logout?",
+  unauthed: "Unauthorized action",
+  "err.tooManyUploads": "Can not upload more than 1000 files at once",
 });

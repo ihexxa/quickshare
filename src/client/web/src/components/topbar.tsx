@@ -1,6 +1,6 @@
 import * as React from "react";
 import { List, Set } from "immutable";
-import { alertMsg } from "../common/env";
+import { alertMsg, confirmMsg } from "../common/env";
 
 import { ICoreState, MsgProps } from "./core_state";
 import { LoginProps } from "./pane_login";
@@ -43,6 +43,10 @@ export class TopBar extends React.Component<Props, State, {}> {
   };
 
   logout = async (): Promise<void> => {
+    if (!confirmMsg(this.props.msg.pkg.get("logout.confirm"))) {
+      return;
+    }
+
     return updater()
       .logout()
       .then((ok: boolean) => {

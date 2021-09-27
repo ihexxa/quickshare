@@ -6,6 +6,6 @@ export function alertMsg(msg: string) {
   }
 }
 
-export function comfirmMsg(msg: string): boolean {
+export function confirmMsg(msg: string): boolean {
   return confirm(msg);
 }

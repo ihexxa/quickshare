@@ -2,7 +2,7 @@ import * as React from "react";
 import { List, Map, Set } from "immutable";
 import FileSize from "filesize";
 
-import { alertMsg } from "../common/env";
+import { alertMsg, confirmMsg } from "../common/env";
 import { ICoreState, MsgProps } from "./core_state";
 import { User, Quota } from "../client";
 import { updater } from "./state_updater";
@@ -97,13 +97,13 @@ export class UserForm extends React.Component<
     });
   };
 
-  setPwd = () => {
+  setPwd = async () => {
     if (this.state.newPwd1 !== this.state.newPwd2) {
       alertMsg(this.props.msg.pkg.get("settings.pwd.notSame"));
       return;
     }
 
-    updater()
+    return updater()
       .forceSetPwd(this.state.id, this.state.newPwd1)
       .then((ok: boolean) => {
         if (ok) {
@@ -134,8 +134,8 @@ export class UserForm extends React.Component<
       });
   };
 
-  delUser = () => {
-    updater()
+  delUser = async () => {
+    return updater()
       .delUser(this.state.id)
       .then((ok: boolean) => {
         if (!ok) {
@@ -208,7 +208,7 @@ export class UserForm extends React.Component<
                 </div>
                 <input
                   name={`${this.props.id}-spaceLimit`}
-                  type="text"
+                  type="number"
                   onChange={this.changeSpaceLimit}
                   value={this.state.quota.spaceLimit}
                   className="black0-font margin-r-m"
@@ -225,7 +225,7 @@ export class UserForm extends React.Component<
                 </div>
                 <input
                   name={`${this.props.id}-uploadSpeedLimit`}
-                  type="text"
+                  type="number"
                   onChange={this.changeUploadSpeedLimit}
                   value={this.state.quota.uploadSpeedLimit}
                   className="black0-font margin-r-m"
@@ -242,7 +242,7 @@ export class UserForm extends React.Component<
                 </div>
                 <input
                   name={`${this.props.id}-downloadSpeedLimit`}
-                  type="text"
+                  type="number"
                   onChange={this.changeDownloadSpeedLimit}
                   value={this.state.quota.downloadSpeedLimit}
                   className="black0-font margin-r-m"
@@ -343,8 +343,8 @@ export class AdminPane extends React.Component<Props, State, {}> {
     this.setState({ newRole: ev.target.value });
   };
 
-  addRole = () => {
-    updater()
+  addRole = async () => {
+    return updater()
       .addRole(this.state.newRole)
       .then((ok: boolean) => {
         if (!ok) {
@@ -359,16 +359,17 @@ export class AdminPane extends React.Component<Props, State, {}> {
       });
   };
 
-  delRole = (role: string) => {
+  delRole = async (role: string) => {
     if (
-      !confirm(
-        this.props.msg.pkg.get("role.delete.warning") // "After deleting this role, some of users may not be able to login."
+      !confirmMsg(
+        // "After deleting this role, some of users may not be able to login."
+        this.props.msg.pkg.get("role.delete.warning")
       )
     ) {
       return;
     }
 
-    updater()
+    return updater()
       .delRole(role)
       .then((ok: boolean) => {
         if (!ok) {
@@ -383,13 +384,13 @@ export class AdminPane extends React.Component<Props, State, {}> {
       });
   };
 
-  addUser = () => {
+  addUser = async () => {
     if (this.state.newUserPwd1 !== this.state.newUserPwd2) {
       alertMsg(this.props.msg.pkg.get("settings.pwd.notSame"));
       return;
     }
 
-    updater()
+    return updater()
       .addUser({
         id: "", // backend will fill it
         name: this.state.newUserName,
@@ -466,51 +467,63 @@ export class AdminPane extends React.Component<Props, State, {}> {
             className="title-m bold margin-b-m"
           />
 
-          <Flexbox
-            children={List([
-              <span>
-                <input
-                  type="text"
-                  onChange={this.onChangeUserName}
-                  value={this.state.newUserName}
-                  className="black0-font margin-r-m margin-b-m"
-                  placeholder={this.props.msg.pkg.get("user.name")}
-                />
-                <input
-                  type="text"
-                  onChange={this.onChangeUserRole}
-                  value={this.state.newUserRole}
-                  className="black0-font margin-r-m margin-b-m"
-                  placeholder={this.props.msg.pkg.get("user.role")}
-                />
-                <input
-                  type="password"
-                  onChange={this.onChangeUserPwd1}
-                  value={this.state.newUserPwd1}
-                  className="black0-font margin-r-m margin-b-m"
-                  placeholder={this.props.msg.pkg.get("user.password")}
-                />
-                <input
-                  type="password"
-                  onChange={this.onChangeUserPwd2}
-                  value={this.state.newUserPwd2}
-                  className="black0-font margin-r-m margin-b-m"
-                  placeholder={this.props.msg.pkg.get("settings.pwd.new2")}
-                />
-              </span>,
+          <span className="inline-block margin-r-m margin-b-m">
+            <div className="font-size-s grey1-font">
+              {this.props.msg.pkg.get("user.name")}
+            </div>
+            <input
+              type="text"
+              onChange={this.onChangeUserName}
+              value={this.state.newUserName}
+              className="black0-font margin-r-m margin-b-m"
+              placeholder={this.props.msg.pkg.get("user.name")}
+            />
+          </span>
 
-              <button onClick={this.addUser} className="margin-r-m">
-                {this.props.msg.pkg.get("add")}
-              </button>,
-            ])}
-            childrenStyles={List([
-              {
-                alignItems: "flex-start",
-              },
-              { justifyContent: "flex-end" },
-            ])}
-            className="margin-t-m"
-          />
+          <span className="inline-block margin-r-m margin-b-m">
+            <div className="font-size-s grey1-font">
+              {this.props.msg.pkg.get("user.role")}
+            </div>
+            <input
+              type="text"
+              onChange={this.onChangeUserRole}
+              value={this.state.newUserRole}
+              className="black0-font margin-r-m margin-b-m"
+              placeholder={this.props.msg.pkg.get("user.role")}
+            />
+          </span>
+
+          <span className="inline-block margin-r-m margin-b-m">
+            <div className="font-size-s grey1-font">
+              {this.props.msg.pkg.get("settings.pwd.new1")}
+            </div>
+            <input
+              type="password"
+              onChange={this.onChangeUserPwd1}
+              value={this.state.newUserPwd1}
+              className="black0-font margin-r-m margin-b-m"
+              placeholder={this.props.msg.pkg.get("settings.pwd.new1")}
+            />
+          </span>
+
+          <span className="inline-block margin-r-m margin-b-m">
+            <div className="font-size-s grey1-font">
+              {this.props.msg.pkg.get("settings.pwd.new2")}
+            </div>
+            <input
+              type="password"
+              onChange={this.onChangeUserPwd2}
+              value={this.state.newUserPwd2}
+              className="black0-font margin-r-m margin-b-m"
+              placeholder={this.props.msg.pkg.get("settings.pwd.new2")}
+            />
+          </span>
+
+          <span className="inline-block margin-r-m margin-b-m">
+            <button onClick={this.addUser} className="margin-r-m">
+              {this.props.msg.pkg.get("add")}
+            </button>
+          </span>
         </div>
 
         <div className="container padding-l">
@@ -521,7 +534,6 @@ export class AdminPane extends React.Component<Props, State, {}> {
             ])}
             className="title-m bold margin-b-m"
           />
-
           {userList}
         </div>
 
