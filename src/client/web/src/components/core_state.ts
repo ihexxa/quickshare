@@ -1,17 +1,13 @@
 import { List, Set, Map } from "immutable";
 
-import BgWorker from "../worker/upload.bg.worker";
-import { FgWorker } from "../worker/upload.fg.worker";
 import { UploadEntry } from "../worker/interface";
 
 import { BrowserProps } from "./browser";
 import { PanesProps } from "./panes";
 import { LoginProps } from "./pane_login";
 import { AdminProps } from "./pane_admin";
-
 import { MsgPackage } from "../i18n/msger";
 import { User, MetadataResp } from "../client";
-import { initUploadMgr, IWorker } from "../worker/upload_mgr";
 
 export interface MsgProps {
   lan: string;
@@ -36,15 +32,7 @@ export interface ICoreState {
   msg: MsgProps;
 }
 
-export function newWithWorker(worker: IWorker): ICoreState {
-  initUploadMgr(worker);
-  return initState();
-}
-
 export function newState(): ICoreState {
-  const worker = window.Worker == null ? new FgWorker() : new BgWorker();
-  initUploadMgr(worker);
-
   return initState();
 }
 

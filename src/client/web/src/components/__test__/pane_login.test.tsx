@@ -3,7 +3,8 @@ import { mock, instance } from "ts-mockito";
 
 import { User, UploadInfo } from "../../client";
 import { AuthPane } from "../pane_login";
-import { ICoreState, newWithWorker } from "../core_state";
+import { ICoreState, newState } from "../core_state";
+import { initUploadMgr } from "../../worker/upload_mgr";
 import { updater } from "../state_updater";
 import { MockWorker, UploadState, UploadEntry } from "../../worker/interface";
 import { MockUsersClient, resps as usersResps } from "../../client/users_mock";
@@ -13,8 +14,9 @@ describe("Login", () => {
   test("login", async () => {
     const mockWorkerClass = mock(MockWorker);
     const mockWorker = instance(mockWorkerClass);
+    initUploadMgr(mockWorker);
 
-    const coreState = newWithWorker(mockWorker);
+    const coreState = newState();
     const pane = new AuthPane({
       login: coreState.login,
       msg: coreState.msg,
