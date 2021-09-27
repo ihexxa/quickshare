@@ -75,4 +75,7 @@ export const msgs: Map<string, string> = Map({
   "detail": "详细",
   "refresh": "刷新",
   "refresh-hint": "请稍后刷新查看结果",
+  "pane.login": "登入",
+  "pane.admin": "管理",
+  "pane.settings": "设置",
 });
