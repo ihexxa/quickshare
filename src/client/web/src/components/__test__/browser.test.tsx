@@ -2,7 +2,8 @@ import { mock, instance, verify, when, anything } from "ts-mockito";
 import { List } from "immutable";
 
 import { Browser } from "../browser";
-import { ICoreState, newWithWorker } from "../core_state";
+import { initUploadMgr } from "../../worker/upload_mgr";
+import { ICoreState, newState } from "../core_state";
 import { updater } from "../state_updater";
 import { MockWorker } from "../../worker/interface";
 import { MockUsersClient, resps as usersResps } from "../../client/users_mock";
@@ -13,8 +14,9 @@ describe("Browser", () => {
   const initBrowser = (): any => {
     const mockWorkerClass = mock(MockWorker);
     const mockWorker = instance(mockWorkerClass);
+    initUploadMgr(mockWorker);
 
-    const coreState = newWithWorker(mockWorker);
+    const coreState = newState();
     const usersCl = new MockUsersClient("");
     const filesCl = new MockFilesClient("");
 

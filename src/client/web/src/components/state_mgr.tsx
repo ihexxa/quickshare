@@ -1,5 +1,9 @@
 import * as React from "react";
 
+import { initUploadMgr } from "../worker/upload_mgr";
+import BgWorker from "../worker/upload.bg.worker";
+import { FgWorker } from "../worker/upload.fg.worker";
+
 import { updater } from "./state_updater";
 import { ICoreState, newState } from "./core_state";
 import { RootFrame } from "./root_frame";
@@ -7,8 +11,8 @@ import { FilesClient } from "../client/files";
 import { UsersClient } from "../client/users";
 import { IUsersClient, IFilesClient } from "../client";
 
-export interface Props { }
-export interface State extends ICoreState { }
+export interface Props {}
+export interface State extends ICoreState {}
 
 export class StateMgr extends React.Component<Props, State, {}> {
   private usersClient: IUsersClient = new UsersClient("");
@@ -17,6 +21,8 @@ export class StateMgr extends React.Component<Props, State, {}> {
   constructor(p: Props) {
     super(p);
     this.state = newState();
+    const worker = window.Worker == null ? new FgWorker() : new BgWorker();
+    initUploadMgr(worker);
     this.initUpdater(this.state); // don't await
   }
 

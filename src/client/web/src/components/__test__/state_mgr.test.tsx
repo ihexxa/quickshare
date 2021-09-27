@@ -2,10 +2,11 @@ import { List, Set, Map } from "immutable";
 import { mock, instance } from "ts-mockito";
 
 import { StateMgr } from "../state_mgr";
+import { initUploadMgr } from "../../worker/upload_mgr";
 import { User, UploadInfo } from "../../client";
 import { MockFilesClient, resps as filesResps } from "../../client/files_mock";
 import { MockUsersClient, resps as usersResps } from "../../client/users_mock";
-import { ICoreState, newWithWorker } from "../core_state";
+import { ICoreState, newState } from "../core_state";
 import { MockWorker, UploadState, UploadEntry } from "../../worker/interface";
 
 describe("State Manager", () => {
@@ -15,6 +16,7 @@ describe("State Manager", () => {
 
     const mockWorkerClass = mock(MockWorker);
     const mockWorker = instance(mockWorkerClass);
+    initUploadMgr(mockWorker);
 
     const mgr = new StateMgr({}); // it will call initUpdater
     mgr.setUsersClient(usersCl);
@@ -25,7 +27,7 @@ describe("State Manager", () => {
       // no op
     };
 
-    const coreState = newWithWorker(mockWorker);
+    const coreState = newState();
     await mgr.initUpdater(coreState);
 
     // browser
@@ -121,7 +123,7 @@ describe("State Manager", () => {
 
     const mockWorkerClass = mock(MockWorker);
     const mockWorker = instance(mockWorkerClass);
-    const coreState = newWithWorker(mockWorker);
+    const coreState = newState();
 
     const mgr = new StateMgr({}); // it will call initUpdater
     mgr.setUsersClient(usersCl);

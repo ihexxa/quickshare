@@ -1,7 +1,8 @@
 import { mock, instance } from "ts-mockito";
 
 import { Panes } from "../panes";
-import { ICoreState, newWithWorker } from "../core_state";
+import { ICoreState, newState } from "../core_state";
+import { initUploadMgr } from "../../worker/upload_mgr";
 import { updater } from "../state_updater";
 import { MockWorker } from "../../worker/interface";
 
@@ -9,8 +10,9 @@ describe("Panes", () => {
   test("closePane", async () => {
     const mockWorkerClass = mock(MockWorker);
     const mockWorker = instance(mockWorkerClass);
+    initUploadMgr(mockWorker);
 
-    const coreState = newWithWorker(mockWorker);
+    const coreState = newState();
     const panes = new Panes({
       panes: coreState.panes,
       admin: coreState.admin,
