@@ -1,7 +1,8 @@
 import * as React from "react";
-import { Set } from "immutable";
+import { List } from "immutable";
 
 import { ICoreState, MsgProps } from "./core_state";
+import { Flexbox } from "./layout/flexbox";
 import { updater } from "./state_updater";
 import { alertMsg } from "../common/env";
 import { Quota } from "../client";
@@ -62,7 +63,9 @@ export class AuthPane extends React.Component<Props, State, {}> {
       )
       .then((ok: boolean): Promise<any> => {
         if (ok) {
-          const params = new URLSearchParams(document.location.search.substring(1));
+          const params = new URLSearchParams(
+            document.location.search.substring(1)
+          );
           return updater().initAll(params);
         } else {
           this.setState({ user: "", pwd: "", captchaInput: "" });
@@ -97,53 +100,65 @@ export class AuthPane extends React.Component<Props, State, {}> {
           style={{ display: this.props.login.authed ? "none" : "block" }}
         >
           <div className="padding-l">
-            <div className="flex-list-container">
-              <div className="flex-list-item-l">
-                <input
-                  name="user"
-                  type="text"
-                  onChange={this.changeUser}
-                  value={this.state.user}
-                  className="black0-font margin-t-m margin-b-m margin-r-m"
-                  placeholder={this.props.msg.pkg.get("login.username")}
-                />
-                <input
-                  name="pwd"
-                  type="password"
-                  onChange={this.changePwd}
-                  value={this.state.pwd}
-                  className="black0-font margin-t-m margin-b-m"
-                  placeholder={this.props.msg.pkg.get("login.pwd")}
-                />
+            <span className="inline-block margin-r-m margin-b-m">
+              <div className="font-size-s grey1-font">
+                {this.props.msg.pkg.get("login.username")}
               </div>
-              <div className="flex-list-item-r">
-                <button
-                  onClick={this.login}
-                  className="green0-bg white-font margin-t-m margin-b-m"
-                >
-                  {this.props.msg.pkg.get("login.login")}
-                </button>
-              </div>
-            </div>
+              <input
+                name="user"
+                type="text"
+                onChange={this.changeUser}
+                value={this.state.user}
+                className="black0-font margin-t-m margin-b-m margin-r-m"
+                placeholder={this.props.msg.pkg.get("login.username")}
+              />
+            </span>
 
-            <div className="flex-list-container">
-              <div className="flex-list-item-l">
-                <input
-                  name="captcha"
-                  type="text"
-                  onChange={this.changeCaptcha}
-                  value={this.state.captchaInput}
-                  className="black0-font margin-t-m margin-b-m margin-r-m"
-                  placeholder={this.props.msg.pkg.get("login.captcha")}
-                />
-                <img
-                  src={`/v1/captchas/imgs?capid=${this.props.login.captchaID}`}
-                  className="captcha"
-                  onClick={this.refreshCaptcha}
-                />
+            <span className="inline-block margin-r-m margin-b-m">
+              <div className="font-size-s grey1-font">
+                {this.props.msg.pkg.get("login.pwd")}
               </div>
-              <div className="flex-list-item-l"></div>
-            </div>
+              <input
+                name="pwd"
+                type="password"
+                onChange={this.changePwd}
+                value={this.state.pwd}
+                className="black0-font margin-t-m margin-b-m"
+                placeholder={this.props.msg.pkg.get("login.pwd")}
+              />
+            </span>
+
+            <span className="inline-block margin-r-m margin-b-m">
+              <div className="font-size-s grey1-font">
+                {this.props.msg.pkg.get("login.captcha")}
+              </div>
+              <Flexbox
+                children={List([
+                  <input
+                    name="captcha"
+                    type="text"
+                    onChange={this.changeCaptcha}
+                    value={this.state.captchaInput}
+                    className="black0-font margin-t-m margin-b-m margin-r-m"
+                    placeholder={this.props.msg.pkg.get("login.captcha")}
+                  />,
+                  <img
+                    src={`/v1/captchas/imgs?capid=${this.props.login.captchaID}`}
+                    className="captcha"
+                    onClick={this.refreshCaptcha}
+                  />,
+                ])}
+              />
+            </span>
+
+            <span className="inline-block margin-r-m margin-b-m">
+              <button
+                onClick={this.login}
+                className="green0-bg white-font margin-t-m margin-b-m"
+              >
+                {this.props.msg.pkg.get("login.login")}
+              </button>
+            </span>
           </div>
         </div>
       </span>
