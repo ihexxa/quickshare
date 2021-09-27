@@ -50,7 +50,7 @@ export function initState(): ICoreState {
     },
     panes: {
       // which pane is displaying
-      displaying: "browser",
+      displaying: "",
       // which panes can be displayed
       paneNames: Set<string>([]), // "settings", "login", "admin"
     },

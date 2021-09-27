@@ -12,11 +12,11 @@ import { RiUploadCloudFill } from "@react-icons/all-files/ri/RiUploadCloudFill";
 import { RiUploadCloudLine } from "@react-icons/all-files/ri/RiUploadCloudLine";
 import { RiEmotionSadLine } from "@react-icons/all-files/ri/RiEmotionSadLine";
 
-import { alertMsg, comfirmMsg } from "../common/env";
+import { alertMsg, confirmMsg } from "../common/env";
 import { updater } from "./state_updater";
 import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { LoginProps } from "./pane_login";
-import { MetadataResp, roleVisitor } from "../client";
+import { MetadataResp, roleVisitor, roleAdmin } from "../client";
 import { Up } from "../worker/upload_mgr";
 import { UploadEntry } from "../worker/interface";
 import { Flexbox } from "./layout/flexbox";
@@ -97,6 +97,11 @@ export class Browser extends React.Component<Props, State, {}> {
   };
 
   addUploads = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files.length > 1000) {
+      alertMsg(this.props.msg.pkg.get("err.tooManyUploads"));
+      return;
+    }
+
     let fileList = List<File>();
     for (let i = 0; i < event.target.files.length; i++) {
       fileList = fileList.push(event.target.files[i]);
@@ -159,7 +164,7 @@ export class Browser extends React.Component<Props, State, {}> {
       return;
     } else {
       const filesToDel = this.state.selectedItems.keySeq().join(", ");
-      if (!comfirmMsg(`do you want to delete ${filesToDel}?`)) {
+      if (!confirmMsg(`do you want to delete ${filesToDel}?`)) {
         return;
       }
     }
@@ -212,6 +217,9 @@ export class Browser extends React.Component<Props, State, {}> {
 
   chdir = async (dirPath: List<string>) => {
     if (dirPath === this.props.browser.dirPath) {
+      return;
+    } else if (this.props.login.userRole !== roleAdmin && dirPath.size <= 1) {
+      alertMsg(this.props.msg.pkg.get("unauthed"));
       return;
     }
 
