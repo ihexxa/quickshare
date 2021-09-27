@@ -19,13 +19,15 @@ export interface MsgProps {
 }
 
 export interface UIProps {
-  wallpaper: string;
-  repeat: string;
-  position: string;
-  align: string;
+  isVertical: boolean;
+  bg: {
+    url: string;
+    repeat: string;
+    position: string;
+    align: string;
+  };
 }
 export interface ICoreState {
-  isVertical: boolean;
   browser: BrowserProps;
   panes: PanesProps;
   login: LoginProps;
@@ -48,9 +50,7 @@ export function newState(): ICoreState {
 
 export function initState(): ICoreState {
   return {
-    isVertical: isVertical(),
     browser: {
-      isVertical: isVertical(),
       dirPath: List<string>(["."]),
       items: List<MetadataResp>([]),
       sharings: List<string>([]),
@@ -61,7 +61,9 @@ export function initState(): ICoreState {
       tab: "",
     },
     panes: {
+      // which pane is displaying
       displaying: "browser",
+      // which panes can be displayed
       paneNames: Set<string>([]), // "settings", "login", "admin"
     },
     login: {
@@ -86,10 +88,13 @@ export function initState(): ICoreState {
       pkg: MsgPackage.get("en_US"),
     },
     ui: {
-      wallpaper: "",
-      repeat: "",
-      position: "",
-      align: "",
+      isVertical: isVertical(),
+      bg: {
+        url: "",
+        repeat: "",
+        position: "",
+        align: "",
+      },
     },
   };
 }

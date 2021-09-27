@@ -14,7 +14,7 @@ import { RiEmotionSadLine } from "@react-icons/all-files/ri/RiEmotionSadLine";
 
 import { alertMsg, comfirmMsg } from "../common/env";
 import { updater } from "./state_updater";
-import { ICoreState, MsgProps } from "./core_state";
+import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { LoginProps } from "./pane_login";
 import { MetadataResp, roleVisitor } from "../client";
 import { Up } from "../worker/upload_mgr";
@@ -40,7 +40,6 @@ export interface BrowserProps {
   uploadFiles: List<File>;
   uploadValue: string;
 
-  isVertical: boolean;
   tab: string;
 }
 
@@ -48,6 +47,7 @@ export interface Props {
   browser: BrowserProps;
   msg: MsgProps;
   login: LoginProps;
+  ui: UIProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
@@ -350,14 +350,8 @@ export class Browser extends React.Component<Props, State, {}> {
     );
 
     const nameCellClass = `item-name item-name-${
-      this.props.browser.isVertical ? "vertical" : "horizontal"
+      this.props.ui.isVertical ? "vertical" : "horizontal"
     } pointer`;
-    const sizeCellClass = this.props.browser.isVertical
-      ? `hidden margin-s`
-      : ``;
-    const modTimeCellClass = this.props.browser.isVertical
-      ? `hidden margin-s`
-      : ``;
 
     const ops = (
       <div>

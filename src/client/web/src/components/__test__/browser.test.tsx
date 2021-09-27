@@ -25,6 +25,7 @@ describe("Browser", () => {
       browser: coreState.browser,
       msg: coreState.msg,
       login: coreState.login,
+      ui: coreState.ui,
       update: (updater: (prevState: ICoreState) => ICoreState) => {},
     });
 
