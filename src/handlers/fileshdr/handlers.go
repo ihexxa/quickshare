@@ -150,7 +150,7 @@ func (h *FileHandlers) Create(c *gin.Context) {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
 		} else if !ok {
-			c.JSON(q.ErrResp(c, 429, err))
+			c.JSON(q.ErrResp(c, 429, userstore.ErrReachedLimit))
 			return
 		}
 
