@@ -25,7 +25,10 @@ export class UploadMgr {
   private intervalID: number;
   private worker: IWorker;
   private infos = OrderedMap<string, UploadEntry>();
-  private statusCb = (infos: Map<string, UploadEntry>, refresh: boolean): void => {};
+  private statusCb = (
+    infos: Map<string, UploadEntry>,
+    refresh: boolean
+  ): void => {};
 
   constructor(worker: IWorker) {
     this.worker = worker;
@@ -49,7 +52,6 @@ export class UploadMgr {
           info.state === UploadState.Ready ||
           info.state === UploadState.Created
         ) {
-
           this.infos = this.infos.set(info.filePath, {
             ...info,
             state: UploadState.Uploading,
@@ -88,7 +90,9 @@ export class UploadMgr {
     return this.cycle;
   };
 
-  setStatusCb = (cb: (infos: Map<string, UploadEntry>, refresh: boolean) => void) => {
+  setStatusCb = (
+    cb: (infos: Map<string, UploadEntry>, refresh: boolean) => void
+  ) => {
     this.statusCb = cb;
   };
 
@@ -144,12 +148,10 @@ export class UploadMgr {
   stop = (filePath: string) => {
     const entry = this.infos.get(filePath);
     if (entry != null) {
-
       this.infos = this.infos.set(filePath, {
         ...entry,
         state: UploadState.Stopped,
       });
-
     } else {
       alert(`failed to stop uploading ${filePath}: not found`);
     }
@@ -178,7 +180,7 @@ export class UploadMgr {
           this.infos = this.infos.set(errResp.filePath, {
             ...errEntry,
             state: UploadState.Error,
-            err: `${errEntry.err} / ${errResp.filePath}`,
+            err: errResp.err,
           });
         } else {
           // TODO: refine this
@@ -201,7 +203,8 @@ export class UploadMgr {
               uploaded: infoResp.uploaded,
               state:
                 // this avoids overwriting Stopped/Error state
-                (entry.state === UploadState.Stopped || entry.state === UploadState.Error)
+                entry.state === UploadState.Stopped ||
+                entry.state === UploadState.Error
                   ? UploadState.Stopped
                   : infoResp.state,
             });
