@@ -13,7 +13,13 @@ import (
 func TestSpaceLimit(t *testing.T) {
 	addr := "http://127.0.0.1:8686"
 	root := "testData"
-	config := `{
+	spaceLimit := 1000000
+	fileSize := 100000
+	if spaceLimit%fileSize != 0 {
+		t.Fatal("spaceLimit % fileSize must be zero")
+	}
+
+	config := fmt.Sprintf(`{
 		"users": {
 			"enableAuth": true,
 			"minUserNameLen": 2,
@@ -21,7 +27,7 @@ func TestSpaceLimit(t *testing.T) {
 			"captchaEnabled": false,
 			"uploadSpeedLimit": 409600,
 			"downloadSpeedLimit": 409600,
-			"spaceLimit": 100,
+			"spaceLimit": %d,
 			"limiterCapacity": 1000,
 			"limiterCyc": 1000
 		},
@@ -32,7 +38,7 @@ func TestSpaceLimit(t *testing.T) {
 		"fs": {
 			"root": "testData"
 		}
-	}`
+	}`, spaceLimit)
 
 	adminName := "qs"
 	adminPwd := "quicksh@re"
@@ -100,11 +106,11 @@ func TestSpaceLimit(t *testing.T) {
 		token := client.GetCookie(resp.Cookies(), q.TokenCookie)
 
 		fileContent := ""
-		for i := 0; i < 10; i++ {
+		for i := 0; i < fileSize; i++ {
 			fileContent += "0"
 		}
 
-		for i := 0; i < 10; i++ {
+		for i := 0; i < spaceLimit/fileSize; i++ {
 			ok := assertUploadOK(t, fmt.Sprintf("%s/files/spacelimit/f_%d", getUserName(0), i), fileContent, addr, token)
 			if !ok {
 				t.Fatalf("space limit failed at %d", i)
@@ -114,8 +120,8 @@ func TestSpaceLimit(t *testing.T) {
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if resp.StatusCode != 200 {
-				t.Fatal("failed to add user")
-			} else if selfResp.UsedSpace != int64((i+1)*10) {
+				t.Fatal("failed to get self")
+			} else if selfResp.UsedSpace != int64((i+1)*fileSize) {
 				t.Fatal("incorrect used space")
 			}
 		}
@@ -127,6 +133,24 @@ func TestSpaceLimit(t *testing.T) {
 			t.Fatal(errs)
 		} else if res.StatusCode != 429 {
 			t.Fatal("(space limit): this request should be rejected")
+		}
+
+		for i := 0; i < spaceLimit/fileSize; i++ {
+			resp, _, errs := cl.Delete(fmt.Sprintf("%s/files/spacelimit/f_%d", getUserName(0), i))
+			if len(errs) > 0 {
+				t.Fatalf("failed to delete %d", i)
+			} else if resp.StatusCode != 200 {
+				t.Fatalf("failed to delete status %d", resp.StatusCode)
+			}
+
+			resp, selfResp, errs := usersCl.Self(token)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if resp.StatusCode != 200 {
+				t.Fatal("failed to get self")
+			} else if selfResp.UsedSpace != int64(spaceLimit)-int64((i+1)*fileSize) {
+				t.Fatal("incorrect used space")
+			}
 		}
 	})
 
