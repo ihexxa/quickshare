@@ -288,7 +288,7 @@ func (s *Server) Start() error {
 		sig := <-s.signalChan
 		if sig != nil {
 			s.deps.Log().Infow(
-				fmt.Sprintf("received signal %s: shutting down\n", sig.String()),
+				fmt.Sprintf("received signal %s: shutting down", sig.String()),
 			)
 		}
 		s.Shutdown()
