@@ -14,7 +14,7 @@ import (
 
 func TestUsersHandlers(t *testing.T) {
 	addr := "http://127.0.0.1:8686"
-	root := "testData"
+	rootPath := "testData"
 	config := `{
 		"users": {
 			"enableAuth": true,
@@ -45,15 +45,8 @@ func TestUsersHandlers(t *testing.T) {
 	adminName := "qs"
 	adminPwd := "quicksh@re"
 	adminNewPwd := "quicksh@re2"
-	os.Setenv("DEFAULTADMIN", adminName)
-	os.Setenv("DEFAULTADMINPWD", adminPwd)
-
-	os.RemoveAll(root)
-	err := os.MkdirAll(root, 0700)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(root)
+	setUpEnv(t, rootPath, adminName, adminPwd)
+	defer os.RemoveAll(rootPath)
 
 	srv := startTestServer(config)
 	defer srv.Shutdown()
@@ -61,9 +54,11 @@ func TestUsersHandlers(t *testing.T) {
 
 	usersCl := client.NewSingleUserClient(addr)
 
-	if !waitForReady(addr) {
+	if !isServerReady(addr) {
 		t.Fatal("fail to start server")
 	}
+
+	var err error
 
 	t.Run("test users APIs: Login-Self-SetPwd-Logout-Login", func(t *testing.T) {
 		users := []*userstore.User{
