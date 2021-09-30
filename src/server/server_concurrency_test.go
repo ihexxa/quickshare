@@ -8,7 +8,7 @@ import (
 
 	"github.com/ihexxa/quickshare/src/client"
 	q "github.com/ihexxa/quickshare/src/handlers"
-	"github.com/ihexxa/quickshare/src/userstore"
+	// "github.com/ihexxa/quickshare/src/userstore"
 )
 
 func TestConcurrency(t *testing.T) {
@@ -57,23 +57,7 @@ func TestConcurrency(t *testing.T) {
 
 	userCount := 5
 	userPwd := "1234"
-	users := map[string]string{}
-	getUserName := func(id int) string {
-		return fmt.Sprintf("user_%d", id)
-	}
-
-	for i := range make([]int, userCount) {
-		userName := getUserName(i)
-
-		resp, adResp, errs := usersCl.AddUser(userName, userPwd, userstore.UserRole, token)
-		if len(errs) > 0 {
-			t.Fatal(errs)
-		} else if resp.StatusCode != 200 {
-			t.Fatal("failed to add user")
-		}
-
-		users[userName] = adResp.ID
-	}
+	users := addUsers(t, addr, userPwd, userCount, token)
 
 	getFilePath := func(name string, i int) string {
 		return fmt.Sprintf("%s/files/home_file_%d", name, i)

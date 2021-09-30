@@ -15,6 +15,7 @@ import (
 	"github.com/ihexxa/gocfg"
 	"github.com/ihexxa/quickshare/src/client"
 	fspkg "github.com/ihexxa/quickshare/src/fs"
+	"github.com/ihexxa/quickshare/src/userstore"
 )
 
 func startTestServer(config string) *Server {
@@ -49,6 +50,29 @@ func setUpEnv(t *testing.T, rootPath string, adminName, adminPwd string) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func getUserName(id int) string {
+	return fmt.Sprintf("user_%d", id)
+}
+
+func addUsers(t *testing.T, addr, userPwd string, userCount int, adminToken *http.Cookie) map[string]string {
+	usersCl := client.NewSingleUserClient(addr)
+	users := map[string]string{}
+	for i := range make([]int, userCount) {
+		userName := getUserName(i)
+
+		resp, adResp, errs := usersCl.AddUser(userName, userPwd, userstore.UserRole, adminToken)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal("failed to add user")
+		}
+
+		users[userName] = adResp.ID
+	}
+
+	return users
 }
 
 func isServerReady(addr string) bool {
