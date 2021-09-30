@@ -12,13 +12,12 @@ import (
 
 func TestSpaceLimit(t *testing.T) {
 	addr := "http://127.0.0.1:8686"
-	root := "testData"
+	rootPath := "testData"
 	spaceLimit := 1000000
 	fileSize := 100000
 	if spaceLimit%fileSize != 0 {
 		t.Fatal("spaceLimit % fileSize must be zero")
 	}
-
 	config := fmt.Sprintf(`{
 		"users": {
 			"enableAuth": true,
@@ -42,20 +41,12 @@ func TestSpaceLimit(t *testing.T) {
 
 	adminName := "qs"
 	adminPwd := "quicksh@re"
-	os.Setenv("DEFAULTADMIN", adminName)
-	os.Setenv("DEFAULTADMINPWD", adminPwd)
-
-	os.RemoveAll(root)
-	err := os.MkdirAll(root, 0700)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(root)
+	setUpEnv(t, rootPath, adminName, adminPwd)
+	defer os.RemoveAll(rootPath)
 
 	srv := startTestServer(config)
 	defer srv.Shutdown()
-	// fs := srv.depsFS()
-	if !waitForReady(addr) {
+	if !isServerReady(addr) {
 		t.Fatal("fail to start server")
 	}
 

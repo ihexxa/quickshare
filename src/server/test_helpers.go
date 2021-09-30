@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"os"
 	"path"
 	"strings"
 	"testing"
@@ -40,7 +41,17 @@ func startTestServer(config string) *Server {
 	return srv
 }
 
-func waitForReady(addr string) bool {
+func setUpEnv(t *testing.T, rootPath string, adminName, adminPwd string) {
+	os.Setenv("DEFAULTADMIN", adminName)
+	os.Setenv("DEFAULTADMINPWD", adminPwd)
+	os.RemoveAll(rootPath)
+	err := os.MkdirAll(rootPath, 0700)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func isServerReady(addr string) bool {
 	retry := 20
 	setCl := client.NewSettingsClient(addr)
 
