@@ -130,7 +130,7 @@ func TestConcurrency(t *testing.T) {
 	}
 
 	var wg sync.WaitGroup
-	t.Run("ListHome", func(t *testing.T) {
+	t.Run("Upload and download concurrently", func(t *testing.T) {
 		for userName := range users {
 			wg.Add(1)
 			go mockClient(userName, userPwd, &wg)
