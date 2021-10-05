@@ -24,8 +24,8 @@ func TestSpaceLimit(t *testing.T) {
 			"minUserNameLen": 2,
 			"minPwdLen": 4,
 			"captchaEnabled": false,
-			"uploadSpeedLimit": 409600,
-			"downloadSpeedLimit": 409600,
+			"uploadSpeedLimit": 4096000,
+			"downloadSpeedLimit": 4096000,
 			"spaceLimit": %d,
 			"limiterCapacity": 1000,
 			"limiterCyc": 1000
