@@ -18,7 +18,7 @@ import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { LoginProps } from "./pane_login";
 import { MetadataResp, roleVisitor, roleAdmin } from "../client";
 import { Up } from "../worker/upload_mgr";
-import { UploadEntry } from "../worker/interface";
+import { UploadEntry, UploadState } from "../worker/interface";
 import { Flexbox } from "./layout/flexbox";
 
 export interface Item {
@@ -236,12 +236,24 @@ export class Browser extends React.Component<Props, State, {}> {
       });
   };
 
-  updateProgress = (infos: Map<string, UploadEntry>, refresh: boolean) => {
+  updateProgress = async (infos: Map<string, UploadEntry>, refresh: boolean) => {
     updater().setUploadings(infos);
+    let errCount = 0;
+    infos.valueSeq().forEach((entry: UploadEntry) => {
+      errCount += entry.state === UploadState.Error ? 1 : 0;
+    });
+
+    if (infos.size === 0 || infos.size === errCount) {
+      // refresh used space
+      updater().self().then(() => {
+        this.update(updater().updateLogin);
+      });
+    }
+
     if (refresh) {
       updater()
         .setItems(this.props.browser.dirPath)
-        .then((ok: boolean) => {
+        .then(() => {
           this.update(updater().updateBrowser);
         });
     } else {
@@ -357,9 +369,8 @@ export class Browser extends React.Component<Props, State, {}> {
       }
     );
 
-    const nameCellClass = `item-name item-name-${
-      this.props.ui.isVertical ? "vertical" : "horizontal"
-    } pointer`;
+    const nameCellClass = `item-name item-name-${this.props.ui.isVertical ? "vertical" : "horizontal"
+      } pointer`;
 
     const ops = (
       <div>
@@ -445,9 +456,8 @@ export class Browser extends React.Component<Props, State, {}> {
             <span className={`padding-m ${showOp}`}>
               <button
                 onClick={() => this.select(item.name)}
-                className={`${
-                  isSelected ? "blue0-bg white-font" : "grey2-bg grey3-font"
-                }`}
+                className={`${isSelected ? "blue0-bg white-font" : "grey2-bg grey3-font"
+                  }`}
                 style={{ width: "8rem", display: "inline-block" }}
               >
                 {isSelected
@@ -502,9 +512,8 @@ export class Browser extends React.Component<Props, State, {}> {
                 <button
                   type="button"
                   onClick={() => this.select(item.name)}
-                  className={`${
-                    isSelected ? "blue0-bg white-font" : "grey2-bg grey3-font"
-                  }`}
+                  className={`${isSelected ? "blue0-bg white-font" : "grey2-bg grey3-font"
+                    }`}
                   style={{ width: "8rem", display: "inline-block" }}
                 >
                   {isSelected
@@ -516,9 +525,8 @@ export class Browser extends React.Component<Props, State, {}> {
             childrenStyles={List([{}, { justifyContent: "flex-end" }])}
           />
           <div
-            className={`${
-              this.state.showDetail.has(item.name) ? "" : "hidden"
-            }`}
+            className={`${this.state.showDetail.has(item.name) ? "" : "hidden"
+              }`}
           >
             <Flexbox
               children={List([
@@ -785,9 +793,8 @@ export class Browser extends React.Component<Props, State, {}> {
                   type="text"
                   readOnly
                   className="margin-r-m"
-                  value={`${
-                    document.location.href.split("?")[0]
-                  }?dir=${encodeURIComponent(dirPath)}`}
+                  value={`${document.location.href.split("?")[0]
+                    }?dir=${encodeURIComponent(dirPath)}`}
                 />
                 <button
                   onClick={() => {

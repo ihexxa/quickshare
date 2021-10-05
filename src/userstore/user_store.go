@@ -279,7 +279,6 @@ func (us *KVUserStore) SetPwd(id uint64, pwd string) error {
 func (us *KVUserStore) CanIncrUsed(id uint64, capacity int64) (bool, error) {
 	us.mtx.Lock()
 	defer us.mtx.Unlock()
-
 	userID := fmt.Sprint(id)
 	infoStr, ok := us.store.GetStringIn(UsersNs, userID)
 	if !ok {
