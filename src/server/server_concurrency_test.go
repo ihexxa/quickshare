@@ -8,7 +8,6 @@ import (
 
 	"github.com/ihexxa/quickshare/src/client"
 	q "github.com/ihexxa/quickshare/src/handlers"
-	// "github.com/ihexxa/quickshare/src/userstore"
 )
 
 func TestConcurrency(t *testing.T) {
