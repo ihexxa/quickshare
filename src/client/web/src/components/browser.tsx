@@ -20,6 +20,7 @@ import { MetadataResp, roleVisitor, roleAdmin } from "../client";
 import { Up } from "../worker/upload_mgr";
 import { UploadEntry, UploadState } from "../worker/interface";
 import { Flexbox } from "./layout/flexbox";
+import { Flowgrid } from "./layout/flowgrid";
 
 export interface Item {
   name: string;
@@ -86,7 +87,6 @@ export class Browser extends React.Component<Props, State, {}> {
       this.uploadInput = ReactDOM.findDOMNode(input);
     };
     this.onClickUpload = () => {
-      // TODO: check if the re-upload file is same as previous upload
       const uploadInput = this.uploadInput as HTMLButtonElement;
       uploadInput.click();
     };
@@ -236,7 +236,10 @@ export class Browser extends React.Component<Props, State, {}> {
       });
   };
 
-  updateProgress = async (infos: Map<string, UploadEntry>, refresh: boolean) => {
+  updateProgress = async (
+    infos: Map<string, UploadEntry>,
+    refresh: boolean
+  ) => {
     updater().setUploadings(infos);
     let errCount = 0;
     infos.valueSeq().forEach((entry: UploadEntry) => {
@@ -245,9 +248,11 @@ export class Browser extends React.Component<Props, State, {}> {
 
     if (infos.size === 0 || infos.size === errCount) {
       // refresh used space
-      updater().self().then(() => {
-        this.update(updater().updateLogin);
-      });
+      updater()
+        .self()
+        .then(() => {
+          this.update(updater().updateLogin);
+        });
     }
 
     if (refresh) {
@@ -352,8 +357,7 @@ export class Browser extends React.Component<Props, State, {}> {
 
   render() {
     const showOp = this.props.login.userRole === roleVisitor ? "hidden" : "";
-
-    let breadcrumb = this.props.browser.dirPath.map(
+    const breadcrumb = this.props.browser.dirPath.map(
       (pathPart: string, key: number) => {
         return (
           <button
@@ -369,38 +373,42 @@ export class Browser extends React.Component<Props, State, {}> {
       }
     );
 
-    const nameCellClass = `item-name item-name-${this.props.ui.isVertical ? "vertical" : "horizontal"
-      } pointer`;
+    const nameCellClass = `item-name item-name-${
+      this.props.ui.isVertical ? "vertical" : "horizontal"
+    } pointer`;
 
     const ops = (
       <div>
-        <div>
-          <span className="inline-block margin-t-m margin-b-m">
-            <input
-              type="text"
-              onChange={this.onInputChange}
-              value={this.state.inputValue}
-              className="black0-font margin-r-m"
-              placeholder={this.props.msg.pkg.get("browser.folder.name")}
-            />
-            <button onClick={this.onMkDir} className="margin-r-m">
-              {this.props.msg.pkg.get("browser.folder.add")}
-            </button>
-          </span>
-          <span className="inline-block margin-t-m margin-b-m">
-            <button onClick={this.onClickUpload}>
-              {this.props.msg.pkg.get("browser.upload")}
-            </button>
-            <input
-              type="file"
-              onChange={this.addUploads}
-              multiple={true}
-              value={this.props.browser.uploadValue}
-              ref={this.assignInput}
-              className="black0-font hidden"
-            />
-          </span>
-        </div>
+        <Flowgrid
+          grids={List([
+            <div className="padding-t-m padding-b-m padding-r-m">
+              <input
+                type="text"
+                onChange={this.onInputChange}
+                value={this.state.inputValue}
+                className="black0-font margin-r-m"
+                placeholder={this.props.msg.pkg.get("browser.folder.name")}
+              />
+              <button onClick={this.onMkDir} className="margin-r-m">
+                {this.props.msg.pkg.get("browser.folder.add")}
+              </button>
+            </div>,
+
+            <div className="padding-t-m padding-b-m">
+              <button onClick={this.onClickUpload}>
+                {this.props.msg.pkg.get("browser.upload")}
+              </button>
+              <input
+                type="file"
+                onChange={this.addUploads}
+                multiple={true}
+                value={this.props.browser.uploadValue}
+                ref={this.assignInput}
+                className="black0-font hidden"
+              />
+            </div>,
+          ])}
+        />
       </div>
     );
 
@@ -456,8 +464,9 @@ export class Browser extends React.Component<Props, State, {}> {
             <span className={`padding-m ${showOp}`}>
               <button
                 onClick={() => this.select(item.name)}
-                className={`${isSelected ? "blue0-bg white-font" : "grey2-bg grey3-font"
-                  }`}
+                className={`${
+                  isSelected ? "cyan0-bg white-font" : "grey2-bg grey3-font"
+                }`}
                 style={{ width: "8rem", display: "inline-block" }}
               >
                 {isSelected
@@ -512,8 +521,9 @@ export class Browser extends React.Component<Props, State, {}> {
                 <button
                   type="button"
                   onClick={() => this.select(item.name)}
-                  className={`${isSelected ? "blue0-bg white-font" : "grey2-bg grey3-font"
-                    }`}
+                  className={`${
+                    isSelected ? "cyan0-bg white-font" : "grey2-bg grey3-font"
+                  }`}
                   style={{ width: "8rem", display: "inline-block" }}
                 >
                   {isSelected
@@ -525,8 +535,9 @@ export class Browser extends React.Component<Props, State, {}> {
             childrenStyles={List([{}, { justifyContent: "flex-end" }])}
           />
           <div
-            className={`${this.state.showDetail.has(item.name) ? "" : "hidden"
-              }`}
+            className={`${
+              this.state.showDetail.has(item.name) ? "" : "hidden"
+            }`}
           >
             <Flexbox
               children={List([
@@ -793,8 +804,9 @@ export class Browser extends React.Component<Props, State, {}> {
                   type="text"
                   readOnly
                   className="margin-r-m"
-                  value={`${document.location.href.split("?")[0]
-                    }?dir=${encodeURIComponent(dirPath)}`}
+                  value={`${
+                    document.location.href.split("?")[0]
+                  }?dir=${encodeURIComponent(dirPath)}`}
                 />
                 <button
                   onClick={() => {
