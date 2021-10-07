@@ -20,7 +20,7 @@
 
 (用户名是 `demo`, 密码是 `Quicksh@re`, 上传/下载速度被限制在大约100KB.)
 
-![Quickshare on desktop](./imgs/desktop_2.jpeg)
+![Quickshare on desktop](./imgs/desktop_2.png)
 
 选择语言: [English](../README.md) | 简体中文
 
