@@ -85,32 +85,49 @@ export class PaneSettings extends React.Component<Props, State, {}> {
             </h5>
 
             <div className="font-size-s margin-t-s">
-              {`${this.props.msg.pkg.get("user.name")}: ${
-                this.props.login.userName
-              }`}
+              <span className="grey0-font">
+                {`${this.props.msg.pkg.get("user.name")}:`}{" "}
+              </span>
+              <span>{`${this.props.login.userName}`}</span>
             </div>
             <div className="font-size-s margin-t-s">
-              {`${this.props.msg.pkg.get("user.role")}: ${
-                this.props.login.userRole
-              }`}
+              <span className="grey0-font">
+                {`${this.props.msg.pkg.get("user.role")}:`}{" "}
+              </span>
+              <span>{`${this.props.login.userRole}`}</span>
             </div>
             <div className="font-size-s margin-t-s">
-              {`${this.props.msg.pkg.get("user.spaceLimit")}: ${FileSize(
-                parseInt(this.props.login.quota.spaceLimit, 10),
-                { round: 0 }
-              )}`}
+              <span className="grey0-font">
+                {`${this.props.msg.pkg.get("user.spaceLimit")}:`}{" "}
+              </span>
+              <span>
+                {" "}
+                {`${FileSize(parseInt(this.props.login.quota.spaceLimit, 10), {
+                  round: 0,
+                })}`}
+              </span>
             </div>
             <div className="font-size-s margin-t-s">
-              {`${this.props.msg.pkg.get("user.upLimit")}: ${FileSize(
-                this.props.login.quota.uploadSpeedLimit,
-                { round: 0 }
-              )}`}
+              <span className="grey0-font">
+                {`${this.props.msg.pkg.get("user.upLimit")}:`}{" "}
+              </span>
+              <span>
+                {" "}
+                {`${FileSize(this.props.login.quota.uploadSpeedLimit, {
+                  round: 0,
+                })}`}
+              </span>
             </div>
             <div className="font-size-s margin-t-s">
-              {`${this.props.msg.pkg.get("user.downLimit")}: ${FileSize(
-                this.props.login.quota.downloadSpeedLimit,
-                { round: 0 }
-              )}`}
+              <span className="grey0-font">
+                {`${this.props.msg.pkg.get("user.downLimit")}:`}{" "}
+              </span>
+              <span>
+                {" "}
+                {`${FileSize(this.props.login.quota.downloadSpeedLimit, {
+                  round: 0,
+                })}`}
+              </span>
             </div>
           </div>
 
