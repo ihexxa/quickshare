@@ -81,4 +81,9 @@ export const msgs: Map<string, string> = Map({
   "logout.confirm": "确定登出吗？",
   "unauthed": "未授权动作",
   "err.tooManyUploads": "不可同时上传超过1000个文件",
+  "login.role": "角色",
+  "user.profile": "用户信息",
+  "user.downLimit": "下载速度限制",
+  "user.upLimit": "上传速度限制",
+  "user.spaceLimit": "空间限制",
 });
