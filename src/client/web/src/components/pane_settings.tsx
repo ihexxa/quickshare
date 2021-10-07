@@ -1,4 +1,5 @@
 import * as React from "react";
+import FileSize from "filesize";
 
 import { ICoreState, MsgProps } from "./core_state";
 import { LoginProps } from "./pane_login";
@@ -78,6 +79,43 @@ export class PaneSettings extends React.Component<Props, State, {}> {
     return (
       <div className="container">
         <div className="padding-l">
+          <div className="grey3-font">
+            <h5 className="black-font">
+              {this.props.msg.pkg.get("user.profile")}
+            </h5>
+
+            <div className="font-size-s margin-t-s">
+              {`${this.props.msg.pkg.get("user.name")}: ${
+                this.props.login.userName
+              }`}
+            </div>
+            <div className="font-size-s margin-t-s">
+              {`${this.props.msg.pkg.get("user.role")}: ${
+                this.props.login.userRole
+              }`}
+            </div>
+            <div className="font-size-s margin-t-s">
+              {`${this.props.msg.pkg.get("user.spaceLimit")}: ${FileSize(
+                parseInt(this.props.login.quota.spaceLimit, 10),
+                { round: 0 }
+              )}`}
+            </div>
+            <div className="font-size-s margin-t-s">
+              {`${this.props.msg.pkg.get("user.upLimit")}: ${FileSize(
+                this.props.login.quota.uploadSpeedLimit,
+                { round: 0 }
+              )}`}
+            </div>
+            <div className="font-size-s margin-t-s">
+              {`${this.props.msg.pkg.get("user.downLimit")}: ${FileSize(
+                this.props.login.quota.downloadSpeedLimit,
+                { round: 0 }
+              )}`}
+            </div>
+          </div>
+
+          <div className="hr white0-bg margin-t-m margin-b-m"></div>
+
           <div>
             <Flexbox
               children={List([
@@ -100,7 +138,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
                 type="password"
                 onChange={this.changeOldPwd}
                 value={this.state.oldPwd}
-                className="black0-font margin-t-m"
+                className="black0-font"
                 placeholder={this.props.msg.pkg.get("settings.pwd.old")}
               />
             </span>
@@ -114,7 +152,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
                 type="password"
                 onChange={this.changeNewPwd1}
                 value={this.state.newPwd1}
-                className="black0-font margin-t-m"
+                className="black0-font"
                 placeholder={this.props.msg.pkg.get("settings.pwd.new1")}
               />
             </span>
@@ -128,7 +166,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
                 type="password"
                 onChange={this.changeNewPwd2}
                 value={this.state.newPwd2}
-                className="black0-font margin-t-m"
+                className="black0-font"
                 placeholder={this.props.msg.pkg.get("settings.pwd.new2")}
               />
             </span>
