@@ -103,13 +103,13 @@ export class TopBar extends React.Component<Props, State, {}> {
             <Flexbox
               children={List([
                 <span className={`${showUserInfo}`}>
-                  <span className="grey3-font font-s">
+                  <span className="grey3-font font-s margin-r-m">
                     {this.props.login.userName}
                   </span>
-                  &nbsp;-&nbsp;
+                  {/* &nbsp;-&nbsp;
                   <span className="grey0-font font-s margin-r-m">
                     {this.props.login.userRole}
-                  </span>
+                  </span> */}
                 </span>,
 
                 <button

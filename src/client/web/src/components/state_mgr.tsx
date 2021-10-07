@@ -20,9 +20,9 @@ export class StateMgr extends React.Component<Props, State, {}> {
 
   constructor(p: Props) {
     super(p);
-    this.state = newState();
     const worker = window.Worker == null ? new FgWorker() : new BgWorker();
     initUploadMgr(worker);
+    this.state = newState();
     this.initUpdater(this.state); // don't await
   }
 
