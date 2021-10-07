@@ -655,7 +655,6 @@ export class Browser extends React.Component<Props, State, {}> {
                 <span className={`padding-m ${showOp}`}>
                   <button
                     onClick={() => this.selectAll()}
-                    className={`grey1-bg white-font`}
                     style={{ width: "8rem", display: "inline-block" }}
                   >
                     {this.props.msg.pkg.get("browser.selectAll")}
