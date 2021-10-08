@@ -9,7 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	q "github.com/ihexxa/quickshare/src/handlers"
-	"github.com/ihexxa/quickshare/src/userstore"
+	"github.com/ihexxa/quickshare/src/db/userstore"
 )
 
 func apiRuleCname(role, method, path string) string {

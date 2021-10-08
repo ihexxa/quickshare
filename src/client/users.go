@@ -7,7 +7,7 @@ import (
 
 	"github.com/ihexxa/quickshare/src/handlers"
 	"github.com/ihexxa/quickshare/src/handlers/multiusers"
-	"github.com/ihexxa/quickshare/src/userstore"
+	"github.com/ihexxa/quickshare/src/db/userstore"
 	"github.com/parnurzeal/gorequest"
 )
 

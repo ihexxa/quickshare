@@ -23,8 +23,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/ihexxa/quickshare/src/cryptoutil/jwt"
+	"github.com/ihexxa/quickshare/src/db/fileinfostore"
+	"github.com/ihexxa/quickshare/src/db/userstore"
 	"github.com/ihexxa/quickshare/src/depidx"
-	"github.com/ihexxa/quickshare/src/fileinfostore"
 	"github.com/ihexxa/quickshare/src/fs"
 	"github.com/ihexxa/quickshare/src/fs/local"
 	"github.com/ihexxa/quickshare/src/handlers/fileshdr"
@@ -34,7 +35,6 @@ import (
 	"github.com/ihexxa/quickshare/src/iolimiter"
 	"github.com/ihexxa/quickshare/src/kvstore"
 	"github.com/ihexxa/quickshare/src/kvstore/boltdbpvd"
-	"github.com/ihexxa/quickshare/src/userstore"
 	"github.com/ihexxa/quickshare/src/worker/localworker"
 )
 

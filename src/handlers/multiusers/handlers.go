@@ -14,7 +14,7 @@ import (
 
 	"github.com/ihexxa/quickshare/src/depidx"
 	q "github.com/ihexxa/quickshare/src/handlers"
-	"github.com/ihexxa/quickshare/src/userstore"
+	"github.com/ihexxa/quickshare/src/db/userstore"
 )
 
 var (

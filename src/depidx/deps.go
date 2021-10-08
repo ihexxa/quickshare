@@ -5,12 +5,12 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/ihexxa/quickshare/src/cryptoutil"
-	"github.com/ihexxa/quickshare/src/fileinfostore"
+	"github.com/ihexxa/quickshare/src/db/fileinfostore"
 	"github.com/ihexxa/quickshare/src/fs"
 	"github.com/ihexxa/quickshare/src/idgen"
 	"github.com/ihexxa/quickshare/src/iolimiter"
 	"github.com/ihexxa/quickshare/src/kvstore"
-	"github.com/ihexxa/quickshare/src/userstore"
+	"github.com/ihexxa/quickshare/src/db/userstore"
 	"github.com/ihexxa/quickshare/src/worker"
 )
 
