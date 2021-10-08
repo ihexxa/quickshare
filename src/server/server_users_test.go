@@ -9,7 +9,7 @@ import (
 	"github.com/ihexxa/quickshare/src/client"
 	q "github.com/ihexxa/quickshare/src/handlers"
 	su "github.com/ihexxa/quickshare/src/handlers/singleuserhdr"
-	"github.com/ihexxa/quickshare/src/userstore"
+	"github.com/ihexxa/quickshare/src/db/userstore"
 )
 
 func TestUsersHandlers(t *testing.T) {
