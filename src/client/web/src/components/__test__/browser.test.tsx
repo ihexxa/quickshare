@@ -8,7 +8,7 @@ import { updater } from "../state_updater";
 import { MockWorker } from "../../worker/interface";
 import { MockUsersClient, resps as usersResps } from "../../client/users_mock";
 import { MockFilesClient, resps as filesResps } from "../../client/files_mock";
-import { mockFileList } from "../../test/helpers";
+import { MockSettingsClient } from "../../client/settings_mock";
 
 describe("Browser", () => {
   const initBrowser = (): any => {
@@ -19,9 +19,10 @@ describe("Browser", () => {
     const coreState = newState();
     const usersCl = new MockUsersClient("");
     const filesCl = new MockFilesClient("");
+    const settingsCl = new MockSettingsClient("");
 
     updater().init(coreState);
-    updater().setClients(usersCl, filesCl);
+    updater().setClients(usersCl, filesCl, settingsCl);
 
     const browser = new Browser({
       browser: coreState.browser,

@@ -8,6 +8,7 @@ import {
   ListRolesResp,
   IUsersClient,
   IFilesClient,
+  ISettingsClient,
   MetadataResp,
   UploadInfo,
   Quota,
@@ -15,9 +16,11 @@ import {
   roleVisitor,
   roleAdmin,
   visitorID,
+  ClientConfig,
 } from "../client";
 import { FilesClient } from "../client/files";
 import { UsersClient } from "../client/users";
+import { SettingsClient } from "../client/settings";
 import { UploadEntry, UploadState } from "../worker/interface";
 import { Up } from "../worker/upload_mgr";
 import { alertMsg } from "../common/env";
@@ -33,11 +36,17 @@ export class Updater {
   props: ICoreState;
   private usersClient: IUsersClient = new UsersClient("");
   private filesClient: IFilesClient = new FilesClient("");
+  private settingsClient: ISettingsClient = new SettingsClient("");
 
   init = (props: ICoreState) => (this.props = { ...props });
-  setClients(usersClient: IUsersClient, filesClient: IFilesClient) {
+  setClients(
+    usersClient: IUsersClient,
+    filesClient: IFilesClient,
+    settingsClient: ISettingsClient
+  ) {
     this.usersClient = usersClient;
     this.filesClient = filesClient;
+    this.settingsClient = settingsClient;
   }
 
   initUploads = () => {
@@ -116,8 +125,7 @@ export class Updater {
     let localUploads = Map<string, UploadEntry>([]);
     this.props.browser.uploadings.forEach((entry: UploadEntry) => {
       localUploads = localUploads.set(entry.filePath, entry);
-    })
-
+    });
 
     let updatedUploads = List<UploadEntry>([]);
     luResp.data.uploadInfos.forEach((remoteInfo: UploadInfo) => {
@@ -352,7 +360,7 @@ export class Updater {
           return Promise.all([this.listRoles(), this.listUsers()]);
         }
         return;
-      })
+      });
   };
 
   resetUser = () => {
@@ -365,7 +373,7 @@ export class Updater {
       downloadSpeedLimit: 0,
       spaceLimit: "0",
     };
-  }
+  };
 
   self = async (): Promise<boolean> => {
     const resp = await this.usersClient.self();
@@ -377,7 +385,7 @@ export class Updater {
       this.props.login.quota = resp.data.quota;
       return true;
     }
-    this.resetUser()
+    this.resetUser();
     return false;
   };
 
@@ -551,6 +559,23 @@ export class Updater {
   generateHash = async (filePath: string): Promise<boolean> => {
     const resp = await this.filesClient.generateHash(filePath);
     return resp.status === 200;
+  };
+
+  setClientCfg = async (cfg: ClientConfig): Promise<number> => {
+    const resp = await this.settingsClient.setClientCfg(cfg);
+    return resp.status;
+  };
+
+  getClientCfg = async (): Promise<number> => {
+    const resp = await this.settingsClient.getClientCfg();
+    if (resp.status === 200) {
+      const clientCfg = resp.data.clientCfg as ClientConfig;
+      this.props.ui.siteName = clientCfg.siteName;
+      this.props.ui.siteDesc = clientCfg.siteDesc;
+      this.props.ui.bg = clientCfg.bg;
+    }
+
+    return resp.status;
   };
 
   updateBrowser = (prevState: ICoreState): ICoreState => {

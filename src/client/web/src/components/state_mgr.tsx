@@ -9,7 +9,8 @@ import { ICoreState, newState } from "./core_state";
 import { RootFrame } from "./root_frame";
 import { FilesClient } from "../client/files";
 import { UsersClient } from "../client/users";
-import { IUsersClient, IFilesClient } from "../client";
+import { SettingsClient } from "../client/settings";
+import { IUsersClient, IFilesClient, ISettingsClient } from "../client";
 
 export interface Props {}
 export interface State extends ICoreState {}
@@ -17,6 +18,7 @@ export interface State extends ICoreState {}
 export class StateMgr extends React.Component<Props, State, {}> {
   private usersClient: IUsersClient = new UsersClient("");
   private filesClient: IFilesClient = new FilesClient("");
+  private settingsClient: ISettingsClient = new SettingsClient("");
 
   constructor(p: Props) {
     super(p);
@@ -34,13 +36,25 @@ export class StateMgr extends React.Component<Props, State, {}> {
     this.filesClient = client;
   };
 
+  setSettingsClient = (client: ISettingsClient) => {
+    this.settingsClient = client;
+  };
+
   initUpdater = async (state: ICoreState): Promise<void> => {
     updater().init(state);
-    if (this.usersClient == null || this.filesClient == null) {
+    if (
+      this.usersClient == null ||
+      this.filesClient == null ||
+      this.settingsClient == null
+    ) {
       console.error("updater's clients are not inited");
       return;
     }
-    updater().setClients(this.usersClient, this.filesClient);
+    updater().setClients(
+      this.usersClient,
+      this.filesClient,
+      this.settingsClient
+    );
 
     const params = new URLSearchParams(document.location.search.substring(1));
     return updater()
