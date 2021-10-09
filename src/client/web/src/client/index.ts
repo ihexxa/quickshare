@@ -65,6 +65,10 @@ export interface ListSharingsResp {
   sharingDirs: string[];
 }
 
+export interface ClientConfigMsg {
+  clientCfg: ClientConfig;
+}
+
 export interface ClientConfig {
   siteName: string;
   siteDesc: string;
