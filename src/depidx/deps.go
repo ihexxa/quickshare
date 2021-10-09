@@ -6,11 +6,12 @@ import (
 
 	"github.com/ihexxa/quickshare/src/cryptoutil"
 	"github.com/ihexxa/quickshare/src/db/fileinfostore"
+	"github.com/ihexxa/quickshare/src/db/sitestore"
+	"github.com/ihexxa/quickshare/src/db/userstore"
 	"github.com/ihexxa/quickshare/src/fs"
 	"github.com/ihexxa/quickshare/src/idgen"
 	"github.com/ihexxa/quickshare/src/iolimiter"
 	"github.com/ihexxa/quickshare/src/kvstore"
-	"github.com/ihexxa/quickshare/src/db/userstore"
 	"github.com/ihexxa/quickshare/src/worker"
 )
 
@@ -28,6 +29,7 @@ type Deps struct {
 	kv        kvstore.IKVStore
 	users     userstore.IUserStore
 	fileInfos fileinfostore.IFileInfoStore
+	siteStore sitestore.ISiteStore
 	id        idgen.IIDGen
 	logger    *zap.SugaredLogger
 	limiter   iolimiter.ILimiter
@@ -92,6 +94,14 @@ func (deps *Deps) FileInfos() fileinfostore.IFileInfoStore {
 
 func (deps *Deps) SetFileInfos(fileInfos fileinfostore.IFileInfoStore) {
 	deps.fileInfos = fileInfos
+}
+
+func (deps *Deps) SiteStore() sitestore.ISiteStore {
+	return deps.siteStore
+}
+
+func (deps *Deps) SetSiteStore(siteStore sitestore.ISiteStore) {
+	deps.siteStore = siteStore
 }
 
 func (deps *Deps) Limiter() iolimiter.ILimiter {

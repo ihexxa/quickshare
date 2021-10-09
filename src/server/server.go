@@ -24,6 +24,7 @@ import (
 
 	"github.com/ihexxa/quickshare/src/cryptoutil/jwt"
 	"github.com/ihexxa/quickshare/src/db/fileinfostore"
+	"github.com/ihexxa/quickshare/src/db/sitestore"
 	"github.com/ihexxa/quickshare/src/db/userstore"
 	"github.com/ihexxa/quickshare/src/depidx"
 	"github.com/ihexxa/quickshare/src/fs"
@@ -124,6 +125,10 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	if err != nil {
 		panic(fmt.Sprintf("fail to init file info store: %s", err))
 	}
+	siteStore, err := sitestore.NewSiteStore(kv)
+	if err != nil {
+		panic(fmt.Sprintf("fail to init site config store: %s", err))
+	}
 
 	limiterCap := cfg.IntOr("Users.LimiterCapacity", 10000)
 	limiterCyc := cfg.IntOr("Users.LimiterCyc", 1000)
@@ -135,6 +140,7 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	deps.SetKV(kv)
 	deps.SetUsers(users)
 	deps.SetFileInfos(fileInfos)
+	deps.SetSiteStore(siteStore)
 	deps.SetID(ider)
 	deps.SetLog(logger)
 	deps.SetLimiter(limiter)
