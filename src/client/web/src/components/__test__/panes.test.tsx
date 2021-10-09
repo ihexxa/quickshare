@@ -17,6 +17,7 @@ describe("Panes", () => {
       panes: coreState.panes,
       admin: coreState.admin,
       login: coreState.login,
+      ui: coreState.ui,
       msg: coreState.msg,
       update: (updater: (prevState: ICoreState) => ICoreState) => {},
     });

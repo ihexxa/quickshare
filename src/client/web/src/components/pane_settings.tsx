@@ -10,7 +10,6 @@ import { alertMsg } from "../common/env";
 export interface Props {
   login: LoginProps;
   msg: MsgProps;
-
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 

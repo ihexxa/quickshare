@@ -6,6 +6,7 @@ import { initUploadMgr } from "../../worker/upload_mgr";
 import { User, UploadInfo } from "../../client";
 import { MockFilesClient, resps as filesResps } from "../../client/files_mock";
 import { MockUsersClient, resps as usersResps } from "../../client/users_mock";
+import { MockSettingsClient, resps as settingsResps } from "../../client/settings_mock";
 import { ICoreState, newState } from "../core_state";
 import { MockWorker, UploadState, UploadEntry } from "../../worker/interface";
 
@@ -13,6 +14,7 @@ describe("State Manager", () => {
   test("initUpdater for admin", async () => {
     const usersCl = new MockUsersClient("");
     const filesCl = new MockFilesClient("");
+    const settingsCl = new MockSettingsClient("");
 
     const mockWorkerClass = mock(MockWorker);
     const mockWorker = instance(mockWorkerClass);
@@ -21,6 +23,7 @@ describe("State Manager", () => {
     const mgr = new StateMgr({}); // it will call initUpdater
     mgr.setUsersClient(usersCl);
     mgr.setFilesClient(filesCl);
+    mgr.setSettingsClient(settingsCl);
 
     // TODO: depress warning
     mgr.update = (apply: (prevState: ICoreState) => ICoreState): void => {
@@ -98,6 +101,7 @@ describe("State Manager", () => {
   test("initUpdater for visitor in sharing mode", async () => {
     const usersCl = new MockUsersClient("");
     const filesCl = new MockFilesClient("");
+    const settingsCl = new MockSettingsClient("");
     const mockSelfResp = {
       status: 200,
       statusText: "",
@@ -128,6 +132,7 @@ describe("State Manager", () => {
     const mgr = new StateMgr({}); // it will call initUpdater
     mgr.setUsersClient(usersCl);
     mgr.setFilesClient(filesCl);
+    mgr.setSettingsClient(settingsCl);
     // TODO: depress warning
     mgr.update = (apply: (prevState: ICoreState) => ICoreState): void => {
       // no op

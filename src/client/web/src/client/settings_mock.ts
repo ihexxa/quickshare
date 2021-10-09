@@ -1,12 +1,12 @@
 // TODO: replace this with jest mocks
-import { Response, Quota } from ".";
+import { Response } from ".";
 
-import { ClientConfig } from "./";
+import { ClientConfigMsg } from "./";
 
 export interface SettingsClientResps {
   healthMockResp?: Response;
   setClientCfgMockResp?: Response;
-  getClientCfgMockResp?: Response<ClientConfig>;
+  getClientCfgMockResp?: Response<ClientConfigMsg>;
 }
 
 export const resps = {
@@ -16,14 +16,16 @@ export const resps = {
     status: 200,
     statusText: "",
     data: {
-      siteName: "",
-      siteDesc: "",
-      bg: {
-        url: "",
-        repeat: "",
-        position: "",
-        align: "",
-      },
+      clientCfg: {
+        siteName: "",
+        siteDesc: "",
+        bg: {
+          url: "",
+          repeat: "",
+          position: "",
+          align: "",
+        },
+      }
     },
   },
 };
