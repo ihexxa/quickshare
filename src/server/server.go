@@ -264,6 +264,8 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 
 	settingsAPI := v1.Group("/settings")
 	settingsAPI.OPTIONS("/health", settingsSvc.Health)
+	settingsAPI.GET("/client", settingsSvc.GetClientCfg)
+	settingsAPI.PATCH("/client", settingsSvc.SetClientCfg)
 
 	return router, nil
 }
