@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 
+	"github.com/ihexxa/quickshare/src/db/sitestore"
 	"github.com/ihexxa/quickshare/src/db/userstore"
 )
 
@@ -53,11 +54,12 @@ type WorkerPoolCfg struct {
 }
 
 type Config struct {
-	Fs      *FSConfig      `json:"fs" yaml:"fs"`
-	Secrets *Secrets       `json:"secrets" yaml:"secrets"`
-	Server  *ServerCfg     `json:"server" yaml:"server"`
-	Users   *UsersCfg      `json:"users" yaml:"users"`
-	Workers *WorkerPoolCfg `json:"workers" yaml:"workers"`
+	Fs      *FSConfig             `json:"fs" yaml:"fs"`
+	Secrets *Secrets              `json:"secrets" yaml:"secrets"`
+	Server  *ServerCfg            `json:"server" yaml:"server"`
+	Users   *UsersCfg             `json:"users" yaml:"users"`
+	Workers *WorkerPoolCfg        `json:"workers" yaml:"workers"`
+	Site    *sitestore.SiteConfig `json:"site" yaml:"site"`
 }
 
 func NewConfig() *Config {
@@ -105,6 +107,18 @@ func DefaultConfig() (string, error) {
 			QueueSize:   1024,
 			SleepCyc:    1,
 			WorkerCount: 2,
+		},
+		Site: &sitestore.SiteConfig{
+			ClientCfg: &sitestore.ClientConfig{
+				SiteName: "Quickshare",
+				SiteDesc: "quick and simple file sharing",
+				Bg: &sitestore.BgConfig{
+					Url:      "/static/img/textured_paper.png",
+					Repeat:   "repeat",
+					Position: "fixed",
+					Align:    "center",
+				},
+			},
 		},
 	}
 
