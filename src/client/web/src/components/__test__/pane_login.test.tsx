@@ -9,6 +9,7 @@ import { updater } from "../state_updater";
 import { MockWorker, UploadState, UploadEntry } from "../../worker/interface";
 import { MockUsersClient, resps as usersResps } from "../../client/users_mock";
 import { MockFilesClient, resps as filesResps } from "../../client/files_mock";
+import { MockSettingsClient } from "../../client/settings_mock";
 
 describe("Login", () => {
   test("login", async () => {
@@ -20,13 +21,14 @@ describe("Login", () => {
     const pane = new AuthPane({
       login: coreState.login,
       msg: coreState.msg,
-      update: (updater: (prevState: ICoreState) => ICoreState) => { },
+      update: (updater: (prevState: ICoreState) => ICoreState) => {},
     });
 
     const usersCl = new MockUsersClient("");
     const filesCl = new MockFilesClient("");
+    const settingsCl = new MockSettingsClient("");
     updater().init(coreState);
-    updater().setClients(usersCl, filesCl);
+    updater().setClients(usersCl, filesCl, settingsCl);
 
     await pane.login();
 

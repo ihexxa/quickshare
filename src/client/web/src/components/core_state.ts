@@ -16,6 +16,8 @@ export interface MsgProps {
 
 export interface UIProps {
   isVertical: boolean;
+  siteName: string;
+  siteDesc: string;
   bg: {
     url: string;
     repeat: string;
@@ -77,6 +79,8 @@ export function initState(): ICoreState {
     },
     ui: {
       isVertical: isVertical(),
+      siteName: "",
+      siteDesc: "",
       bg: {
         url: "",
         repeat: "",
