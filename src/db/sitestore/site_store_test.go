@@ -51,6 +51,18 @@ func TestSiteStore(t *testing.T) {
 		if err != nil {
 			t.Fatal("fail to new kvstore", err)
 		}
+		err = store.Init(&SiteConfig{
+			ClientCfg: &ClientConfig{
+				SiteName: "",
+				SiteDesc: "",
+				Bg: &BgConfig{
+					Url:      "",
+					Repeat:   "",
+					Position: "",
+					Align:    "",
+				},
+			},
+		})
 
 		testSiteMethods(t, store)
 	})
