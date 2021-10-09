@@ -12,9 +12,9 @@ import (
 	"github.com/ihexxa/gocfg"
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/ihexxa/quickshare/src/db/userstore"
 	"github.com/ihexxa/quickshare/src/depidx"
 	q "github.com/ihexxa/quickshare/src/handlers"
-	"github.com/ihexxa/quickshare/src/db/userstore"
 )
 
 var (
@@ -63,6 +63,8 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/fs/uploadings"):      true,
 		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/metadata"):           true,
 		apiRuleCname(userstore.AdminRole, "OPTIONS", "/v1/settings/health"):   true,
+		apiRuleCname(userstore.AdminRole, "GET", "/v1/settings/client"):       true,
+		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/settings/client"):     true,
 		apiRuleCname(userstore.AdminRole, "GET", "/v1/captchas/"):             true,
 		apiRuleCname(userstore.AdminRole, "GET", "/v1/captchas/imgs"):         true,
 		apiRuleCname(userstore.AdminRole, "POST", "/v1/fs/sharings"):          true,
@@ -70,7 +72,6 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/sharings"):           true,
 		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/sharings/exist"):     true,
 		apiRuleCname(userstore.AdminRole, "POST", "/v1/fs/hashes/sha1"):       true,
-
 		// user rules
 		apiRuleCname(userstore.UserRole, "GET", "/"):                       true,
 		apiRuleCname(userstore.UserRole, "GET", publicPath):                true,
@@ -93,6 +94,7 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(userstore.UserRole, "DELETE", "/v1/fs/uploadings"):    true,
 		apiRuleCname(userstore.UserRole, "GET", "/v1/fs/metadata"):         true,
 		apiRuleCname(userstore.UserRole, "OPTIONS", "/v1/settings/health"): true,
+		apiRuleCname(userstore.UserRole, "GET", "/v1/settings/client"):     true,
 		apiRuleCname(userstore.UserRole, "GET", "/v1/captchas/"):           true,
 		apiRuleCname(userstore.UserRole, "GET", "/v1/captchas/imgs"):       true,
 		apiRuleCname(userstore.UserRole, "POST", "/v1/fs/sharings"):        true,
@@ -109,6 +111,7 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(userstore.VisitorRole, "GET", "/v1/fs/files"):            true,
 		apiRuleCname(userstore.VisitorRole, "GET", "/v1/fs/dirs"):             true,
 		apiRuleCname(userstore.VisitorRole, "OPTIONS", "/v1/settings/health"): true,
+		apiRuleCname(userstore.VisitorRole, "GET", "/v1/settings/client"):     true,
 		apiRuleCname(userstore.VisitorRole, "GET", "/v1/captchas/"):           true,
 		apiRuleCname(userstore.VisitorRole, "GET", "/v1/captchas/imgs"):       true,
 		apiRuleCname(userstore.VisitorRole, "GET", "/v1/fs/sharings/exist"):   true,

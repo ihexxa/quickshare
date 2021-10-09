@@ -7,6 +7,7 @@ import (
 	"github.com/ihexxa/gocfg"
 
 	"github.com/ihexxa/quickshare/src/db/sitestore"
+	"github.com/ihexxa/quickshare/src/db/userstore"
 	"github.com/ihexxa/quickshare/src/depidx"
 	q "github.com/ihexxa/quickshare/src/handlers"
 )
@@ -52,6 +53,12 @@ func (h *SettingsSvc) SetClientCfg(c *gin.Context) {
 	}
 	if err = validateClientCfg(req.ClientCfg); err != nil {
 		c.JSON(q.ErrResp(c, 400, err))
+		return
+	}
+
+	role := c.MustGet(q.RoleParam).(string)
+	if role != userstore.AdminRole {
+		c.JSON(q.ErrResp(c, 401, q.ErrUnauthorized))
 		return
 	}
 

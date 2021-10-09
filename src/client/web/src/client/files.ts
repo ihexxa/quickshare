@@ -14,6 +14,7 @@ const listDirQuery = "dp";
 
 function translateResp(resp: Response<any>): Response<any> {
   if (resp.status === 500) {
+    // TODO: replace following with error code
     if (
       resp.data == null ||
       resp.data === "" ||
