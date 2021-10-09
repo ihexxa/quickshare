@@ -3,7 +3,7 @@ import { Set, List } from "immutable";
 
 import { updater } from "./state_updater";
 import { Flexbox } from "./layout/flexbox";
-import { ICoreState, MsgProps } from "./core_state";
+import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { PaneSettings } from "./pane_settings";
 import { AdminPane, AdminProps } from "./pane_admin";
 import { AuthPane, LoginProps } from "./pane_login";
@@ -16,6 +16,7 @@ export interface Props {
   panes: PanesProps;
   login: LoginProps;
   admin: AdminProps;
+  ui: UIProps;
   msg: MsgProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
@@ -88,6 +89,7 @@ export class Panes extends React.Component<Props, State, {}> {
           <div className={`${showAdmin}`}>
             <AdminPane
               admin={this.props.admin}
+              ui={this.props.ui}
               msg={this.props.msg}
               update={this.props.update}
             />

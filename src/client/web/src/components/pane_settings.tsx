@@ -1,15 +1,16 @@
 import * as React from "react";
 import FileSize from "filesize";
+import { List } from "immutable";
 
 import { ICoreState, MsgProps } from "./core_state";
 import { LoginProps } from "./pane_login";
 import { Flexbox } from "./layout/flexbox";
 import { updater } from "./state_updater";
 import { alertMsg } from "../common/env";
-import { List } from "immutable";
 export interface Props {
   login: LoginProps;
   msg: MsgProps;
+
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
@@ -20,7 +21,6 @@ export interface State {
 }
 
 export class PaneSettings extends React.Component<Props, State, {}> {
-  private update: (updater: (prevState: ICoreState) => ICoreState) => void;
   changeOldPwd = (ev: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ oldPwd: ev.target.value });
   };
@@ -33,7 +33,6 @@ export class PaneSettings extends React.Component<Props, State, {}> {
 
   constructor(p: Props) {
     super(p);
-    this.update = p.update;
     this.state = {
       oldPwd: "",
       newPwd1: "",
@@ -130,9 +129,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               </span>
             </div>
           </div>
-
           <div className="hr white0-bg margin-t-m margin-b-m"></div>
-
           <div>
             <Flexbox
               children={List([
@@ -188,9 +185,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               />
             </span>
           </div>
-
           <div className="hr white0-bg margin-t-m margin-b-m"></div>
-
           <div className="margin-b-m">
             <Flexbox
               children={List([

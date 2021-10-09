@@ -8,7 +8,7 @@ import { PanesProps } from "./panes";
 import { updater } from "./state_updater";
 import { Flexbox } from "./layout/flexbox";
 
-export interface State { }
+export interface State {}
 export interface Props {
   login: LoginProps;
   panes: PanesProps;
@@ -51,7 +51,9 @@ export class TopBar extends React.Component<Props, State, {}> {
       .logout()
       .then((ok: boolean) => {
         if (ok) {
-          const params = new URLSearchParams(document.location.search.substring(1));
+          const params = new URLSearchParams(
+            document.location.search.substring(1)
+          );
           return updater().initAll(params);
         } else {
           alertMsg(this.props.msg.pkg.get("login.logout.fail"));
@@ -65,6 +67,7 @@ export class TopBar extends React.Component<Props, State, {}> {
         this.props.update(updater().updateLogin);
         this.props.update(updater().updatePanes);
         this.props.update(updater().updateAdmin);
+        this.props.update(updater().updateUI);
 
         updater().initLan();
         this.props.update(updater().updateMsg);
@@ -82,7 +85,9 @@ export class TopBar extends React.Component<Props, State, {}> {
   render() {
     const showUserInfo = this.props.login.authed ? "" : "hidden";
     const showLogin = this.props.login.authed ? "" : "hidden";
-    const showSettings = this.props.panes.paneNames.get("settings") ? "" : "hidden";
+    const showSettings = this.props.panes.paneNames.get("settings")
+      ? ""
+      : "hidden";
     const showAdmin = this.props.panes.paneNames.get("admin") ? "" : "hidden";
 
     return (

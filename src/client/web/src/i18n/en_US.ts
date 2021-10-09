@@ -87,4 +87,12 @@ export const msgs: Map<string, string> = Map({
   "user.downLimit": "Download Speed Limit",
   "user.upLimit": "Upload Speed Limit",
   "user.spaceLimit": "Space Limit",
+  "cfg.siteName": "Site Name",
+  "cfg.siteDesc": "Site Description",
+  "cfg.bg": "Background",
+  "cfg.bg.url": "Background URL",
+  "cfg.bg.repeat": "Repeat",
+  "cfg.bg.pos": "Position",
+  "cfg.bg.align": "Align",
+  reset: "Reset",
 });

@@ -3,10 +3,11 @@ import { List, Map, Set } from "immutable";
 import FileSize from "filesize";
 
 import { alertMsg, confirmMsg } from "../common/env";
-import { ICoreState, MsgProps } from "./core_state";
+import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { User, Quota } from "../client";
 import { updater } from "./state_updater";
 import { Flexbox } from "./layout/flexbox";
+import { Flowgrid } from "./layout/flowgrid";
 
 export interface AdminProps {
   users: Map<string, User>;
@@ -15,6 +16,7 @@ export interface AdminProps {
 
 export interface Props {
   admin: AdminProps;
+  ui: UIProps;
   msg: MsgProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
@@ -459,6 +461,14 @@ export class AdminPane extends React.Component<Props, State, {}> {
     return (
       <div className="font-size-m">
         <div className="container padding-l">
+          <BgCfg
+            ui={this.props.ui}
+            msg={this.props.msg}
+            update={this.props.update}
+          />
+        </div>
+
+        <div className="container padding-l">
           <Flexbox
             children={List([
               <span>{this.props.msg.pkg.get("user.add")}</span>,
@@ -577,6 +587,163 @@ export class AdminPane extends React.Component<Props, State, {}> {
           />
           {roleList}
         </div>
+      </div>
+    );
+  }
+}
+
+interface BgProps {
+  msg: MsgProps;
+  ui: UIProps;
+  update?: (updater: (prevState: ICoreState) => ICoreState) => void;
+}
+
+interface BgState {}
+export class BgCfg extends React.Component<BgProps, BgState, {}> {
+  changeSiteName = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    updater().setClientCfg({ ...this.props.ui, siteName: ev.target.value });
+    this.props.update(updater().updateUI);
+  };
+  changeSiteDesc = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    updater().setClientCfg({ ...this.props.ui, siteDesc: ev.target.value });
+    this.props.update(updater().updateUI);
+  };
+  changeBgUrl = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    updater().setClientCfg({
+      ...this.props.ui,
+      bg: { ...this.props.ui.bg, url: ev.target.value },
+    });
+    this.props.update(updater().updateUI);
+  };
+  changeBgRepeat = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    updater().setClientCfg({
+      ...this.props.ui,
+      bg: { ...this.props.ui.bg, repeat: ev.target.value },
+    });
+    this.props.update(updater().updateUI);
+  };
+  changeBgPos = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    updater().setClientCfg({
+      ...this.props.ui,
+      bg: { ...this.props.ui.bg, position: ev.target.value },
+    });
+    this.props.update(updater().updateUI);
+  };
+  changeBgAlign = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    updater().setClientCfg({
+      ...this.props.ui,
+      bg: { ...this.props.ui.bg, align: ev.target.value },
+    });
+    this.props.update(updater().updateUI);
+  };
+
+  constructor(p: BgProps) {
+    super(p);
+  }
+
+  setClientCfg = async () => {
+    return updater().setClientCfgRemote({
+      siteName: this.props.ui.siteName,
+      siteDesc: this.props.ui.siteDesc,
+      bg: this.props.ui.bg,
+    });
+  };
+
+  resetClientCfg = () => {
+    // TODO: move this to backend
+    updater().setClientCfg({
+      siteName: "Quickshare",
+      siteDesc: "Quickshare",
+      bg: {
+        url: "/static/img/textured_paper.png",
+        repeat: "repeat",
+        position: "fixed",
+        align: "center",
+      },
+    });
+    this.props.update(updater().updateUI);
+  };
+
+  render() {
+    return (
+      <div>
+        <Flexbox
+          children={List([
+            <span className="title-m bold">
+              {this.props.msg.pkg.get("cfg.bg")}
+            </span>,
+
+            <span>
+              <button onClick={this.resetClientCfg} className="margin-r-m">
+                {this.props.msg.pkg.get("reset")}
+              </button>
+              <button onClick={this.setClientCfg}>
+                {this.props.msg.pkg.get("update")}
+              </button>
+            </span>,
+          ])}
+          childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+        />
+
+        <Flowgrid
+          grids={List([
+            <div className="padding-t-m padding-b-m padding-r-m">
+              <div className="font-size-s grey1-font">
+                {this.props.msg.pkg.get("cfg.bg.url")}
+              </div>
+              <input
+                name="bg_url"
+                type="text"
+                onChange={this.changeBgUrl}
+                value={this.props.ui.bg.url}
+                className="black0-font"
+                placeholder={this.props.msg.pkg.get("cfg.bg.url")}
+              />
+            </div>,
+
+            <div className="padding-t-m padding-b-m padding-r-m">
+              <div className="font-size-s grey1-font">
+                {this.props.msg.pkg.get("cfg.bg.repeat")}
+              </div>
+              <input
+                name="bg_repeat"
+                type="text"
+                onChange={this.changeBgRepeat}
+                value={this.props.ui.bg.repeat}
+                className="black0-font"
+                placeholder={this.props.msg.pkg.get("cfg.bg.repeat")}
+              />
+            </div>,
+
+            <div className="padding-t-m padding-b-m padding-r-m">
+              <div className="font-size-s grey1-font">
+                {this.props.msg.pkg.get("cfg.bg.pos")}
+              </div>
+              <input
+                name="bg_pos"
+                type="text"
+                onChange={this.changeBgPos}
+                value={this.props.ui.bg.position}
+                className="black0-font"
+                placeholder={this.props.msg.pkg.get("cfg.bg.pos")}
+              />
+            </div>,
+
+            <div className="padding-t-m padding-b-m padding-r-m">
+              <div className="font-size-s grey1-font">
+                {this.props.msg.pkg.get("cfg.bg.align")}
+              </div>
+              <input
+                name="bg_align"
+                type="text"
+                onChange={this.changeBgAlign}
+                value={this.props.ui.bg.align}
+                className="black0-font"
+                placeholder={this.props.msg.pkg.get("cfg.bg.align")}
+              />
+            </div>,
+          ])}
+        />
       </div>
     );
   }

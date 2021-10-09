@@ -25,7 +25,9 @@ export class SettingsClient extends BaseClient {
     return this.do({
       method: "patch",
       url: `${this.url}/v1/settings/client`,
-      data: cfg,
+      data: {
+        clientCfg: cfg,
+      },
     });
   };
 }
