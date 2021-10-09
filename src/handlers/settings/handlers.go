@@ -30,7 +30,7 @@ func (h *SettingsSvc) Health(c *gin.Context) {
 }
 
 type ClientCfgMsg struct {
-	ClientCfg *sitestore.ClientConfig
+	ClientCfg *sitestore.ClientConfig `json:"clientCfg"`
 }
 
 func (h *SettingsSvc) GetClientCfg(c *gin.Context) {
@@ -51,6 +51,8 @@ func (h *SettingsSvc) SetClientCfg(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 400, err))
 		return
 	}
+	h.deps.Log().Info(req.ClientCfg)
+
 	if err = validateClientCfg(req.ClientCfg); err != nil {
 		c.JSON(q.ErrResp(c, 400, err))
 		return

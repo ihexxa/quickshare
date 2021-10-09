@@ -351,6 +351,10 @@ export class Updater {
         return this.isSharing(this.props.browser.dirPath.join("/"));
       })
       .then(() => {
+        // init settings
+        return this.getClientCfg();
+      })
+      .then(() => {
         // init panes
         return this.initPanes();
       })
@@ -561,9 +565,18 @@ export class Updater {
     return resp.status === 200;
   };
 
-  setClientCfg = async (cfg: ClientConfig): Promise<number> => {
+  setClientCfgRemote = async (cfg: ClientConfig): Promise<number> => {
     const resp = await this.settingsClient.setClientCfg(cfg);
     return resp.status;
+  };
+
+  setClientCfg = async (cfg: ClientConfig): Promise<void> => {
+    this.props.ui = {
+      ...this.props.ui,
+      siteName: cfg.siteName,
+      siteDesc: cfg.siteDesc,
+      bg: cfg.bg,
+    };
   };
 
   getClientCfg = async (): Promise<number> => {
@@ -610,6 +623,13 @@ export class Updater {
     return {
       ...prevState,
       msg: { ...prevState.msg, ...this.props.msg },
+    };
+  };
+
+  updateUI = (prevState: ICoreState): ICoreState => {
+    return {
+      ...prevState,
+      ui: { ...prevState.ui, ...this.props.ui },
     };
   };
 }

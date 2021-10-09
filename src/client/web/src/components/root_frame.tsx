@@ -44,6 +44,7 @@ export class RootFrame extends React.Component<Props, State, {}> {
             panes={this.props.panes}
             login={this.props.login}
             admin={this.props.admin}
+            ui={this.props.ui}
             msg={this.props.msg}
             update={this.props.update}
           />
