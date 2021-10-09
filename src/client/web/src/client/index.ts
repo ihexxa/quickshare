@@ -65,6 +65,17 @@ export interface ListSharingsResp {
   sharingDirs: string[];
 }
 
+export interface ClientConfig {
+  siteName: string;
+  siteDesc: string;
+  bg: {
+    url: string;
+    repeat: string;
+    position: string;
+    align: string;
+  };
+}
+
 export interface IUsersClient {
   login: (
     user: string,
@@ -108,6 +119,12 @@ export interface IFilesClient {
   isSharing: (dirPath: string) => Promise<Response>;
   listSharings: () => Promise<Response<ListSharingsResp>>;
   generateHash: (filePath: string) => Promise<Response>;
+}
+
+export interface ISettingsClient {
+  health: () => Promise<Response>;
+  getClientCfg: () => Promise<Response>;
+  setClientCfg: (cfg: ClientConfig) => Promise<Response>;
 }
 
 export interface Response<T = any> {
