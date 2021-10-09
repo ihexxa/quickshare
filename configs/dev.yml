@@ -37,3 +37,12 @@ workers:
   queueSize: 1024
   sleepCyc: 1 # in second
   workerCount: 2
+site:
+  clientCfg:
+    siteName: "Quickshare"
+    siteDesc: "quick and simple file sharing"
+    bg:
+      url: "/static/img/textured_paper.png"
+      repeat: "repeat"
+      position: "fixed"
+      align: "center"

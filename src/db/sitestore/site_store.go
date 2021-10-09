@@ -53,36 +53,45 @@ type SiteStore struct {
 }
 
 func NewSiteStore(store kvstore.IKVStore) (*SiteStore, error) {
-	_, ok := store.GetStringIn(InitNs, InitTimeKey)
-	if !ok {
-		var err error
-		for _, nsName := range []string{
-			InitNs,
-			SiteNs,
-		} {
-			if err = store.AddNamespace(nsName); err != nil {
-				return nil, err
-			}
-		}
-	}
-
-	err := store.SetStringIn(InitNs, InitTimeKey, fmt.Sprintf("%d", time.Now().Unix()))
-	if err != nil {
-		return nil, err
-	}
-
 	return &SiteStore{
 		store: store,
 		mtx:   &sync.RWMutex{},
 	}, nil
 }
 
-func (fi *SiteStore) SetClientCfg(cfg *ClientConfig) error {
-	fi.mtx.Lock()
-	defer fi.mtx.Unlock()
+func (st *SiteStore) Init(cfg *SiteConfig) error {
+	_, ok := st.store.GetStringIn(InitNs, InitTimeKey)
+	if !ok {
+		var err error
+		for _, nsName := range []string{
+			InitNs,
+			SiteNs,
+		} {
+			if err = st.store.AddNamespace(nsName); err != nil {
+				return err
+			}
+		}
+
+		// TODO: replace following with setConfig
+		err = st.SetClientCfg(cfg.ClientCfg)
+		if err != nil {
+			return err
+		}
+		err = st.store.SetStringIn(InitNs, InitTimeKey, fmt.Sprintf("%d", time.Now().Unix()))
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (st *SiteStore) SetClientCfg(cfg *ClientConfig) error {
+	st.mtx.Lock()
+	defer st.mtx.Unlock()
 
 	siteCfg := &SiteConfig{}
-	cfgStr, ok := fi.store.GetStringIn(SiteNs, SiteCfgKey)
+	cfgStr, ok := st.store.GetStringIn(SiteNs, SiteCfgKey)
 	if ok {
 		err := json.Unmarshal([]byte(cfgStr), siteCfg)
 		if err != nil {
@@ -95,14 +104,14 @@ func (fi *SiteStore) SetClientCfg(cfg *ClientConfig) error {
 	if err != nil {
 		return err
 	}
-	return fi.store.SetStringIn(SiteNs, SiteCfgKey, string(cfgBytes))
+	return st.store.SetStringIn(SiteNs, SiteCfgKey, string(cfgBytes))
 }
 
-func (fi *SiteStore) GetCfg() (*SiteConfig, error) {
-	fi.mtx.RLock()
-	defer fi.mtx.RUnlock()
+func (st *SiteStore) GetCfg() (*SiteConfig, error) {
+	st.mtx.RLock()
+	defer st.mtx.RUnlock()
 
-	cfgStr, ok := fi.store.GetStringIn(SiteNs, SiteCfgKey)
+	cfgStr, ok := st.store.GetStringIn(SiteNs, SiteCfgKey)
 	if !ok {
 		return nil, ErrNotFound
 	}

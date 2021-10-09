@@ -127,6 +127,22 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	}
 	siteStore, err := sitestore.NewSiteStore(kv)
 	if err != nil {
+		panic(fmt.Sprintf("fail to new site config store: %s", err))
+	}
+
+	err = siteStore.Init(&sitestore.SiteConfig{
+		ClientCfg: &sitestore.ClientConfig{
+			SiteName: cfg.StringOr("Site.ClientCfg.SiteName", "Quickshare"),
+			SiteDesc: cfg.StringOr("Site.ClientCfg.SiteDesc", "quick and simple file sharing"),
+			Bg: &sitestore.BgConfig{
+				Url:      cfg.StringOr("Site.ClientCfg.Bg.Url", "/static/img/textured_paper.png"),
+				Repeat:   cfg.StringOr("Site.ClientCfg.Bg.Repeat", "repeat"),
+				Position: cfg.StringOr("Site.ClientCfg.Bg.Position", "fixed"),
+				Align:    cfg.StringOr("Site.ClientCfg.Bg.Align", "center"),
+			},
+		},
+	})
+	if err != nil {
 		panic(fmt.Sprintf("fail to init site config store: %s", err))
 	}
 
