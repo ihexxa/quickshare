@@ -604,10 +604,12 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
     updater().setClientCfg({ ...this.props.ui, siteName: ev.target.value });
     this.props.update(updater().updateUI);
   };
+
   changeSiteDesc = (ev: React.ChangeEvent<HTMLInputElement>) => {
     updater().setClientCfg({ ...this.props.ui, siteDesc: ev.target.value });
     this.props.update(updater().updateUI);
   };
+
   changeBgUrl = (ev: React.ChangeEvent<HTMLInputElement>) => {
     updater().setClientCfg({
       ...this.props.ui,
@@ -615,6 +617,7 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
     });
     this.props.update(updater().updateUI);
   };
+
   changeBgRepeat = (ev: React.ChangeEvent<HTMLInputElement>) => {
     updater().setClientCfg({
       ...this.props.ui,
@@ -622,6 +625,7 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
     });
     this.props.update(updater().updateUI);
   };
+
   changeBgPos = (ev: React.ChangeEvent<HTMLInputElement>) => {
     updater().setClientCfg({
       ...this.props.ui,
@@ -629,6 +633,7 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
     });
     this.props.update(updater().updateUI);
   };
+
   changeBgAlign = (ev: React.ChangeEvent<HTMLInputElement>) => {
     updater().setClientCfg({
       ...this.props.ui,
@@ -642,11 +647,56 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
   }
 
   setClientCfg = async () => {
-    return updater().setClientCfgRemote({
-      siteName: this.props.ui.siteName,
-      siteDesc: this.props.ui.siteDesc,
-      bg: this.props.ui.bg,
-    });
+    const bgURL = this.props.ui.bg.url;
+    if (bgURL.length === 0 || bgURL.length >= 4096) {
+      alertMsg(this.props.msg.pkg.get("bg.url.alert"));
+      return;
+    }
+
+    const bgRepeat = this.props.ui.bg.repeat;
+    if (
+      bgRepeat !== "repeat-x" &&
+      bgRepeat !== "repeat-y" &&
+      bgRepeat !== "repeat" &&
+      bgRepeat !== "space" &&
+      bgRepeat !== "round" &&
+      bgRepeat !== "no-repeat"
+    ) {
+      alertMsg(this.props.msg.pkg.get("bg.repeat.alert"));
+      return;
+    }
+
+    const bgPos = this.props.ui.bg.position;
+    if (
+      bgPos !== "top" &&
+      bgPos !== "bottom" &&
+      bgPos !== "left" &&
+      bgPos !== "right" &&
+      bgPos !== "center"
+    ) {
+      alertMsg(this.props.msg.pkg.get("bg.pos.alert"));
+      return;
+    }
+
+    const bgAlign = this.props.ui.bg.align;
+    if (bgAlign != "scroll" && bgAlign != "fixed" && bgAlign != "local") {
+      alertMsg(this.props.msg.pkg.get("bg.align.alert"));
+      return;
+    }
+
+    return updater()
+      .setClientCfgRemote({
+        siteName: this.props.ui.siteName,
+        siteDesc: this.props.ui.siteDesc,
+        bg: this.props.ui.bg,
+      })
+      .then((code: number) => {
+        if (code === 200) {
+          alertMsg(this.props.msg.pkg.get("update.ok"));
+        } else {
+          alertMsg(this.props.msg.pkg.get("update.fail"));
+        }
+      });
   };
 
   resetClientCfg = () => {
@@ -657,8 +707,8 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
       bg: {
         url: "/static/img/textured_paper.png",
         repeat: "repeat",
-        position: "fixed",
-        align: "center",
+        position: "center",
+        align: "fixed",
       },
     });
     this.props.update(updater().updateUI);
@@ -697,6 +747,7 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
                 onChange={this.changeBgUrl}
                 value={this.props.ui.bg.url}
                 className="black0-font"
+                style={{ width: "20rem" }}
                 placeholder={this.props.msg.pkg.get("cfg.bg.url")}
               />
             </div>,

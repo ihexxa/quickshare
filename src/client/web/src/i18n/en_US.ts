@@ -95,4 +95,8 @@ export const msgs: Map<string, string> = Map({
   "cfg.bg.pos": "Position",
   "cfg.bg.align": "Align",
   reset: "Reset",
+  "bg.url.alert": "Image URL is too short or too long",
+  "bg.pos.alert": "Position only supports: top, bottom, left, right, center",
+  "bg.repeat.alert": "Repeat only supports: repeat-x, repeat-y, repeat, space, round, no-repeat",
+  "bg.align.alert": "Align only supports: scroll, fixed, local",
 });
