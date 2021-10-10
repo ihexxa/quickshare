@@ -599,7 +599,7 @@ export class Browser extends React.Component<Props, State, {}> {
                       <button
                         type="button"
                         onClick={this.addSharing}
-                        className="green0-bg white-font margin-r-m"
+                        className="cyan0-bg white-font margin-r-m"
                       >
                         {this.props.msg.pkg.get("browser.share.add")}
                       </button>
