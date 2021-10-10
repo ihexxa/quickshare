@@ -12,10 +12,10 @@
 }
 
 .theme-white .top-bar {
-  background: rgba( 255, 255, 255, 0.9 );
-  box-shadow: 0 5px 30px 0 rgba( 31, 38, 135, 0.1 );
-  backdrop-filter: blur( 9.5px );
-  -webkit-backdrop-filter: blur( 9.5px );
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 5px 30px 0 rgba(31, 38, 135, 0.1);
+  backdrop-filter: blur(9.5px);
+  -webkit-backdrop-filter: blur(9.5px);
 }
 
 /* .theme-white div.hr {
@@ -23,10 +23,10 @@
 } */
 
 .theme-white .op-bar {
-  background: rgba( 255, 255, 255, 0.9 );
-  box-shadow: 0 5px 30px 0 rgba( 31, 38, 135, 0.1 );
-  backdrop-filter: blur( 9.5px );
-  -webkit-backdrop-filter: blur( 9.5px );
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 5px 30px 0 rgba(31, 38, 135, 0.1);
+  backdrop-filter: blur(9.5px);
+  -webkit-backdrop-filter: blur(9.5px);
 }
 
 .theme-white .panel {
