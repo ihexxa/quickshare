@@ -133,7 +133,11 @@ export class TopBar extends React.Component<Props, State, {}> {
                   {this.props.msg.pkg.get("admin")}
                 </button>,
 
-                <button onClick={this.logout} className={`${showLogin}`}>
+                <button
+                  onClick={this.logout}
+                  className={`${showLogin}`}
+                  style={{ minWidth: "7rem" }}
+                >
                   {this.props.msg.pkg.get("login.logout")}
                 </button>,
               ])}
