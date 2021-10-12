@@ -68,7 +68,7 @@ export const msgs: Map<string, string> = Map({
   "role.name": "Role Name",
   "admin.roles": "Roles",
   zhCN: "简体中文",
-  enUS: "English (USA)",
+  enUS: "English (US)",
   "move.fail": "Failed to move",
   "share.404.title": "No folder is in sharing",
   "share.404.desc": "You can share a folder in the items tab",
