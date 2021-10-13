@@ -296,6 +296,7 @@ func (h *MultiUsersSvc) SetPwd(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
+
 	user, err := h.deps.Users().GetUser(uid)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 402, err))
@@ -671,5 +672,48 @@ func (h *MultiUsersSvc) SetUser(c *gin.Context) {
 		return
 	}
 
+	c.JSON(q.Resp(200))
+}
+
+type SetPreferencesReq struct {
+	Preferences *userstore.Preferences `json:"preferences"`
+}
+
+func (h *MultiUsersSvc) SetPreferences(c *gin.Context) {
+	req := &SetPreferencesReq{}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(q.ErrResp(c, 400, err))
+		return
+	}
+
+	claims, err := h.getUserInfo(c)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 401, err))
+		return
+	}
+	if claims[q.RoleParam] == userstore.VisitorRole {
+		c.JSON(q.ErrResp(c, 403, errors.New("operation denied")))
+		return
+	}
+
+	// userstore.setPreferences
+
+	uidStr, ok := claims[q.UserIDParam]
+	if !ok {
+		c.JSON(q.ErrResp(c, 500, errors.New("user id not found")))
+		return
+	}
+	uid, err := strconv.ParseUint(uidStr, 10, 64)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
+	// TODO: validate
+	err = h.deps.Users().SetPreferences(uid, req.Preferences)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
 	c.JSON(q.Resp(200))
 }

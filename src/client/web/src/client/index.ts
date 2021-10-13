@@ -14,6 +14,11 @@ export interface Quota {
   downloadSpeedLimit: number;
 }
 
+export interface Settings {
+  bgURL: string;
+  cssURL: string;
+  lanPackURL: string;
+}
 export interface User {
   id: string;
   name: string;
@@ -21,6 +26,7 @@ export interface User {
   role: string;
   quota: Quota;
   usedSpace: string;
+  settings: Settings;
 }
 
 export interface ListUsersResp {

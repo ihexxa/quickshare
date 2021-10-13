@@ -43,6 +43,12 @@ type Quota struct {
 	DownloadSpeedLimit int   `json:"downloadSpeedLimit"`
 }
 
+type Preferences struct {
+	BgURL      string `json:"bgURL"`
+	CSSURL     string `json:"cssURL"`
+	LanPackURL string `json:"lanPackURL"`
+}
+
 type UserCfg struct {
 	Name string `json:"name"`
 	Role string `json:"role"`
@@ -50,12 +56,13 @@ type UserCfg struct {
 }
 
 type User struct {
-	ID        uint64 `json:"id,string"`
-	Name      string `json:"name"`
-	Pwd       string `json:"pwd"`
-	Role      string `json:"role"`
-	UsedSpace int64  `json:"usedSpace,string"`
-	Quota     *Quota `json:"quota"`
+	ID          uint64       `json:"id,string"`
+	Name        string       `json:"name"`
+	Pwd         string       `json:"pwd"`
+	Role        string       `json:"role"`
+	UsedSpace   int64        `json:"usedSpace,string"`
+	Quota       *Quota       `json:"quota"`
+	Preferences *Preferences `json:"preferences"`
 }
 
 type IUserStore interface {
@@ -69,6 +76,7 @@ type IUserStore interface {
 	CanIncrUsed(id uint64, capacity int64) (bool, error)
 	SetUsed(id uint64, incr bool, capacity int64) error
 	SetPwd(id uint64, pwd string) error
+	SetPreferences(id uint64, settings *Preferences) error
 	ListUsers() ([]*User, error)
 	AddRole(role string) error
 	DelRole(role string) error
@@ -269,6 +277,31 @@ func (us *KVUserStore) SetPwd(id uint64, pwd string) error {
 	}
 
 	gotUser.Pwd = pwd
+	infoBytes, err := json.Marshal(gotUser)
+	if err != nil {
+		return err
+	}
+	return us.store.SetStringIn(UsersNs, userID, string(infoBytes))
+}
+
+func (us *KVUserStore) SetPreferences(id uint64, prefers *Preferences) error {
+	us.mtx.Lock()
+	defer us.mtx.Unlock()
+
+	userID := fmt.Sprint(id)
+	infoStr, ok := us.store.GetStringIn(UsersNs, userID)
+	if !ok {
+		return fmt.Errorf("user (%d) does not exist", id)
+	}
+	gotUser := &User{}
+	err := json.Unmarshal([]byte(infoStr), gotUser)
+	if err != nil {
+		return err
+	} else if gotUser.ID != id {
+		return fmt.Errorf("user id key(%d) info(%d) does match", id, gotUser.ID)
+	}
+
+	gotUser.Preferences = prefers
 	infoBytes, err := json.Marshal(gotUser)
 	if err != nil {
 		return err
