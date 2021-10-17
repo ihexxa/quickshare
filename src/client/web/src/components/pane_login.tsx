@@ -5,7 +5,7 @@ import { ICoreState, MsgProps } from "./core_state";
 import { Flexbox } from "./layout/flexbox";
 import { updater } from "./state_updater";
 import { alertMsg } from "../common/env";
-import { Quota } from "../client";
+import { Quota, Preferences } from "../client";
 
 export interface LoginProps {
   userID: string;
@@ -15,6 +15,7 @@ export interface LoginProps {
   quota: Quota;
   authed: boolean;
   captchaID: string;
+  preferences: Preferences;
 }
 
 export interface Props {

@@ -24,8 +24,6 @@ export interface UIProps {
     position: string;
     align: string;
   };
-  cssURL: string;
-  lanPackURL: string;
 }
 export interface ICoreState {
   browser: BrowserProps;
@@ -70,6 +68,16 @@ export function initState(): ICoreState {
       },
       authed: false,
       captchaID: "",
+      preferences: {
+        bg: {
+          url: "",
+          repeat: "",
+          position: "",
+          align: "",
+        },
+        cssURL: "",
+        lanPackURL: "",        
+      }
     },
     admin: {
       users: Map<string, User>(),
@@ -89,8 +97,6 @@ export function initState(): ICoreState {
         position: "",
         align: "",
       },
-      cssURL: "",
-      lanPackURL: "",
     },
   };
 }

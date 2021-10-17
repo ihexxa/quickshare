@@ -70,6 +70,16 @@ describe("Login", () => {
         downloadSpeedLimit: 3,
       },
       captchaID: "",
+      preferences: {
+        bg: {
+          url: "bgUrl",
+          repeat: "bgRepeat",
+          position: "bgPosition",
+          align: "bgAlign",
+        },
+        cssURL: "cssURL",
+        lanPackURL: "lanPackURL",
+      },
     });
 
     // panes
