@@ -24,6 +24,8 @@ export interface UIProps {
     position: string;
     align: string;
   };
+  cssURL: string;
+  lanPackURL: string;
 }
 export interface ICoreState {
   browser: BrowserProps;
@@ -87,6 +89,8 @@ export function initState(): ICoreState {
         position: "",
         align: "",
       },
+      cssURL: "",
+      lanPackURL: "",
     },
   };
 }

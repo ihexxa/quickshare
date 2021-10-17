@@ -81,6 +81,16 @@ export const resps = {
         uploadSpeedLimit: 3,
         downloadSpeedLimit: 3,
       },
+      preferences: {
+        bg: {
+          url: "bgUrl",
+          repeat: "bgRepeat",
+          position: "bgPosition",
+          align: "bgAlign",
+        },
+        cssURL: "cssURL",
+        lanPackURL: "lanPackURL",
+      },
     },
   },
   getCaptchaIDMockResp: {
