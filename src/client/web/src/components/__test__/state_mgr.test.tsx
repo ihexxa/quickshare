@@ -82,6 +82,16 @@ describe("State Manager", () => {
       },
       authed: true,
       captchaID: "",
+      preferences: {
+        bg: {
+          url: "bgUrl",
+          repeat: "bgRepeat",
+          position: "bgPosition",
+          align: "bgAlign",
+        },
+        cssURL: "cssURL",
+        lanPackURL: "lanPackURL",
+      },
     });
 
     // admin
@@ -177,6 +187,16 @@ describe("State Manager", () => {
       usedSpace: mockSelfResp.data.usedSpace,
       authed: false,
       captchaID: "",
+      preferences: {
+        bg: {
+          url: "bgUrl",
+          repeat: "bgRepeat",
+          position: "bgPosition",
+          align: "bgAlign",
+        },
+        cssURL: "cssURL",
+        lanPackURL: "lanPackURL",
+      },
     });
 
     // admin
