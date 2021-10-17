@@ -181,6 +181,7 @@ func (h *MultiUsersSvc) Init(adminName, adminPwd string) (string, error) {
 					UploadSpeedLimit:   uploadSpeedLimit,
 					DownloadSpeedLimit: downloadSpeedLimit,
 				},
+				Preferences: &userstore.DefaultPreferences,
 			}
 
 			err = h.deps.Users().AddUser(user)
@@ -434,6 +435,7 @@ func (h *MultiUsersSvc) AddUser(c *gin.Context) {
 			UploadSpeedLimit:   h.cfg.IntOr("Users.UploadSpeedLimit", 100*1024),
 			DownloadSpeedLimit: h.cfg.IntOr("Users.DownloadSpeedLimit", 100*1024),
 		},
+		Preferences: &userstore.DefaultPreferences,
 	})
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
@@ -642,6 +644,7 @@ func (h *MultiUsersSvc) Self(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
+	fmt.Println(user.Preferences)
 
 	c.JSON(200, &SelfResp{
 		ID:          claims[q.UserIDParam],
