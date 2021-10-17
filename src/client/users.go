@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/ihexxa/quickshare/src/db/userstore"
 	"github.com/ihexxa/quickshare/src/handlers"
 	"github.com/ihexxa/quickshare/src/handlers/multiusers"
-	"github.com/ihexxa/quickshare/src/db/userstore"
 	"github.com/parnurzeal/gorequest"
 )
 
@@ -161,4 +161,13 @@ func (cl *SingleUserClient) Self(token *http.Cookie) (*http.Response, *multiuser
 		return nil, nil, errs
 	}
 	return resp, selfResp, errs
+}
+
+func (cl *SingleUserClient) SetPreferences(prefers *userstore.Preferences, token *http.Cookie) (*http.Response, string, []error) {
+	return cl.r.Patch(cl.url("/v1/users/preferences")).
+		Send(multiusers.SetPreferencesReq{
+			Preferences: prefers,
+		}).
+		AddCookie(token).
+		End()
 }

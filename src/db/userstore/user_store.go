@@ -46,7 +46,6 @@ type Quota struct {
 
 type Preferences struct {
 	Bg         *sitestore.BgConfig `json:"bg"`
-	BgURL      string              `json:"bgURL"`
 	CSSURL     string              `json:"cssURL"`
 	LanPackURL string              `json:"lanPackURL"`
 }
