@@ -25,12 +25,18 @@ export class RootFrame extends React.Component<Props, State, {}> {
   }
 
   render() {
-    const bgStyle =
-      this.props.ui.bg.url !== ""
-        ? {
-            background: `url("${this.props.ui.bg.url}") ${this.props.ui.bg.repeat} ${this.props.ui.bg.position} ${this.props.ui.bg.align}`,
-          }
-        : {};
+    let bgStyle = undefined;
+    if (this.props.login.preferences.bg.url !== "") {
+      bgStyle = {
+        background: `url("${this.props.login.preferences.bg.url}") ${this.props.login.preferences.bg.repeat} ${this.props.login.preferences.bg.position} ${this.props.login.preferences.bg.align}`,
+      };
+    } else if (this.props.ui.bg.url !== "") {
+      bgStyle = {
+        background: `url("${this.props.ui.bg.url}") ${this.props.ui.bg.repeat} ${this.props.ui.bg.position} ${this.props.ui.bg.align}`,
+      };
+    } else {
+      bgStyle = {};
+    }
 
     const showBrowser =
       this.props.login.userRole === roleVisitor && !this.props.browser.isSharing
