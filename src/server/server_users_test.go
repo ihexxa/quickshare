@@ -62,6 +62,60 @@ func TestUsersHandlers(t *testing.T) {
 
 	var err error
 
+	t.Run("test inited users", func(t *testing.T) {
+		usersCl := client.NewSingleUserClient(addr)
+		resp, _, errs := usersCl.Login(adminName, adminPwd)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+		token := client.GetCookie(resp.Cookies(), su.TokenCookie)
+
+		resp, lsResp, errs := usersCl.ListUsers(token)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+
+		if len(lsResp.Users) != 3 {
+			t.Fatal(fmt.Errorf("incorrect users size (%d)", len(lsResp.Users)))
+		}
+
+		for _, user := range lsResp.Users {
+			if user.Name == adminName {
+				if user.ID != 0 ||
+					user.Role != userstore.AdminRole ||
+					user.UsedSpace != 0 ||
+					user.Quota.SpaceLimit != 1024*1024*1024 || // TODO: export these
+					user.Quota.UploadSpeedLimit != 50*1024*1024 ||
+					user.Quota.DownloadSpeedLimit != 50*1024*1024 ||
+					!reflect.DeepEqual(user.Preferences, &userstore.DefaultPreferences) {
+					t.Fatal(fmt.Errorf("incorrect user info (%v)", user))
+				}
+			}
+			if user.Name == "visitor" {
+				if user.Role != userstore.VisitorRole ||
+					user.Quota.SpaceLimit != 0 || // TODO: export these
+					user.Quota.UploadSpeedLimit != 10*1024*1024 ||
+					user.Quota.DownloadSpeedLimit != 10*1024*1024 ||
+					!reflect.DeepEqual(user.Preferences, &userstore.DefaultPreferences) {
+					t.Fatal(fmt.Errorf("incorrect user info (%v)", user))
+				}
+			}
+			if user.Name == "demo" {
+				if user.Role != userstore.UserRole ||
+					user.Quota.SpaceLimit != 1024 ||
+					user.Quota.UploadSpeedLimit != 409600 ||
+					user.Quota.DownloadSpeedLimit != 409600 ||
+					!reflect.DeepEqual(user.Preferences, &userstore.DefaultPreferences) {
+					t.Fatal(fmt.Errorf("incorrect user info (%v)", user))
+				}
+			}
+		}
+	})
+
 	t.Run("test users APIs: Login-Self-SetPwd-Logout-Login", func(t *testing.T) {
 		users := []*userstore.User{
 			{
@@ -92,14 +146,12 @@ func TestUsersHandlers(t *testing.T) {
 
 		for _, user := range users {
 			usersCl := client.NewSingleUserClient(addr)
-
 			resp, _, errs := usersCl.Login(user.Name, user.Pwd)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if resp.StatusCode != 200 {
 				t.Fatal(resp.StatusCode)
 			}
-
 			token := client.GetCookie(resp.Cookies(), su.TokenCookie)
 
 			resp, selfResp, errs := usersCl.Self(token)
@@ -152,7 +204,6 @@ func TestUsersHandlers(t *testing.T) {
 		} else if resp.StatusCode != 200 {
 			t.Fatal(resp.StatusCode)
 		}
-
 		token := client.GetCookie(resp.Cookies(), su.TokenCookie)
 
 		userName, userPwd := "user_login", "1234"

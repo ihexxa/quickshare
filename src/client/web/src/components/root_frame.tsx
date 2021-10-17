@@ -26,7 +26,7 @@ export class RootFrame extends React.Component<Props, State, {}> {
 
   render() {
     let bgStyle = undefined;
-    if (this.props.login.preferences.bg.url !== "") {
+    if (this.props.login.preferences != null && this.props.login.preferences.bg.url !== "") {
       bgStyle = {
         background: `url("${this.props.login.preferences.bg.url}") ${this.props.login.preferences.bg.repeat} ${this.props.login.preferences.bg.position} ${this.props.login.preferences.bg.align}`,
       };

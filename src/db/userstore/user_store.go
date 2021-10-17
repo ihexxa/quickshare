@@ -31,7 +31,17 @@ const (
 )
 
 var (
-	ErrReachedLimit = errors.New("reached space limit")
+	ErrReachedLimit    = errors.New("reached space limit")
+	DefaultPreferences = Preferences{
+		Bg: &sitestore.BgConfig{
+			Url:      "",
+			Repeat:   "no-repeat",
+			Position: "center",
+			Align:    "fixed",
+		},
+		CSSURL:     "",
+		LanPackURL: "",
+	}
 )
 
 func IsReachedLimitErr(err error) bool {
@@ -123,6 +133,7 @@ func (us *KVUserStore) Init(rootName, rootPwd string) error {
 			UploadSpeedLimit:   defaultUploadSpeedLimit,
 			DownloadSpeedLimit: defaultDownloadSpeedLimit,
 		},
+		Preferences: &DefaultPreferences,
 	}
 	visitor := &User{
 		ID:   VisitorID,
@@ -134,6 +145,7 @@ func (us *KVUserStore) Init(rootName, rootPwd string) error {
 			UploadSpeedLimit:   visitorUploadSpeedLimit,
 			DownloadSpeedLimit: visitorDownloadSpeedLimit,
 		},
+		Preferences: &DefaultPreferences,
 	}
 
 	for _, user := range []*User{admin, visitor} {
