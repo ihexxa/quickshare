@@ -3,13 +3,15 @@ package server
 import (
 	"fmt"
 	"os"
+	"reflect"
 	"strconv"
 	"testing"
 
 	"github.com/ihexxa/quickshare/src/client"
+	"github.com/ihexxa/quickshare/src/db/sitestore"
+	"github.com/ihexxa/quickshare/src/db/userstore"
 	q "github.com/ihexxa/quickshare/src/handlers"
 	su "github.com/ihexxa/quickshare/src/handlers/singleuserhdr"
-	"github.com/ihexxa/quickshare/src/db/userstore"
 )
 
 func TestUsersHandlers(t *testing.T) {
@@ -375,6 +377,58 @@ func TestUsersHandlers(t *testing.T) {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
 			t.Fatal(resp.StatusCode)
+		}
+	})
+
+	t.Run("Login,SetPreferences, Self, Logout", func(t *testing.T) {
+		usersCl := client.NewSingleUserClient(addr)
+		resp, _, errs := usersCl.Login(adminName, adminNewPwd)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+
+		token := client.GetCookie(resp.Cookies(), su.TokenCookie)
+
+		prefers := []*userstore.Preferences{
+			&userstore.Preferences{
+				Bg: &sitestore.BgConfig{
+					Url:      "/bgurl",
+					Repeat:   "no-repeat",
+					Position: "center",
+					Align:    "fixed",
+				},
+				CSSURL:     "/cssurl",
+				LanPackURL: "/lanpack",
+			},
+			&userstore.Preferences{
+				Bg: &sitestore.BgConfig{
+					Url:      "/bgurl2",
+					Repeat:   "no-repeat2",
+					Position: "center2",
+					Align:    "fixed2",
+				},
+				CSSURL:     "/cssurl2",
+				LanPackURL: "/lanpack2",
+			},
+		}
+		for _, prefer := range prefers {
+			resp, _, errs := usersCl.SetPreferences(prefer, token)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if resp.StatusCode != 200 {
+				t.Fatal(resp.StatusCode)
+			}
+
+			resp, selfResp, errs := usersCl.Self(token)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if resp.StatusCode != 200 {
+				t.Fatal(resp.StatusCode)
+			} else if !reflect.DeepEqual(selfResp.Preferences, prefer) {
+				t.Fatal("preference not equal")
+			}
 		}
 	})
 }
