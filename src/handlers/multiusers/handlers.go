@@ -698,8 +698,6 @@ func (h *MultiUsersSvc) SetPreferences(c *gin.Context) {
 		return
 	}
 
-	// userstore.setPreferences
-
 	uidStr, ok := claims[q.UserIDParam]
 	if !ok {
 		c.JSON(q.ErrResp(c, 500, errors.New("user id not found")))

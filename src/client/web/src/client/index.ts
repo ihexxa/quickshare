@@ -14,8 +14,15 @@ export interface Quota {
   downloadSpeedLimit: number;
 }
 
-export interface Settings {
-  bgURL: string;
+export interface BgConfig {
+  url: string;
+  repeat: string;
+  position: string;
+  align: string;
+}
+
+export interface Preferences {
+  bg: BgConfig;
   cssURL: string;
   lanPackURL: string;
 }
@@ -26,7 +33,7 @@ export interface User {
   role: string;
   quota: Quota;
   usedSpace: string;
-  settings: Settings;
+  preferences: Preferences | undefined;
 }
 
 export interface ListUsersResp {
@@ -74,16 +81,10 @@ export interface ListSharingsResp {
 export interface ClientConfigMsg {
   clientCfg: ClientConfig;
 }
-
 export interface ClientConfig {
   siteName: string;
   siteDesc: string;
-  bg: {
-    url: string;
-    repeat: string;
-    position: string;
-    align: string;
-  };
+  bg: BgConfig;
 }
 
 export interface IUsersClient {

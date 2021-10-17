@@ -387,6 +387,9 @@ export class Updater {
       this.props.login.userRole = resp.data.role;
       this.props.login.usedSpace = resp.data.usedSpace;
       this.props.login.quota = resp.data.quota;
+      this.props.ui.bg = resp.data.preferences.bg;
+      this.props.ui.cssURL = resp.data.preferences.cssURL;
+      this.props.ui.lanPackURL = resp.data.preferences.lanPackURL;
       return true;
     }
     this.resetUser();

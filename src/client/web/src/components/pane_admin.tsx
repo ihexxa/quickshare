@@ -400,6 +400,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
         role: this.state.newUserRole,
         quota: undefined,
         usedSpace: "0",
+        preferences: undefined,
       })
       .then((ok: boolean) => {
         if (!ok) {

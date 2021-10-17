@@ -6,7 +6,10 @@ import { initUploadMgr } from "../../worker/upload_mgr";
 import { User, UploadInfo } from "../../client";
 import { MockFilesClient, resps as filesResps } from "../../client/files_mock";
 import { MockUsersClient, resps as usersResps } from "../../client/users_mock";
-import { MockSettingsClient, resps as settingsResps } from "../../client/settings_mock";
+import {
+  MockSettingsClient,
+  resps as settingsResps,
+} from "../../client/settings_mock";
 import { ICoreState, newState } from "../core_state";
 import { MockWorker, UploadState, UploadEntry } from "../../worker/interface";
 
@@ -114,6 +117,16 @@ describe("State Manager", () => {
           spaceLimit: "0",
           uploadSpeedLimit: 0,
           downloadSpeedLimit: 0,
+        },
+        preferences: {
+          bg: {
+            url: "bgUrl",
+            repeat: "bgRepeat",
+            position: "bgPosition",
+            align: "bgAlign",
+          },
+          cssURL: "cssURL",
+          lanPackURL: "lanPackURL",
         },
       },
     };

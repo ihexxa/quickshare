@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ihexxa/quickshare/src/db/sitestore"
 	"github.com/ihexxa/quickshare/src/kvstore"
 )
 
@@ -44,9 +45,10 @@ type Quota struct {
 }
 
 type Preferences struct {
-	BgURL      string `json:"bgURL"`
-	CSSURL     string `json:"cssURL"`
-	LanPackURL string `json:"lanPackURL"`
+	Bg         *sitestore.BgConfig `json:"bg"`
+	BgURL      string              `json:"bgURL"`
+	CSSURL     string              `json:"cssURL"`
+	LanPackURL string              `json:"lanPackURL"`
 }
 
 type UserCfg struct {
