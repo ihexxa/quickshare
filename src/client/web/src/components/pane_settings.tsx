@@ -2,9 +2,10 @@ import * as React from "react";
 import FileSize from "filesize";
 import { List } from "immutable";
 
-import { ICoreState, MsgProps } from "./core_state";
+import { ICoreState, UIProps, MsgProps } from "./core_state";
 import { LoginProps } from "./pane_login";
 import { Flexbox } from "./layout/flexbox";
+import { Flowgrid } from "./layout/flowgrid";
 import { updater } from "./state_updater";
 import { alertMsg } from "../common/env";
 export interface Props {
@@ -29,6 +30,48 @@ export class PaneSettings extends React.Component<Props, State, {}> {
   changeNewPwd2 = (ev: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ newPwd2: ev.target.value });
   };
+  changeBgUrl = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    updater().setPreferences({
+      ...this.props.login.preferences,
+      bg: { ...this.props.login.preferences.bg, url: ev.target.value },
+    });
+    this.props.update(updater().updateLogin);
+  };
+  changeBgRepeat = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    updater().setPreferences({
+      ...this.props.login.preferences,
+      bg: { ...this.props.login.preferences.bg, repeat: ev.target.value },
+    });
+    this.props.update(updater().updateLogin);
+  };
+  changeBgPos = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    updater().setPreferences({
+      ...this.props.login.preferences,
+      bg: { ...this.props.login.preferences.bg, position: ev.target.value },
+    });
+    this.props.update(updater().updateLogin);
+  };
+  changeBgAlign = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    updater().setPreferences({
+      ...this.props.login.preferences,
+      bg: { ...this.props.login.preferences.bg, align: ev.target.value },
+    });
+    this.props.update(updater().updateLogin);
+  };
+  changeCSSURL = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    updater().setPreferences({
+      ...this.props.login.preferences,
+      cssURL: ev.target.value,
+    });
+    this.props.update(updater().updateLogin);
+  };
+  changeLanPackURL = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    updater().setPreferences({
+      ...this.props.login.preferences,
+      lanPackURL: ev.target.value,
+    });
+    this.props.update(updater().updateLogin);
+  };
 
   constructor(p: Props) {
     super(p);
@@ -38,6 +81,18 @@ export class PaneSettings extends React.Component<Props, State, {}> {
       newPwd2: "",
     };
   }
+
+  syncPreferences = async () => {
+    updater()
+      .syncPreferences()
+      .then((status: number) => {
+        if (status === 200) {
+          alertMsg(this.props.msg.pkg.get("update.ok"));
+        } else {
+          alertMsg(this.props.msg.pkg.get("update.fail"));
+        }
+      });
+  };
 
   setPwd = async (): Promise<any> => {
     if (this.state.newPwd1 !== this.state.newPwd2) {
@@ -184,6 +239,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               />
             </span>
           </div>
+
           <div className="hr white0-bg margin-t-m margin-b-m"></div>
           <div className="margin-b-m">
             <Flexbox
@@ -210,6 +266,84 @@ export class PaneSettings extends React.Component<Props, State, {}> {
                 </span>,
               ])}
               childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+            />
+          </div>
+
+          <div className="hr white0-bg margin-t-m margin-b-m"></div>
+          <div>
+            <Flexbox
+              children={List([
+                <span className="title-m bold">
+                  {this.props.msg.pkg.get("cfg.bg")}
+                </span>,
+
+                <span>
+                  <button onClick={this.syncPreferences}>
+                    {this.props.msg.pkg.get("update")}
+                  </button>
+                </span>,
+              ])}
+              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+            />
+            <Flowgrid
+              grids={List([
+                <div className="padding-t-m padding-b-m padding-r-m">
+                  <div className="font-size-s grey1-font">
+                    {this.props.msg.pkg.get("cfg.bg.url")}
+                  </div>
+                  <input
+                    name="bg_url"
+                    type="text"
+                    onChange={this.changeBgUrl}
+                    value={this.props.login.preferences.bg.url}
+                    className="black0-font"
+                    style={{ width: "20rem" }}
+                    placeholder={this.props.msg.pkg.get("cfg.bg.url")}
+                  />
+                </div>,
+
+                <div className="padding-t-m padding-b-m padding-r-m">
+                  <div className="font-size-s grey1-font">
+                    {this.props.msg.pkg.get("cfg.bg.repeat")}
+                  </div>
+                  <input
+                    name="bg_repeat"
+                    type="text"
+                    onChange={this.changeBgRepeat}
+                    value={this.props.login.preferences.bg.repeat}
+                    className="black0-font"
+                    placeholder={this.props.msg.pkg.get("cfg.bg.repeat")}
+                  />
+                </div>,
+
+                <div className="padding-t-m padding-b-m padding-r-m">
+                  <div className="font-size-s grey1-font">
+                    {this.props.msg.pkg.get("cfg.bg.pos")}
+                  </div>
+                  <input
+                    name="bg_pos"
+                    type="text"
+                    onChange={this.changeBgPos}
+                    value={this.props.login.preferences.bg.position}
+                    className="black0-font"
+                    placeholder={this.props.msg.pkg.get("cfg.bg.pos")}
+                  />
+                </div>,
+
+                <div className="padding-t-m padding-b-m padding-r-m">
+                  <div className="font-size-s grey1-font">
+                    {this.props.msg.pkg.get("cfg.bg.align")}
+                  </div>
+                  <input
+                    name="bg_align"
+                    type="text"
+                    onChange={this.changeBgAlign}
+                    value={this.props.login.preferences.bg.align}
+                    className="black0-font"
+                    placeholder={this.props.msg.pkg.get("cfg.bg.align")}
+                  />
+                </div>,
+              ])}
             />
           </div>
         </div>
