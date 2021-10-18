@@ -65,7 +65,7 @@ export const msgs: Map<string, string> = Map({
   "role.add": "新增角色",
   "role.name": "角色名字",
   "admin.roles": "角色列表",
-  zhCN: "中文简体",
+  zhCN: "简体中文",
   enUS: "English(US)",
   "move.fail": "移动失败",
   "share.404.title": "没有找到正在共享的文件夹",

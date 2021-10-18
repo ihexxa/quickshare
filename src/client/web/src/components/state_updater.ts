@@ -17,6 +17,7 @@ import {
   roleAdmin,
   visitorID,
   ClientConfig,
+  Preferences,
 } from "../client";
 import { FilesClient } from "../client/files";
 import { UsersClient } from "../client/users";
@@ -578,6 +579,15 @@ export class Updater {
       siteDesc: cfg.siteDesc,
       bg: cfg.bg,
     };
+  };
+
+  setPreferences = (prefer: Preferences) => {
+    this.props.login.preferences = { ...prefer };
+  };
+
+  syncPreferences = async ():Promise<number> => {
+    const resp = await this.usersClient.setPreferences(this.props.login.preferences);
+    return resp.status;
   };
 
   getClientCfg = async (): Promise<number> => {

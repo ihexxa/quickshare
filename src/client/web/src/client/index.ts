@@ -107,6 +107,7 @@ export interface IUsersClient {
   delRole: (role: string) => Promise<Response>;
   listRoles: () => Promise<Response>;
   getCaptchaID: () => Promise<Response>;
+  setPreferences: (prefers: Preferences) => Promise<Response>;
 }
 
 export interface IFilesClient {

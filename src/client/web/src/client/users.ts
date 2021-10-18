@@ -1,4 +1,4 @@
-import { BaseClient, Response, userIDParam, Quota } from "./";
+import { BaseClient, Response, userIDParam, Quota, Preferences } from "./";
 
 export class UsersClient extends BaseClient {
   constructor(url: string) {
@@ -139,6 +139,16 @@ export class UsersClient extends BaseClient {
       method: "get",
       url: `${this.url}/v1/captchas/`,
       params: {},
+    });
+  };
+
+  setPreferences = (prefers: Preferences): Promise<Response> => {
+    return this.do({
+      method: "patch",
+      url: `${this.url}/v1/users/preferences`,
+      data: {
+        preferences: prefers,
+      },
     });
   };
 }
