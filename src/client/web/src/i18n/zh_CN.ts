@@ -99,4 +99,8 @@ export const msgs: Map<string, string> = Map({
   "bg.repeat.alert":
     "Repeat目前仅支持repeat-x, repeat-y, repeat, space, round, no-repeat",
   "bg.align.alert": "Align目前仅支持scroll, fixed, local",
+  "prefer.theme": "主题",
+  "prefer.theme.url": "主题链接",
+  "settings.customLan": "自定义语言包",
+  "settings.lanPackURL": "语言包链接",
 });

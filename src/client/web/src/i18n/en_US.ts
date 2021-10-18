@@ -99,4 +99,8 @@ export const msgs: Map<string, string> = Map({
   "bg.pos.alert": "Position only supports: top, bottom, left, right, center",
   "bg.repeat.alert": "Repeat only supports: repeat-x, repeat-y, repeat, space, round, no-repeat",
   "bg.align.alert": "Align only supports: scroll, fixed, local",
+  "prefer.theme": "Theme",
+  "prefer.theme.url": "Theme URL",
+  "settings.customLan": "Customized Language Pack",
+  "settings.lanPackURL": "Language Pack URL",
 });
