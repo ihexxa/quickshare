@@ -274,6 +274,41 @@ export class PaneSettings extends React.Component<Props, State, {}> {
             <Flexbox
               children={List([
                 <span className="title-m bold">
+                  {this.props.msg.pkg.get("settings.customLan")}
+                </span>,
+
+                <span>
+                  <button onClick={this.syncPreferences}>
+                    {this.props.msg.pkg.get("update")}
+                  </button>
+                </span>,
+              ])}
+              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+            />
+            <Flowgrid
+              grids={List([
+                <div className="padding-t-m padding-b-m padding-r-m">
+                  <div className="font-size-s grey1-font">
+                    {this.props.msg.pkg.get("settings.lanPackURL")}
+                  </div>
+                  <input
+                    type="text"
+                    onChange={this.changeLanPackURL}
+                    value={this.props.login.preferences.lanPackURL}
+                    className="black0-font"
+                    style={{ width: "20rem" }}
+                    placeholder={this.props.msg.pkg.get("settings.lanPackURL")}
+                  />
+                </div>,
+              ])}
+            />
+          </div>
+
+          <div className="hr white0-bg margin-t-m margin-b-m"></div>
+          <div>
+            <Flexbox
+              children={List([
+                <span className="title-m bold">
                   {this.props.msg.pkg.get("cfg.bg")}
                 </span>,
 
@@ -346,6 +381,42 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               ])}
             />
           </div>
+
+          <div className="hr white0-bg margin-t-m margin-b-m"></div>
+          <div>
+            <Flexbox
+              children={List([
+                <span className="title-m bold">
+                  {this.props.msg.pkg.get("prefer.theme")}
+                </span>,
+
+                <span>
+                  <button onClick={this.syncPreferences}>
+                    {this.props.msg.pkg.get("update")}
+                  </button>
+                </span>,
+              ])}
+              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+            />
+            <Flowgrid
+              grids={List([
+                <div className="padding-t-m padding-b-m padding-r-m">
+                  <div className="font-size-s grey1-font">
+                    {this.props.msg.pkg.get("prefer.theme.url")}
+                  </div>
+                  <input
+                    type="text"
+                    onChange={this.changeCSSURL}
+                    value={this.props.login.preferences.cssURL}
+                    className="black0-font"
+                    style={{ width: "20rem" }}
+                    placeholder={this.props.msg.pkg.get("prefer.theme.url")}
+                  />
+                </div>,
+              ])}
+            />
+          </div>
+
         </div>
       </div>
     );
