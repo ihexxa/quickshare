@@ -1,5 +1,5 @@
 // TODO: replace this with jest mocks
-import { Response, Quota } from "./";
+import { Response, Quota, Preferences } from "./";
 
 export interface UsersClientResps {
   loginMockResp: Response;
@@ -16,6 +16,7 @@ export interface UsersClientResps {
   listRolesMockResp: Response;
   selfMockResp: Response;
   getCaptchaIDMockResp: Response;
+  setPreferencesMockResp: Response;
 }
 
 export const resps = {
@@ -100,6 +101,11 @@ export const resps = {
       id: "mockCaptchaID",
     },
   },
+  setPreferencesMockResp: {
+    status: 200,
+    statusText: "",
+    data: {},
+  },
 };
 export class MockUsersClient {
   private url: string;
@@ -174,5 +180,9 @@ export class MockUsersClient {
 
   getCaptchaID = (): Promise<Response> => {
     return this.wrapPromise(this.resps.getCaptchaIDMockResp);
+  };
+
+  setPreferences = (prefers: Preferences): Promise<Response> => {
+    return this.wrapPromise(this.resps.setPreferencesMockResp);
   };
 }
