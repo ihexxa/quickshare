@@ -41,6 +41,7 @@ var (
 		},
 		CSSURL:     "",
 		LanPackURL: "",
+		Lan:        "en_US",
 	}
 )
 
@@ -58,6 +59,7 @@ type Preferences struct {
 	Bg         *sitestore.BgConfig `json:"bg"`
 	CSSURL     string              `json:"cssURL"`
 	LanPackURL string              `json:"lanPackURL"`
+	Lan        string              `json:"lan"`
 }
 
 type UserCfg struct {
