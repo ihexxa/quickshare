@@ -209,4 +209,11 @@ export class FilesClient extends BaseClient {
       },
     });
   };
+
+  download = (url: string): Promise<Response> => {
+    return this.do({
+      method: "get",
+      url,
+    });
+  }
 }

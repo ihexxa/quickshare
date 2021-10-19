@@ -27,7 +27,7 @@ import { Up } from "../worker/upload_mgr";
 import { alertMsg } from "../common/env";
 import { LocalStorage } from "../common/localstorage";
 
-import { MsgPackage } from "../i18n/msger";
+import { MsgPackage, isValidLanPack } from "../i18n/msger";
 
 function getCookieLanKey(user: string) {
   return `qs_${user}_lan`;
@@ -360,6 +360,11 @@ export class Updater {
         return this.initPanes();
       })
       .then(() => {
+        // init i18n
+        // TOOD: status is ignored, should return alert
+        return this.fetchLanPack();
+      })
+      .then(() => {
         // init admin content
         if (this.props.login.userRole === roleAdmin) {
           return Promise.all([this.listRoles(), this.listUsers()]);
@@ -520,25 +525,19 @@ export class Updater {
     return resp.status === 200;
   };
 
-  initLan = () => {
-    const lanKey = getCookieLanKey(this.props.login.userName);
-    const lanSaved = LocalStorage.get(lanKey);
-    this.setLan(lanSaved === "" ? "en_US" : lanSaved);
-  };
-
   setLan = (lan: string) => {
-    const lanKey = getCookieLanKey(this.props.login.userName);
-
     switch (lan) {
       case "en_US":
         this.props.msg.lan = "en_US";
         this.props.msg.pkg = MsgPackage.get(lan);
-        LocalStorage.set(lanKey, "en_US");
+        this.props.login.preferences.lan = "en_US";
+        this.props.login.preferences.lanPackURL = "";
         break;
       case "zh_CN":
         this.props.msg.lan = "zh_CN";
         this.props.msg.pkg = MsgPackage.get(lan);
-        LocalStorage.set(lanKey, "zh_CN");
+        this.props.login.preferences.lan = "zh_CN";
+        this.props.login.preferences.lanPackURL = "";
         break;
       default:
         alertMsg("language package not found");
@@ -585,8 +584,10 @@ export class Updater {
     this.props.login.preferences = { ...prefer };
   };
 
-  syncPreferences = async ():Promise<number> => {
-    const resp = await this.usersClient.setPreferences(this.props.login.preferences);
+  syncPreferences = async (): Promise<number> => {
+    const resp = await this.usersClient.setPreferences(
+      this.props.login.preferences
+    );
     return resp.status;
   };
 
@@ -599,6 +600,47 @@ export class Updater {
       this.props.ui.bg = clientCfg.bg;
     }
 
+    return resp.status;
+  };
+
+  // initLan = () => {
+  //   const lanKey = getCookieLanKey(this.props.login.userName);
+  //   const lanSaved = LocalStorage.get(lanKey);
+  //   this.setLan(lanSaved === "" ? "en_US" : lanSaved);
+  // };
+
+  fetchLanPack = async (): Promise<number> => {
+    const url = this.props.login.preferences.lanPackURL;
+    if (url === "") {
+      const lan = this.props.login.preferences.lan;
+      if (lan == "en_US" || lan == "zh_CN") {
+        // fallback to build-in language pack
+        this.props.msg.lan = lan;
+        this.props.msg.pkg = MsgPackage.get(lan);
+      } else {
+        // fallback to english
+        this.props.msg.lan = "en_US";
+        this.props.msg.pkg = MsgPackage.get("en_US");
+      }
+      return 404;
+    }
+
+    const resp = await this.filesClient.download(url);
+    let isValid = true;
+    if (resp == null || resp.data == null) {
+      isValid = false;
+    } else if (!isValidLanPack(resp.data)) {
+      isValid = false;
+    }
+
+    if (!isValid) {
+      this.props.msg.lan = "en_US";
+      this.props.msg.pkg = MsgPackage.get("en_US");
+      this.props.login.preferences.lanPackURL = "";
+      return 400;
+    }
+    this.props.msg.lan = resp.data.lan;
+    this.props.msg.pkg = Map<string, string>(resp.data);
     return resp.status;
   };
 

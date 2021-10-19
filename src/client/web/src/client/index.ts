@@ -25,6 +25,7 @@ export interface Preferences {
   bg: BgConfig;
   cssURL: string;
   lanPackURL: string;
+  lan: string;
 }
 export interface User {
   id: string;
@@ -131,6 +132,7 @@ export interface IFilesClient {
   isSharing: (dirPath: string) => Promise<Response>;
   listSharings: () => Promise<Response<ListSharingsResp>>;
   generateHash: (filePath: string) => Promise<Response>;
+  download: (url: string) => Promise<Response>;
 }
 
 export interface ISettingsClient {

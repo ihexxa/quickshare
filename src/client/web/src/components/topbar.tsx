@@ -68,8 +68,6 @@ export class TopBar extends React.Component<Props, State, {}> {
         this.props.update(updater().updatePanes);
         this.props.update(updater().updateAdmin);
         this.props.update(updater().updateUI);
-
-        updater().initLan();
         this.props.update(updater().updateMsg);
       });
   };
