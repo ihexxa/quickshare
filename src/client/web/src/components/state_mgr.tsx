@@ -65,8 +65,6 @@ export class StateMgr extends React.Component<Props, State, {}> {
         this.update(updater().updatePanes);
         this.update(updater().updateAdmin);
         this.update(updater().updateUI);
-
-        updater().initLan();
         this.update(updater().updateMsg);
       });
   };

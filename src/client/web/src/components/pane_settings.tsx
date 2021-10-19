@@ -125,7 +125,16 @@ export class PaneSettings extends React.Component<Props, State, {}> {
 
   setLan = (lan: string) => {
     updater().setLan(lan);
-    this.props.update(updater().updateMsg);
+    updater()
+      .syncPreferences()
+      .then((status: number) => {
+        if (status === 200) {
+          alertMsg(this.props.msg.pkg.get("update.ok"));
+        } else {
+          alertMsg(this.props.msg.pkg.get("update.fail"));
+        }
+        this.props.update(updater().updateMsg);
+      });
   };
 
   render() {
@@ -416,7 +425,6 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               ])}
             />
           </div>
-
         </div>
       </div>
     );
