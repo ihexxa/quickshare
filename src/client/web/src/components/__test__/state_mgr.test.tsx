@@ -12,6 +12,7 @@ import {
 } from "../../client/settings_mock";
 import { ICoreState, newState } from "../core_state";
 import { MockWorker, UploadState, UploadEntry } from "../../worker/interface";
+import { MsgPackage } from "../../i18n/msger";
 
 describe("State Manager", () => {
   test("initUpdater for admin", async () => {
@@ -91,6 +92,7 @@ describe("State Manager", () => {
         },
         cssURL: "cssURL",
         lanPackURL: "lanPackURL",
+        lan: "en_US",
       },
     });
 
@@ -109,9 +111,17 @@ describe("State Manager", () => {
       users: usersMap,
       roles: roles,
     });
+
+    // msg
+    // it is fallback to en_US because language pack url is not valid
+    expect(coreState.msg.lan).toEqual("en_US");
+    expect(coreState.msg.pkg).toEqual(MsgPackage.get("en_US"));
+
+    // ui
+    expect(coreState.ui.bg).toEqual(settingsResps.getClientCfgMockResp.data.clientCfg.bg);
   });
 
-  test("initUpdater for visitor in sharing mode", async () => {
+  xtest("initUpdater for visitor in sharing mode", async () => {
     const usersCl = new MockUsersClient("");
     const filesCl = new MockFilesClient("");
     const settingsCl = new MockSettingsClient("");
@@ -130,13 +140,14 @@ describe("State Manager", () => {
         },
         preferences: {
           bg: {
-            url: "bgUrl",
-            repeat: "bgRepeat",
-            position: "bgPosition",
-            align: "bgAlign",
+            url: "",
+            repeat: "",
+            position: "",
+            align: "",
           },
-          cssURL: "cssURL",
-          lanPackURL: "lanPackURL",
+          cssURL: "",
+          lanPackURL: "",
+          lan: "en_US",
         },
       },
     };
@@ -148,8 +159,6 @@ describe("State Manager", () => {
     };
     usersCl.setMock(mockUserResps);
 
-    const mockWorkerClass = mock(MockWorker);
-    const mockWorker = instance(mockWorkerClass);
     const coreState = newState();
 
     const mgr = new StateMgr({}); // it will call initUpdater
@@ -189,13 +198,14 @@ describe("State Manager", () => {
       captchaID: "",
       preferences: {
         bg: {
-          url: "bgUrl",
-          repeat: "bgRepeat",
-          position: "bgPosition",
-          align: "bgAlign",
+          url: "",
+          repeat: "",
+          position: "",
+          align: "",
         },
-        cssURL: "cssURL",
-        lanPackURL: "lanPackURL",
+        cssURL: "",
+        lanPackURL: "",
+        lan: "en_US",
       },
     });
 
@@ -204,5 +214,13 @@ describe("State Manager", () => {
       users: Map({}),
       roles: Set<string>(),
     });
+
+    // msg
+    // it is fallback to en_US because language pack url is not valid
+    expect(coreState.msg.lan).toEqual("en_US");
+    expect(coreState.msg.pkg).toEqual(MsgPackage.get("en_US"));
+
+    // ui
+    expect(coreState.ui.bg).toEqual(settingsResps.getClientCfgMockResp.data.clientCfg.bg);
   });
 });

@@ -79,6 +79,7 @@ describe("Login", () => {
         },
         cssURL: "cssURL",
         lanPackURL: "lanPackURL",
+        lan: "en_US",
       },
     });
 

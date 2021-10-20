@@ -76,7 +76,8 @@ export function initState(): ICoreState {
           align: "",
         },
         cssURL: "",
-        lanPackURL: "",        
+        lanPackURL: "",
+        lan: "en_US",
       }
     },
     admin: {
