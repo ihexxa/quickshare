@@ -383,6 +383,17 @@ export class Updater {
       downloadSpeedLimit: 0,
       spaceLimit: "0",
     };
+    this.props.login.preferences = {
+      bg: {
+        url: "",
+        repeat: "",
+        position: "",
+        align: "",
+      },
+      cssURL: "",
+      lanPackURL: "",
+      lan: "en_US",
+    };
   };
 
   self = async (): Promise<boolean> => {
@@ -531,13 +542,11 @@ export class Updater {
         this.props.msg.lan = "en_US";
         this.props.msg.pkg = MsgPackage.get(lan);
         this.props.login.preferences.lan = "en_US";
-        this.props.login.preferences.lanPackURL = "";
         break;
       case "zh_CN":
         this.props.msg.lan = "zh_CN";
         this.props.msg.pkg = MsgPackage.get(lan);
         this.props.login.preferences.lan = "zh_CN";
-        this.props.login.preferences.lanPackURL = "";
         break;
       default:
         alertMsg("language package not found");
@@ -603,12 +612,6 @@ export class Updater {
     return resp.status;
   };
 
-  // initLan = () => {
-  //   const lanKey = getCookieLanKey(this.props.login.userName);
-  //   const lanSaved = LocalStorage.get(lanKey);
-  //   this.setLan(lanSaved === "" ? "en_US" : lanSaved);
-  // };
-
   fetchLanPack = async (): Promise<number> => {
     const url = this.props.login.preferences.lanPackURL;
     if (url === "") {
@@ -636,7 +639,6 @@ export class Updater {
     if (!isValid) {
       this.props.msg.lan = "en_US";
       this.props.msg.pkg = MsgPackage.get("en_US");
-      this.props.login.preferences.lanPackURL = "";
       return 400;
     }
     this.props.msg.lan = resp.data.lan;

@@ -20,10 +20,10 @@ export const resps = {
         siteName: "",
         siteDesc: "",
         bg: {
-          url: "",
-          repeat: "",
-          position: "",
-          align: "",
+          url: "clientCfg_bg_url",
+          repeat: "clientCfg_bg_repeat",
+          position: "clientCfg_bg_position",
+          align: "clientCfg_bg_align",
         },
       }
     },
