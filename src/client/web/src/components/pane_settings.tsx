@@ -391,7 +391,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
             />
           </div>
 
-          <div className="hr white0-bg margin-t-m margin-b-m"></div>
+          {/* <div className="hr white0-bg margin-t-m margin-b-m"></div>
           <div>
             <Flexbox
               children={List([
@@ -424,7 +424,8 @@ export class PaneSettings extends React.Component<Props, State, {}> {
                 </div>,
               ])}
             />
-          </div>
+          </div> */}
+
         </div>
       </div>
     );
