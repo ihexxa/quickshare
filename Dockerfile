@@ -3,7 +3,7 @@ ADD . /quickshare
 WORKDIR /quickshare
 RUN /quickshare/scripts/build_exec.sh
 
-FROM node as build-fe
+FROM node:lts as build-fe
 COPY --from=build-be /quickshare /quickshare
 WORKDIR /quickshare
 RUN yarn run build:fe \
