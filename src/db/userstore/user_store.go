@@ -125,6 +125,7 @@ func NewKVUserStore(store kvstore.IKVStore) (*KVUserStore, error) {
 
 func (us *KVUserStore) Init(rootName, rootPwd string) error {
 	var err error
+	adminPreferences := DefaultPreferences
 	admin := &User{
 		ID:   0,
 		Name: rootName,
@@ -135,8 +136,10 @@ func (us *KVUserStore) Init(rootName, rootPwd string) error {
 			UploadSpeedLimit:   defaultUploadSpeedLimit,
 			DownloadSpeedLimit: defaultDownloadSpeedLimit,
 		},
-		Preferences: &DefaultPreferences,
+		Preferences: &adminPreferences,
 	}
+
+	visitorPreferences := DefaultPreferences
 	visitor := &User{
 		ID:   VisitorID,
 		Name: VisitorName,
@@ -147,7 +150,7 @@ func (us *KVUserStore) Init(rootName, rootPwd string) error {
 			UploadSpeedLimit:   visitorUploadSpeedLimit,
 			DownloadSpeedLimit: visitorDownloadSpeedLimit,
 		},
-		Preferences: &DefaultPreferences,
+		Preferences: &visitorPreferences,
 	}
 
 	for _, user := range []*User{admin, visitor} {

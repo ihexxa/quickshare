@@ -171,6 +171,7 @@ func (h *MultiUsersSvc) Init(adminName, adminPwd string) (string, error) {
 				return "", err
 			}
 
+			preferences := userstore.DefaultPreferences
 			user := &userstore.User{
 				ID:   h.deps.ID().Gen(),
 				Name: userCfg.Name,
@@ -181,7 +182,7 @@ func (h *MultiUsersSvc) Init(adminName, adminPwd string) (string, error) {
 					UploadSpeedLimit:   uploadSpeedLimit,
 					DownloadSpeedLimit: downloadSpeedLimit,
 				},
-				Preferences: &userstore.DefaultPreferences,
+				Preferences: &preferences,
 			}
 
 			err = h.deps.Users().AddUser(user)
@@ -425,6 +426,7 @@ func (h *MultiUsersSvc) AddUser(c *gin.Context) {
 		return
 	}
 
+	newPreferences := userstore.DefaultPreferences
 	err = h.deps.Users().AddUser(&userstore.User{
 		ID:   uid,
 		Name: req.Name,
@@ -435,7 +437,7 @@ func (h *MultiUsersSvc) AddUser(c *gin.Context) {
 			UploadSpeedLimit:   h.cfg.IntOr("Users.UploadSpeedLimit", 100*1024),
 			DownloadSpeedLimit: h.cfg.IntOr("Users.DownloadSpeedLimit", 100*1024),
 		},
-		Preferences: &userstore.DefaultPreferences,
+		Preferences: &newPreferences,
 	})
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))

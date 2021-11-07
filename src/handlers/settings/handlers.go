@@ -51,7 +51,6 @@ func (h *SettingsSvc) SetClientCfg(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 400, err))
 		return
 	}
-	h.deps.Log().Info(req.ClientCfg)
 
 	if err = validateClientCfg(req.ClientCfg); err != nil {
 		c.JSON(q.ErrResp(c, 400, err))
