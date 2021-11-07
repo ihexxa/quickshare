@@ -121,7 +121,7 @@ describe("State Manager", () => {
     expect(coreState.ui.bg).toEqual(settingsResps.getClientCfgMockResp.data.clientCfg.bg);
   });
 
-  xtest("initUpdater for visitor in sharing mode", async () => {
+  test("initUpdater for visitor in sharing mode", async () => {
     const usersCl = new MockUsersClient("");
     const filesCl = new MockFilesClient("");
     const settingsCl = new MockSettingsClient("");
