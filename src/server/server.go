@@ -58,6 +58,11 @@ func NewServer(cfg gocfg.ICfg) (*Server, error) {
 		return nil, fmt.Errorf("init handlers error: %w", err)
 	}
 
+	err = checkCompatibility(deps)
+	if err != nil {
+		return nil, fmt.Errorf("fail to check compatibility: %w", err)
+	}
+
 	port := cfg.GrabInt("Server.Port")
 	portStr, ok := cfg.String("ENV.PORT")
 	if ok && portStr != "" {
@@ -80,6 +85,22 @@ func NewServer(cfg gocfg.ICfg) (*Server, error) {
 		deps:   deps,
 		cfg:    cfg,
 	}, nil
+}
+
+func checkCompatibility(deps *depidx.Deps) error {
+	users, err := deps.Users().ListUsers()
+	if err != nil {
+		return err
+	}
+
+	for _, user := range users {
+		fmt.Println(user, user.Preferences)
+		if user.Preferences == nil {
+			deps.Users().SetPreferences(user.ID, &userstore.DefaultPreferences)
+		}
+	}
+
+	return nil
 }
 
 func mkRoot(rootPath string) {
