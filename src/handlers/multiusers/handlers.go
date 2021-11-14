@@ -646,7 +646,6 @@ func (h *MultiUsersSvc) Self(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
-	fmt.Println(user.Preferences)
 
 	c.JSON(200, &SelfResp{
 		ID:          claims[q.UserIDParam],

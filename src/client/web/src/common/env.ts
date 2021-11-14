@@ -7,5 +7,10 @@ export function alertMsg(msg: string) {
 }
 
 export function confirmMsg(msg: string): boolean {
-  return confirm(msg);
+  try {
+    return confirm(msg);
+  } catch (e) {
+    console.log(`${msg}: yes (confirm is not implemented)`);
+    return true;
+  }
 }
