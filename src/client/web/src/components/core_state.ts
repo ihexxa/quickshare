@@ -41,7 +41,7 @@ export function newState(): ICoreState {
 export function initState(): ICoreState {
   return {
     browser: {
-      dirPath: List<string>(["."]),
+      dirPath: List<string>([]),
       items: List<MetadataResp>([]),
       sharings: List<string>([]),
       isSharing: false,

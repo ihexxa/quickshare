@@ -314,11 +314,13 @@ export class Updater {
         return Promise.all([]);
       }
 
+
       // redirect to login
       this.setPanes(Set<string>(["login"]));
       this.displayPane("login");
       return Promise.all([this.getCaptchaID()]);
     }
+
 
     if (this.props.login.userRole === roleAdmin) {
       this.setPanes(Set<string>(["login", "settings", "admin"]));
