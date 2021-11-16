@@ -16,6 +16,9 @@ import { UploadEntry, UploadState } from "../../worker/interface";
 
 
 describe("TopBar", () => {
+  // stub confirm
+  window.confirm = (message?: string): boolean => {return true;};
+
   test("logout as visitor without sharing", async () => {
     const mockWorkerClass = mock(MockWorker);
     const mockWorker = instance(mockWorkerClass);
