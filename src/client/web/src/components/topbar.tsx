@@ -1,5 +1,5 @@
 import * as React from "react";
-import { List, Set } from "immutable";
+import { List } from "immutable";
 import { alertMsg, confirmMsg } from "../common/env";
 
 import { ICoreState, MsgProps } from "./core_state";
@@ -89,13 +89,11 @@ export class TopBar extends React.Component<Props, State, {}> {
     const showAdmin = this.props.panes.paneNames.get("admin") ? "" : "hidden";
 
     return (
-      <div
-        id="top-bar"
-        className="top-bar cyan1-font padding-t-m padding-b-m padding-l-l padding-r-l"
-      >
+      <div id="top-bar">
         <Flexbox
           children={List([
             <a
+              id="topbar-title"
               href="https://github.com/ihexxa/quickshare"
               target="_blank"
               className="h5"
@@ -106,27 +104,21 @@ export class TopBar extends React.Component<Props, State, {}> {
             <Flexbox
               children={List([
                 <span className={`${showUserInfo}`}>
-                  <span className="grey3-font font-s margin-r-m">
+                  <span id="topbar-user-info">
                     {this.props.login.userName}
                   </span>
-                  {/* &nbsp;-&nbsp;
-                  <span className="grey0-font font-s margin-r-m">
-                    {this.props.login.userRole}
-                  </span> */}
                 </span>,
 
                 <button
                   onClick={this.showSettings}
-                  className={`grey3-bg grey4-font margin-r-m ${showSettings}`}
-                  style={{ minWidth: "7rem" }}
+                  className={`margin-r-m ${showSettings}`}
                 >
                   {this.props.msg.pkg.get("settings")}
                 </button>,
 
                 <button
                   onClick={this.showAdmin}
-                  className={`grey3-bg grey4-font margin-r-m ${showAdmin}`}
-                  style={{ minWidth: "7rem" }}
+                  className={`margin-r-m ${showAdmin}`}
                 >
                   {this.props.msg.pkg.get("admin")}
                 </button>,
@@ -134,7 +126,6 @@ export class TopBar extends React.Component<Props, State, {}> {
                 <button
                   onClick={this.logout}
                   className={`${showLogin}`}
-                  style={{ minWidth: "7rem" }}
                 >
                   {this.props.msg.pkg.get("login.logout")}
                 </button>,

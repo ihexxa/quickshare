@@ -422,21 +422,7 @@ tr button {
 .weight-normal {
   font-weight: normal;
 }
-.h1,
-.h2 {
-  font-size: 2rem;
-  font-weight: bold;
-}
-.h3,
-.h4 {
-  font-size: 1.8rem;
-  font-weight: bold;
-}
-.h5,
-.h6 {
-  font-size: 1.6rem;
-  font-weight: bold;
-}
+
 .noselect {
   -webkit-touch-callout: none; /* iOS Safari */
   -webkit-user-select: none; /* Safari */
