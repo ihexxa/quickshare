@@ -4,11 +4,22 @@
   background: url("/static/img/textured_paper.png") repeat fixed center;
 } 
 
-.theme-default .top-bar {
+.theme-default #top-bar {
   background: rgba(255, 255, 255, 0.9);
   box-shadow: 0 5px 30px 0 rgba(31, 38, 135, 0.1);
   backdrop-filter: blur(9.5px);
+  color: #16a085;
+  padding: 1rem 2rem 1rem 2rem;
   -webkit-backdrop-filter: blur(9.5px);
+}
+
+.theme-default #topbar-user-info {
+  color: #697384;
+  margin-right: 1rem;
+}
+
+.theme-default #top-bar button {
+  min-width: 7rem;
 }
 
 .theme-default .op-bar {
@@ -27,4 +38,52 @@
 
 .theme-default #tail {
   color: #34495e;
+}
+
+.theme-default .h1,
+.theme-default .h2 {
+  font-size: 2rem;
+  font-weight: bold;
+}
+.theme-default .h3,
+.theme-default .h4 {
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+.theme-default .h5,
+.theme-default .h6 {
+  font-size: 1.6rem;
+  font-weight: bold;
+}
+
+
+.theme-default .font-xs {
+  font-size: 1.2rem;
+  line-height: 1.8rem;
+}
+
+.theme-default .font-s {
+  font-size: 1.4rem;
+  line-height: 2.1rem;
+}
+
+.theme-default .font-m {
+  font-size: 1.6rem;
+  line-height: 2.4rem;
+}
+
+.theme-default .font-l {
+  font-size: 1.8rem;
+  line-height: 2.7rem;
+}
+
+.theme-default .font-xl {
+  font-size: 2.0rem;
+  line-height: 3rem;
+}
+
+.theme-default button {
+  color: #697384;
+  font-size: 1.2rem;
+  background-color: #ecf0f6;
 }
