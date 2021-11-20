@@ -42,6 +42,7 @@ Choose Language: English | [简体中文](./docs/README_zh-cn.md)
 - MISC
   - Adaptive UI
   - I18n support
+  - Wallpaper customization
   - Cross-platform: support Linux, Mac and Windows
 
 
