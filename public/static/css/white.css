@@ -43,11 +43,8 @@
   border-radius: 0.6rem;
 }
 
-.theme-default #panes #title-container {
-  padding: 2rem;
-}
-
 .theme-default #panes .container {
+  padding: 2rem;
   background-color: white;
   margin: 3rem auto 1rem auto;
   border-radius: 0.6rem;
@@ -107,6 +104,16 @@
   color: #95a5a6;
   font-size: 1.2rem;
   line-height: 1.8rem;
+}
+
+.theme-default .user-form {
+  border: dashed 2px #ccc;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.theme-default .role-list-item {
+  margin: 0 auto 1rem 0;
 }
 
 .theme-default .wide-input {
