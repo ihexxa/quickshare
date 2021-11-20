@@ -4,12 +4,12 @@ body button {
   background-color: #ecf0f6;
 }
 
-body input {
+/* body input {
   font-size: 1.2rem;
   color: #697384;
   background-color: #ecf0f6;
   border: solid 1px #95a5a6;
-}
+} */
 
 #bg {
   position: fixed;
@@ -649,12 +649,12 @@ div.hr {
   font-size: 1.4rem;
 }
 
-.captcha {
+/* .captcha {
   width: 14rem;
   height: 3rem;
   border: solid 1px #95a5a6;
   border-radius: 0.5rem;
-}
+} */
 
 .user {
   font-weight: bold;

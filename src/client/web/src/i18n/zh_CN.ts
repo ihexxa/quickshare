@@ -103,4 +103,5 @@ export const msgs: Map<string, string> = Map({
   "prefer.theme.url": "主题链接",
   "settings.customLan": "自定义语言包",
   "settings.lanPackURL": "语言包链接",
+  "op.fail": "操作失败",
 });

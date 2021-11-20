@@ -57,6 +57,10 @@
   text-transform: capitalize;
 }
 
+.theme-default #pane-login {
+  padding: 2rem;
+}
+
 .theme-default .op-bar {
   background: rgba(255, 255, 255, 1);
   box-shadow: 0 5px 30px 0 rgba(31, 38, 135, 0.1);
@@ -71,8 +75,43 @@
   z-index: 9;
 }
 
+.theme-default .float-input {
+  display: inline-block;
+  margin: auto 1rem 1rem auto;
+}
+
+.theme-default .float-input:last-child {
+  margin: auto 1rem auto auto;
+}
+
+.theme-default .float-input .label {
+  font-size: 1.2rem;
+  line-height: 1.8rem;
+  color: #7f8c8d;
+}
+
+.theme-default #btn-login {
+  background-color: #1abc9c;
+  color: #fff;
+}
+
 .theme-default #tail {
   color: #34495e;
+}
+
+.theme-default input {
+  font-size: 1.2rem;
+  color: #34495e;
+  background-color: #ecf0f6;
+  border: solid 1px #95a5a6;
+  margin: 1rem 0;
+}
+
+.captcha {
+  width: 14rem;
+  height: 3rem;
+  border: solid 1px #95a5a6;
+  border-radius: 0.5rem;
 }
 
 .theme-default .h1,
