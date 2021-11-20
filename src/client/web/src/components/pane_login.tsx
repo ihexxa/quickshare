@@ -70,7 +70,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
           return updater().initAll(params);
         } else {
           this.setState({ user: "", pwd: "", captchaInput: "" });
-          alertMsg("Failed to login.");
+          alertMsg(this.props.msg.pkg.get("op.fail"));
           return updater().getCaptchaID();
         }
       })
@@ -94,74 +94,64 @@ export class AuthPane extends React.Component<Props, State, {}> {
 
   render() {
     return (
-      <span>
-        <div
-          className="container"
-          style={{ display: this.props.login.authed ? "none" : "block" }}
-        >
-          <div className="padding-l">
-            <span className="inline-block margin-r-m margin-b-m">
-              <div className="font-size-s grey1-font">
-                {this.props.msg.pkg.get("login.username")}
-              </div>
-              <input
-                name="user"
-                type="text"
-                onChange={this.changeUser}
-                value={this.state.user}
-                className="black0-font margin-t-m margin-b-m margin-r-m"
-                placeholder={this.props.msg.pkg.get("login.username")}
-              />
-            </span>
-
-            <span className="inline-block margin-r-m margin-b-m">
-              <div className="font-size-s grey1-font">
-                {this.props.msg.pkg.get("login.pwd")}
-              </div>
-              <input
-                name="pwd"
-                type="password"
-                onChange={this.changePwd}
-                value={this.state.pwd}
-                className="black0-font margin-t-m margin-b-m"
-                placeholder={this.props.msg.pkg.get("login.pwd")}
-              />
-            </span>
-
-            <span className="inline-block margin-r-m margin-b-m">
-              <div className="font-size-s grey1-font">
-                {this.props.msg.pkg.get("login.captcha")}
-              </div>
-              <Flexbox
-                children={List([
-                  <input
-                    name="captcha"
-                    type="text"
-                    onChange={this.changeCaptcha}
-                    value={this.state.captchaInput}
-                    className="black0-font margin-t-m margin-b-m margin-r-m"
-                    placeholder={this.props.msg.pkg.get("login.captcha")}
-                  />,
-                  <img
-                    src={`/v1/captchas/imgs?capid=${this.props.login.captchaID}`}
-                    className="captcha"
-                    onClick={this.refreshCaptcha}
-                  />,
-                ])}
-              />
-            </span>
-
-            <span className="inline-block margin-r-m margin-b-m">
-              <button
-                onClick={this.login}
-                className="green0-bg white-font margin-t-m margin-b-m"
-              >
-                {this.props.msg.pkg.get("login.login")}
-              </button>
-            </span>
+      <div
+        id="pane-login"
+        className="container"
+        style={{ display: this.props.login.authed ? "none" : "block" }}
+      >
+        <span className="float-input">
+          <div className="label">
+            {this.props.msg.pkg.get("login.username")}
           </div>
-        </div>
-      </span>
+          <input
+            name="user"
+            type="text"
+            onChange={this.changeUser}
+            value={this.state.user}
+            placeholder={this.props.msg.pkg.get("login.username")}
+          />
+        </span>
+
+        <span className="float-input">
+          <div className="label">{this.props.msg.pkg.get("login.pwd")}</div>
+          <input
+            name="pwd"
+            type="password"
+            onChange={this.changePwd}
+            value={this.state.pwd}
+            placeholder={this.props.msg.pkg.get("login.pwd")}
+          />
+        </span>
+
+        <span className="float-input">
+          <div className="label">{this.props.msg.pkg.get("login.captcha")}</div>
+          <Flexbox
+            children={List([
+              <input
+                name="captcha"
+                type="text"
+                onChange={this.changeCaptcha}
+                value={this.state.captchaInput}
+                placeholder={this.props.msg.pkg.get("login.captcha")}
+              />,
+              <img
+                src={`/v1/captchas/imgs?capid=${this.props.login.captchaID}`}
+                className="captcha"
+                onClick={this.refreshCaptcha}
+              />,
+            ])}
+          />
+        </span>
+
+        <span className="float-input">
+          <button
+            id="btn-login"
+            onClick={this.login}
+          >
+            {this.props.msg.pkg.get("login.login")}
+          </button>
+        </span>
+      </div>
     );
   }
 }

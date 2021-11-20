@@ -97,10 +97,12 @@ export const msgs: Map<string, string> = Map({
   reset: "Reset",
   "bg.url.alert": "Image URL is too short or too long",
   "bg.pos.alert": "Position only supports: top, bottom, left, right, center",
-  "bg.repeat.alert": "Repeat only supports: repeat-x, repeat-y, repeat, space, round, no-repeat",
+  "bg.repeat.alert":
+    "Repeat only supports: repeat-x, repeat-y, repeat, space, round, no-repeat",
   "bg.align.alert": "Align only supports: scroll, fixed, local",
   "prefer.theme": "Theme",
   "prefer.theme.url": "Theme URL",
   "settings.customLan": "Customized Language Pack",
   "settings.lanPackURL": "Language Pack URL",
+  "op.fail": "Operation Failed",
 });
