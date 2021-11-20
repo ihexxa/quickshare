@@ -38,14 +38,16 @@ export class RootFrame extends React.Component<Props, State, {}> {
       bgStyle = {};
     }
 
+    const fontSizeClass = "font-m";
+    const theme = "theme-default";
     const showBrowser =
       this.props.login.userRole === roleVisitor && !this.props.browser.isSharing
         ? "hidden"
         : "";
 
     return (
-      <div className="theme-white desktop">
-        <div id="bg" className="bg bg-img font-m" style={bgStyle}>
+      <div id="root-frame" className={`${theme} ${fontSizeClass}`}>
+        <div id="bg" style={bgStyle}>
           <Panes
             panes={this.props.panes}
             login={this.props.login}
@@ -72,7 +74,7 @@ export class RootFrame extends React.Component<Props, State, {}> {
             />
           </div>
 
-          <div id="tail" className="container-center black0-font">
+          <div id="tail" className="container-center">
             <a href="https://github.com/ihexxa/quickshare">Quickshare</a> -
             quick and simple file sharing.
           </div>

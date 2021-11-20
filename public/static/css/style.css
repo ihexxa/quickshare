@@ -63,12 +63,12 @@ body input {
   display: block;
 }
 
-.container-center {
+/* .container-center {
   margin: 2rem auto auto auto;
   width: 96%;
   max-width: 80rem;
   z-index: 9;
-}
+} */
 
 .layouter .vcell {
   text-align: left;
