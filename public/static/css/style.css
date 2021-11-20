@@ -76,7 +76,7 @@ body input {
   border-bottom: solid 1px #e8e8e8;
 }
 
-#panes {
+/* #panes {
   position: fixed;
   left: 0;
   right: 0;
@@ -85,24 +85,18 @@ body input {
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 100;
   overflow: scroll;
-}
+} */
 
-#panes .root-container {
+/* #panes .root-container {
   max-width: 80rem;
   width: 96%;
   z-index: 101;
   text-align: left;
   margin: 3rem auto 8rem auto;
   border-radius: 0.6rem;
-}
+} */
 
-#panes .container {
-  background-color: white;
-  margin: 3rem auto 1rem auto;
-  border-radius: 0.6rem;
-}
-
-#panes .return-btn {
+/* #panes .return-btn {
   position: fixed;
   max-width: 960px;
   width: 96%;
@@ -114,7 +108,7 @@ body input {
   bottom: 3rem;
   height: 3rem;
   border-radius: 0.6rem;
-}
+} */
 
 #op-bar {
   /* width: 96%; */
@@ -653,10 +647,6 @@ div.hr {
 
 .breadcrumb {
   font-size: 1.4rem;
-}
-
-.txt-cap {
-  text-transform: capitalize;
 }
 
 .captcha {
