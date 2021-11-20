@@ -81,7 +81,7 @@
 }
 
 .theme-default .float-input:last-child {
-  margin: auto 1rem auto auto;
+  margin: auto auto auto auto;
 }
 
 .theme-default .float-input .label {
@@ -93,6 +93,37 @@
 .theme-default #btn-login {
   background-color: #1abc9c;
   color: #fff;
+}
+
+.theme-default .pane-title {
+  color: black;
+}
+
+.theme-default #pane-settings {
+  padding: 2rem;
+}
+
+.theme-default #pane-settings #profile {
+  color: #95a5a6;
+  font-size: 1.2rem;
+  line-height: 1.8rem;
+}
+
+.theme-default .wide-input {
+  width: 20rem;
+}
+
+.theme-default .hr {
+  margin: 1rem 0;
+  background-color: #ecf0f1;
+}
+
+.theme-default .key-value {
+  margin-top: 0.5rem;
+}
+
+.theme-default .value {
+  color: #697384;
 }
 
 .theme-default #tail {
