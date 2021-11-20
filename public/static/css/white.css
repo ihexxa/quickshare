@@ -1,8 +1,9 @@
-#root-frame {}
+#root-frame {
+}
 
 .theme-default #bg {
   background: url("/static/img/textured_paper.png") repeat fixed center;
-} 
+}
 
 .theme-default #top-bar {
   background: rgba(255, 255, 255, 0.9);
@@ -20,6 +21,40 @@
 
 .theme-default #top-bar button {
   min-width: 7rem;
+}
+
+.theme-default #panes {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  overflow: scroll;
+}
+
+.theme-default #root-container {
+  max-width: 80rem;
+  width: 96%;
+  z-index: 101;
+  text-align: left;
+  margin: 3rem auto 8rem auto;
+  border-radius: 0.6rem;
+}
+
+.theme-default #panes #title-container {
+  padding: 2rem;
+}
+
+.theme-default #panes .container {
+  background-color: white;
+  margin: 3rem auto 1rem auto;
+  border-radius: 0.6rem;
+}
+
+.theme-default #panes #title {
+  text-transform: capitalize;
 }
 
 .theme-default .op-bar {
@@ -56,7 +91,6 @@
   font-weight: bold;
 }
 
-
 .theme-default .font-xs {
   font-size: 1.2rem;
   line-height: 1.8rem;
@@ -78,7 +112,7 @@
 }
 
 .theme-default .font-xl {
-  font-size: 2.0rem;
+  font-size: 2rem;
   line-height: 3rem;
 }
 

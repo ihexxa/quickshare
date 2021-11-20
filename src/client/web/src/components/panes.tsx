@@ -53,19 +53,18 @@ export class Panes extends React.Component<Props, State, {}> {
 
     return (
       <div id="panes" className={displaying === "" ? "hidden" : ""}>
-        <div className="root-container">
-          <div className="container">
+        <div id="root-container">
+          <div id="title-container" className="container">
             <Flexbox
               children={List([
-                <h3 className="flex-list-item-l txt-cap">{title}</h3>,
+                <h3 id="title">{title}</h3>,
                 <button
                   onClick={this.closePane}
-                  className={`red0-bg white-font ${btnClass}`}
+                  className={`${btnClass}`}
                 >
                   {this.props.msg.pkg.get("panes.close")}
                 </button>,
               ])}
-              className="padding-l"
               childrenStyles={List([{}, { justifyContent: "flex-end" }])}
             />
           </div>
