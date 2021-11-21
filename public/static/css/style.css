@@ -110,19 +110,6 @@ body button {
   border-radius: 0.6rem;
 } */
 
-#op-bar {
-  /* width: 96%; */
-  /* max-width: 960px; */
-
-  /* position: fixed;
-  top: 6rem;
-  right: auto;
-  bottom: auto;
-  left: auto; */
-  line-height: 3rem;
-  border-radius: 0.6rem;
-}
-
 #item-list {
   margin-top: 2rem;
 }
@@ -189,9 +176,9 @@ body button {
   display: block;
 }
 
-#item-list .item-op {
+/* #item-list .item-op {
   line-height: 4rem;
-}
+} */
 
 tr button {
   background-color: #95a5a6;
@@ -660,53 +647,11 @@ div.hr {
   font-weight: bold;
 }
 
-.title-m {
-  font-size: 1.4rem;
-  /* font-weight: bold; */
-  line-height: 2rem;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow-wrap: break-word;
-  display: block;
-}
-
-.desc-m {
-  font-size: 1.2rem;
-  line-height: 2rem;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow-wrap: break-word;
-  display: block;
-}
-
-.title-l {
-  font-size: 1.8rem;
-  font-weight: bold;
-  line-height: 2rem;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow-wrap: break-word;
-  display: block;
-}
-
-.desc-l {
-  font-size: 1.2rem;
-  line-height: 2rem;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow-wrap: break-word;
-  display: block;
-}
-
-.alert-red {
+/* .alert-red {
   border: dashed 1px #e74c3c;
   color: #e74c3c;
   border-radius: 0.5rem;
-}
+} */
 
 .detail {
   font-size: 1.2rem;

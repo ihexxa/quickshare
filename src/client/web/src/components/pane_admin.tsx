@@ -452,7 +452,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
     });
 
     return (
-      <div className="font-size-m">
+      <div className="font-m">
         <div className="container">
           <BgCfg
             ui={this.props.ui}
@@ -714,66 +714,56 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
           childrenStyles={List([{}, { justifyContent: "flex-end" }])}
         />
 
-        <Flowgrid
-          grids={List([
-            <div className="padding-t-m padding-b-m padding-r-m">
-              <div className="font-size-s grey1-font">
-                {this.props.msg.pkg.get("cfg.bg.url")}
-              </div>
-              <input
-                name="bg_url"
-                type="text"
-                onChange={this.changeBgUrl}
-                value={this.props.ui.bg.url}
-                className="black0-font"
-                style={{ width: "20rem" }}
-                placeholder={this.props.msg.pkg.get("cfg.bg.url")}
-              />
-            </div>,
+        <div>
+          <div className="float-input">
+            <div className="label">{this.props.msg.pkg.get("cfg.bg.url")}</div>
+            <input
+              name="bg_url"
+              type="text"
+              onChange={this.changeBgUrl}
+              value={this.props.ui.bg.url}
+              style={{ width: "20rem" }}
+              placeholder={this.props.msg.pkg.get("cfg.bg.url")}
+            />
+          </div>
 
-            <div className="padding-t-m padding-b-m padding-r-m">
-              <div className="font-size-s grey1-font">
-                {this.props.msg.pkg.get("cfg.bg.repeat")}
-              </div>
-              <input
-                name="bg_repeat"
-                type="text"
-                onChange={this.changeBgRepeat}
-                value={this.props.ui.bg.repeat}
-                className="black0-font"
-                placeholder={this.props.msg.pkg.get("cfg.bg.repeat")}
-              />
-            </div>,
+          <div className="float-input">
+            <div className="label">
+              {this.props.msg.pkg.get("cfg.bg.repeat")}
+            </div>
+            <input
+              name="bg_repeat"
+              type="text"
+              onChange={this.changeBgRepeat}
+              value={this.props.ui.bg.repeat}
+              placeholder={this.props.msg.pkg.get("cfg.bg.repeat")}
+            />
+          </div>
 
-            <div className="padding-t-m padding-b-m padding-r-m">
-              <div className="font-size-s grey1-font">
-                {this.props.msg.pkg.get("cfg.bg.pos")}
-              </div>
-              <input
-                name="bg_pos"
-                type="text"
-                onChange={this.changeBgPos}
-                value={this.props.ui.bg.position}
-                className="black0-font"
-                placeholder={this.props.msg.pkg.get("cfg.bg.pos")}
-              />
-            </div>,
+          <div className="float-input">
+            <div className="label">{this.props.msg.pkg.get("cfg.bg.pos")}</div>
+            <input
+              name="bg_pos"
+              type="text"
+              onChange={this.changeBgPos}
+              value={this.props.ui.bg.position}
+              placeholder={this.props.msg.pkg.get("cfg.bg.pos")}
+            />
+          </div>
 
-            <div className="padding-t-m padding-b-m padding-r-m">
-              <div className="font-size-s grey1-font">
-                {this.props.msg.pkg.get("cfg.bg.align")}
-              </div>
-              <input
-                name="bg_align"
-                type="text"
-                onChange={this.changeBgAlign}
-                value={this.props.ui.bg.align}
-                className="black0-font"
-                placeholder={this.props.msg.pkg.get("cfg.bg.align")}
-              />
-            </div>,
-          ])}
-        />
+          <div className="float-input">
+            <div className="label">
+              {this.props.msg.pkg.get("cfg.bg.align")}
+            </div>
+            <input
+              name="bg_align"
+              type="text"
+              onChange={this.changeBgAlign}
+              value={this.props.ui.bg.align}
+              placeholder={this.props.msg.pkg.get("cfg.bg.align")}
+            />
+          </div>
+        </div>
       </div>
     );
   }
