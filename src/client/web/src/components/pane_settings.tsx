@@ -386,7 +386,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
             <Flowgrid
               grids={List([
                 <div className="padding-t-m padding-b-m padding-r-m">
-                  <div className="font-size-s grey1-font">
+                  <div className="font-s grey1-font">
                     {this.props.msg.pkg.get("prefer.theme.url")}
                   </div>
                   <input

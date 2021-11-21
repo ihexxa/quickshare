@@ -58,11 +58,112 @@
   padding: 2rem;
 }
 
-.theme-default .op-bar {
+.theme-default #breadcrumb {
+  padding: 1rem;
+  width: 100%;
+}
+
+.theme-default #breadcrumb .item {
+  color: #697384;
+  margin-right: 1rem;
+  /* padding: 1rem; */
+}
+
+.theme-default #breadcrumb .item {
+  color: #697384;
+  margin-right: 1rem;
+  /* padding: 1rem; */
+}
+
+#browser .container {
+  width: 100%;
+  color: #34495e;
+  background-color: white;
+  border-radius: 0.8rem;
+  margin-bottom: 2rem;
+}
+
+/* .theme-default #breadcrumb .item:last-child {
+  margin-right: 0;
+} */
+
+.theme-default .select-btn {
+  width: 8rem;
+  display: inline-block;
+  margin: 0 1rem 0 0;
+}
+
+.theme-default #op-bar {
+}
+
+.theme-default #browser-op {
+  padding: 1rem;
+}
+
+.theme-default #browser-op button {
+  margin: 0 1rem 0 0;
+}
+
+.theme-default #browser {
+  padding-bottom: 1rem;
+}
+
+.theme-default #icon-home {
+  color: black;
+  margin-right: 1rem;
+}
+
+.theme-default #browser .item-op {
+  line-height: 4rem;
+  padding: 1rem;
+}
+
+.theme-default #browser .error {
+  line-height: 4rem;
+  border: dashed 1px #e74c3c;
+  background-color: #e74c3c;
+  border-radius: 0.5rem;
+  color: white;
+  margin: 1rem;
+  padding: 0 1rem;
+}
+
+.theme-default .upload-item {
+  padding: 1rem;
+}
+
+.theme-default #share-list {
+  padding: 1rem;
+}
+
+.theme-default #tabs {
+  padding: 1rem;
+}
+
+.theme-default #upload-op {
+  padding: 1rem;
+}
+
+/* .theme-default .op-bar {
   background: rgba(255, 255, 255, 1);
   box-shadow: 0 5px 30px 0 rgba(31, 38, 135, 0.1);
   backdrop-filter: blur(9.5px);
   -webkit-backdrop-filter: blur(9.5px);
+} */
+
+.theme-default .red-btn {
+  background-color: #e74c3c;
+  color: #fff;
+}
+
+.theme-default .blue-btn {
+  background-color: #3498db;
+  color: #fff;
+}
+
+.theme-default .cyan-btn {
+  background-color: #1abc9c;
+  color: #fff;
 }
 
 .theme-default .container-center {
@@ -70,6 +171,11 @@
   width: 96%;
   max-width: 80rem;
   z-index: 9;
+}
+
+.theme-default .float {
+  display: inline-block;
+  margin: auto 1rem auto auto;
 }
 
 .theme-default .float-input {
@@ -135,6 +241,9 @@
 
 .theme-default #tail {
   color: #34495e;
+  font-size: 1.2rem;
+  text-align: center;
+  margin: 4rem auto;
 }
 
 .theme-default input {

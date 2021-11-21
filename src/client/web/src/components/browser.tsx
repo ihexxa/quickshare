@@ -365,7 +365,7 @@ export class Browser extends React.Component<Props, State, {}> {
             onClick={() =>
               this.chdir(this.props.browser.dirPath.slice(0, key + 1))
             }
-            className="grey3-bg grey4-font margin-r-m"
+            className="item"
           >
             {pathPart}
           </button>
@@ -378,37 +378,33 @@ export class Browser extends React.Component<Props, State, {}> {
     } pointer`;
 
     const ops = (
-      <div>
-        <Flowgrid
-          grids={List([
-            <div className="padding-t-m padding-b-m padding-r-m">
-              <input
-                type="text"
-                onChange={this.onInputChange}
-                value={this.state.inputValue}
-                className="black0-font margin-r-m"
-                placeholder={this.props.msg.pkg.get("browser.folder.name")}
-              />
-              <button onClick={this.onMkDir} className="margin-r-m">
-                {this.props.msg.pkg.get("browser.folder.add")}
-              </button>
-            </div>,
+      <div id="upload-op">
+        <div className="float">
+          <input
+            type="text"
+            onChange={this.onInputChange}
+            value={this.state.inputValue}
+            placeholder={this.props.msg.pkg.get("browser.folder.name")}
+            className="float"
+          />
+          <button onClick={this.onMkDir} className="float">
+            {this.props.msg.pkg.get("browser.folder.add")}
+          </button>
+        </div>
 
-            <div className="padding-t-m padding-b-m">
-              <button onClick={this.onClickUpload}>
-                {this.props.msg.pkg.get("browser.upload")}
-              </button>
-              <input
-                type="file"
-                onChange={this.addUploads}
-                multiple={true}
-                value={this.props.browser.uploadValue}
-                ref={this.assignInput}
-                className="black0-font hidden"
-              />
-            </div>,
-          ])}
-        />
+        <div className="float">
+          <button onClick={this.onClickUpload}>
+            {this.props.msg.pkg.get("browser.upload")}
+          </button>
+          <input
+            type="file"
+            onChange={this.addUploads}
+            multiple={true}
+            value={this.props.browser.uploadValue}
+            ref={this.assignInput}
+            className="hidden"
+          />
+        </div>
       </div>
     );
 
@@ -573,13 +569,11 @@ export class Browser extends React.Component<Props, State, {}> {
 
     const itemListPane =
       this.props.browser.tab === "" || this.props.browser.tab === "item" ? (
-        <div>
-          <div id="op-bar" className={`op-bar ${showOp}`}>
-            <div className="margin-l-m margin-r-m margin-b-m">{ops}</div>
-          </div>
+        <div id="item-list">
+          <div className={`container ${showOp}`}>{ops}</div>
 
-          <div className="container" style={{ paddingBottom: "1rem" }}>
-            <div className={`${showOp}`}>
+          <div className="container">
+            <div id="browser-op" className={`${showOp}`}>
               <Flexbox
                 children={List([
                   <span>
@@ -591,7 +585,7 @@ export class Browser extends React.Component<Props, State, {}> {
                             this.props.browser.dirPath.join("/")
                           );
                         }}
-                        className="red0-bg white-font margin-r-m"
+                        className="red-btn"
                       >
                         {this.props.msg.pkg.get("browser.share.del")}
                       </button>
@@ -599,27 +593,25 @@ export class Browser extends React.Component<Props, State, {}> {
                       <button
                         type="button"
                         onClick={this.addSharing}
-                        className="cyan0-bg white-font margin-r-m"
+                        className="cyan-btn"
                       >
                         {this.props.msg.pkg.get("browser.share.add")}
                       </button>
                     )}
+                  </span>,
 
+                  <span>
                     {this.state.selectedItems.size > 0 ? (
                       <span>
                         <button
                           type="button"
                           onClick={() => this.delete()}
-                          className="red0-bg white-font margin-r-m"
+                          className="red-btn"
                         >
                           {this.props.msg.pkg.get("browser.delete")}
                         </button>
 
-                        <button
-                          type="button"
-                          onClick={() => this.moveHere()}
-                          className="margin-r-m"
-                        >
+                        <button type="button" onClick={() => this.moveHere()}>
                           {this.props.msg.pkg.get("browser.paste")}
                         </button>
                       </span>
@@ -627,35 +619,41 @@ export class Browser extends React.Component<Props, State, {}> {
                   </span>,
 
                   <span>
-                    <span className="desc-m grey0-font">{`${this.props.msg.pkg.get(
+                    <span
+                      id="space-used"
+                      className="desc-m grey0-font"
+                    >{`${this.props.msg.pkg.get(
                       "browser.used"
                     )} ${usedSpace} / ${spaceLimit}`}</span>
                   </span>,
                 ])}
-                className="padding-m"
-                childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+                childrenStyles={List([
+                  { flex: "0 0 auto" },
+                  { flex: "0 0 auto" },
+                  { justifyContent: "flex-end" },
+                ])}
               />
             </div>
 
             <Flexbox
               children={List([
-                <span className="padding-m">
+                <span id="breadcrumb">
                   <Flexbox
                     children={List([
-                      <RiHomeSmileFill
-                        size="3rem"
-                        className="margin-r-m black-font"
-                      />,
-
+                      <RiHomeSmileFill size="3rem" id="icon-home" />,
                       <Flexbox children={breadcrumb} />,
+                    ])}
+                    childrenStyles={List([
+                      { flex: "0 0 auto" },
+                      { flex: "0 0 auto" },
                     ])}
                   />
                 </span>,
 
-                <span className={`padding-m ${showOp}`}>
+                <span className={`${showOp}`}>
                   <button
                     onClick={() => this.selectAll()}
-                    style={{ width: "8rem", display: "inline-block" }}
+                    className="select-btn"
                   >
                     {this.props.msg.pkg.get("browser.selectAll")}
                   </button>
@@ -683,6 +681,7 @@ export class Browser extends React.Component<Props, State, {}> {
                     children={List([
                       <RiUploadCloudLine
                         size="3rem"
+                        id="icon-upload"
                         className="margin-r-m blue0-font"
                       />,
 
@@ -697,16 +696,16 @@ export class Browser extends React.Component<Props, State, {}> {
                   />
                 </span>,
 
-                <div className="item-op padding-m">
+                <div className="item-op">
                   <button
                     onClick={() => this.stopUploading(uploading.filePath)}
-                    className="grey3-bg grey4-font margin-r-m"
+                    className="float-input"
                   >
                     {this.props.msg.pkg.get("browser.stop")}
                   </button>
                   <button
                     onClick={() => this.deleteUpload(uploading.filePath)}
-                    className="grey3-bg grey4-font"
+                    className="float-input"
                   >
                     {this.props.msg.pkg.get("browser.delete")}
                   </button>
@@ -715,9 +714,7 @@ export class Browser extends React.Component<Props, State, {}> {
               childrenStyles={List([{}, { justifyContent: "flex-end" }])}
             />
             {uploading.err.trim() === "" ? null : (
-              <div className="alert-red margin-s">
-                <span className="padding-m">{uploading.err.trim()}</span>
-              </div>
+              <div className="error">{uploading.err.trim()}</div>
             )}
           </div>
         );
@@ -751,10 +748,10 @@ export class Browser extends React.Component<Props, State, {}> {
             />
           </div>
         ) : (
-          <div className="container padding-b-m">
+          <div className="container">
             <Flexbox
               children={List([
-                <span className="padding-m">
+                <span className="upload-item">
                   <Flexbox
                     children={List([
                       <RiUploadCloudFill
@@ -785,7 +782,7 @@ export class Browser extends React.Component<Props, State, {}> {
 
     const sharingList = this.props.browser.sharings.map((dirPath: string) => {
       return (
-        <div key={dirPath} className="padding-m">
+        <div id="share-list" key={dirPath}>
           <Flexbox
             children={List([
               <Flexbox
@@ -802,7 +799,7 @@ export class Browser extends React.Component<Props, State, {}> {
                 <input
                   type="text"
                   readOnly
-                  className="margin-r-m"
+                  className="float-input"
                   value={`${
                     document.location.href.split("?")[0]
                   }?dir=${encodeURIComponent(dirPath)}`}
@@ -811,7 +808,7 @@ export class Browser extends React.Component<Props, State, {}> {
                   onClick={() => {
                     this.deleteSharing(dirPath);
                   }}
-                  className="grey3-bg grey4-bg"
+                  className="float-input"
                 >
                   {this.props.msg.pkg.get("browser.share.del")}
                 </button>
@@ -885,14 +882,14 @@ export class Browser extends React.Component<Props, State, {}> {
     const showTabs = this.props.login.userRole === roleVisitor ? "hidden" : "";
     return (
       <div>
-        <div id="item-list">
+        <div id="browser">
           <div className={`container ${showTabs}`}>
-            <div className="padding-m">
+            <div id="tabs">
               <button
                 onClick={() => {
                   this.setTab("item");
                 }}
-                className="margin-r-m"
+                className="float"
               >
                 <Flexbox
                   children={List([
@@ -909,7 +906,7 @@ export class Browser extends React.Component<Props, State, {}> {
                 onClick={() => {
                   this.setTab("uploading");
                 }}
-                className="margin-r-m"
+                className="float"
               >
                 <Flexbox
                   children={List([
@@ -928,7 +925,7 @@ export class Browser extends React.Component<Props, State, {}> {
                 onClick={() => {
                   this.setTab("sharing");
                 }}
-                className="margin-r-m"
+                className="float"
               >
                 <Flexbox
                   children={List([
@@ -945,6 +942,7 @@ export class Browser extends React.Component<Props, State, {}> {
               </button>
             </div>
           </div>
+
           <div>{sharingListPane}</div>
           <div>{uploadingListPane}</div>
           {itemListPane}
