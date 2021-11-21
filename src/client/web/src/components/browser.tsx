@@ -373,7 +373,7 @@ export class Browser extends React.Component<Props, State, {}> {
       }
     );
 
-    const nameCellClass = `item-name item-name-${
+    const nameWidthClass = `item-name item-name-${
       this.props.ui.isVertical ? "vertical" : "horizontal"
     } pointer`;
 
@@ -438,26 +438,28 @@ export class Browser extends React.Component<Props, State, {}> {
                     className="yellow0-font margin-r-m"
                   />,
 
-                  <span className="">
-                    <span className={nameCellClass}>
-                      <span
-                        className="title-m"
-                        onClick={() => this.gotoChild(item.name)}
-                      >
-                        {item.name}
-                      </span>
-                      <div className="desc-m grey0-font">
-                        <span>
-                          {item.modTime.slice(0, item.modTime.indexOf("T"))}
-                        </span>
-                      </div>
+                  <span className={`${nameWidthClass}`}>
+                    <span
+                      className="title-m"
+                      onClick={() => this.gotoChild(item.name)}
+                    >
+                      {item.name}
                     </span>
+                    <div className="desc-m grey0-font">
+                      <span>
+                        {item.modTime.slice(0, item.modTime.indexOf("T"))}
+                      </span>
+                    </div>
                   </span>,
+                ])}
+                childrenStyles={List([
+                  { flex: "0 0 auto" },
+                  { flex: "0 0 auto" },
                 ])}
               />
             </span>,
 
-            <span className={`padding-m ${showOp}`}>
+            <span className={`item-op padding-m ${showOp}`}>
               <button
                 onClick={() => this.select(item.name)}
                 className={`${
@@ -471,45 +473,51 @@ export class Browser extends React.Component<Props, State, {}> {
               </button>
             </span>,
           ])}
-          childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+          childrenStyles={List([
+            { flex: "0 0 auto", width: "60%" },
+            { flex: "0 0 auto", justifyContent: "flex-end", width: "40%" },
+          ])}
         />
       ) : (
         <div key={item.name}>
           <Flexbox
+            key={item.name}
             children={List([
-              <span className="padding-m">
-                <Flexbox
-                  children={List([
-                    <RiFile2Fill
-                      size="3rem"
-                      className="cyan0-font margin-r-m"
-                    />,
+              <Flexbox
+                children={List([
+                  <RiFile2Fill
+                    size="3rem"
+                    className="cyan0-font margin-l-m margin-r-m"
+                  />,
 
-                    <span className={`${nameCellClass}`}>
-                      <a
-                        className="title-m"
-                        href={`/v1/fs/files?fp=${itemPath}`}
-                        target="_blank"
-                      >
-                        {item.name}
-                      </a>
-                      <div className="desc-m grey0-font">
-                        <span>
-                          {item.modTime.slice(0, item.modTime.indexOf("T"))}
-                        </span>
-                        &nbsp;/&nbsp;
-                        <span>{FileSize(item.size, { round: 0 })}</span>
-                      </div>
-                    </span>,
-                  ])}
-                />
-              </span>,
+                  <span className={`${nameWidthClass}`}>
+                    <a
+                      className="title-m"
+                      href={`/v1/fs/files?fp=${itemPath}`}
+                      target="_blank"
+                    >
+                      {item.name}
+                    </a>
+                    <div className="desc-m grey0-font">
+                      <span>
+                        {item.modTime.slice(0, item.modTime.indexOf("T"))}
+                      </span>
+                      &nbsp;/&nbsp;
+                      <span>{FileSize(item.size, { round: 0 })}</span>
+                    </div>
+                  </span>,
+                ])}
+                childrenStyles={List([
+                  { flex: "0 0 auto" },
+                  { flex: "0 0 auto" },
+                ])}
+              />,
 
               <span className={`item-op padding-m ${showOp}`}>
                 <button
                   onClick={() => this.toggleDetail(item.name)}
-                  className="grey2-bg grey3-font margin-r-m"
-                  style={{ width: "8rem", display: "inline-block" }}
+                  style={{ width: "8rem" }}
+                  className="float-input"
                 >
                   {this.props.msg.pkg.get("detail")}
                 </button>
@@ -517,10 +525,10 @@ export class Browser extends React.Component<Props, State, {}> {
                 <button
                   type="button"
                   onClick={() => this.select(item.name)}
-                  className={`${
-                    isSelected ? "cyan0-bg white-font" : "grey2-bg grey3-font"
+                  className={`float-input ${
+                    isSelected ? "cyan0-bg white-font " : "grey2-bg grey3-font "
                   }`}
-                  style={{ width: "8rem", display: "inline-block" }}
+                  style={{ width: "8rem" }}
                 >
                   {isSelected
                     ? this.props.msg.pkg.get("browser.deselect")
@@ -528,8 +536,12 @@ export class Browser extends React.Component<Props, State, {}> {
                 </button>
               </span>,
             ])}
-            childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+            childrenStyles={List([
+              { flex: "0 0 auto", width: "60%" },
+              { flex: "0 0 auto", justifyContent: "flex-end", width: "40%" },
+            ])}
           />
+
           <div
             className={`${
               this.state.showDetail.has(item.name) ? "" : "hidden"
@@ -685,7 +697,7 @@ export class Browser extends React.Component<Props, State, {}> {
                         className="margin-r-m blue0-font"
                       />,
 
-                      <div className={`${nameCellClass}`}>
+                      <div className={`${nameWidthClass}`}>
                         <span className="title-m">{fileName}</span>
                         <div className="desc-m grey0-font">
                           {FileSize(uploading.uploaded, { round: 0 })}

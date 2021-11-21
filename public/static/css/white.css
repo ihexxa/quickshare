@@ -3,6 +3,9 @@
 
 .theme-default #bg {
   background: url("/static/img/textured_paper.png") repeat fixed center;
+  width: 100%;
+  height: 100%;
+  padding: 0 0 2rem 0;
 }
 
 .theme-default #top-bar {
@@ -116,6 +119,7 @@
 .theme-default #browser .item-op {
   line-height: 4rem;
   padding: 1rem;
+  text-align: right;
 }
 
 .theme-default #browser .error {
@@ -143,13 +147,6 @@
 .theme-default #upload-op {
   padding: 1rem;
 }
-
-/* .theme-default .op-bar {
-  background: rgba(255, 255, 255, 1);
-  box-shadow: 0 5px 30px 0 rgba(31, 38, 135, 0.1);
-  backdrop-filter: blur(9.5px);
-  -webkit-backdrop-filter: blur(9.5px);
-} */
 
 .theme-default .red-btn {
   background-color: #e74c3c;
@@ -306,4 +303,12 @@
   color: #697384;
   font-size: 1.2rem;
   background-color: #ecf0f6;
+}
+
+#item-list .item-name-vertical {
+  width: 14rem;
+}
+
+#item-list .item-name-horizontal {
+  width: 48rem;
 }
