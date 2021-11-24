@@ -51,7 +51,7 @@ export class Updater {
   }
 
   initUploads = () => {
-    this.props.browser.uploadings.forEach((entry) => {
+    this.props.uploadingsInfo.uploadings.forEach((entry) => {
       Up().addStopped(entry.filePath, entry.uploaded, entry.size);
     });
     // this.setUploadings(Up().list());
@@ -60,7 +60,7 @@ export class Updater {
   addUploads = (fileList: List<File>) => {
     fileList.forEach((file) => {
       const filePath = getItemPath(
-        this.props.browser.dirPath.join("/"),
+        this.props.filesInfo.dirPath.join("/"),
         file.name
       );
       // do not wait for the promise
@@ -76,7 +76,7 @@ export class Updater {
   };
 
   setUploadings = (infos: Map<string, UploadEntry>) => {
-    this.props.browser.uploadings = List<UploadEntry>(
+    this.props.uploadingsInfo.uploadings = List<UploadEntry>(
       infos.valueSeq().map((entry: UploadEntry): UploadEntry => {
         return entry;
       })
@@ -84,7 +84,7 @@ export class Updater {
   };
 
   addSharing = async (): Promise<boolean> => {
-    const dirPath = this.props.browser.dirPath.join("/");
+    const dirPath = this.props.filesInfo.dirPath.join("/");
     const resp = await this.filesClient.addSharing(dirPath);
     return resp.status === 200;
   };
@@ -96,20 +96,20 @@ export class Updater {
 
   isSharing = async (dirPath: string): Promise<boolean> => {
     const resp = await this.filesClient.isSharing(dirPath);
-    this.props.browser.isSharing = resp.status === 200;
+    this.props.filesInfo.isSharing = resp.status === 200;
     return resp.status === 200; // TODO: differentiate 404 and error
   };
 
   setSharing = (shared: boolean) => {
-    this.props.browser.isSharing = shared;
+    this.props.filesInfo.isSharing = shared;
   };
 
   listSharings = async (): Promise<boolean> => {
     const resp = await this.filesClient.listSharings();
-    this.props.browser.sharings =
+    this.props.sharingsInfo.sharings =
       resp.status === 200
         ? List<string>(resp.data.sharingDirs)
-        : this.props.browser.sharings;
+        : this.props.sharingsInfo.sharings;
     return resp.status === 200;
   };
 
@@ -124,7 +124,7 @@ export class Updater {
     }
 
     let localUploads = Map<string, UploadEntry>([]);
-    this.props.browser.uploadings.forEach((entry: UploadEntry) => {
+    this.props.uploadingsInfo.uploadings.forEach((entry: UploadEntry) => {
       localUploads = localUploads.set(entry.filePath, entry);
     });
 
@@ -152,7 +152,7 @@ export class Updater {
       }
     });
 
-    this.props.browser.uploadings = updatedUploads;
+    this.props.uploadingsInfo.uploadings = updatedUploads;
     return true;
   };
 
@@ -217,12 +217,12 @@ export class Updater {
     const listResp = await this.filesClient.list(dirPath);
 
     if (listResp.status === 200) {
-      this.props.browser.dirPath = dirParts;
-      this.props.browser.items = List<MetadataResp>(listResp.data.metadatas);
+      this.props.filesInfo.dirPath = dirParts;
+      this.props.filesInfo.items = List<MetadataResp>(listResp.data.metadatas);
       return true;
     }
-    this.props.browser.dirPath = List<string>([]);
-    this.props.browser.items = List<MetadataResp>([]);
+    this.props.filesInfo.dirPath = List<string>([]);
+    this.props.filesInfo.items = List<MetadataResp>([]);
     return false;
   };
 
@@ -230,12 +230,12 @@ export class Updater {
     const listResp = await this.filesClient.listHome();
 
     if (listResp.status === 200) {
-      this.props.browser.dirPath = List<string>(listResp.data.cwd.split("/"));
-      this.props.browser.items = List<MetadataResp>(listResp.data.metadatas);
+      this.props.filesInfo.dirPath = List<string>(listResp.data.cwd.split("/"));
+      this.props.filesInfo.items = List<MetadataResp>(listResp.data.metadatas);
       return true;
     }
-    this.props.browser.dirPath = List<string>([]);
-    this.props.browser.items = List<MetadataResp>([]);
+    this.props.filesInfo.dirPath = List<string>([]);
+    this.props.filesInfo.items = List<MetadataResp>([]);
     return false;
   };
 
@@ -307,20 +307,18 @@ export class Updater {
   initPanes = async (): Promise<Array<any>> => {
     // init browser content
     if (this.props.login.userRole === roleVisitor) {
-      if (this.props.browser.isSharing) {
+      if (this.props.filesInfo.isSharing) {
         // sharing with visitor
         this.setPanes(Set<string>(["login"]));
         this.displayPane("");
         return Promise.all([]);
       }
 
-
       // redirect to login
       this.setPanes(Set<string>(["login"]));
       this.displayPane("login");
       return Promise.all([this.getCaptchaID()]);
     }
-
 
     if (this.props.login.userRole === roleAdmin) {
       this.setPanes(Set<string>(["login", "settings", "admin"]));
@@ -351,7 +349,7 @@ export class Updater {
         }
       })
       .then(() => {
-        return this.isSharing(this.props.browser.dirPath.join("/"));
+        return this.isSharing(this.props.filesInfo.dirPath.join("/"));
       })
       .then(() => {
         // init settings
@@ -558,16 +556,16 @@ export class Updater {
   setTab = (tabName: string) => {
     switch (tabName) {
       case "item":
-        this.props.browser.tab = tabName;
+        this.props.panels.displaying = tabName;
         break;
       case "uploading":
-        this.props.browser.tab = tabName;
+        this.props.panels.displaying = tabName;
         break;
       case "sharing":
-        this.props.browser.tab = tabName;
+        this.props.panels.displaying = tabName;
         break;
       default:
-        this.props.browser.tab = "item";
+        this.props.panels.displaying = "item";
         break;
     }
   };
@@ -648,10 +646,27 @@ export class Updater {
     return resp.status;
   };
 
-  updateBrowser = (prevState: ICoreState): ICoreState => {
+  updateFilesInfo = (prevState: ICoreState): ICoreState => {
     return {
       ...prevState,
-      browser: { ...prevState.browser, ...this.props.browser },
+      filesInfo: { ...prevState.filesInfo, ...this.props.filesInfo },
+    };
+  };
+
+  updateUploadingsInfo = (prevState: ICoreState): ICoreState => {
+    return {
+      ...prevState,
+      uploadingsInfo: {
+        ...prevState.uploadingsInfo,
+        ...this.props.uploadingsInfo,
+      },
+    };
+  };
+
+  updateSharingsInfo = (prevState: ICoreState): ICoreState => {
+    return {
+      ...prevState,
+      sharingsInfo: { ...prevState.sharingsInfo, ...this.props.sharingsInfo },
     };
   };
 

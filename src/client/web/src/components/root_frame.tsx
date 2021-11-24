@@ -1,7 +1,10 @@
 import * as React from "react";
 
 import { ICoreState, MsgProps, UIProps } from "./core_state";
-import { Browser, BrowserProps } from "./browser";
+import { FilesPanel, FilesProps } from "./panel_files";
+import { UploadingsPanel, UploadingsProps } from "./panel_uploadings";
+import { SharingsPanel, SharingsProps } from "./panel_sharings";
+
 import { LoginProps } from "./pane_login";
 import { Panes, PanesProps } from "./panes";
 import { AdminProps } from "./pane_admin";
@@ -9,7 +12,9 @@ import { TopBar } from "./topbar";
 import { roleVisitor } from "../client";
 
 export interface Props {
-  browser: BrowserProps;
+  filesInfo: FilesProps;
+  uploadingsInfo: UploadingsProps;
+  sharingsInfo: SharingsProps;
   panes: PanesProps;
   admin: AdminProps;
   login: LoginProps;
@@ -26,7 +31,10 @@ export class RootFrame extends React.Component<Props, State, {}> {
 
   render() {
     let bgStyle = undefined;
-    if (this.props.login.preferences != null && this.props.login.preferences.bg.url !== "") {
+    if (
+      this.props.login.preferences != null &&
+      this.props.login.preferences.bg.url !== ""
+    ) {
       bgStyle = {
         background: `url("${this.props.login.preferences.bg.url}") ${this.props.login.preferences.bg.repeat} ${this.props.login.preferences.bg.position} ${this.props.login.preferences.bg.align}`,
       };
@@ -41,7 +49,8 @@ export class RootFrame extends React.Component<Props, State, {}> {
     const fontSizeClass = "font-m";
     const theme = "theme-default";
     const showBrowser =
-      this.props.login.userRole === roleVisitor && !this.props.browser.isSharing
+      this.props.login.userRole === roleVisitor &&
+      !this.props.filesInfo.isSharing
         ? "hidden"
         : "";
 
@@ -65,8 +74,29 @@ export class RootFrame extends React.Component<Props, State, {}> {
           />
 
           <div className={`container-center ${showBrowser}`}>
-            <Browser
+            {/* <Browser
               browser={this.props.browser}
+              msg={this.props.msg}
+              login={this.props.login}
+              ui={this.props.ui}
+              update={this.props.update}
+            /> */}
+            <FilesPanel
+              filesInfo={this.props.filesInfo}
+              msg={this.props.msg}
+              login={this.props.login}
+              ui={this.props.ui}
+              update={this.props.update}
+            />
+            <UploadingsPanel
+              uploadingsInfo={this.props.uploadingsInfo}
+              msg={this.props.msg}
+              login={this.props.login}
+              ui={this.props.ui}
+              update={this.props.update}
+            />
+            <SharingsPanel
+              sharingsInfo={this.props.sharingsInfo}
               msg={this.props.msg}
               login={this.props.login}
               ui={this.props.ui}

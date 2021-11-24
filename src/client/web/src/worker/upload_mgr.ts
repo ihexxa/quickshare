@@ -90,6 +90,8 @@ export class UploadMgr {
     return this.cycle;
   };
 
+  // TODO: change it to observer pattern
+  // so that it can be observed by multiple components
   setStatusCb = (
     cb: (infos: Map<string, UploadEntry>, refresh: boolean) => void
   ) => {

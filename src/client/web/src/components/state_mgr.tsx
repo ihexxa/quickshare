@@ -60,7 +60,9 @@ export class StateMgr extends React.Component<Props, State, {}> {
     return updater()
       .initAll(params)
       .then(() => {
-        this.update(updater().updateBrowser);
+        this.update(updater().updateFilesInfo);
+        this.update(updater().updateUploadingsInfo);
+        this.update(updater().updateSharingsInfo);
         this.update(updater().updateLogin);
         this.update(updater().updatePanes);
         this.update(updater().updateAdmin);
@@ -76,7 +78,9 @@ export class StateMgr extends React.Component<Props, State, {}> {
   render() {
     return (
       <RootFrame
-        browser={this.state.browser}
+        filesInfo={this.state.filesInfo}
+        uploadingsInfo={this.state.uploadingsInfo}
+        sharingsInfo={this.state.sharingsInfo}
         msg={this.state.msg}
         panes={this.state.panes}
         login={this.state.login}

@@ -105,4 +105,5 @@ export const msgs: Map<string, string> = Map({
   "settings.customLan": "Customized Language Pack",
   "settings.lanPackURL": "Language Pack URL",
   "op.fail": "Operation Failed",
+  "op.confirm": "Do you confirm to apply the action?",
 });

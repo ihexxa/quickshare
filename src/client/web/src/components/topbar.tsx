@@ -63,7 +63,9 @@ export class TopBar extends React.Component<Props, State, {}> {
         return this.refreshCaptcha();
       })
       .then(() => {
-        this.props.update(updater().updateBrowser);
+        this.props.update(updater().updateFilesInfo);
+        this.props.update(updater().updateUploadingsInfo);
+        this.props.update(updater().updateSharingsInfo);
         this.props.update(updater().updateLogin);
         this.props.update(updater().updatePanes);
         this.props.update(updater().updateAdmin);

@@ -104,4 +104,5 @@ export const msgs: Map<string, string> = Map({
   "settings.customLan": "自定义语言包",
   "settings.lanPackURL": "语言包链接",
   "op.fail": "操作失败",
+  "op.confirm": "你确定执行此操作吗?",
 });
