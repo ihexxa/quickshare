@@ -2,12 +2,18 @@ import { List, Set, Map } from "immutable";
 
 import { UploadEntry } from "../worker/interface";
 
-import { BrowserProps } from "./browser";
+import { FilesProps } from "./panel_files";
+import { UploadingsProps } from "./panel_uploadings";
+import { SharingsProps } from "./panel_sharings";
 import { PanesProps } from "./panes";
 import { LoginProps } from "./pane_login";
 import { AdminProps } from "./pane_admin";
 import { MsgPackage } from "../i18n/msger";
 import { User, MetadataResp } from "../client";
+
+export interface PanelsProps {
+  displaying: string;
+}
 
 export interface MsgProps {
   lan: string;
@@ -26,7 +32,10 @@ export interface UIProps {
   };
 }
 export interface ICoreState {
-  browser: BrowserProps;
+  panels: PanelsProps;
+  filesInfo: FilesProps;
+  uploadingsInfo: UploadingsProps;
+  sharingsInfo: SharingsProps;
   panes: PanesProps;
   login: LoginProps;
   admin: AdminProps;
@@ -40,15 +49,20 @@ export function newState(): ICoreState {
 
 export function initState(): ICoreState {
   return {
-    browser: {
+    panels: {
+      displaying: "item",
+    },
+    filesInfo: {
       dirPath: List<string>([]),
       items: List<MetadataResp>([]),
-      sharings: List<string>([]),
       isSharing: false,
+    },
+    uploadingsInfo: {
       uploadings: List<UploadEntry>([]),
-      uploadValue: "",
       uploadFiles: List<File>([]),
-      tab: "",
+    },
+    sharingsInfo: {
+      sharings: List<string>([]),
     },
     panes: {
       // which pane is displaying
@@ -78,7 +92,7 @@ export function initState(): ICoreState {
         cssURL: "",
         lanPackURL: "",
         lan: "en_US",
-      }
+      },
     },
     admin: {
       users: Map<string, User>(),

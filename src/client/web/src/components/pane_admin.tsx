@@ -7,7 +7,6 @@ import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { User, Quota } from "../client";
 import { updater } from "./state_updater";
 import { Flexbox } from "./layout/flexbox";
-import { Flowgrid } from "./layout/flowgrid";
 
 export interface AdminProps {
   users: Map<string, User>;
