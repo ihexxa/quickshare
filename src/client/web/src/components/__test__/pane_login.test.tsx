@@ -35,12 +35,12 @@ describe("Login", () => {
     // TODO: state is not checked
 
     // browser
-    expect(coreState.browser.dirPath.join("/")).toEqual("mock_home/files");
-    expect(coreState.browser.isSharing).toEqual(true);
-    expect(coreState.browser.sharings).toEqual(
+    expect(coreState.filesInfo.dirPath.join("/")).toEqual("mock_home/files");
+    expect(coreState.filesInfo.isSharing).toEqual(true);
+    expect(coreState.sharingsInfo.sharings).toEqual(
       List(filesResps.listSharingsMockResp.data.sharingDirs)
     );
-    expect(coreState.browser.uploadings).toEqual(
+    expect(coreState.uploadingsInfo.uploadings).toEqual(
       List<UploadEntry>(
         filesResps.listUploadingsMockResp.data.uploadInfos.map(
           (info: UploadInfo) => {
