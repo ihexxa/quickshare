@@ -93,11 +93,11 @@ describe("TopBar", () => {
     await topbar.logout();
 
     // browser
-    expect(coreState.browser.dirPath.join("/")).toEqual(mockFileResps.listHomeMockResp.data.cwd);
-    expect(coreState.browser.isSharing).toEqual(false);
-    expect(coreState.browser.sharings).toEqual(List());
-    expect(coreState.browser.uploadings).toEqual(List<UploadEntry>());
-    expect(coreState.browser.items).toEqual(List());
+    expect(coreState.filesInfo.dirPath.join("/")).toEqual(mockFileResps.listHomeMockResp.data.cwd);
+    expect(coreState.filesInfo.isSharing).toEqual(false);
+    expect(coreState.filesInfo.items).toEqual(List());
+    expect(coreState.sharingsInfo.sharings).toEqual(List());
+    expect(coreState.uploadingsInfo.uploadings).toEqual(List<UploadEntry>());
 
     // panes
     expect(coreState.panes).toEqual({

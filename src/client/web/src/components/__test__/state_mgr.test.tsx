@@ -38,12 +38,12 @@ describe("State Manager", () => {
     await mgr.initUpdater(coreState);
 
     // browser
-    expect(coreState.browser.dirPath.join("/")).toEqual("mock_home/files");
-    expect(coreState.browser.isSharing).toEqual(true);
-    expect(coreState.browser.sharings).toEqual(
+    expect(coreState.filesInfo.dirPath.join("/")).toEqual("mock_home/files");
+    expect(coreState.filesInfo.isSharing).toEqual(true);
+    expect(coreState.sharingsInfo.sharings).toEqual(
       List(filesResps.listSharingsMockResp.data.sharingDirs)
     );
-    expect(coreState.browser.uploadings).toEqual(
+    expect(coreState.uploadingsInfo.uploadings).toEqual(
       List<UploadEntry>(
         filesResps.listUploadingsMockResp.data.uploadInfos.map(
           (info: UploadInfo) => {
@@ -60,7 +60,7 @@ describe("State Manager", () => {
       )
     );
 
-    expect(coreState.browser.items).toEqual(
+    expect(coreState.filesInfo.items).toEqual(
       List(filesResps.listHomeMockResp.data.metadatas)
     );
 
@@ -173,13 +173,13 @@ describe("State Manager", () => {
 
     // browser
     // TODO: mock query to get dir parm
-    expect(coreState.browser.dirPath.join("/")).toEqual("mock_home/files");
-    expect(coreState.browser.isSharing).toEqual(true);
-    expect(coreState.browser.sharings).toEqual(List([]));
-    expect(coreState.browser.uploadings).toEqual(List<UploadEntry>([]));
-    expect(coreState.browser.items).toEqual(
+    expect(coreState.filesInfo.dirPath.join("/")).toEqual("mock_home/files");
+    expect(coreState.filesInfo.isSharing).toEqual(true);
+    expect(coreState.filesInfo.items).toEqual(
       List(filesResps.listHomeMockResp.data.metadatas)
     );
+    expect(coreState.sharingsInfo.sharings).toEqual(List([]));
+    expect(coreState.uploadingsInfo.uploadings).toEqual(List<UploadEntry>([]));
 
     // panes
     expect(coreState.panes).toEqual({
