@@ -11,10 +11,6 @@ import { AdminProps } from "./pane_admin";
 import { MsgPackage } from "../i18n/msger";
 import { User, MetadataResp } from "../client";
 
-export interface PanelsProps {
-  displaying: string;
-}
-
 export interface MsgProps {
   lan: string;
   pkg: Map<string, string>;
@@ -30,15 +26,18 @@ export interface UIProps {
     position: string;
     align: string;
   };
+  control: {
+    controls: Map<string, string>;
+    options: Map<string, Set<string>>;
+  };
 }
 export interface ICoreState {
-  panels: PanelsProps;
   filesInfo: FilesProps;
   uploadingsInfo: UploadingsProps;
   sharingsInfo: SharingsProps;
-  panes: PanesProps;
-  login: LoginProps;
   admin: AdminProps;
+  login: LoginProps;
+  panes: PanesProps;
   ui: UIProps;
   msg: MsgProps;
 }
@@ -49,9 +48,6 @@ export function newState(): ICoreState {
 
 export function initState(): ICoreState {
   return {
-    panels: {
-      displaying: "item",
-    },
     filesInfo: {
       dirPath: List<string>([]),
       items: List<MetadataResp>([]),
@@ -111,6 +107,10 @@ export function initState(): ICoreState {
         repeat: "",
         position: "",
         align: "",
+      },
+      control: {
+        controls: Map<string, string>(),
+        options: Map<string, Set<string>>(),
       },
     },
   };
