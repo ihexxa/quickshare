@@ -554,20 +554,34 @@ export class Updater {
   };
 
   setTab = (tabName: string) => {
-    switch (tabName) {
-      case "item":
-        this.props.panels.displaying = tabName;
-        break;
-      case "uploading":
-        this.props.panels.displaying = tabName;
-        break;
-      case "sharing":
-        this.props.panels.displaying = tabName;
-        break;
-      default:
-        this.props.panels.displaying = "item";
-        break;
+    // switch (tabName) {
+    //   case "item":
+    //     this.props.panels.displaying = tabName;
+    //     break;
+    //   case "uploading":
+    //     this.props.panels.displaying = tabName;
+    //     break;
+    //   case "sharing":
+    //     this.props.panels.displaying = tabName;
+    //     break;
+    //   default:
+    //     this.props.panels.displaying = "item";
+    //     break;
+    // }
+  };
+
+  setControlOption = (controlName: string, option: string): boolean => {
+    const controlExists = this.props.ui.control.controls.has(controlName);
+    const options = this.props.ui.control.options.get(controlName);
+    if (!controlExists || !options.has(option)) {
+      return false;
     }
+
+    this.props.ui.control.controls = this.props.ui.control.controls.set(
+      controlName,
+      option
+    );
+    return true;
   };
 
   generateHash = async (filePath: string): Promise<boolean> => {
