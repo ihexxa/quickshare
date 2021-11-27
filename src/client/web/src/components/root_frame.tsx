@@ -83,6 +83,34 @@ export class RootFrame extends React.Component<Props, State, {}> {
             update={this.props.update}
           />
 
+          <div id="top-menu">
+            <Tabs
+              targetControl={controlName}
+              tabIcons={Map<string, IconProps>({
+                filesPanel: {
+                  name: "RiFolder2Fill",
+                  size: "1.6rem",
+                  color: "cyan0",
+                },
+                uploadingsPanel: {
+                  name: "RiUploadCloudFill",
+                  size: "1.6rem",
+                  color: "blue0",
+                },
+                sharingsPanel: {
+                  name: "RiShareBoxLine",
+                  size: "1.6rem",
+                  color: "purple0",
+                },
+              })}
+              login={this.props.login}
+              admin={this.props.admin}
+              ui={this.props.ui}
+              msg={this.props.msg}
+              update={this.props.update}
+            />
+          </div>
+
           <div className={`container-center ${showBrowser}`}>
             {/* <Browser
               browser={this.props.browser}
@@ -91,36 +119,6 @@ export class RootFrame extends React.Component<Props, State, {}> {
               ui={this.props.ui}
               update={this.props.update}
             /> */}
-
-            <div className="container">
-              <div className="padding-m">
-                <Tabs
-                  targetControl={controlName}
-                  tabIcons={Map<string, IconProps>({
-                    filesPanel: {
-                      name: "RiFolder2Fill",
-                      size: "1.6rem",
-                      color: "cyan0",
-                    },
-                    uploadingsPanel: {
-                      name: "RiUploadCloudFill",
-                      size: "1.6rem",
-                      color: "blue0",
-                    },
-                    sharingsPanel: {
-                      name: "RiShareBoxLine",
-                      size: "1.6rem",
-                      color: "purple0",
-                    },
-                  })}
-                  login={this.props.login}
-                  admin={this.props.admin}
-                  ui={this.props.ui}
-                  msg={this.props.msg}
-                  update={this.props.update}
-                />
-              </div>
-            </div>
 
             <span className={filesPanelClass}>
               <FilesPanel
