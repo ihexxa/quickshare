@@ -432,7 +432,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
 
     const roleList = this.props.admin.roles.valueSeq().map((role: string) => {
       return (
-        <div className="role-list-item">
+        <div key={role} className="role-list-item">
           <Flexbox
             children={List([
               <span>{role}</span>,

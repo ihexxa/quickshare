@@ -105,4 +105,7 @@ export const msgs: Map<string, string> = Map({
   "settings.lanPackURL": "语言包链接",
   "op.fail": "操作失败",
   "op.confirm": "你确定执行此操作吗?",
+  "control.panelTabs.filesPanel": "文件",
+  "control.panelTabs.uploadingsPanel": "上传",
+  "control.panelTabs.sharingsPanel": "共享",
 });

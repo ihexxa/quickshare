@@ -14,7 +14,7 @@ import { AdminProps } from "./pane_admin";
 import { TopBar } from "./topbar";
 import { roleVisitor } from "../client";
 
-const controlName = "panel-tabs";
+export const controlName = "panelTabs";
 export interface Props {
   filesInfo: FilesProps;
   uploadingsInfo: UploadingsProps;
@@ -59,9 +59,10 @@ export class RootFrame extends React.Component<Props, State, {}> {
         : "";
 
     const displaying = this.props.ui.control.controls.get(controlName);
-    const filesPanelClass = displaying === "files" ? "" : "none";
-    const uploadingsPanelClass = displaying === "uploadings" ? "" : "none";
-    const sharingsPanelClass = displaying === "sharings" ? "" : "none";
+    const filesPanelClass = displaying === "filesPanel" ? "" : "hidden";
+    const uploadingsPanelClass =
+      displaying === "uploadingsPanel" ? "" : "hidden";
+    const sharingsPanelClass = displaying === "sharingsPanel" ? "" : "hidden";
 
     return (
       <div id="root-frame" className={`${theme} ${fontSizeClass}`}>
@@ -91,30 +92,35 @@ export class RootFrame extends React.Component<Props, State, {}> {
               update={this.props.update}
             /> */}
 
-            <Tabs
-              targetControl={controlName}
-              tabIcons={Map<string, IconProps>({
-                filesPanel: {
-                  name: "RiFolder2Fill",
-                  size: "1.6rem",
-                  color: "cyan0",
-                },
-                uploadingsPanel: {
-                  name: "RiFolder2Fill",
-                  size: "1.6rem",
-                  color: "cyan0",
-                },
-                sharingsPanel: {
-                  name: "RiFolder2Fill",
-                  size: "1.6rem",
-                  color: "cyan0",
-                },
-              })}
-              login={this.props.login}
-              admin={this.props.admin}
-              ui={this.props.ui}
-              msg={this.props.msg}
-            />
+            <div className="container">
+              <div className="padding-m">
+                <Tabs
+                  targetControl={controlName}
+                  tabIcons={Map<string, IconProps>({
+                    filesPanel: {
+                      name: "RiFolder2Fill",
+                      size: "1.6rem",
+                      color: "cyan0",
+                    },
+                    uploadingsPanel: {
+                      name: "RiUploadCloudFill",
+                      size: "1.6rem",
+                      color: "blue0",
+                    },
+                    sharingsPanel: {
+                      name: "RiShareBoxLine",
+                      size: "1.6rem",
+                      color: "purple0",
+                    },
+                  })}
+                  login={this.props.login}
+                  admin={this.props.admin}
+                  ui={this.props.ui}
+                  msg={this.props.msg}
+                  update={this.props.update}
+                />
+              </div>
+            </div>
 
             <span className={filesPanelClass}>
               <FilesPanel

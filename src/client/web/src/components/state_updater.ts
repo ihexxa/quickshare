@@ -572,8 +572,12 @@ export class Updater {
 
   setControlOption = (controlName: string, option: string): boolean => {
     const controlExists = this.props.ui.control.controls.has(controlName);
+    const optionsExists = this.props.ui.control.options.has(controlName);
     const options = this.props.ui.control.options.get(controlName);
-    if (!controlExists || !options.has(option)) {
+    if (!controlExists || !optionsExists || !options.has(option)) {
+      console.error(
+        `control(${controlName}-${controlExists}) or option(${option}-${optionsExists}) not found`
+      );
       return false;
     }
 
