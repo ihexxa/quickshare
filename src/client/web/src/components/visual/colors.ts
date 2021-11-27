@@ -1,4 +1,4 @@
-import { Set, Map } from "immutable";
+import { Set } from "immutable";
 
 export const colors = Set<string>([
   "blue0",
