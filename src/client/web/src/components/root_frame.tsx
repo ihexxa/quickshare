@@ -112,14 +112,6 @@ export class RootFrame extends React.Component<Props, State, {}> {
           </div>
 
           <div className={`container-center ${showBrowser}`}>
-            {/* <Browser
-              browser={this.props.browser}
-              msg={this.props.msg}
-              login={this.props.login}
-              ui={this.props.ui}
-              update={this.props.update}
-            /> */}
-
             <span className={filesPanelClass}>
               <FilesPanel
                 filesInfo={this.props.filesInfo}
