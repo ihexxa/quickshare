@@ -78,7 +78,7 @@
   /* padding: 1rem; */
 }
 
-#browser .container {
+.container {
   width: 100%;
   color: #34495e;
   background-color: white;
@@ -173,6 +173,16 @@
 .theme-default .float {
   display: inline-block;
   margin: auto 1rem auto auto;
+}
+
+.theme-default .float-l {
+  display: inline-block;
+  margin: auto 1rem auto auto;
+}
+
+.theme-default .float-r {
+  display: inline-block;
+  margin: auto auto 1rem 1rem;
 }
 
 .theme-default .float-input {

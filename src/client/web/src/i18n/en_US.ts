@@ -106,4 +106,7 @@ export const msgs: Map<string, string> = Map({
   "settings.lanPackURL": "Language Pack URL",
   "op.fail": "Operation Failed",
   "op.confirm": "Do you confirm to apply the action?",
+  "control.panelTabs.filesPanel": "Files",
+  "control.panelTabs.uploadingsPanel": "Uploadings",
+  "control.panelTabs.sharingsPanel": "Sharings",
 });

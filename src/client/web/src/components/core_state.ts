@@ -5,6 +5,7 @@ import { UploadEntry } from "../worker/interface";
 import { FilesProps } from "./panel_files";
 import { UploadingsProps } from "./panel_uploadings";
 import { SharingsProps } from "./panel_sharings";
+import { controlName as panelTabs } from "./root_frame";
 import { PanesProps } from "./panes";
 import { LoginProps } from "./pane_login";
 import { AdminProps } from "./pane_admin";
@@ -109,8 +110,16 @@ export function initState(): ICoreState {
         align: "",
       },
       control: {
-        controls: Map<string, string>(),
-        options: Map<string, Set<string>>(),
+        controls: Map<string, string>({
+          [panelTabs]: "filesPanel",
+        }),
+        options: Map<string, Set<string>>({
+          [panelTabs]: Set<string>([
+            "filesPanel",
+            "uploadingsPanel",
+            "sharingsPanel",
+          ]),
+        }),
       },
     },
   };

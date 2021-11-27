@@ -37,34 +37,37 @@ export class Tabs extends React.Component<Props, State, {}> {
     if (!updater().setControlOption(targetControl, targetOption)) {
       alertMsg(this.props.msg.pkg.get("op.fail"));
     }
+    this.props.update(updater().updateUI);
   };
 
   render() {
     const displaying = this.props.ui.control.controls.get(
       this.props.targetControl
     );
+
     const options = this.props.ui.control.options.get(this.props.targetControl);
-    const tabs = options.map((option: string, targetControl: string) => {
+    const tabs = options.map((option: string) => {
       const iconProps = this.props.tabIcons.has(option)
         ? this.props.tabIcons.get(option)
         : defaultIconProps;
 
-      // <RiFolder2Fill size="1.6rem" className="margin-r-s cyan0-font" />,
       const icon = getIcon(iconProps.name, iconProps.size, iconProps.color);
 
       return (
         <button
-          key={`${targetControl}-${option}`}
+          key={`${this.props.targetControl}-${option}`}
           onClick={() => {
-            this.setTab(targetControl, option);
+            this.setTab(this.props.targetControl, option);
           }}
-          className="float"
+          className="float-l"
         >
           <Flexbox
             children={List([
               <span className="margin-r-s">{icon}</span>,
               <span>
-                {this.props.msg.pkg.get(`switch.${targetControl}.${option}`)}
+                {this.props.msg.pkg.get(
+                  `control.${this.props.targetControl}.${option}`
+                )}
               </span>,
             ])}
             childrenStyles={List([{ flex: "30%" }, { flex: "70%" }])}
