@@ -18,7 +18,7 @@ const defaultIconProps: IconProps = {
 };
 
 export interface Props {
-  targetSwitch: string;
+  targetControl: string;
   tabIcons: Map<string, IconProps>; // option name -> icon name
   login: LoginProps;
   admin: AdminProps;
@@ -33,18 +33,18 @@ export class Tabs extends React.Component<Props, State, {}> {
     super(p);
   }
 
-  setTab = (targetSwitch: string, targetOption: string) => {
-    if (!updater().setControlOption(targetSwitch, targetOption)) {
+  setTab = (targetControl: string, targetOption: string) => {
+    if (!updater().setControlOption(targetControl, targetOption)) {
       alertMsg(this.props.msg.pkg.get("op.fail"));
     }
   };
 
   render() {
     const displaying = this.props.ui.control.controls.get(
-      this.props.targetSwitch
+      this.props.targetControl
     );
-    const options = this.props.ui.control.options.get(this.props.targetSwitch);
-    const tabs = options.map((option: string, targetSwitch: string) => {
+    const options = this.props.ui.control.options.get(this.props.targetControl);
+    const tabs = options.map((option: string, targetControl: string) => {
       const iconProps = this.props.tabIcons.has(option)
         ? this.props.tabIcons.get(option)
         : defaultIconProps;
@@ -54,9 +54,9 @@ export class Tabs extends React.Component<Props, State, {}> {
 
       return (
         <button
-          key={`${targetSwitch}-${option}`}
+          key={`${targetControl}-${option}`}
           onClick={() => {
-            this.setTab(targetSwitch, option);
+            this.setTab(targetControl, option);
           }}
           className="float"
         >
@@ -64,7 +64,7 @@ export class Tabs extends React.Component<Props, State, {}> {
             children={List([
               <span className="margin-r-s">{icon}</span>,
               <span>
-                {this.props.msg.pkg.get(`switch.${targetSwitch}.${option}`)}
+                {this.props.msg.pkg.get(`switch.${targetControl}.${option}`)}
               </span>,
             ])}
             childrenStyles={List([{ flex: "30%" }, { flex: "70%" }])}
@@ -74,7 +74,7 @@ export class Tabs extends React.Component<Props, State, {}> {
     });
 
     return (
-      <div className={`tabs control-${this.props.targetSwitch}`}>{tabs}</div>
+      <div className={`tabs control-${this.props.targetControl}`}>{tabs}</div>
     );
   }
 }
