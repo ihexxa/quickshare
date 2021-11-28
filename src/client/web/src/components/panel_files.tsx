@@ -13,8 +13,10 @@ import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { LoginProps } from "./pane_login";
 import { MetadataResp, roleVisitor, roleAdmin } from "../client";
 import { Flexbox } from "./layout/flexbox";
+import { Container } from "./layout/container";
 import { Up } from "../worker/upload_mgr";
 import { UploadEntry, UploadState } from "../worker/interface";
+import { getIcon } from "./visual/icons";
 
 export interface Item {
   name: string;
@@ -391,47 +393,38 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         <Flexbox
           key={item.name}
           children={List([
-            <span className="padding-m">
-              <Flexbox
-                children={List([
-                  <RiFolder2Fill
-                    size="3rem"
-                    className="yellow0-font margin-r-m"
-                  />,
+            <Flexbox
+              children={List([
+                <RiFolder2Fill
+                  size="3rem"
+                  className="yellow0-font margin-r-m"
+                />,
 
-                  <span className={`${nameWidthClass}`}>
-                    <span
-                      className="title-m"
-                      onClick={() => this.gotoChild(item.name)}
-                    >
-                      {item.name}
+                <span className={`${nameWidthClass}`}>
+                  <span
+                    className="title-m"
+                    onClick={() => this.gotoChild(item.name)}
+                  >
+                    {item.name}
+                  </span>
+                  <div className="desc-m grey0-font">
+                    <span>
+                      {item.modTime.slice(0, item.modTime.indexOf("T"))}
                     </span>
-                    <div className="desc-m grey0-font">
-                      <span>
-                        {item.modTime.slice(0, item.modTime.indexOf("T"))}
-                      </span>
-                    </div>
-                  </span>,
-                ])}
-                childrenStyles={List([
-                  { flex: "0 0 auto" },
-                  { flex: "0 0 auto" },
-                ])}
-              />
-            </span>,
-
-            <span className={`item-op padding-m ${showOp}`}>
-              <button
-                onClick={() => this.select(item.name)}
-                className={`${
-                  isSelected ? "cyan0-bg white-font" : "grey2-bg grey3-font"
-                }`}
-                style={{ width: "8rem", display: "inline-block" }}
-              >
+                  </div>
+                </span>,
+              ])}
+              childrenStyles={List([
+                { flex: "0 0 auto" },
+                { flex: "0 0 auto" },
+              ])}
+            />,
+            <span className={`item-op ${showOp}`}>
+              <span onClick={() => this.select(item.name)} className="float-l">
                 {isSelected
-                  ? this.props.msg.pkg.get("browser.deselect")
-                  : this.props.msg.pkg.get("browser.select")}
-              </button>
+                  ? getIcon("RiCheckboxFill", "1.8rem", "cyan0")
+                  : getIcon("RiCheckboxBlankFill", "1.8rem", "grey1")}
+              </span>
             </span>,
           ])}
           childrenStyles={List([
@@ -446,10 +439,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
             children={List([
               <Flexbox
                 children={List([
-                  <RiFile2Fill
-                    size="3rem"
-                    className="cyan0-font margin-l-m margin-r-m"
-                  />,
+                  <RiFile2Fill size="3rem" className="cyan0-font margin-r-m" />,
 
                   <span className={`${nameWidthClass}`}>
                     <a
@@ -474,27 +464,22 @@ export class FilesPanel extends React.Component<Props, State, {}> {
                 ])}
               />,
 
-              <span className={`item-op padding-m ${showOp}`}>
-                <button
+              <span className={`item-op ${showOp}`}>
+                <span
                   onClick={() => this.toggleDetail(item.name)}
-                  style={{ width: "8rem" }}
-                  className="float-input"
+                  className="float-l"
                 >
-                  {this.props.msg.pkg.get("detail")}
-                </button>
+                  {getIcon("RiInformationFill", "1.8rem", "grey1")}
+                </span>
 
-                <button
-                  type="button"
+                <span
                   onClick={() => this.select(item.name)}
-                  className={`float-input ${
-                    isSelected ? "cyan0-bg white-font " : "grey2-bg grey3-font "
-                  }`}
-                  style={{ width: "8rem" }}
+                  className="float-l"
                 >
                   {isSelected
-                    ? this.props.msg.pkg.get("browser.deselect")
-                    : this.props.msg.pkg.get("browser.select")}
-                </button>
+                    ? getIcon("RiCheckboxFill", "1.8rem", "cyan0")
+                    : getIcon("RiCheckboxBlankFill", "1.8rem", "grey1")}
+                </span>
               </span>,
             ])}
             childrenStyles={List([
@@ -511,8 +496,8 @@ export class FilesPanel extends React.Component<Props, State, {}> {
             <Flexbox
               children={List([
                 <span>
-                  <b>SHA1:</b>
-                  {` ${item.sha1}`}
+                  <b>{`SHA1: `}</b>
+                  <input type="text" readOnly={true} value={`${item.sha1}`} />
                 </span>,
                 <button
                   onClick={() => this.generateHash(itemPath)}
@@ -522,7 +507,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
                   {this.props.msg.pkg.get("refresh")}
                 </button>,
               ])}
-              className={`grey2-bg grey3-font detail margin-r-m`}
+              className={`item-info`}
               childrenStyles={List([{}, { justifyContent: "flex-end" }])}
             />
           </div>
@@ -542,9 +527,11 @@ export class FilesPanel extends React.Component<Props, State, {}> {
 
     const itemListPane = (
       <div id="item-list">
-        <div className={`container ${showOp}`}>{ops}</div>
+        <div className={showOp}>
+          <Container>{ops}</Container>
+        </div>
 
-        <div className="container">
+        <Container>
           <div id="browser-op" className={`${showOp}`}>
             <Flexbox
               children={List([
@@ -632,7 +619,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
           />
 
           {itemList}
-        </div>
+        </Container>
       </div>
     );
 

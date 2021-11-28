@@ -11,6 +11,7 @@ import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { LoginProps } from "./pane_login";
 import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
+import { getIcon } from "./visual/icons";
 
 export interface SharingsProps {
   sharings: List<string>;
@@ -94,30 +95,34 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
                       size="3rem"
                       className="purple0-font margin-r-m"
                     />,
-                    <span>{dirPath}</span>,
+                    <span className={nameWidthClass}>{dirPath}</span>,
                   ])}
                 />,
+
+                <span
+                  onClick={() => {
+                    this.deleteSharing(dirPath);
+                  }}
+                  className="margin-r-m"
+                >
+                  {getIcon("RiDeleteBin2Fill", "1.8rem", "red0")}
+                </span>,
 
                 <span>
                   <input
                     type="text"
                     readOnly
-                    className="float-input"
                     value={`${
                       document.location.href.split("?")[0]
                     }?dir=${encodeURIComponent(dirPath)}`}
                   />
-                  <button
-                    onClick={() => {
-                      this.deleteSharing(dirPath);
-                    }}
-                    className="float-input"
-                  >
-                    {this.props.msg.pkg.get("browser.share.del")}
-                  </button>
                 </span>,
               ])}
-              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+              childrenStyles={List([
+                { alignItems: "center" },
+                { alignItems: "center", justifyContent: "flex-end" },
+                { alignItems: "center", justifyContent: "flex-end" },
+              ])}
             />
           </div>
         );
