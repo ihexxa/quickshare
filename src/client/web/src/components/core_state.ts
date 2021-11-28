@@ -116,7 +116,7 @@ export function initState(): ICoreState {
           [panelTabs]: "filesPanel",
           [loginDialogCtrl]: "on",
           [settingsDialogCtrl]: "off",
-          [settingsTabsCtrl]: "settingsPane",
+          [settingsTabsCtrl]: "preferencePane",
         }),
         options: Map<string, Set<string>>({
           [panelTabs]: Set<string>([
@@ -126,7 +126,7 @@ export function initState(): ICoreState {
           ]),
           [loginDialogCtrl]: Set<string>(["on", "off"]),
           [settingsDialogCtrl]: Set<string>(["on", "off"]),
-          [settingsTabsCtrl]: Set<string>(["settingsPane", "managementPane"]),
+          [settingsTabsCtrl]: Set<string>(["preferencePane", "managementPane"]),
         }),
       },
     },

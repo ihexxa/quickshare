@@ -12,6 +12,7 @@ import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { LoginProps } from "./pane_login";
 import { UploadEntry, UploadState } from "../worker/interface";
 import { Flexbox } from "./layout/flexbox";
+import { Container } from "./layout/container";
 
 export interface UploadingsProps {
   uploadings: List<UploadEntry>;
@@ -85,25 +86,23 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
           <div key={uploading.filePath}>
             <Flexbox
               children={List([
-                <span className="padding-m">
-                  <Flexbox
-                    children={List([
-                      <RiUploadCloudLine
-                        size="3rem"
-                        id="icon-upload"
-                        className="margin-r-m blue0-font"
-                      />,
+                <Flexbox
+                  children={List([
+                    <RiUploadCloudLine
+                      size="3rem"
+                      id="icon-upload"
+                      className="margin-r-m blue0-font"
+                    />,
 
-                      <div className={`${nameWidthClass}`}>
-                        <span className="title-m">{fileName}</span>
-                        <div className="desc-m grey0-font">
-                          {FileSize(uploading.uploaded, { round: 0 })}
-                          &nbsp;/&nbsp;{FileSize(uploading.size, { round: 0 })}
-                        </div>
-                      </div>,
-                    ])}
-                  />
-                </span>,
+                    <div className={`${nameWidthClass}`}>
+                      <span className="title-m">{fileName}</span>
+                      <div className="desc-m grey0-font">
+                        {FileSize(uploading.uploaded, { round: 0 })}
+                        &nbsp;/&nbsp;{FileSize(uploading.size, { round: 0 })}
+                      </div>
+                    </div>,
+                  ])}
+                />,
 
                 <div className="item-op">
                   <button
@@ -130,57 +129,59 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
       }
     );
 
-    return this.props.uploadingsInfo.uploadings.size === 0 ? (
-      <div id="upload-list" className="container">
-        <Flexbox
-          children={List([
-            <RiEmotionSadLine size="4rem" className="margin-r-m red0-font" />,
-            <span>
-              <h3 className="title-l">
-                {this.props.msg.pkg.get("upload.404.title")}
-              </h3>
-              <span className="desc-l grey0-font">
-                {this.props.msg.pkg.get("upload.404.desc")}
-              </span>
-            </span>,
-          ])}
-          childrenStyles={List([
-            { flex: "auto", justifyContent: "flex-end" },
-            { flex: "auto" },
-          ])}
-          className="padding-l"
-        />
-      </div>
-    ) : (
-      <div id="upload-list" className="container">
-        <Flexbox
-          children={List([
-            <span className="upload-item">
-              <Flexbox
-                children={List([
-                  <RiUploadCloudFill
-                    size="3rem"
-                    className="margin-r-m black-font"
-                  />,
+    const list =
+      this.props.uploadingsInfo.uploadings.size === 0 ? (
+        <Container>
+          <Flexbox
+            children={List([
+              <RiEmotionSadLine size="4rem" className="margin-r-m red0-font" />,
+              <span>
+                <h3 className="title-l">
+                  {this.props.msg.pkg.get("upload.404.title")}
+                </h3>
+                <span className="desc-l grey0-font">
+                  {this.props.msg.pkg.get("upload.404.desc")}
+                </span>
+              </span>,
+            ])}
+            childrenStyles={List([
+              { flex: "auto", justifyContent: "flex-end" },
+              { flex: "auto" },
+            ])}
+          />
+        </Container>
+      ) : (
+        <Container>
+          <Flexbox
+            children={List([
+              <span className="upload-item">
+                <Flexbox
+                  children={List([
+                    <RiUploadCloudFill
+                      size="3rem"
+                      className="margin-r-m black-font"
+                    />,
 
-                  <span>
-                    <span className="title-m bold">
-                      {this.props.msg.pkg.get("browser.upload.title")}
-                    </span>
-                    <span className="desc-m grey0-font">
-                      {this.props.msg.pkg.get("browser.upload.desc")}
-                    </span>
-                  </span>,
-                ])}
-              />
-            </span>,
+                    <span>
+                      <span className="title-m bold">
+                        {this.props.msg.pkg.get("browser.upload.title")}
+                      </span>
+                      <span className="desc-m grey0-font">
+                        {this.props.msg.pkg.get("browser.upload.desc")}
+                      </span>
+                    </span>,
+                  ])}
+                />
+              </span>,
 
-            <span></span>,
-          ])}
-        />
+              <span></span>,
+            ])}
+          />
 
-        {uploadingList}
-      </div>
-    );
+          {uploadingList}
+        </Container>
+      );
+
+    return <div id="upload-list">{list}</div>;
   }
 }
