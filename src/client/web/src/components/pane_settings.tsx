@@ -143,9 +143,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
       <div id="pane-settings">
         <Container>
           <div id="profile">
-            <h5 className="title">
-              {this.props.msg.pkg.get("user.profile")}
-            </h5>
+            <h5 className="title">{this.props.msg.pkg.get("user.profile")}</h5>
 
             <div>
               <Card
@@ -243,28 +241,27 @@ export class PaneSettings extends React.Component<Props, State, {}> {
                 <h5 className="title">
                   {this.props.msg.pkg.get("settings.chooseLan")}
                 </h5>,
-
-                <span>
-                  <button
-                    onClick={() => {
-                      this.setLan("en_US");
-                    }}
-                    className="float-input"
-                  >
-                    {this.props.msg.pkg.get("enUS")}
-                  </button>
-                  <button
-                    onClick={() => {
-                      this.setLan("zh_CN");
-                    }}
-                    className="float-input"
-                  >
-                    {this.props.msg.pkg.get("zhCN")}
-                  </button>
-                </span>,
               ])}
               childrenStyles={List([{}, { justifyContent: "flex-end" }])}
             />
+            <div>
+              <button
+                onClick={() => {
+                  this.setLan("en_US");
+                }}
+                className="float-input"
+              >
+                {this.props.msg.pkg.get("enUS")}
+              </button>
+              <button
+                onClick={() => {
+                  this.setLan("zh_CN");
+                }}
+                className="float-input"
+              >
+                {this.props.msg.pkg.get("zhCN")}
+              </button>
+            </div>
           </div>
 
           <div className="hr"></div>

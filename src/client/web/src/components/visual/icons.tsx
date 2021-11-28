@@ -7,6 +7,12 @@ import { RiShareBoxLine } from "@react-icons/all-files/ri/RiShareBoxLine";
 import { RiUploadCloudFill } from "@react-icons/all-files/ri/RiUploadCloudFill";
 import { RiSettings3Fill } from "@react-icons/all-files/ri/RiSettings3Fill";
 import { RiWindowFill } from "@react-icons/all-files/ri/RiWindowFill";
+import { RiCheckboxBlankFill } from "@react-icons/all-files/ri/RiCheckboxBlankFill";
+import { RiCheckboxFill } from "@react-icons/all-files/ri/RiCheckboxFill";
+import { RiMenuFill } from "@react-icons/all-files/ri/RiMenuFill";
+import { RiInformationFill } from "@react-icons/all-files/ri/RiInformationFill";
+import { RiDeleteBin2Fill } from "@react-icons/all-files/ri/RiDeleteBin2Fill";
+
 
 import { colorClass } from "./colors";
 
@@ -22,6 +28,11 @@ const icons = Map<string, IconType>({
   RiUploadCloudFill: RiUploadCloudFill,
   RiSettings3Fill: RiSettings3Fill,
   RiWindowFill: RiWindowFill,
+  RiCheckboxBlankFill: RiCheckboxBlankFill,
+  RiCheckboxFill: RiCheckboxFill,
+  RiMenuFill: RiMenuFill,
+  RiInformationFill: RiInformationFill,
+  RiDeleteBin2Fill: RiDeleteBin2Fill,
 });
 
 export function getIconWithProps(

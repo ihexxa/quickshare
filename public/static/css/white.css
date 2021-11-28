@@ -84,7 +84,7 @@
 }
 
 .theme-default #breadcrumb {
-  padding: 1rem;
+  padding: 1rem 0;
   width: 100%;
 }
 
@@ -119,14 +119,13 @@
 .theme-default .select-btn {
   width: 8rem;
   display: inline-block;
-  margin: 0 1rem 0 0;
 }
 
 .theme-default #op-bar {
 }
 
 .theme-default #browser-op {
-  padding: 1rem;
+  margin-bottom: 1rem;
 }
 
 .theme-default #browser-op button {
@@ -144,8 +143,14 @@
 
 .theme-default #browser .item-op {
   line-height: 4rem;
-  padding: 1rem;
+  padding: 1rem 0;
   text-align: right;
+}
+
+.theme-default #browser .item-info {
+  padding: 1rem;
+  font-size: 1.2rem;
+  border: dashed 1px #7f8c8d;
 }
 
 .theme-default #browser .error {
@@ -171,7 +176,7 @@
 }
 
 .theme-default #upload-op {
-  padding: 1rem;
+  padding: 0;
 }
 
 .theme-default .red-btn {
@@ -365,10 +370,10 @@
   background-color: #ecf0f6;
 }
 
-#item-list .item-name-vertical {
+.item-name-vertical {
   width: 14rem;
 }
 
-#item-list .item-name-horizontal {
+.item-name-horizontal {
   width: 48rem;
 }
