@@ -5,6 +5,8 @@ import { IconType, IconBaseProps } from "@react-icons/all-files";
 import { RiFolder2Fill } from "@react-icons/all-files/ri/RiFolder2Fill";
 import { RiShareBoxLine } from "@react-icons/all-files/ri/RiShareBoxLine";
 import { RiUploadCloudFill } from "@react-icons/all-files/ri/RiUploadCloudFill";
+import { RiSettings3Fill } from "@react-icons/all-files/ri/RiSettings3Fill";
+import { RiWindowFill } from "@react-icons/all-files/ri/RiWindowFill";
 
 import { colorClass } from "./colors";
 
@@ -18,6 +20,8 @@ const icons = Map<string, IconType>({
   RiFolder2Fill: RiFolder2Fill,
   RiShareBoxLine: RiShareBoxLine,
   RiUploadCloudFill: RiUploadCloudFill,
+  RiSettings3Fill: RiSettings3Fill,
+  RiWindowFill: RiWindowFill,
 });
 
 export function getIconWithProps(
