@@ -10,6 +10,7 @@ import { updater } from "./state_updater";
 import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { LoginProps } from "./pane_login";
 import { Flexbox } from "./layout/flexbox";
+import { Container } from "./layout/container";
 
 export interface SharingsProps {
   sharings: List<string>;
@@ -123,32 +124,31 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
       }
     );
 
-    return this.props.sharingsInfo.sharings.size === 0 ? (
-      <div id="sharing-list" className="container">
-        <Flexbox
-          children={List([
-            <RiEmotionSadLine size="4rem" className="margin-r-m red0-font" />,
-            <span>
-              <h3 className="title-l">
-                {this.props.msg.pkg.get("share.404.title")}
-              </h3>
-              <span className="desc-l grey0-font">
-                {this.props.msg.pkg.get("share.404.desc")}
-              </span>
-            </span>,
-          ])}
-          childrenStyles={List([
-            { flex: "auto", justifyContent: "flex-end" },
-            { flex: "auto" },
-          ])}
-          className="padding-l"
-        />
-      </div>
-    ) : (
-      <div className="container">
-        <Flexbox
-          children={List([
-            <span className="padding-m">
+    const list =
+      this.props.sharingsInfo.sharings.size === 0 ? (
+        <Container>
+          <Flexbox
+            children={List([
+              <RiEmotionSadLine size="4rem" className="margin-r-m red0-font" />,
+              <span>
+                <h3 className="title-l">
+                  {this.props.msg.pkg.get("share.404.title")}
+                </h3>
+                <span className="desc-l grey0-font">
+                  {this.props.msg.pkg.get("share.404.desc")}
+                </span>
+              </span>,
+            ])}
+            childrenStyles={List([
+              { flex: "auto", justifyContent: "flex-end" },
+              { flex: "auto" },
+            ])}
+          />
+        </Container>
+      ) : (
+        <Container>
+          <Flexbox
+            children={List([
               <Flexbox
                 children={List([
                   <RiShareBoxLine
@@ -165,15 +165,16 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
                     </span>
                   </span>,
                 ])}
-              />
-            </span>,
+              />,
 
-            <span></span>,
-          ])}
-        />
+              <span></span>,
+            ])}
+          />
 
-        {sharingList}
-      </div>
-    );
+          {sharingList}
+        </Container>
+      );
+
+    return <div id="sharing-list">{list}</div>;
   }
 }

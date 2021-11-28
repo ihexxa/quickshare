@@ -2,17 +2,14 @@ import * as React from "react";
 import { Map } from "immutable";
 
 import { ICoreState, MsgProps, UIProps } from "./core_state";
-import { FilesPanel, FilesProps } from "./panel_files";
-import { UploadingsPanel, UploadingsProps } from "./panel_uploadings";
-import { SharingsPanel, SharingsProps } from "./panel_sharings";
 import { IconProps } from "./visual/icons";
 
 import { PaneSettings } from "./pane_settings";
 import { AdminPane, AdminProps } from "./pane_admin";
 
 import { Tabs } from "./control/tabs";
+import { Container } from "./layout/container";
 import { LoginProps } from "./pane_login";
-import { RiShareBoxLine } from "@react-icons/all-files/ri/RiShareBoxLine";
 import { roleAdmin } from "../client";
 
 export const settingsTabsCtrl = "settingsTabs";
@@ -33,7 +30,7 @@ export class SettingsDialog extends React.Component<Props, State, {}> {
 
   render() {
     const displaying = this.props.ui.control.controls.get(settingsTabsCtrl);
-    const showSettings = displaying === "settingsPane" ? "" : "hidden";
+    const showSettings = displaying === "preferencePane" ? "" : "hidden";
     const showManagement =
       this.props.login.userRole === roleAdmin && displaying === "managementPane"
         ? ""
@@ -41,11 +38,11 @@ export class SettingsDialog extends React.Component<Props, State, {}> {
 
     return (
       <div id="settings-dialog">
-        <div className="container">
+        <Container>
           <Tabs
             targetControl={settingsTabsCtrl}
             tabIcons={Map<string, IconProps>({
-              settingsPane: {
+              preferencePane: {
                 name: "RiSettings3Fill",
                 size: "1.6rem",
                 color: "cyan0",
@@ -62,7 +59,7 @@ export class SettingsDialog extends React.Component<Props, State, {}> {
             msg={this.props.msg}
             update={this.props.update}
           />
-        </div>
+        </Container>
 
         <div className={`${showSettings}`}>
           <PaneSettings

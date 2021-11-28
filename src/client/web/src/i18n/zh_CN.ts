@@ -108,4 +108,6 @@ export const msgs: Map<string, string> = Map({
   "control.panelTabs.filesPanel": "文件",
   "control.panelTabs.uploadingsPanel": "上传",
   "control.panelTabs.sharingsPanel": "共享",
+  "control.settingsTabs.managementPane": "管理",
+  "control.settingsTabs.preferencePane": "设置",
 });

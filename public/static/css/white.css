@@ -1,11 +1,19 @@
 #root-frame {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
 }
 
 .theme-default #bg {
   background: url("/static/img/textured_paper.png") repeat fixed center;
-  width: 100%;
-  height: 100%;
-  padding: 0 0 2rem 0;
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  overflow: scroll;
 }
 
 .theme-default #top-bar {
@@ -100,6 +108,10 @@
   margin-bottom: 2rem;
 }
 
+.container-padding {
+  padding: 1.5rem;
+}
+
 /* .theme-default #breadcrumb .item:last-child {
   margin-right: 0;
 } */
@@ -147,11 +159,11 @@
 }
 
 .theme-default .upload-item {
-  padding: 1rem;
+  padding: 0 0 1rem 0;
 }
 
-.theme-default #share-list {
-  padding: 1rem;
+.theme-default .share-item {
+  padding: 0 0 1rem 0;
 }
 
 .theme-default #tabs {
@@ -227,10 +239,8 @@
   /* padding: 2rem; */
 }
 
-.theme-default #pane-settings #profile {
+.theme-default #pane-settings #profile .desc-m {
   color: #95a5a6;
-  font-size: 1.2rem;
-  line-height: 1.8rem;
 }
 
 .theme-default .user-form {
@@ -248,8 +258,16 @@
 }
 
 .theme-default .hr {
+  height: 1px;
   margin: 1rem 0;
   background-color: #ecf0f1;
+}
+
+.theme-default .card {
+  padding: 1rem;
+  /* background-color: #e8e8e8; */
+  text-align: center;
+  border-radius: 0.8rem;
 }
 
 .theme-default .key-value {
@@ -290,7 +308,7 @@
   color: #34495e;
   background-color: #ecf0f6;
   border: solid 1px #95a5a6;
-  margin: 1rem 0;
+  margin: 0.5rem 0 1rem 0;
 }
 
 .captcha {

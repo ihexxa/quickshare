@@ -7,6 +7,7 @@ import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { User, Quota } from "../client";
 import { updater } from "./state_updater";
 import { Flexbox } from "./layout/flexbox";
+import { Container } from "./layout/container";
 
 export interface AdminProps {
   users: Map<string, User>;
@@ -452,15 +453,15 @@ export class AdminPane extends React.Component<Props, State, {}> {
 
     return (
       <div className="font-m">
-        <div className="container">
+        <Container>
           <BgCfg
             ui={this.props.ui}
             msg={this.props.msg}
             update={this.props.update}
           />
-        </div>
+        </Container>
 
-        <div className="container">
+        <Container>
           <Flexbox
             children={List([
               <h5 className="title">{this.props.msg.pkg.get("user.add")}</h5>,
@@ -514,9 +515,9 @@ export class AdminPane extends React.Component<Props, State, {}> {
               placeholder={this.props.msg.pkg.get("settings.pwd.new2")}
             />
           </span>
-        </div>
+        </Container>
 
-        <div className="container">
+        <Container>
           <Flexbox
             children={List([
               <h5 className="title">
@@ -526,9 +527,9 @@ export class AdminPane extends React.Component<Props, State, {}> {
             ])}
           />
           {userList}
-        </div>
+        </Container>
 
-        <div className="container">
+        <Container>
           <div>
             <Flexbox
               children={List([
@@ -564,7 +565,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
             ])}
           />
           {roleList}
-        </div>
+        </Container>
       </div>
     );
   }
@@ -697,9 +698,9 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
       <div>
         <Flexbox
           children={List([
-            <span className="title-m bold">
+            <h5 className="title">
               {this.props.msg.pkg.get("cfg.bg")}
-            </span>,
+            </h5>,
 
             <span>
               <button onClick={this.resetClientCfg} className="margin-r-m">

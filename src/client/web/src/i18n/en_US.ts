@@ -109,4 +109,6 @@ export const msgs: Map<string, string> = Map({
   "control.panelTabs.filesPanel": "Files",
   "control.panelTabs.uploadingsPanel": "Uploadings",
   "control.panelTabs.sharingsPanel": "Sharings",
+  "control.settingsTabs.managementPane": "Management",
+  "control.settingsTabs.preferencePane": "Preference",
 });

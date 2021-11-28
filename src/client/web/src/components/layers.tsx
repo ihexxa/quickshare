@@ -9,6 +9,7 @@ import { SettingsDialog } from "./dialog_settings";
 
 import { AuthPane, LoginProps } from "./pane_login";
 import { Flexbox } from "./layout/flexbox";
+import { Container } from "./layout/container";
 
 export const loginDialogCtrl = "loginDialog";
 export const settingsDialogCtrl = "settingsDialog";
@@ -53,25 +54,21 @@ export class Layers extends React.Component<Props, State, {}> {
 
         <div id="settings-layer" className={`layer ${showSettings}`}>
           <div id="root-container">
-            <div className="container">
-              <div className="padding-m">
-                <Flexbox
-                  children={List([
-                    <h4 id="title">
-                      {this.props.msg.pkg.get("pane.settings")}
-                    </h4>,
-                    <button
-                      onClick={() => {
-                        this.setControlOption("settingsDialog", "off");
-                      }}
-                    >
-                      {this.props.msg.pkg.get("panes.close")}
-                    </button>,
-                  ])}
-                  childrenStyles={List([{}, { justifyContent: "flex-end" }])}
-                />
-              </div>
-            </div>
+            <Container>
+              <Flexbox
+                children={List([
+                  <h4 id="title">{this.props.msg.pkg.get("pane.settings")}</h4>,
+                  <button
+                    onClick={() => {
+                      this.setControlOption("settingsDialog", "off");
+                    }}
+                  >
+                    {this.props.msg.pkg.get("panes.close")}
+                  </button>,
+                ])}
+                childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+              />
+            </Container>
 
             <SettingsDialog
               admin={this.props.admin}
