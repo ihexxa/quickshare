@@ -10,6 +10,7 @@ import { IconProps } from "./visual/icons";
 import { Tabs } from "./control/tabs";
 import { LoginProps } from "./pane_login";
 import { Panes, PanesProps } from "./panes";
+import { Layers } from "./layers";
 import { AdminProps } from "./pane_admin";
 import { TopBar } from "./topbar";
 import { roleVisitor } from "../client";
@@ -67,8 +68,7 @@ export class RootFrame extends React.Component<Props, State, {}> {
     return (
       <div id="root-frame" className={`${theme} ${fontSizeClass}`}>
         <div id="bg" style={bgStyle}>
-          <Panes
-            panes={this.props.panes}
+          <Layers
             login={this.props.login}
             admin={this.props.admin}
             ui={this.props.ui}

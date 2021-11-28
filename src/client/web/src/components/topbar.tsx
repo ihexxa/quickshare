@@ -7,6 +7,7 @@ import { LoginProps } from "./pane_login";
 import { PanesProps } from "./panes";
 import { updater } from "./state_updater";
 import { Flexbox } from "./layout/flexbox";
+import { getIcon } from "./visual/icons";
 
 export interface State {}
 export interface Props {
@@ -22,24 +23,8 @@ export class TopBar extends React.Component<Props, State, {}> {
   }
 
   showSettings = () => {
-    updater().displayPane("settings");
-    this.props.update(updater().updatePanes);
-  };
-
-  showAdmin = async () => {
-    return updater()
-      .self()
-      .then(() => {
-        // TODO: remove hardcode role
-        if (this.props.login.authed && this.props.login.userRole === "admin") {
-          return Promise.all([updater().listRoles(), updater().listUsers()]);
-        }
-      })
-      .then(() => {
-        updater().displayPane("admin");
-        this.props.update(updater().updateAdmin);
-        this.props.update(updater().updatePanes);
-      });
+    updater().setControlOption("settingsDialog", "on");
+    this.props.update(updater().updateUI);
   };
 
   logout = async (): Promise<void> => {
@@ -83,12 +68,7 @@ export class TopBar extends React.Component<Props, State, {}> {
   };
 
   render() {
-    const showUserInfo = this.props.login.authed ? "" : "hidden";
     const showLogin = this.props.login.authed ? "" : "hidden";
-    const showSettings = this.props.panes.paneNames.get("settings")
-      ? ""
-      : "hidden";
-    const showAdmin = this.props.panes.paneNames.get("admin") ? "" : "hidden";
 
     return (
       <div id="top-bar">
@@ -105,30 +85,23 @@ export class TopBar extends React.Component<Props, State, {}> {
 
             <Flexbox
               children={List([
-                <span className={`${showUserInfo}`}>
-                  <span id="topbar-user-info">
-                    {this.props.login.userName}
-                  </span>
-                </span>,
+                // <span className={`${showUserInfo}`}>
+                //   <span id="topbar-user-info">{this.props.login.userName}</span>
+                // </span>,
 
-                <button
-                  onClick={this.showSettings}
-                  className={`margin-r-m ${showSettings}`}
-                >
+                <button onClick={this.showSettings} className={`margin-r-m`}>
                   {this.props.msg.pkg.get("settings")}
+                  {/* {getIcon("RiSettings4Line", "1.8rem", "cyan0")} */}
                 </button>,
 
-                <button
-                  onClick={this.showAdmin}
-                  className={`margin-r-m ${showAdmin}`}
-                >
-                  {this.props.msg.pkg.get("admin")}
-                </button>,
+                // <button
+                //   onClick={this.showAdmin}
+                //   className={`margin-r-m ${showAdmin}`}
+                // >
+                //   {this.props.msg.pkg.get("admin")}
+                // </button>,
 
-                <button
-                  onClick={this.logout}
-                  className={`${showLogin}`}
-                >
+                <button onClick={this.logout} className={`${showLogin}`}>
                   {this.props.msg.pkg.get("login.logout")}
                 </button>,
               ])}

@@ -30,7 +30,7 @@
   box-shadow: 0 5px 30px 0 rgba(31, 38, 135, 0.1);
   backdrop-filter: blur(9.5px);
   color: #16a085;
-  padding: 1rem 2rem 1rem 2rem;
+  padding: 0.5rem 1rem;
   -webkit-backdrop-filter: blur(9.5px);
 }
 
@@ -52,10 +52,12 @@
 .theme-default #root-container {
   max-width: 80rem;
   width: 96%;
-  z-index: 101;
   text-align: left;
   margin: 3rem auto 8rem auto;
-  border-radius: 0.6rem;
+}
+
+.theme-default #layers {
+  height: 0;
 }
 
 .theme-default #panes .container {
@@ -222,7 +224,7 @@
 }
 
 .theme-default #pane-settings {
-  padding: 2rem;
+  /* padding: 2rem; */
 }
 
 .theme-default #pane-settings #profile {
@@ -252,6 +254,24 @@
 
 .theme-default .key-value {
   margin-top: 0.5rem;
+}
+
+.theme-default .layer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  overflow: scroll;
+}
+
+.theme-default #login-layer {
+  z-index: 100;
+}
+
+.theme-default #settings-layer {
+  z-index: 1;
 }
 
 .theme-default .value {
