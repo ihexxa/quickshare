@@ -496,18 +496,14 @@ export class FilesPanel extends React.Component<Props, State, {}> {
             <Flexbox
               children={List([
                 <span>
-                  <b>{`SHA1: `}</b>
+                  <div className="label">{`SHA1: `}</div>
                   <input type="text" readOnly={true} value={`${item.sha1}`} />
                 </span>,
-                <button
-                  onClick={() => this.generateHash(itemPath)}
-                  className="black-bg white-font margin-l-m"
-                  style={{ display: "inline-block" }}
-                >
+                <button onClick={() => this.generateHash(itemPath)}>
                   {this.props.msg.pkg.get("refresh")}
                 </button>,
               ])}
-              className={`item-info`}
+              className="item-info"
               childrenStyles={List([{}, { justifyContent: "flex-end" }])}
             />
           </div>

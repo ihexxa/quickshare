@@ -150,7 +150,7 @@
 .theme-default #browser .item-info {
   padding: 1rem;
   font-size: 1.2rem;
-  border: dashed 1px #7f8c8d;
+  border-top: dashed 1px #7f8c8d;
 }
 
 .theme-default #browser .error {
