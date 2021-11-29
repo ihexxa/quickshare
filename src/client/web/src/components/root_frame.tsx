@@ -6,10 +6,8 @@ import { FilesPanel, FilesProps } from "./panel_files";
 import { UploadingsPanel, UploadingsProps } from "./panel_uploadings";
 import { SharingsPanel, SharingsProps } from "./panel_sharings";
 import { IconProps } from "./visual/icons";
-
 import { Tabs } from "./control/tabs";
 import { LoginProps } from "./pane_login";
-import { Panes, PanesProps } from "./panes";
 import { Layers } from "./layers";
 import { AdminProps } from "./pane_admin";
 import { TopBar } from "./topbar";
@@ -20,7 +18,6 @@ export interface Props {
   filesInfo: FilesProps;
   uploadingsInfo: UploadingsProps;
   sharingsInfo: SharingsProps;
-  panes: PanesProps;
   admin: AdminProps;
   login: LoginProps;
   msg: MsgProps;
@@ -78,7 +75,6 @@ export class RootFrame extends React.Component<Props, State, {}> {
 
           <TopBar
             login={this.props.login}
-            panes={this.props.panes}
             msg={this.props.msg}
             update={this.props.update}
           />

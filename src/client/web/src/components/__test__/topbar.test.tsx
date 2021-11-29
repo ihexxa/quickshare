@@ -85,7 +85,6 @@ describe("TopBar", () => {
 
     const topbar = new TopBar({
       login: coreState.login,
-      panes: coreState.panes,
       msg: coreState.msg,
       update: (updater: (prevState: ICoreState) => ICoreState) => { },
     });
@@ -98,12 +97,6 @@ describe("TopBar", () => {
     expect(coreState.filesInfo.items).toEqual(List());
     expect(coreState.sharingsInfo.sharings).toEqual(List());
     expect(coreState.uploadingsInfo.uploadings).toEqual(List<UploadEntry>());
-
-    // panes
-    expect(coreState.panes).toEqual({
-      displaying: "login",
-      paneNames: Set(["login"]),
-    });
 
     // login
     expect(coreState.login).toEqual({

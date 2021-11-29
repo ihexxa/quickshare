@@ -8,7 +8,6 @@ import { UploadingsProps } from "./panel_uploadings";
 import { SharingsProps } from "./panel_sharings";
 import { controlName as panelTabs } from "./root_frame";
 import { settingsTabsCtrl } from "./dialog_settings";
-import { PanesProps } from "./panes";
 import { LoginProps } from "./pane_login";
 import { AdminProps } from "./pane_admin";
 import { MsgPackage } from "../i18n/msger";
@@ -40,7 +39,6 @@ export interface ICoreState {
   sharingsInfo: SharingsProps;
   admin: AdminProps;
   login: LoginProps;
-  panes: PanesProps;
   ui: UIProps;
   msg: MsgProps;
 }
@@ -62,12 +60,6 @@ export function initState(): ICoreState {
     },
     sharingsInfo: {
       sharings: List<string>([]),
-    },
-    panes: {
-      // which pane is displaying
-      displaying: "",
-      // which panes can be displayed
-      paneNames: Set<string>([]), // "settings", "login", "admin"
     },
     login: {
       userID: "",

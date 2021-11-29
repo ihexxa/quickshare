@@ -64,7 +64,6 @@ export class StateMgr extends React.Component<Props, State, {}> {
         this.update(updater().updateUploadingsInfo);
         this.update(updater().updateSharingsInfo);
         this.update(updater().updateLogin);
-        this.update(updater().updatePanes);
         this.update(updater().updateAdmin);
         this.update(updater().updateUI);
         this.update(updater().updateMsg);
@@ -82,7 +81,6 @@ export class StateMgr extends React.Component<Props, State, {}> {
         uploadingsInfo={this.state.uploadingsInfo}
         sharingsInfo={this.state.sharingsInfo}
         msg={this.state.msg}
-        panes={this.state.panes}
         login={this.state.login}
         admin={this.state.admin}
         ui={this.state.ui}

@@ -286,54 +286,6 @@ export class Updater {
     return this.setItems(List<string>(dstDir.split("/")));
   };
 
-  displayPane = (paneName: string) => {
-    if (paneName === "") {
-      // hide all panes
-      this.props.panes.displaying = "";
-    } else {
-      const pane = this.props.panes.paneNames.get(paneName);
-      if (pane != null) {
-        this.props.panes.displaying = paneName;
-      } else {
-        alertMsg(`pane (${paneName}) not found`);
-      }
-    }
-  };
-
-  setPanes = (paneNames: Set<string>) => {
-    this.props.panes.paneNames = paneNames;
-  };
-
-  initPanes = async (): Promise<Array<any>> => {
-    // init browser content
-    if (this.props.login.userRole === roleVisitor) {
-      if (this.props.filesInfo.isSharing) {
-        // sharing with visitor
-        this.setPanes(Set<string>(["login"]));
-        this.displayPane("");
-        return Promise.all([]);
-      }
-
-      // redirect to login
-      this.setPanes(Set<string>(["login"]));
-      this.displayPane("login");
-      return Promise.all([this.getCaptchaID()]);
-    }
-
-    if (this.props.login.userRole === roleAdmin) {
-      this.setPanes(Set<string>(["login", "settings", "admin"]));
-    } else {
-      this.setPanes(Set<string>(["login", "settings"]));
-    }
-    this.displayPane("");
-
-    return Promise.all([
-      this.refreshUploadings(),
-      this.initUploads(),
-      this.listSharings(),
-    ]);
-  };
-
   initAll = async (params: URLSearchParams): Promise<any> => {
     return this.initIsAuthed()
       .then(() => {
@@ -356,8 +308,14 @@ export class Updater {
         return this.getClientCfg();
       })
       .then(() => {
-        // init panes
-        return this.initPanes();
+        if (this.props.login.userRole !== roleVisitor) {
+          // init panels for authned users
+          return Promise.all([
+            this.refreshUploadings(),
+            this.initUploads(),
+            this.listSharings(),
+          ]);
+        }
       })
       .then(() => {
         // init i18n
@@ -685,13 +643,6 @@ export class Updater {
     return {
       ...prevState,
       sharingsInfo: { ...prevState.sharingsInfo, ...this.props.sharingsInfo },
-    };
-  };
-
-  updatePanes = (prevState: ICoreState): ICoreState => {
-    return {
-      ...prevState,
-      panes: { ...prevState.panes, ...this.props.panes },
     };
   };
 
