@@ -1,9 +1,8 @@
 import * as React from "react";
-import { Set, List } from "immutable";
+import { List } from "immutable";
 
 import { updater } from "./state_updater";
 import { ICoreState, MsgProps, UIProps } from "./core_state";
-// import { PaneSettings } from "./pane_settings";
 import { AdminProps } from "./pane_admin";
 import { SettingsDialog } from "./dialog_settings";
 
@@ -36,7 +35,7 @@ export class Layers extends React.Component<Props, State, {}> {
   render() {
     const showLogin = this.props.login.authed ? "hidden" : "";
     const showSettings =
-      this.props.ui.control.controls.get("settingsDialog") == "on"
+      this.props.ui.control.controls.get("settingsDialog") === "on"
         ? ""
         : "hidden";
 

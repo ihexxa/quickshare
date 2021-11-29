@@ -83,12 +83,6 @@ describe("Login", () => {
       },
     });
 
-    // panes
-    expect(updater().props.panes).toEqual({
-      displaying: "",
-      paneNames: Set(["settings", "login", "admin"]),
-    });
-
     // admin
     let usersMap = Map({});
     usersResps.listUsersMockResp.data.users.forEach((user: User) => {

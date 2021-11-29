@@ -4,7 +4,6 @@ import { alertMsg, confirmMsg } from "../common/env";
 
 import { ICoreState, MsgProps } from "./core_state";
 import { LoginProps } from "./pane_login";
-import { PanesProps } from "./panes";
 import { updater } from "./state_updater";
 import { Flexbox } from "./layout/flexbox";
 import { getIcon } from "./visual/icons";
@@ -12,7 +11,6 @@ import { getIcon } from "./visual/icons";
 export interface State {}
 export interface Props {
   login: LoginProps;
-  panes: PanesProps;
   msg: MsgProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
@@ -52,7 +50,6 @@ export class TopBar extends React.Component<Props, State, {}> {
         this.props.update(updater().updateUploadingsInfo);
         this.props.update(updater().updateSharingsInfo);
         this.props.update(updater().updateLogin);
-        this.props.update(updater().updatePanes);
         this.props.update(updater().updateAdmin);
         this.props.update(updater().updateUI);
         this.props.update(updater().updateMsg);

@@ -64,12 +64,6 @@ describe("State Manager", () => {
       List(filesResps.listHomeMockResp.data.metadatas)
     );
 
-    // panes
-    expect(coreState.panes).toEqual({
-      displaying: "",
-      paneNames: Set(["settings", "login", "admin"]),
-    });
-
     // login
     expect(coreState.login).toEqual({
       userID: "0",
@@ -180,12 +174,6 @@ describe("State Manager", () => {
     );
     expect(coreState.sharingsInfo.sharings).toEqual(List([]));
     expect(coreState.uploadingsInfo.uploadings).toEqual(List<UploadEntry>([]));
-
-    // panes
-    expect(coreState.panes).toEqual({
-      displaying: "",
-      paneNames: Set(["login"]),
-    });
 
     // login
     expect(coreState.login).toEqual({
