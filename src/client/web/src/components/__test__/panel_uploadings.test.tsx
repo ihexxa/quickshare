@@ -1,5 +1,4 @@
-import { mock, instance, verify, when, anything } from "ts-mockito";
-import { List } from "immutable";
+import { mock, instance } from "ts-mockito";
 
 import { UploadingsPanel } from "../panel_uploadings";
 import { initUploadMgr } from "../../worker/upload_mgr";

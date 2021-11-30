@@ -304,10 +304,6 @@ export class Updater {
         return this.isSharing(this.props.filesInfo.dirPath.join("/"));
       })
       .then(() => {
-        // init settings
-        return this.getClientCfg();
-      })
-      .then(() => {
         if (this.props.login.userRole !== roleVisitor) {
           // init panels for authned users
           return Promise.all([
@@ -316,6 +312,10 @@ export class Updater {
             this.listSharings(),
           ]);
         }
+      })
+      .then(() => {
+        // init settings
+        return this.getClientCfg();
       })
       .then(() => {
         // init i18n
@@ -341,6 +341,8 @@ export class Updater {
       downloadSpeedLimit: 0,
       spaceLimit: "0",
     };
+    this.props.login.authed = false;
+    this.props.login.captchaID = "";
     this.props.login.preferences = {
       bg: {
         url: "",
@@ -460,7 +462,6 @@ export class Updater {
 
   logout = async (): Promise<boolean> => {
     const resp = await this.usersClient.logout();
-    updater().setAuthed(false);
     this.resetUser();
     return resp.status === 200;
   };
@@ -509,23 +510,6 @@ export class Updater {
       default:
         alertMsg("language package not found");
     }
-  };
-
-  setTab = (tabName: string) => {
-    // switch (tabName) {
-    //   case "item":
-    //     this.props.panels.displaying = tabName;
-    //     break;
-    //   case "uploading":
-    //     this.props.panels.displaying = tabName;
-    //     break;
-    //   case "sharing":
-    //     this.props.panels.displaying = tabName;
-    //     break;
-    //   default:
-    //     this.props.panels.displaying = "item";
-    //     break;
-    // }
   };
 
   setControlOption = (controlName: string, option: string): boolean => {

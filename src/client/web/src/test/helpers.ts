@@ -1,6 +1,10 @@
+import { mock, instance } from "ts-mockito";
+import { List } from "immutable";
+
+import { MockWorker } from "../worker/interface";
+import { initUploadMgr } from "../worker/upload_mgr";
 import { Response } from "../client";
 import { ICoreState, initState } from "../components/core_state";
-import { List } from "immutable";
 
 export const makePromise = (ret: any): Promise<any> => {
   return new Promise<any>((resolve) => {
@@ -37,4 +41,10 @@ export function mockFileList(filePaths: Array<string>): List<File> {
     return mockRandFile(filePath);
   })
   return List<File>(files);
+}
+
+export function initMockWorker() {
+  const mockWorkerClass = mock(MockWorker);
+  const mockWorker = instance(mockWorkerClass);
+  initUploadMgr(mockWorker);
 }

@@ -10,7 +10,6 @@ import { AuthPane, LoginProps } from "./pane_login";
 import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
 
-export const loginDialogCtrl = "loginDialog";
 export const settingsDialogCtrl = "settingsDialog";
 
 export interface Props {

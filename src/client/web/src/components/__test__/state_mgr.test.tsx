@@ -1,8 +1,8 @@
 import { List, Set, Map } from "immutable";
 import { mock, instance } from "ts-mockito";
 
+import { initMockWorker } from "../../test/helpers";
 import { StateMgr } from "../state_mgr";
-import { initUploadMgr } from "../../worker/upload_mgr";
 import { User, UploadInfo } from "../../client";
 import { MockFilesClient, resps as filesResps } from "../../client/files_mock";
 import { MockUsersClient, resps as usersResps } from "../../client/users_mock";
@@ -11,18 +11,16 @@ import {
   resps as settingsResps,
 } from "../../client/settings_mock";
 import { ICoreState, newState } from "../core_state";
-import { MockWorker, UploadState, UploadEntry } from "../../worker/interface";
+import { UploadState, UploadEntry } from "../../worker/interface";
 import { MsgPackage } from "../../i18n/msger";
 
 describe("State Manager", () => {
+  initMockWorker();
+
   test("initUpdater for admin", async () => {
     const usersCl = new MockUsersClient("");
     const filesCl = new MockFilesClient("");
     const settingsCl = new MockSettingsClient("");
-
-    const mockWorkerClass = mock(MockWorker);
-    const mockWorker = instance(mockWorkerClass);
-    initUploadMgr(mockWorker);
 
     const mgr = new StateMgr({}); // it will call initUpdater
     mgr.setUsersClient(usersCl);
