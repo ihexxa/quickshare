@@ -31,7 +31,7 @@ export class RootFrame extends React.Component<Props, State, {}> {
     super(p);
   }
 
-  render() {
+  makeBgStyle = (): Object => {
     let bgStyle = undefined;
     if (
       this.props.login.preferences != null &&
@@ -48,13 +48,13 @@ export class RootFrame extends React.Component<Props, State, {}> {
       bgStyle = {};
     }
 
-    const fontSizeClass = "font-m";
+    return bgStyle;
+  };
+
+  render() {
+    const bgStyle = this.makeBgStyle();
     const theme = "theme-default";
-    const showBrowser =
-      this.props.login.userRole === roleVisitor &&
-      !this.props.filesInfo.isSharing
-        ? "hidden"
-        : "";
+    const fontSizeClass = "font-m";
 
     const displaying = this.props.ui.control.controls.get(controlName);
     const filesPanelClass = displaying === "filesPanel" ? "" : "hidden";
@@ -107,7 +107,7 @@ export class RootFrame extends React.Component<Props, State, {}> {
             />
           </div>
 
-          <div className={`container-center ${showBrowser}`}>
+          <div className="container-center">
             <span className={filesPanelClass}>
               <FilesPanel
                 filesInfo={this.props.filesInfo}

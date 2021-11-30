@@ -1,22 +1,22 @@
 import { List, Set, Map } from "immutable";
-import { mock, instance } from "ts-mockito";
 
+import { initMockWorker } from "../../test/helpers";
 import { User, UploadInfo } from "../../client";
 import { AuthPane } from "../pane_login";
 import { ICoreState, newState } from "../core_state";
-import { initUploadMgr } from "../../worker/upload_mgr";
 import { updater } from "../state_updater";
-import { MockWorker, UploadState, UploadEntry } from "../../worker/interface";
+import { UploadState, UploadEntry } from "../../worker/interface";
 import { MockUsersClient, resps as usersResps } from "../../client/users_mock";
 import { MockFilesClient, resps as filesResps } from "../../client/files_mock";
 import { MockSettingsClient } from "../../client/settings_mock";
+import { controlName as panelTabs } from "../root_frame";
+import { settingsDialogCtrl } from "../layers";
+import { settingsTabsCtrl } from "../dialog_settings";
 
 describe("Login", () => {
-  test("login", async () => {
-    const mockWorkerClass = mock(MockWorker);
-    const mockWorker = instance(mockWorkerClass);
-    initUploadMgr(mockWorker);
+  initMockWorker();
 
+  test("login", async () => {
     const coreState = newState();
     const pane = new AuthPane({
       login: coreState.login,
@@ -34,7 +34,7 @@ describe("Login", () => {
 
     // TODO: state is not checked
 
-    // browser
+    // files, uploadings, sharings
     expect(coreState.filesInfo.dirPath.join("/")).toEqual("mock_home/files");
     expect(coreState.filesInfo.isSharing).toEqual(true);
     expect(coreState.sharingsInfo.sharings).toEqual(
@@ -97,6 +97,35 @@ describe("Login", () => {
     expect(coreState.admin).toEqual({
       users: usersMap,
       roles: roles,
+    });
+
+    // ui
+    expect(coreState.ui).toEqual({
+      isVertical: false,
+      siteName: "",
+      siteDesc: "",
+      bg: {
+        url: "clientCfg_bg_url",
+        repeat: "clientCfg_bg_repeat",
+        position: "clientCfg_bg_position",
+        align: "clientCfg_bg_align",
+      },
+      control: {
+        controls: Map<string, string>({
+          [panelTabs]: "filesPanel",
+          [settingsDialogCtrl]: "off",
+          [settingsTabsCtrl]: "preferencePane",
+        }),
+        options: Map<string, Set<string>>({
+          [panelTabs]: Set<string>([
+            "filesPanel",
+            "uploadingsPanel",
+            "sharingsPanel",
+          ]),
+          [settingsDialogCtrl]: Set<string>(["on", "off"]),
+          [settingsTabsCtrl]: Set<string>(["preferencePane", "managementPane"]),
+        }),
+      },
     });
   });
 });

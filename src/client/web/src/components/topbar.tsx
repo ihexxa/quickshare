@@ -82,21 +82,10 @@ export class TopBar extends React.Component<Props, State, {}> {
 
             <Flexbox
               children={List([
-                // <span className={`${showUserInfo}`}>
-                //   <span id="topbar-user-info">{this.props.login.userName}</span>
-                // </span>,
-
                 <button onClick={this.showSettings} className={`margin-r-m`}>
                   {this.props.msg.pkg.get("settings")}
                   {/* {getIcon("RiSettings4Line", "1.8rem", "cyan0")} */}
                 </button>,
-
-                // <button
-                //   onClick={this.showAdmin}
-                //   className={`margin-r-m ${showAdmin}`}
-                // >
-                //   {this.props.msg.pkg.get("admin")}
-                // </button>,
 
                 <button onClick={this.logout} className={`${showLogin}`}>
                   {this.props.msg.pkg.get("login.logout")}

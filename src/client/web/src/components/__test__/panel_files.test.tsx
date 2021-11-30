@@ -1,20 +1,17 @@
 import { mock, instance, verify, when, anything } from "ts-mockito";
 import { List } from "immutable";
 
+import { initMockWorker } from "../../test/helpers";
 import { FilesPanel } from "../panel_files";
-import { initUploadMgr } from "../../worker/upload_mgr";
 import { ICoreState, newState } from "../core_state";
 import { updater } from "../state_updater";
-import { MockWorker } from "../../worker/interface";
 import { MockUsersClient, resps as usersResps } from "../../client/users_mock";
 import { MockFilesClient, resps as filesResps } from "../../client/files_mock";
 import { MockSettingsClient } from "../../client/settings_mock";
 
 describe("FilesPanel", () => {
   const initFilesPanel = (): any => {
-    const mockWorkerClass = mock(MockWorker);
-    const mockWorker = instance(mockWorkerClass);
-    initUploadMgr(mockWorker);
+    initMockWorker();
 
     const coreState = newState();
     const usersCl = new MockUsersClient("");

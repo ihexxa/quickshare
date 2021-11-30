@@ -2,7 +2,7 @@ import { List, Set, Map } from "immutable";
 
 import { UploadEntry } from "../worker/interface";
 
-import { loginDialogCtrl, settingsDialogCtrl } from "./layers";
+import { settingsDialogCtrl } from "./layers";
 import { FilesProps } from "./panel_files";
 import { UploadingsProps } from "./panel_uploadings";
 import { SharingsProps } from "./panel_sharings";
@@ -61,6 +61,10 @@ export function initState(): ICoreState {
     sharingsInfo: {
       sharings: List<string>([]),
     },
+    admin: {
+      users: Map<string, User>(),
+      roles: Set<string>(),
+    },
     login: {
       userID: "",
       userName: "",
@@ -85,10 +89,6 @@ export function initState(): ICoreState {
         lan: "en_US",
       },
     },
-    admin: {
-      users: Map<string, User>(),
-      roles: Set<string>(),
-    },
     msg: {
       lan: "en_US",
       pkg: MsgPackage.get("en_US"),
@@ -106,7 +106,6 @@ export function initState(): ICoreState {
       control: {
         controls: Map<string, string>({
           [panelTabs]: "filesPanel",
-          [loginDialogCtrl]: "on",
           [settingsDialogCtrl]: "off",
           [settingsTabsCtrl]: "preferencePane",
         }),
@@ -116,7 +115,6 @@ export function initState(): ICoreState {
             "uploadingsPanel",
             "sharingsPanel",
           ]),
-          [loginDialogCtrl]: Set<string>(["on", "off"]),
           [settingsDialogCtrl]: Set<string>(["on", "off"]),
           [settingsTabsCtrl]: Set<string>(["preferencePane", "managementPane"]),
         }),

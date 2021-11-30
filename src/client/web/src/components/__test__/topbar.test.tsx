@@ -1,11 +1,9 @@
 import { List, Set, Map } from "immutable";
-import { mock, instance } from "ts-mockito";
 
+import { initMockWorker } from "../../test/helpers";
 import { TopBar } from "../topbar";
-import { initUploadMgr } from "../../worker/upload_mgr";
 import { ICoreState, newState } from "../core_state";
 import { updater } from "../state_updater";
-import { MockWorker } from "../../worker/interface";
 import { MockUsersClient, resps as usersResps } from "../../client/users_mock";
 import { MockFilesClient, resps as filesResps } from "../../client/files_mock";
 import { MockSettingsClient } from "../../client/settings_mock";
@@ -13,17 +11,14 @@ import { MockSettingsClient } from "../../client/settings_mock";
 import { UploadInfo, visitorID, roleVisitor, MetadataResp } from "../../client";
 import { UploadEntry, UploadState } from "../../worker/interface";
 
-
-
 describe("TopBar", () => {
+  initMockWorker();
   // stub confirm
-  window.confirm = (message?: string): boolean => {return true;};
+  window.confirm = (message?: string): boolean => {
+    return true;
+  };
 
   test("logout as visitor without sharing", async () => {
-    const mockWorkerClass = mock(MockWorker);
-    const mockWorker = instance(mockWorkerClass);
-    initUploadMgr(mockWorker);
-
     const coreState = newState();
 
     const isSharingMockResp = { status: 404, statusText: "", data: {} };
@@ -42,7 +37,7 @@ describe("TopBar", () => {
     const listHomeMockResp = {
       status: 401,
       statusText: "",
-      data: { cwd: "", metadatas: new Array<MetadataResp>() }
+      data: { cwd: "", metadatas: new Array<MetadataResp>() },
     };
     const mockFileResps = {
       ...filesResps,
@@ -50,7 +45,7 @@ describe("TopBar", () => {
       isSharingMockResp,
       listSharingsMockResp,
       listUploadingsMockResp,
-    }
+    };
 
     const selfMockResp = {
       status: 401,
@@ -66,7 +61,7 @@ describe("TopBar", () => {
           downloadSpeedLimit: 0,
         },
       },
-    }
+    };
     const isAuthedMockResp = { status: 401, statusText: "", data: {} };
     const mockUserResps = {
       ...usersResps,
@@ -86,13 +81,15 @@ describe("TopBar", () => {
     const topbar = new TopBar({
       login: coreState.login,
       msg: coreState.msg,
-      update: (updater: (prevState: ICoreState) => ICoreState) => { },
+      update: (updater: (prevState: ICoreState) => ICoreState) => {},
     });
 
     await topbar.logout();
 
-    // browser
-    expect(coreState.filesInfo.dirPath.join("/")).toEqual(mockFileResps.listHomeMockResp.data.cwd);
+    // files, uploadings, sharings
+    expect(coreState.filesInfo.dirPath.join("/")).toEqual(
+      mockFileResps.listHomeMockResp.data.cwd
+    );
     expect(coreState.filesInfo.isSharing).toEqual(false);
     expect(coreState.filesInfo.items).toEqual(List());
     expect(coreState.sharingsInfo.sharings).toEqual(List());
@@ -121,7 +118,7 @@ describe("TopBar", () => {
         cssURL: "",
         lanPackURL: "",
         lan: "en_US",
-      }
+      },
     });
 
     // admin
