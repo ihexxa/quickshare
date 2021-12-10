@@ -16,6 +16,7 @@ import { MsgPackage } from "../../i18n/msger";
 
 describe("State Manager", () => {
   initMockWorker();
+  const emptyQuery = new URLSearchParams("");
 
   test("initUpdater for admin", async () => {
     const usersCl = new MockUsersClient("");
@@ -33,7 +34,7 @@ describe("State Manager", () => {
     };
 
     const coreState = newState();
-    await mgr.initUpdater(coreState);
+    await mgr.initUpdater(coreState, emptyQuery);
 
     // browser
     expect(coreState.filesInfo.dirPath.join("/")).toEqual("mock_home/files");
@@ -161,11 +162,14 @@ describe("State Manager", () => {
     mgr.update = (apply: (prevState: ICoreState) => ICoreState): void => {
       // no op
     };
-    await mgr.initUpdater(coreState);
+
+    const sharingPath = "sharingPath/files";
+    const query = new URLSearchParams(`?dir=${sharingPath}`);
+    await mgr.initUpdater(coreState, query);
 
     // browser
     // TODO: mock query to get dir parm
-    expect(coreState.filesInfo.dirPath.join("/")).toEqual("mock_home/files");
+    expect(coreState.filesInfo.dirPath.join("/")).toEqual(sharingPath);
     expect(coreState.filesInfo.isSharing).toEqual(true);
     expect(coreState.filesInfo.items).toEqual(
       List(filesResps.listHomeMockResp.data.metadatas)

@@ -1,6 +1,12 @@
 import { List, Map, Set } from "immutable";
 
-import { ICoreState } from "./core_state";
+import {
+  ICoreState,
+  sharingCtrl,
+  ctrlOn,
+  ctrlOff,
+  ctrlHidden,
+} from "./core_state";
 import { getItemPath } from "./browser";
 import {
   User,
@@ -26,6 +32,9 @@ import { UploadEntry, UploadState } from "../worker/interface";
 import { Up } from "../worker/upload_mgr";
 import { alertMsg } from "../common/env";
 import { LocalStorage } from "../common/localstorage";
+import { controlName as panelTabs } from "./root_frame";
+import { settingsTabsCtrl } from "./dialog_settings";
+import { settingsDialogCtrl } from "./layers";
 
 import { MsgPackage, isValidLanPack } from "../i18n/msger";
 
@@ -286,48 +295,135 @@ export class Updater {
     return this.setItems(List<string>(dstDir.split("/")));
   };
 
+  initUITree = () => {
+    const isAuthed = this.props.login.authed;
+    const isSharing =
+      this.props.ui.control.controls.get(sharingCtrl) === ctrlOn;
+
+    if (isAuthed) {
+      this.props.ui.control.controls = Map<string, string>({
+        [panelTabs]: "filesPanel",
+        [settingsDialogCtrl]: ctrlOff,
+        [settingsTabsCtrl]: "preferencePane",
+        [sharingCtrl]: isSharing ? ctrlOn : ctrlOff,
+      });
+      this.props.ui.control.options = Map<string, Set<string>>({
+        [panelTabs]: Set<string>([
+          "filesPanel",
+          "uploadingsPanel",
+          "sharingsPanel",
+        ]),
+        [settingsDialogCtrl]: Set<string>([ctrlOn, ctrlOff]),
+        [settingsTabsCtrl]: Set<string>(["preferencePane"]),
+        [sharingCtrl]: Set<string>([ctrlOn, ctrlOff]),
+      });
+
+      if (this.props.login.userRole == roleAdmin) {
+        this.props.ui.control.options = this.props.ui.control.options.set(
+          settingsTabsCtrl,
+          Set<string>(["preferencePane", "managementPane"])
+        );
+      }
+    } else {
+      if (isSharing) {
+        this.props.ui.control.controls = Map<string, string>({
+          [panelTabs]: "filesPanel",
+          [settingsDialogCtrl]: ctrlHidden,
+          [settingsTabsCtrl]: ctrlHidden,
+          [sharingCtrl]: ctrlOn,
+        });
+        this.props.ui.control.options = Map<string, Set<string>>({
+          [panelTabs]: Set<string>(["filesPanel"]),
+          [settingsDialogCtrl]: Set<string>([ctrlHidden]),
+          [settingsTabsCtrl]: Set<string>([ctrlHidden]),
+          [sharingCtrl]: Set<string>([ctrlOn]),
+        });
+      } else {
+        this.props.ui.control.controls = Map<string, string>({
+          [panelTabs]: ctrlHidden,
+          [settingsDialogCtrl]: ctrlHidden,
+          [settingsTabsCtrl]: ctrlHidden,
+          [sharingCtrl]: ctrlOff,
+        });
+        this.props.ui.control.options = Map<string, Set<string>>({
+          [panelTabs]: Set<string>([ctrlHidden]),
+          [settingsDialogCtrl]: Set<string>([ctrlHidden]),
+          [settingsTabsCtrl]: Set<string>([ctrlHidden]),
+          [sharingCtrl]: Set<string>([ctrlOff]),
+        });
+      }
+    }
+  };
+
+  initStateForVisitor = async (): Promise<any> => {
+    // TOOD: status is ignored, should return alert
+    return Promise.all([
+      this.getClientCfg(),
+      this.syncLan(),
+      this.isSharing(this.props.filesInfo.dirPath.join("/")),
+    ]);
+  };
+
+  initStateForAuthedUser = async (): Promise<any> => {
+    // TOOD: status is ignored, should return alert
+    return Promise.all([
+      this.refreshUploadings(),
+      this.initUploads(),
+      this.listSharings(),
+    ]);
+  };
+
+  initStateForAdmin = async (): Promise<any> => {
+    return this.initStateForVisitor()
+      .then(() => {
+        return this.initStateForAuthedUser();
+      })
+      .then(() => {
+        return Promise.all([this.listRoles(), this.listUsers()]);
+      });
+  };
+
+  syncCwd = async () => {
+    if (this.props.filesInfo.dirPath.size !== 0) {
+      return this.setItems(this.props.filesInfo.dirPath);
+    }
+    return this.setHomeItems();
+  };
+
+  initCwd = async (params: URLSearchParams): Promise<any> => {
+    const dir = params.get("dir");
+
+    if (dir != null && dir !== "") {
+      const dirPath = List(dir.split("/"));
+      this.props.ui.control.controls = this.props.ui.control.controls.set(
+        sharingCtrl,
+        ctrlOn
+      );
+      this.props.filesInfo.dirPath = dirPath;
+    } else {
+      this.props.ui.control.controls = this.props.ui.control.controls.set(
+        sharingCtrl,
+        ctrlOff
+      );
+      this.props.filesInfo.dirPath = List([]);
+    }
+  };
+
   initAll = async (params: URLSearchParams): Promise<any> => {
-    return this.initIsAuthed()
+    return Promise.all([this.self(), this.initIsAuthed(), this.initCwd(params)])
       .then(() => {
-        return this.self();
+        this.initUITree();
       })
       .then(() => {
-        const dir = params.get("dir");
-        if (dir != null && dir !== "") {
-          const dirPath = List(dir.split("/"));
-          return this.setItems(dirPath);
-        } else {
-          return this.setHomeItems();
-        }
+        return this.syncCwd();
       })
       .then(() => {
-        return this.isSharing(this.props.filesInfo.dirPath.join("/"));
-      })
-      .then(() => {
-        if (this.props.login.userRole !== roleVisitor) {
-          // init panels for authned users
-          return Promise.all([
-            this.refreshUploadings(),
-            this.initUploads(),
-            this.listSharings(),
-          ]);
-        }
-      })
-      .then(() => {
-        // init settings
-        return this.getClientCfg();
-      })
-      .then(() => {
-        // init i18n
-        // TOOD: status is ignored, should return alert
-        return this.fetchLanPack();
-      })
-      .then(() => {
-        // init admin content
         if (this.props.login.userRole === roleAdmin) {
-          return Promise.all([this.listRoles(), this.listUsers()]);
+          return this.initStateForAdmin();
+        } else if (this.props.login.userRole === roleVisitor) {
+          return this.initStateForVisitor();
         }
-        return;
+        return this.initStateForAuthedUser();
       });
   };
 
@@ -572,7 +668,7 @@ export class Updater {
     return resp.status;
   };
 
-  fetchLanPack = async (): Promise<number> => {
+  syncLan = async (): Promise<number> => {
     const url = this.props.login.preferences.lanPackURL;
     if (url === "") {
       const lan = this.props.login.preferences.lan;
