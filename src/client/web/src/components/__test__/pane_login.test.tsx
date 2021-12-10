@@ -3,7 +3,13 @@ import { List, Set, Map } from "immutable";
 import { initMockWorker } from "../../test/helpers";
 import { User, UploadInfo } from "../../client";
 import { AuthPane } from "../pane_login";
-import { ICoreState, newState } from "../core_state";
+import {
+  ICoreState,
+  newState,
+  sharingCtrl,
+  ctrlOn,
+  ctrlOff,
+} from "../core_state";
 import { updater } from "../state_updater";
 import { UploadState, UploadEntry } from "../../worker/interface";
 import { MockUsersClient, resps as usersResps } from "../../client/users_mock";
@@ -16,7 +22,7 @@ import { settingsTabsCtrl } from "../dialog_settings";
 describe("Login", () => {
   initMockWorker();
 
-  test("login", async () => {
+  test("login as admin without sharing", async () => {
     const coreState = newState();
     const pane = new AuthPane({
       login: coreState.login,
@@ -113,8 +119,9 @@ describe("Login", () => {
       control: {
         controls: Map<string, string>({
           [panelTabs]: "filesPanel",
-          [settingsDialogCtrl]: "off",
+          [settingsDialogCtrl]: ctrlOff,
           [settingsTabsCtrl]: "preferencePane",
+          [sharingCtrl]: ctrlOff,
         }),
         options: Map<string, Set<string>>({
           [panelTabs]: Set<string>([
@@ -122,8 +129,9 @@ describe("Login", () => {
             "uploadingsPanel",
             "sharingsPanel",
           ]),
-          [settingsDialogCtrl]: Set<string>(["on", "off"]),
+          [settingsDialogCtrl]: Set<string>([ctrlOn, ctrlOff]),
           [settingsTabsCtrl]: Set<string>(["preferencePane", "managementPane"]),
+          [sharingCtrl]: Set<string>([ctrlOn, ctrlOff]),
         }),
       },
     });

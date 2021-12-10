@@ -25,7 +25,9 @@ export class StateMgr extends React.Component<Props, State, {}> {
     const worker = window.Worker == null ? new FgWorker() : new BgWorker();
     initUploadMgr(worker);
     this.state = newState();
-    this.initUpdater(this.state); // don't await
+
+    const query = new URLSearchParams(document.location.search.substring(1));
+    this.initUpdater(this.state, query); // don't await
   }
 
   setUsersClient = (client: IUsersClient) => {
@@ -40,7 +42,10 @@ export class StateMgr extends React.Component<Props, State, {}> {
     this.settingsClient = client;
   };
 
-  initUpdater = async (state: ICoreState): Promise<void> => {
+  initUpdater = async (
+    state: ICoreState,
+    query: URLSearchParams
+  ): Promise<void> => {
     updater().init(state);
     if (
       this.usersClient == null ||
@@ -56,9 +61,8 @@ export class StateMgr extends React.Component<Props, State, {}> {
       this.settingsClient
     );
 
-    const params = new URLSearchParams(document.location.search.substring(1));
     return updater()
-      .initAll(params)
+      .initAll(query)
       .then(() => {
         this.update(updater().updateFilesInfo);
         this.update(updater().updateUploadingsInfo);

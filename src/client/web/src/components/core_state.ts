@@ -1,7 +1,8 @@
 import { List, Set, Map } from "immutable";
 
 import { UploadEntry } from "../worker/interface";
-
+import { MsgPackage } from "../i18n/msger";
+import { User, MetadataResp } from "../client";
 import { settingsDialogCtrl } from "./layers";
 import { FilesProps } from "./panel_files";
 import { UploadingsProps } from "./panel_uploadings";
@@ -10,9 +11,11 @@ import { controlName as panelTabs } from "./root_frame";
 import { settingsTabsCtrl } from "./dialog_settings";
 import { LoginProps } from "./pane_login";
 import { AdminProps } from "./pane_admin";
-import { MsgPackage } from "../i18n/msger";
-import { User, MetadataResp } from "../client";
 
+export const ctrlHidden = "hidden";
+export const ctrlOn = "on";
+export const ctrlOff = "off";
+export const sharingCtrl = "sharingCtrl";
 export interface MsgProps {
   lan: string;
   pkg: Map<string, string>;
@@ -108,6 +111,7 @@ export function initState(): ICoreState {
           [panelTabs]: "filesPanel",
           [settingsDialogCtrl]: "off",
           [settingsTabsCtrl]: "preferencePane",
+          [sharingCtrl]: "off",
         }),
         options: Map<string, Set<string>>({
           [panelTabs]: Set<string>([
@@ -117,6 +121,7 @@ export function initState(): ICoreState {
           ]),
           [settingsDialogCtrl]: Set<string>(["on", "off"]),
           [settingsTabsCtrl]: Set<string>(["preferencePane", "managementPane"]),
+          [sharingCtrl]: Set<string>(["on", "off"]),
         }),
       },
     },
