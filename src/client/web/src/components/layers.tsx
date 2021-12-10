@@ -2,17 +2,25 @@ import * as React from "react";
 import { List } from "immutable";
 
 import { updater } from "./state_updater";
-import { ICoreState, MsgProps, UIProps } from "./core_state";
+import {
+  ICoreState,
+  MsgProps,
+  UIProps,
+  sharingCtrl,
+  ctrlOn,
+} from "./core_state";
 import { AdminProps } from "./pane_admin";
 import { SettingsDialog } from "./dialog_settings";
 
 import { AuthPane, LoginProps } from "./pane_login";
+import { FilesProps } from "./panel_files";
 import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
 
 export const settingsDialogCtrl = "settingsDialog";
 
 export interface Props {
+  filesInfo: FilesProps;
   login: LoginProps;
   admin: AdminProps;
   ui: UIProps;
@@ -32,7 +40,12 @@ export class Layers extends React.Component<Props, State, {}> {
   };
 
   render() {
-    const showLogin = this.props.login.authed ? "hidden" : "";
+    const showLogin =
+      this.props.login.authed ||
+      (this.props.ui.control.controls.get(sharingCtrl) === ctrlOn &&
+        this.props.filesInfo.isSharing)
+        ? "hidden"
+        : "";
     const showSettings =
       this.props.ui.control.controls.get("settingsDialog") === "on"
         ? ""
