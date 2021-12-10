@@ -70,6 +70,7 @@ export class RootFrame extends React.Component<Props, State, {}> {
             admin={this.props.admin}
             ui={this.props.ui}
             msg={this.props.msg}
+            filesInfo={this.props.filesInfo}
             update={this.props.update}
           />
 
