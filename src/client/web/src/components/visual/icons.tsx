@@ -12,6 +12,9 @@ import { RiCheckboxFill } from "@react-icons/all-files/ri/RiCheckboxFill";
 import { RiMenuFill } from "@react-icons/all-files/ri/RiMenuFill";
 import { RiInformationFill } from "@react-icons/all-files/ri/RiInformationFill";
 import { RiDeleteBin2Fill } from "@react-icons/all-files/ri/RiDeleteBin2Fill";
+import { RiArchiveDrawerFill } from "@react-icons/all-files/ri/RiArchiveDrawerFill";
+import { RiFileList2Fill } from "@react-icons/all-files/ri/RiFileList2Fill";
+
 
 
 import { colorClass } from "./colors";
@@ -23,6 +26,7 @@ export interface IconProps {
 }
 
 const icons = Map<string, IconType>({
+  RiFileList2Fill: RiFileList2Fill,
   RiFolder2Fill: RiFolder2Fill,
   RiShareBoxLine: RiShareBoxLine,
   RiUploadCloudFill: RiUploadCloudFill,
@@ -33,6 +37,7 @@ const icons = Map<string, IconType>({
   RiMenuFill: RiMenuFill,
   RiInformationFill: RiInformationFill,
   RiDeleteBin2Fill: RiDeleteBin2Fill,
+  RiArchiveDrawerFill: RiArchiveDrawerFill,
 });
 
 export function getIconWithProps(

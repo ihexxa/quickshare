@@ -91,13 +91,20 @@
 .theme-default #breadcrumb .item {
   color: #697384;
   margin-right: 1rem;
-  /* padding: 1rem; */
+  max-width: 6rem;
+}
+
+.theme-default #breadcrumb .content {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-wrap: break-word;
+  display: block;
 }
 
 .theme-default #breadcrumb .item {
   color: #697384;
   margin-right: 1rem;
-  /* padding: 1rem; */
 }
 
 .container {
@@ -136,21 +143,50 @@
   padding-bottom: 1rem;
 }
 
-.theme-default #icon-home {
-  color: black;
-  margin-right: 1rem;
+.theme-default #item-table {
+  width: 100%;
+  max-width: 100%;
+  display: block;
 }
 
-.theme-default #browser .item-op {
-  line-height: 4rem;
-  padding: 1rem 0;
-  text-align: right;
+.theme-default #item-table thead,
+.theme-default #item-table tfoot,
+.theme-default #item-table tbody,
+.theme-default #item-table tr {
+  max-width: 100%;
+  display: block;
+  padding: 0;
+}
+.theme-default #item-table td,
+.theme-default #item-table th {
+  display: inline-block;
+  padding: 0;
+}
+
+.theme-default .item-cell {
+  height: 5rem;
+}
+
+.theme-default .float-menu {
+  position: relative;
+  box-shadow: 0 5px 30px 0 rgba(31, 38, 135, 0.1);
+  border-radius: 0.5rem;
+  background-color: white;
 }
 
 .theme-default #browser .item-info {
-  padding: 1rem;
+  padding: 1rem 0;
   font-size: 1.2rem;
   border-top: dashed 1px #7f8c8d;
+}
+
+.theme-default #browser .item-op {
+  text-align: right;
+}
+
+.theme-default #icon-home {
+  color: black;
+  margin-right: 1rem;
 }
 
 .theme-default #browser .error {

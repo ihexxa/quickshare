@@ -2,7 +2,7 @@ import * as React from "react";
 import { List } from "immutable";
 
 export interface Props {
-  children: List<JSX.Element>;
+  children: List<React.ReactNode>;
   childrenStyles?: List<React.CSSProperties>;
   style?: React.CSSProperties;
   className?: string;
@@ -25,7 +25,7 @@ const childrenStyle = {
 export const Flexbox = (props: Props) => {
   const childrenCount = props.children.size;
   const children = props.children.map(
-    (child: JSX.Element, i: number): JSX.Element => {
+    (child: React.ReactNode, i: number): React.ReactNode => {
       return (
         <div
           key={`fb-${i}`}

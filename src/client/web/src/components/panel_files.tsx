@@ -4,8 +4,9 @@ import { List, Map, Set } from "immutable";
 import FileSize from "filesize";
 
 import { RiFolder2Fill } from "@react-icons/all-files/ri/RiFolder2Fill";
-import { RiHomeSmileFill } from "@react-icons/all-files/ri/RiHomeSmileFill";
+import { RiArchiveDrawerFill } from "@react-icons/all-files/ri/RiArchiveDrawerFill";
 import { RiFile2Fill } from "@react-icons/all-files/ri/RiFile2Fill";
+import { RiFileList2Fill } from "@react-icons/all-files/ri/RiFileList2Fill";
 
 import { alertMsg, confirmMsg } from "../common/env";
 import { updater } from "./state_updater";
@@ -14,6 +15,7 @@ import { LoginProps } from "./pane_login";
 import { MetadataResp, roleVisitor, roleAdmin } from "../client";
 import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
+import { Table } from "./layout/table";
 import { Up } from "../worker/upload_mgr";
 import { UploadEntry, UploadState } from "../worker/interface";
 import { getIcon } from "./visual/icons";
@@ -222,6 +224,14 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     return this.chdir(this.props.filesInfo.dirPath.push(childDirName));
   };
 
+  goHome = async () => {
+    return updater()
+      .setHomeItems()
+      .then(() => {
+        this.props.update(updater().updateFilesInfo);
+      });
+  };
+
   chdir = async (dirPath: List<string>) => {
     if (dirPath === this.props.filesInfo.dirPath) {
       return;
@@ -330,15 +340,11 @@ export class FilesPanel extends React.Component<Props, State, {}> {
             }
             className="item"
           >
-            {pathPart}
+            <span className="content">{pathPart}</span>
           </button>
         );
       }
     );
-
-    const nameWidthClass = `item-name item-name-${
-      this.props.ui.isVertical ? "vertical" : "horizontal"
-    } pointer`;
 
     const ops = (
       <div id="upload-op">
@@ -382,111 +388,52 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       }
     );
 
-    const itemList = sortedItems.map((item: MetadataResp) => {
+    const items = sortedItems.map((item: MetadataResp) => {
       const isSelected = this.state.selectedItems.has(item.name);
       const dirPath = this.props.filesInfo.dirPath.join("/");
       const itemPath = dirPath.endsWith("/")
         ? `${dirPath}${item.name}`
         : `${dirPath}/${item.name}`;
 
-      return item.isDir ? (
-        <Flexbox
-          key={item.name}
-          children={List([
-            <Flexbox
-              children={List([
-                <RiFolder2Fill
-                  size="3rem"
-                  className="yellow0-font margin-r-m"
-                />,
-
-                <span className={`${nameWidthClass}`}>
-                  <span
-                    className="title-m"
-                    onClick={() => this.gotoChild(item.name)}
-                  >
-                    {item.name}
-                  </span>
-                  <div className="desc-m grey0-font">
-                    <span>
-                      {item.modTime.slice(0, item.modTime.indexOf("T"))}
-                    </span>
-                  </div>
-                </span>,
-              ])}
-              childrenStyles={List([
-                { flex: "0 0 auto" },
-                { flex: "0 0 auto" },
-              ])}
-            />,
-            <span className={`item-op ${showOp}`}>
-              <span onClick={() => this.select(item.name)} className="float-l">
-                {isSelected
-                  ? getIcon("RiCheckboxFill", "1.8rem", "cyan0")
-                  : getIcon("RiCheckboxBlankFill", "1.8rem", "grey1")}
-              </span>
-            </span>,
-          ])}
-          childrenStyles={List([
-            { flex: "0 0 auto", width: "60%" },
-            { flex: "0 0 auto", justifyContent: "flex-end", width: "40%" },
-          ])}
-        />
+      const icon = item.isDir ? (
+        <div className="v-mid item-cell">
+          <RiFolder2Fill size="3rem" className="yellow0-font" />
+        </div>
       ) : (
-        <div key={item.name}>
-          <Flexbox
-            key={item.name}
-            children={List([
-              <Flexbox
-                children={List([
-                  <RiFile2Fill size="3rem" className="cyan0-font margin-r-m" />,
+        <div className="v-mid item-cell">
+          <RiFile2Fill size="3rem" className="cyan0-font" />
+        </div>
+      );
 
-                  <span className={`${nameWidthClass}`}>
-                    <a
-                      className="title-m"
-                      href={`/v1/fs/files?fp=${itemPath}`}
-                      target="_blank"
-                    >
-                      {item.name}
-                    </a>
-                    <div className="desc-m grey0-font">
-                      <span>
-                        {item.modTime.slice(0, item.modTime.indexOf("T"))}
-                      </span>
-                      &nbsp;/&nbsp;
-                      <span>{FileSize(item.size, { round: 0 })}</span>
-                    </div>
-                  </span>,
-                ])}
-                childrenStyles={List([
-                  { flex: "0 0 auto" },
-                  { flex: "0 0 auto" },
-                ])}
-              />,
-
-              <span className={`item-op ${showOp}`}>
-                <span
-                  onClick={() => this.toggleDetail(item.name)}
-                  className="float-l"
-                >
-                  {getIcon("RiInformationFill", "1.8rem", "grey1")}
-                </span>
-
-                <span
-                  onClick={() => this.select(item.name)}
-                  className="float-l"
-                >
-                  {isSelected
-                    ? getIcon("RiCheckboxFill", "1.8rem", "cyan0")
-                    : getIcon("RiCheckboxBlankFill", "1.8rem", "grey1")}
-                </span>
-              </span>,
-            ])}
-            childrenStyles={List([
-              { flex: "0 0 auto", width: "60%" },
-              { flex: "0 0 auto", justifyContent: "flex-end", width: "40%" },
-            ])}
-          />
+      const content = item.isDir ? (
+        <div className={`v-mid item-cell`}>
+          <div className="full-width">
+            <div className="title-m clickable" onClick={() => this.gotoChild(item.name)}>
+              {item.name}
+            </div>
+            <div className="desc-m grey0-font">
+              <span>{item.modTime.slice(0, item.modTime.indexOf("T"))}</span>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <div className={`v-mid item-cell`}>
+            <div className="full-width">
+              <a
+                className="title-m clickable"
+                href={`/v1/fs/files?fp=${itemPath}`}
+                target="_blank"
+              >
+                {item.name}
+              </a>
+              <div className="desc-m grey0-font">
+                <span>{item.modTime.slice(0, item.modTime.indexOf("T"))}</span>
+                &nbsp;/&nbsp;
+                <span>{FileSize(item.size, { round: 0 })}</span>
+              </div>
+            </div>
+          </div>
 
           <div
             className={`${
@@ -509,6 +456,33 @@ export class FilesPanel extends React.Component<Props, State, {}> {
           </div>
         </div>
       );
+
+      const op = item.isDir ? (
+        <div className={`v-mid item-cell item-op ${showOp}`}>
+          <span onClick={() => this.select(item.name)} className="float-l">
+            {isSelected
+              ? getIcon("RiCheckboxFill", "1.8rem", "cyan0")
+              : getIcon("RiCheckboxBlankFill", "1.8rem", "grey1")}
+          </span>
+        </div>
+      ) : (
+        <div className={`v-mid item-cell item-op ${showOp}`}>
+          <span
+            onClick={() => this.toggleDetail(item.name)}
+            className="float-l"
+          >
+            {getIcon("RiInformationFill", "1.8rem", "grey1")}
+          </span>
+
+          <span onClick={() => this.select(item.name)} className="float-l">
+            {isSelected
+              ? getIcon("RiCheckboxFill", "1.8rem", "cyan0")
+              : getIcon("RiCheckboxBlankFill", "1.8rem", "grey1")}
+          </span>
+        </div>
+      );
+
+      return List([icon, content, op]);
     });
 
     const usedSpace = FileSize(parseInt(this.props.login.usedSpace, 10), {
@@ -521,8 +495,16 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       }
     );
 
+    const tableTitles = List([
+      <div className="font-s grey0-font">
+        <RiFileList2Fill size="3rem" className="black-font" />
+      </div>,
+      <div className="font-s grey0-font">Name</div>,
+      <div className="font-s grey0-font">Action</div>,
+    ]);
+
     const itemListPane = (
-      <div id="item-list">
+      <div>
         <div className={showOp}>
           <Container>{ops}</Container>
         </div>
@@ -595,7 +577,12 @@ export class FilesPanel extends React.Component<Props, State, {}> {
               <span id="breadcrumb">
                 <Flexbox
                   children={List([
-                    <RiHomeSmileFill size="3rem" id="icon-home" />,
+                    <RiArchiveDrawerFill
+                      size="3rem"
+                      id="icon-home"
+                      className="clickable"
+                      onClick={this.goHome}
+                    />,
                     <Flexbox children={breadcrumb} />,
                   ])}
                   childrenStyles={List([
@@ -614,7 +601,17 @@ export class FilesPanel extends React.Component<Props, State, {}> {
             childrenStyles={List([{}, { justifyContent: "flex-end" }])}
           />
 
-          {itemList}
+          <Table
+            colStyles={List([
+              { width: "3rem", paddingRight: "1rem" },
+              { width: "calc(100% - 12rem)", textAlign: "left" },
+              { width: "8rem", textAlign: "right" },
+            ])}
+            id="item-table"
+            head={tableTitles}
+            foot={List()}
+            rows={items}
+          />
         </Container>
       </div>
     );

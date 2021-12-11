@@ -2,16 +2,23 @@ import * as React from "react";
 import { List } from "immutable";
 import { alertMsg, confirmMsg } from "../common/env";
 
-import { ICoreState, MsgProps } from "./core_state";
+import {
+  ICoreState,
+  MsgProps,
+  UIProps,
+  ctrlOn,
+  ctrlHidden,
+} from "./core_state";
 import { LoginProps } from "./pane_login";
 import { updater } from "./state_updater";
 import { Flexbox } from "./layout/flexbox";
-import { getIcon } from "./visual/icons";
+import { settingsDialogCtrl } from "./layers";
 
 export interface State {}
 export interface Props {
   login: LoginProps;
   msg: MsgProps;
+  ui: UIProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
@@ -20,8 +27,8 @@ export class TopBar extends React.Component<Props, State, {}> {
     super(p);
   }
 
-  showSettings = () => {
-    updater().setControlOption("settingsDialog", "on");
+  openSettings = () => {
+    updater().setControlOption(settingsDialogCtrl, ctrlOn);
     this.props.update(updater().updateUI);
   };
 
@@ -66,6 +73,10 @@ export class TopBar extends React.Component<Props, State, {}> {
 
   render() {
     const showLogin = this.props.login.authed ? "" : "hidden";
+    const showSettings =
+      this.props.ui.control.controls.get(settingsDialogCtrl) === ctrlHidden
+        ? "hidden"
+        : "";
 
     return (
       <div id="top-bar">
@@ -82,7 +93,10 @@ export class TopBar extends React.Component<Props, State, {}> {
 
             <Flexbox
               children={List([
-                <button onClick={this.showSettings} className={`margin-r-m`}>
+                <button
+                  onClick={this.openSettings}
+                  className={`margin-r-m ${showSettings}`}
+                >
                   {this.props.msg.pkg.get("settings")}
                   {/* {getIcon("RiSettings4Line", "1.8rem", "cyan0")} */}
                 </button>,
