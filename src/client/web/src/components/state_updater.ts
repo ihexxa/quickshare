@@ -418,6 +418,9 @@ export class Updater {
         return this.syncCwd();
       })
       .then(() => {
+        return this.getCaptchaID();
+      })
+      .then(() => {
         if (this.props.login.userRole === roleAdmin) {
           return this.initStateForAdmin();
         } else if (this.props.login.userRole === roleVisitor) {

@@ -75,7 +75,7 @@ describe("State Manager", () => {
         downloadSpeedLimit: 3,
       },
       authed: true,
-      captchaID: "",
+      captchaID: "mockCaptchaID",
       preferences: {
         bg: {
           url: "bgUrl",
@@ -185,7 +185,7 @@ describe("State Manager", () => {
       quota: mockSelfResp.data.quota,
       usedSpace: mockSelfResp.data.usedSpace,
       authed: false,
-      captchaID: "",
+      captchaID: "mockCaptchaID",
       preferences: {
         bg: {
           url: "",

@@ -479,3 +479,18 @@
   overflow-wrap: break-word;
   display: block;
 }
+
+.clickable {
+  cursor: pointer;
+}
+
+.v-mid {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.full-width {
+  width: 100%;
+}

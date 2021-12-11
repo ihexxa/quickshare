@@ -79,6 +79,7 @@ describe("TopBar", () => {
     updater().setClients(usersCl, filesCl, settingsCl);
 
     const topbar = new TopBar({
+      ui: coreState.ui,
       login: coreState.login,
       msg: coreState.msg,
       update: (updater: (prevState: ICoreState) => ICoreState) => {},

@@ -63,13 +63,13 @@ export class AuthPane extends React.Component<Props, State, {}> {
         this.state.captchaInput
       )
       .then((ok: boolean): Promise<any> => {
+        this.setState({ captchaInput: "" });
         if (ok) {
           const params = new URLSearchParams(
             document.location.search.substring(1)
           );
           return updater().initAll(params);
         } else {
-          this.setState({ user: "", pwd: "", captchaInput: "" });
           alertMsg(this.props.msg.pkg.get("op.fail"));
           return updater().getCaptchaID();
         }
@@ -145,10 +145,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
         </span>
 
         <span className="float-input">
-          <button
-            id="btn-login"
-            onClick={this.login}
-          >
+          <button id="btn-login" onClick={this.login}>
             {this.props.msg.pkg.get("login.login")}
           </button>
         </span>

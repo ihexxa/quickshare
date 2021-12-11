@@ -75,7 +75,7 @@ describe("Login", () => {
         uploadSpeedLimit: 3,
         downloadSpeedLimit: 3,
       },
-      captchaID: "",
+      captchaID: "mockCaptchaID",
       preferences: {
         bg: {
           url: "bgUrl",
