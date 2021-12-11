@@ -99,6 +99,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         .self()
         .then(() => {
           this.props.update(updater().updateLogin);
+          this.props.update(updater().updateUploadingsInfo);
         });
     }
 
@@ -107,9 +108,11 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         .setItems(this.props.filesInfo.dirPath)
         .then(() => {
           this.props.update(updater().updateFilesInfo);
+          this.props.update(updater().updateUploadingsInfo);
         });
     } else {
       this.props.update(updater().updateFilesInfo);
+      this.props.update(updater().updateUploadingsInfo);
     }
   };
 
@@ -124,8 +127,9 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       fileList = fileList.push(event.target.files[i]);
     }
     updater().addUploads(fileList);
-    this.props.update(updater().updateFilesInfo);
-    this.props.update(updater().updateSharingsInfo);
+    this.props.update(updater().updateUploadingsInfo);
+    // this.props.update(updater().updateFilesInfo);
+    // this.props.update(updater().updateSharingsInfo);
   };
 
   onNewFolderNameChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
