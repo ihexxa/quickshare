@@ -15,7 +15,7 @@ import { LoginProps } from "./pane_login";
 import { MetadataResp, roleVisitor, roleAdmin } from "../client";
 import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
-import { Table } from "./layout/table";
+import { Table, Cell, Head } from "./layout/table";
 import { Up } from "../worker/upload_mgr";
 import { UploadEntry, UploadState } from "../worker/interface";
 import { getIcon } from "./visual/icons";
@@ -332,6 +332,12 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       });
   };
 
+  updateItems = (items: Object) => {
+    const metadataResps = items as List<MetadataResp>;
+    updater().updateItems(metadataResps);
+    this.props.update(updater().updateFilesInfo);
+  };
+
   render() {
     const showOp = this.props.login.userRole === roleVisitor ? "hidden" : "";
     const breadcrumb = this.props.filesInfo.dirPath.map(
@@ -381,18 +387,18 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       </div>
     );
 
-    const sortedItems = this.props.filesInfo.items.sort(
-      (item1: MetadataResp, item2: MetadataResp) => {
-        if (item1.isDir && !item2.isDir) {
-          return -1;
-        } else if (!item1.isDir && item2.isDir) {
-          return 1;
-        }
-        return 0;
-      }
-    );
+    // const sortedItems = this.props.filesInfo.items.sort(
+    //   (item1: MetadataResp, item2: MetadataResp) => {
+    //     if (item1.isDir && !item2.isDir) {
+    //       return -1;
+    //     } else if (!item1.isDir && item2.isDir) {
+    //       return 1;
+    //     }
+    //     return 0;
+    //   }
+    // );
 
-    const items = sortedItems.map((item: MetadataResp) => {
+    const items = this.props.filesInfo.items.map((item: MetadataResp) => {
       const isSelected = this.state.selectedItems.has(item.name);
       const dirPath = this.props.filesInfo.dirPath.join("/");
       const itemPath = dirPath.endsWith("/")
@@ -412,7 +418,10 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       const content = item.isDir ? (
         <div className={`v-mid item-cell`}>
           <div className="full-width">
-            <div className="title-m clickable" onClick={() => this.gotoChild(item.name)}>
+            <div
+              className="title-m clickable"
+              onClick={() => this.gotoChild(item.name)}
+            >
               {item.name}
             </div>
             <div className="desc-m grey0-font">
@@ -486,8 +495,34 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         </div>
       );
 
-      return List([icon, content, op]);
+      return {
+        val: item,
+        cells: List<Cell>([
+          { elem: icon, val: item.isDir ? "d" : "f" },
+          { elem: content, val: itemPath },
+          { elem: op, val: "" },
+        ]),
+      };
     });
+
+    const tableTitles = List<Head>([
+      {
+        elem: (
+          <div className="font-s grey0-font">
+            <RiFileList2Fill size="3rem" className="black-font" />
+          </div>
+        ),
+        sortable: true,
+      },
+      {
+        elem: <div className="font-s grey0-font">Name</div>,
+        sortable: true,
+      },
+      {
+        elem: <div className="font-s grey0-font">Action</div>,
+        sortable: false,
+      },
+    ]);
 
     const usedSpace = FileSize(parseInt(this.props.login.usedSpace, 10), {
       round: 0,
@@ -498,14 +533,6 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         round: 0,
       }
     );
-
-    const tableTitles = List([
-      <div className="font-s grey0-font">
-        <RiFileList2Fill size="3rem" className="black-font" />
-      </div>,
-      <div className="font-s grey0-font">Name</div>,
-      <div className="font-s grey0-font">Action</div>,
-    ]);
 
     const itemListPane = (
       <div>
@@ -615,6 +642,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
             head={tableTitles}
             foot={List()}
             rows={items}
+            updateRows={this.updateItems}
           />
         </Container>
       </div>

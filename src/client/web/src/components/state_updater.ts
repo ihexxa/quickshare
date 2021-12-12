@@ -247,6 +247,10 @@ export class Updater {
     return false;
   };
 
+  updateItems = (items: List<MetadataResp>) => {
+    this.props.filesInfo.items = items;
+  };
+
   moveHere = async (
     srcDir: string,
     dstDir: string,
