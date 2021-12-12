@@ -128,8 +128,6 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     }
     updater().addUploads(fileList);
     this.props.update(updater().updateUploadingsInfo);
-    // this.props.update(updater().updateFilesInfo);
-    // this.props.update(updater().updateSharingsInfo);
   };
 
   onNewFolderNameChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
@@ -308,11 +306,12 @@ export class FilesPanel extends React.Component<Props, State, {}> {
           alertMsg(this.props.msg.pkg.get("browser.share.add.fail"));
         } else {
           updater().setSharing(true);
+          return updater().listSharings();
         }
       })
       .then(() => {
-        this.props.update(updater().updateFilesInfo);
         this.props.update(updater().updateSharingsInfo);
+        this.props.update(updater().updateFilesInfo);
       });
   };
 
@@ -324,11 +323,12 @@ export class FilesPanel extends React.Component<Props, State, {}> {
           alertMsg(this.props.msg.pkg.get("browser.share.del.fail"));
         } else {
           updater().setSharing(false);
+          return updater().listSharings();
         }
       })
       .then(() => {
-        this.props.update(updater().updateFilesInfo);
         this.props.update(updater().updateSharingsInfo);
+        this.props.update(updater().updateFilesInfo);
       });
   };
 

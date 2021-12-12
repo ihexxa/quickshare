@@ -74,8 +74,8 @@ export class StateMgr extends React.Component<Props, State, {}> {
       });
   };
 
-  update = (apply: (prevState: ICoreState) => ICoreState): void => {
-    this.setState(apply(this.state));
+  update = (update: (prevState: ICoreState) => ICoreState): void => {
+    this.setState(update(this.state));
   };
 
   render() {

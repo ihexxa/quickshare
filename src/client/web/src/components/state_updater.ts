@@ -63,7 +63,6 @@ export class Updater {
     this.props.uploadingsInfo.uploadings.forEach((entry) => {
       Up().addStopped(entry.filePath, entry.uploaded, entry.size);
     });
-    // this.setUploadings(Up().list());
   };
 
   addUploads = (fileList: List<File>) => {
@@ -703,6 +702,21 @@ export class Updater {
     this.props.msg.lan = resp.data.lan;
     this.props.msg.pkg = Map<string, string>(resp.data);
     return resp.status;
+  };
+
+  updateAll = (prevState: ICoreState): ICoreState => {
+    return {
+      filesInfo: { ...prevState.filesInfo, ...this.props.filesInfo },
+      uploadingsInfo: {
+        ...prevState.uploadingsInfo,
+        ...this.props.uploadingsInfo,
+      },
+      sharingsInfo: { ...prevState.sharingsInfo, ...this.props.sharingsInfo },
+      login: { ...prevState.login, ...this.props.login },
+      admin: { ...prevState.admin, ...this.props.admin },
+      msg: { ...prevState.msg, ...this.props.msg },
+      ui: { ...prevState.ui, ...this.props.ui },
+    };
   };
 
   updateFilesInfo = (prevState: ICoreState): ICoreState => {
