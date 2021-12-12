@@ -387,18 +387,18 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       </div>
     );
 
-    // const sortedItems = this.props.filesInfo.items.sort(
-    //   (item1: MetadataResp, item2: MetadataResp) => {
-    //     if (item1.isDir && !item2.isDir) {
-    //       return -1;
-    //     } else if (!item1.isDir && item2.isDir) {
-    //       return 1;
-    //     }
-    //     return 0;
-    //   }
-    // );
+    const sortedItems = this.props.filesInfo.items.sort(
+      (item1: MetadataResp, item2: MetadataResp) => {
+        if (item1.isDir && !item2.isDir) {
+          return -1;
+        } else if (!item1.isDir && item2.isDir) {
+          return 1;
+        }
+        return 0;
+      }
+    );
 
-    const items = this.props.filesInfo.items.map((item: MetadataResp) => {
+    const items = sortedItems.map((item: MetadataResp) => {
       const isSelected = this.state.selectedItems.has(item.name);
       const dirPath = this.props.filesInfo.dirPath.join("/");
       const itemPath = dirPath.endsWith("/")
