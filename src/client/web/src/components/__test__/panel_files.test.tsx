@@ -1,4 +1,3 @@
-import { mock, instance, verify, when, anything } from "ts-mockito";
 import { List } from "immutable";
 
 import { initMockWorker } from "../../test/helpers";
@@ -39,19 +38,7 @@ describe("FilesPanel", () => {
   test("chdir", async () => {
     const { filesPanel, usersCl, filesCl } = initFilesPanel();
 
-    const newSharings = ["mock_sharingfolder1", "mock_sharingfolder2"];
     const newCwd = List(["newPos", "subFolder"]);
-
-    filesCl.setMock({
-      ...filesResps,
-      listSharingsMockResp: {
-        status: 200,
-        statusText: "",
-        data: {
-          sharingDirs: newSharings,
-        },
-      },
-    });
 
     await filesPanel.chdir(newCwd);
 
@@ -60,8 +47,31 @@ describe("FilesPanel", () => {
     expect(updater().props.filesInfo.items).toEqual(
       List(filesResps.listHomeMockResp.data.metadatas)
     );
+  });
+
+  test("addSharing", async () => {
+    const { filesPanel, usersCl, filesCl } = initFilesPanel();
+
+    const newSharingPath = List(["newPos", "subFolder"]);
+    const sharingDirs = [newSharingPath.join("/")];
+
+    filesCl.setMock({
+      ...filesResps,
+      listSharingsMockResp: {
+        status: 200,
+        statusText: "",
+        data: {
+          sharingDirs: sharingDirs,
+        },
+      },
+    });
+
+    await filesPanel.addSharing(newSharingPath);
+
+
+    expect(updater().props.filesInfo.isSharing).toEqual(true);
     expect(updater().props.sharingsInfo.sharings).toEqual(
-      List(filesResps.listSharingsMockResp.data.sharingDirs)
+      List(sharingDirs)
     );
   });
 });
