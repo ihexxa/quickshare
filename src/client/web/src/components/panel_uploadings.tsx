@@ -7,6 +7,7 @@ import { RiUploadCloudLine } from "@react-icons/all-files/ri/RiUploadCloudLine";
 import { RiEmotionSadLine } from "@react-icons/all-files/ri/RiEmotionSadLine";
 
 import { alertMsg } from "../common/env";
+import { getErrMsg } from "../common/utils";
 import { updater } from "./state_updater";
 import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { LoginProps } from "./pane_login";
@@ -41,14 +42,15 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
       .then((status: string) => {
         if (status !== "") {
           alertMsg(
-            `${this.props.msg.pkg.get(
-              "browser.upload.del.fail"
-            )}: ${this.props.msg.pkg.get(status)}`
+            getErrMsg(this.props.msg.pkg, "browser.upload.del.fail", status)
           );
         }
         return updater().refreshUploadings();
       })
-      .then(() => {
+      .then((status: string) => {
+        if (status !== "") {
+          alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+        }
         return updater().self();
       })
       .then(() => {

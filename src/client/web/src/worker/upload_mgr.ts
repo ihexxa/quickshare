@@ -141,7 +141,7 @@ export class UploadMgr {
           state: UploadState.Ready,
         });
       } else {
-        status = "op.fail";
+        status = "uploadMgr.err";
       }
     }
 
@@ -159,7 +159,7 @@ export class UploadMgr {
         state: UploadState.Stopped,
       });
     } else {
-      status = "op.fail";
+      status = "uploadMgr.err";
     }
 
     this.statusCb(this.infos.toMap(), false);

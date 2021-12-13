@@ -70,7 +70,7 @@ export class Updater {
         file.name
       );
       const status = Up().add(file, filePath);
-      if (status !== ""){
+      if (status !== "") {
         return status;
       }
     });
@@ -97,44 +97,45 @@ export class Updater {
     );
   };
 
-  addSharing = async (): Promise<boolean> => {
+  addSharing = async (): Promise<string> => {
     const dirPath = this.props.filesInfo.dirPath.join("/");
     const resp = await this.filesClient.addSharing(dirPath);
-    return resp.status === 200;
+    return resp.status === 200 ? "" : "server.fail";
   };
 
-  deleteSharing = async (dirPath: string): Promise<boolean> => {
+  deleteSharing = async (dirPath: string): Promise<string> => {
     const resp = await this.filesClient.deleteSharing(dirPath);
-    return resp.status === 200;
+    return resp.status === 200 ? "" : "server.fail";
   };
 
-  isSharing = async (dirPath: string): Promise<boolean> => {
+  isSharing = async (dirPath: string): Promise<string> => {
     const resp = await this.filesClient.isSharing(dirPath);
+    // TODO: differentiate 404 and error
     this.props.filesInfo.isSharing = resp.status === 200;
-    return resp.status === 200; // TODO: differentiate 404 and error
+    return resp.status === 200 ? "" : "server.fail";
   };
 
   setSharing = (shared: boolean) => {
     this.props.filesInfo.isSharing = shared;
   };
 
-  listSharings = async (): Promise<boolean> => {
+  listSharings = async (): Promise<string> => {
     const resp = await this.filesClient.listSharings();
     this.props.sharingsInfo.sharings =
       resp.status === 200
         ? List<string>(resp.data.sharingDirs)
         : this.props.sharingsInfo.sharings;
-    return resp.status === 200;
+    return resp.status === 200 ? "" : "server.fail";
   };
 
-  refreshUploadings = async (): Promise<boolean> => {
-    // this function get information from server and merge them with local information
-    // because some information (error) can only be detected from local
+  // this function gets information from server and merge them with local information
+  // because some information (error) can only be detected from local
+  refreshUploadings = async (): Promise<string> => {
     const luResp = await this.filesClient.listUploadings();
     if (luResp.status !== 200) {
-      // TODO: i18n
+      // TODO: log error
       console.error(luResp.data);
-      return false;
+      return "server.fail";
     }
 
     let localUploads = Map<string, UploadEntry>([]);
@@ -167,11 +168,11 @@ export class Updater {
     });
 
     this.props.uploadingsInfo.uploadings = updatedUploads;
-    return true;
+    return "";
   };
 
-  stopUploading = (filePath: string) => {
-    Up().stop(filePath);
+  stopUploading = (filePath: string): string => {
+    return Up().stop(filePath);
   };
 
   mkDir = async (dirPath: string): Promise<void> => {
@@ -369,14 +370,14 @@ export class Updater {
     return Promise.all([
       this.getClientCfg(),
       this.syncLan(),
-      this.isSharing(this.props.filesInfo.dirPath.join("/")),
+      this.isSharing(this.props.filesInfo.dirPath.join("/")), // TODO: they return Promise<string>, check its status
     ]);
   };
 
   initStateForAuthedUser = async (): Promise<any> => {
     // TOOD: status is ignored, should return alert
     this.initUploads(); // ignore return because it always succeed
-    return Promise.all([this.refreshUploadings(), this.listSharings()]);
+    return Promise.all([this.refreshUploadings(), this.listSharings()]); // TODO: they return Promise<string>, check its status
   };
 
   initStateForAdmin = async (): Promise<any> => {

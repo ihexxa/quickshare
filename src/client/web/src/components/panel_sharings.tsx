@@ -5,6 +5,7 @@ import { RiShareBoxLine } from "@react-icons/all-files/ri/RiShareBoxLine";
 import { RiFolderSharedFill } from "@react-icons/all-files/ri/RiFolderSharedFill";
 import { RiEmotionSadLine } from "@react-icons/all-files/ri/RiEmotionSadLine";
 
+import { getErrMsg } from "../common/utils";
 import { alertMsg, confirmMsg } from "../common/env";
 import { updater } from "./state_updater";
 import { ICoreState, MsgProps, UIProps } from "./core_state";
@@ -33,48 +34,28 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
     this.state = {};
   }
 
-  addSharing = async () => {
-    return updater()
-      .addSharing()
-      .then((ok) => {
-        if (!ok) {
-          alertMsg(this.props.msg.pkg.get("browser.share.add.fail"));
-        } else {
-          updater().setSharing(true);
-          return this.listSharings();
-        }
-      })
-      .then(() => {
-        this.props.update(updater().updateFilesInfo);
-        this.props.update(updater().updateSharingsInfo);
-      });
-  };
-
   deleteSharing = async (dirPath: string) => {
     return updater()
       .deleteSharing(dirPath)
-      .then((ok) => {
-        if (!ok) {
-          alertMsg(this.props.msg.pkg.get("browser.share.del.fail"));
+      .then((status: string) => {
+        if (status !== "") {
+          alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
         } else {
           updater().setSharing(false);
           return this.listSharings();
         }
-      })
-      .then(() => {
-        this.props.update(updater().updateFilesInfo);
-        this.props.update(updater().updateFilesInfo);
       });
   };
 
   listSharings = async () => {
     return updater()
       .listSharings()
-      .then((ok) => {
-        if (ok) {
-          this.props.update(updater().updateFilesInfo);
-          this.props.update(updater().updateSharingsInfo);
+      .then((status: string) => {
+        if (status !== "") {
+          alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
         }
+        this.props.update(updater().updateFilesInfo);
+        this.props.update(updater().updateSharingsInfo);
       });
   };
 
