@@ -9,6 +9,7 @@ import { RiFile2Fill } from "@react-icons/all-files/ri/RiFile2Fill";
 import { RiFileList2Fill } from "@react-icons/all-files/ri/RiFileList2Fill";
 
 import { alertMsg, confirmMsg } from "../common/env";
+import { getErrMsg } from "../common/utils";
 import { updater } from "./state_updater";
 import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { LoginProps } from "./pane_login";
@@ -129,7 +130,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
 
     const status = updater().addUploads(fileList);
     if (status !== "") {
-      alertMsg(this.props.msg.pkg.get("upload.add.fail"));
+      alertMsg(getErrMsg(this.props.msg.pkg, "upload.add.fail", status));
     }
     this.props.update(updater().updateUploadingsInfo);
   };
@@ -249,12 +250,12 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     return updater()
       .setItems(dirPath)
       .then(() => {
-        return updater().listSharings();
-      })
-      .then(() => {
         return updater().isSharing(dirPath.join("/"));
       })
-      .then(() => {
+      .then((status: string) => {
+        if (status !== "") {
+          alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+        }
         this.props.update(updater().updateFilesInfo);
         this.props.update(updater().updateSharingsInfo);
       });
@@ -305,15 +306,19 @@ export class FilesPanel extends React.Component<Props, State, {}> {
   addSharing = async () => {
     return updater()
       .addSharing()
-      .then((ok) => {
-        if (!ok) {
-          alertMsg(this.props.msg.pkg.get("browser.share.add.fail"));
+      .then((status: string) => {
+        if (status !== "") {
+          alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+          return "";
         } else {
           updater().setSharing(true);
           return updater().listSharings();
         }
       })
-      .then(() => {
+      .then((status: string) => {
+        if (status !== "") {
+          alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+        }
         this.props.update(updater().updateSharingsInfo);
         this.props.update(updater().updateFilesInfo);
       });
@@ -322,15 +327,19 @@ export class FilesPanel extends React.Component<Props, State, {}> {
   deleteSharing = async (dirPath: string) => {
     return updater()
       .deleteSharing(dirPath)
-      .then((ok) => {
-        if (!ok) {
-          alertMsg(this.props.msg.pkg.get("browser.share.del.fail"));
+      .then((status) => {
+        if (status !== "") {
+          alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+          return "";
         } else {
           updater().setSharing(false);
           return updater().listSharings();
         }
       })
-      .then(() => {
+      .then((status: string) => {
+        if (status !== "") {
+          alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+        }
         this.props.update(updater().updateSharingsInfo);
         this.props.update(updater().updateFilesInfo);
       });

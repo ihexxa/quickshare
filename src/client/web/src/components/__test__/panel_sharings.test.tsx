@@ -39,33 +39,6 @@ describe("SharingsPanel", () => {
     };
   };
 
-  test("add sharing", async () => {
-    const { sharingsPanel, usersCl, filesCl } = initSharingsPanel();
-
-    const newSharings = [
-      "mock_sharingfolder1",
-      "mock_sharingfolder2",
-      "newSharing",
-    ];
-
-    filesCl.setMock({
-      ...filesResps,
-      listSharingsMockResp: {
-        status: 200,
-        statusText: "",
-        data: {
-          sharingDirs: newSharings,
-        },
-      },
-    });
-
-    await sharingsPanel.addSharing();
-
-    // TODO: check addSharing's input
-    expect(updater().props.filesInfo.isSharing).toEqual(true);
-    expect(updater().props.sharingsInfo.sharings).toEqual(List(newSharings));
-  });
-
   test("delete sharing", async () => {
     const { sharingsPanel, usersCl, filesCl } = initSharingsPanel();
 
