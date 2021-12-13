@@ -1,16 +1,13 @@
 import * as React from "react";
 import { List } from "immutable";
 
-import { updater } from "../state_updater";
-
 export interface Cell {
-  elem: React.ReactNode;
+  elem: React.ReactNode; // element to display
   val: string; // original cell value
-  // sortVal: string; // this value is for sorting
 }
 
 export interface Row {
-  cells: List<Cell>;
+  cells: List<Cell>; // columns of arow
   val: Object; // original object value
 }
 
@@ -27,8 +24,8 @@ export interface Props {
   id?: string;
   style?: React.CSSProperties;
   className?: string;
-  originalVals?: List<Object>;
-  updateRows?: (rows: Object) => void;
+  originalVals?: List<Object>; // these are original values which will be updated to the state after re-sorting
+  updateRows?: (rows: Object) => void; // this is a callback which update state with re-sorted rows
 }
 
 export interface State {
@@ -151,51 +148,3 @@ export class Table extends React.Component<Props, State, {}> {
     );
   }
 }
-
-// export const Table = (props: Props) => {
-//   const headCols = props.head.map((head: Head, i: number): React.ReactNode => {
-//     const style = props.colStyles != null ? props.colStyles.get(i) : {};
-//     return (
-//       <th key={`h-${i}`} className="title-xs clickable" style={style}>
-//         {head.elem}
-//       </th>
-//     );
-//   });
-
-//   const bodyRows = props.rows.map(
-//     (row: List<Cell>, i: number): React.ReactNode => {
-//       const tds = row.map((cell: Cell, j: number) => {
-//         const style = props.colStyles != null ? props.colStyles.get(j) : {};
-//         return (
-//           <td key={`rc-${i}-${j}`} style={style}>
-//             {cell.elem}
-//           </td>
-//         );
-//       });
-//       return <tr key={`r-${i}`}>{tds}</tr>;
-//     }
-//   );
-
-//   const footCols = props.foot.map(
-//     (elem: React.ReactNode, i: number): React.ReactNode => {
-//       const style = props.colStyles != null ? props.colStyles.get(i) : {};
-//       return (
-//         <th key={`f-${i}`} style={style}>
-//           {elem}
-//         </th>
-//       );
-//     }
-//   );
-
-//   return (
-//     <table id={props.id} style={props.style} className={props.className}>
-//       <thead>
-//         <tr>{headCols}</tr>
-//       </thead>
-//       <tbody>{bodyRows}</tbody>
-//       <tfoot>
-//         <tr>{footCols}</tr>
-//       </tfoot>
-//     </table>
-//   );
-// };

@@ -35,26 +35,16 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
     this.state = {};
   }
 
-  addUploads = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files.length > 1000) {
-      alertMsg(this.props.msg.pkg.get("err.tooManyUploads"));
-      return;
-    }
-
-    let fileList = List<File>();
-    for (let i = 0; i < event.target.files.length; i++) {
-      fileList = fileList.push(event.target.files[i]);
-    }
-    updater().addUploads(fileList);
-    this.props.update(updater().updateUploadingsInfo);
-  };
-
   deleteUpload = (filePath: string): Promise<void> => {
     return updater()
       .deleteUpload(filePath)
-      .then((ok: boolean) => {
-        if (!ok) {
-          alertMsg(this.props.msg.pkg.get("browser.upload.del.fail"));
+      .then((status: string) => {
+        if (status !== "") {
+          alertMsg(
+            `${this.props.msg.pkg.get(
+              "browser.upload.del.fail"
+            )}: ${this.props.msg.pkg.get(status)}`
+          );
         }
         return updater().refreshUploadings();
       })

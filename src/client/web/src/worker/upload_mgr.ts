@@ -98,7 +98,7 @@ export class UploadMgr {
     this.statusCb = cb;
   };
 
-  // addStopped is for initializing uploading list in the UploadMgr
+  // addStopped is for initializing uploading list in the UploadMgr, when page is loaded
   // notice even uploading list are shown in the UI, it may not inited in the UploadMgr
   addStopped = (filePath: string, uploaded: number, fileSize: number) => {
     this.infos = this.infos.set(filePath, {
@@ -111,8 +111,10 @@ export class UploadMgr {
     });
   };
 
-  add = (file: File, filePath: string) => {
+  add = (file: File, filePath: string): string => {
     const entry = this.infos.get(filePath);
+    let status = "";
+
     if (entry == null) {
       // new uploading
       this.infos = this.infos.set(filePath, {
@@ -124,46 +126,55 @@ export class UploadMgr {
         err: "",
       });
     } else {
-      // restart the uploading
+      // the uploading task exists, restart the uploading
       if (
         entry.state === UploadState.Stopped &&
         filePath === entry.filePath &&
         file.size === entry.size
       ) {
-        // try to upload a file with same name but actually with different content.
-        // it still can not resolve one case: names and sizes are same, but contents are different
-        // TODO: showing file SHA will avoid above case
+        // try to upload a file with same name
+        // the file may be a totally different file.
+        // TODO: checking file SHA will avoid above case
         this.infos = this.infos.set(filePath, {
           ...entry,
           file: file,
           state: UploadState.Ready,
         });
       } else {
-        alert(
-          `(${filePath}) seems not same file with uploading item, please check.`
-        );
+        status = "op.fail";
       }
     }
+
     this.statusCb(this.infos.toMap(), false);
+    return status;
   };
 
-  stop = (filePath: string) => {
+  stop = (filePath: string): string => {
     const entry = this.infos.get(filePath);
+    let status = "";
+
     if (entry != null) {
       this.infos = this.infos.set(filePath, {
         ...entry,
         state: UploadState.Stopped,
       });
     } else {
-      alert(`failed to stop uploading ${filePath}: not found`);
+      status = "op.fail";
     }
+
     this.statusCb(this.infos.toMap(), false);
+    return status;
   };
 
-  delete = (filePath: string) => {
-    this.stop(filePath);
+  delete = (filePath: string): string => {
+    const status = this.stop(filePath);
+    if (status !== "") {
+      return status;
+    }
+
     this.infos = this.infos.delete(filePath);
     this.statusCb(this.infos.toMap(), false);
+    return "";
   };
 
   list = (): OrderedMap<string, UploadEntry> => {

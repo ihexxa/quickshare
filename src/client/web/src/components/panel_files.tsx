@@ -87,7 +87,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     infos: Map<string, UploadEntry>,
     refresh: boolean
   ) => {
-    updater().setUploadings(infos);
+    updater().setUploads(infos);
     let errCount = 0;
     infos.valueSeq().forEach((entry: UploadEntry) => {
       errCount += entry.state === UploadState.Error ? 1 : 0;
@@ -126,7 +126,11 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     for (let i = 0; i < event.target.files.length; i++) {
       fileList = fileList.push(event.target.files[i]);
     }
-    updater().addUploads(fileList);
+
+    const status = updater().addUploads(fileList);
+    if (status !== "") {
+      alertMsg(this.props.msg.pkg.get("upload.add.fail"));
+    }
     this.props.update(updater().updateUploadingsInfo);
   };
 
