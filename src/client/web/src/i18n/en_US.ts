@@ -111,4 +111,6 @@ export const msgs: Map<string, string> = Map({
   "control.panelTabs.sharingsPanel": "Sharings",
   "control.settingsTabs.managementPane": "Management",
   "control.settingsTabs.preferencePane": "Preference",
+  "upload.add.fail": "Some files conflict with uploading files, please check.",
+  "server.fail": "The operation failed in the server",
 });

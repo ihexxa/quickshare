@@ -7,7 +7,7 @@ import {
   ctrlOff,
   ctrlHidden,
 } from "./core_state";
-import { getItemPath } from "./browser";
+import { getItemPath } from "../common/utils";
 import {
   User,
   ListUsersResp,
@@ -38,10 +38,6 @@ import { settingsDialogCtrl } from "./layers";
 
 import { MsgPackage, isValidLanPack } from "../i18n/msger";
 
-function getCookieLanKey(user: string) {
-  return `qs_${user}_lan`;
-}
-
 export class Updater {
   props: ICoreState;
   private usersClient: IUsersClient = new UsersClient("");
@@ -59,31 +55,41 @@ export class Updater {
     this.settingsClient = settingsClient;
   }
 
-  initUploads = () => {
+  initUploads = (): string => {
     this.props.uploadingsInfo.uploadings.forEach((entry) => {
       Up().addStopped(entry.filePath, entry.uploaded, entry.size);
     });
+
+    return "";
   };
 
-  addUploads = (fileList: List<File>) => {
+  addUploads = (fileList: List<File>): string => {
     fileList.forEach((file) => {
       const filePath = getItemPath(
         this.props.filesInfo.dirPath.join("/"),
         file.name
       );
-      // do not wait for the promise
-      Up().add(file, filePath);
+      const status = Up().add(file, filePath);
+      if (status !== ""){
+        return status;
+      }
     });
-    this.setUploadings(Up().list());
+
+    this.setUploads(Up().list());
+    return "";
   };
 
-  deleteUpload = async (filePath: string): Promise<boolean> => {
-    Up().delete(filePath);
+  deleteUpload = async (filePath: string): Promise<string> => {
+    const status = Up().delete(filePath);
+    if (status !== "") {
+      return status;
+    }
+
     const resp = await this.filesClient.deleteUploading(filePath);
-    return resp.status === 200;
+    return resp.status === 200 ? "" : "server.fail";
   };
 
-  setUploadings = (infos: Map<string, UploadEntry>) => {
+  setUploads = (infos: Map<string, UploadEntry>) => {
     this.props.uploadingsInfo.uploadings = List<UploadEntry>(
       infos.valueSeq().map((entry: UploadEntry): UploadEntry => {
         return entry;
@@ -369,11 +375,8 @@ export class Updater {
 
   initStateForAuthedUser = async (): Promise<any> => {
     // TOOD: status is ignored, should return alert
-    return Promise.all([
-      this.refreshUploadings(),
-      this.initUploads(),
-      this.listSharings(),
-    ]);
+    this.initUploads(); // ignore return because it always succeed
+    return Promise.all([this.refreshUploadings(), this.listSharings()]);
   };
 
   initStateForAdmin = async (): Promise<any> => {
