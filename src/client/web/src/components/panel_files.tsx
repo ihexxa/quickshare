@@ -313,9 +313,9 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     this.setState({ showDetail });
   };
 
-  generateHash = async (filePath: string): Promise<boolean> => {
+  generateHash = async (filePath: string) => {
     alertMsg(this.props.msg.pkg.get("refresh-hint"));
-    return updater().generateHash(filePath);
+    updater().generateHash(filePath);
   };
 
   addSharing = async () => {

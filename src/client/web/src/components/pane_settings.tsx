@@ -86,8 +86,8 @@ export class PaneSettings extends React.Component<Props, State, {}> {
   syncPreferences = async () => {
     updater()
       .syncPreferences()
-      .then((status: number) => {
-        if (status === 200) {
+      .then((status: string) => {
+        if (status === "") {
           alertMsg(this.props.msg.pkg.get("update.ok"));
         } else {
           alertMsg(this.props.msg.pkg.get("update.fail"));
@@ -109,8 +109,8 @@ export class PaneSettings extends React.Component<Props, State, {}> {
     } else {
       return updater()
         .setPwd(this.state.oldPwd, this.state.newPwd1)
-        .then((ok: boolean) => {
-          if (ok) {
+        .then((status: string) => {
+          if (status) {
             alertMsg(this.props.msg.pkg.get("update.ok"));
           } else {
             alertMsg(this.props.msg.pkg.get("update.fail"));
@@ -128,8 +128,8 @@ export class PaneSettings extends React.Component<Props, State, {}> {
     updater().setLan(lan);
     updater()
       .syncPreferences()
-      .then((status: number) => {
-        if (status === 200) {
+      .then((status: string) => {
+        if (status === "") {
           alertMsg(this.props.msg.pkg.get("update.ok"));
         } else {
           alertMsg(this.props.msg.pkg.get("update.fail"));

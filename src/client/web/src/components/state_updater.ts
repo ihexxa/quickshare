@@ -512,40 +512,40 @@ export class Updater {
     return "server.fail";
   };
 
-  addUser = async (user: User): Promise<boolean> => {
+  addUser = async (user: User): Promise<string> => {
     const resp = await this.usersClient.addUser(user.name, user.pwd, user.role);
     // TODO: should return uid instead
-    return resp.status === 200;
+    return resp.status === 200 ? "" : "server.fail";
   };
 
-  delUser = async (userID: string): Promise<boolean> => {
+  delUser = async (userID: string): Promise<string> => {
     const resp = await this.usersClient.delUser(userID);
-    return resp.status === 200;
+    return resp.status === 200 ? "" : "server.fail";
   };
 
   setUser = async (
     userID: string,
     role: string,
     quota: Quota
-  ): Promise<boolean> => {
+  ): Promise<string> => {
     const resp = await this.usersClient.setUser(userID, role, quota);
-    return resp.status === 200;
+    return resp.status === 200 ? "" : "server.fail";
   };
 
-  setRole = async (userID: string, role: string): Promise<boolean> => {
+  setRole = async (userID: string, role: string): Promise<string> => {
     const resp = await this.usersClient.delUser(userID);
-    return resp.status === 200;
+    return resp.status === 200 ? "" : "server.fail";
   };
 
-  forceSetPwd = async (userID: string, pwd: string): Promise<boolean> => {
+  forceSetPwd = async (userID: string, pwd: string): Promise<string> => {
     const resp = await this.usersClient.forceSetPwd(userID, pwd);
-    return resp.status === 200;
+    return resp.status === 200 ? "" : "server.fail";
   };
 
-  listUsers = async (): Promise<boolean> => {
+  listUsers = async (): Promise<string> => {
     const resp = await this.usersClient.listUsers();
     if (resp.status !== 200) {
-      return false;
+      return "server.fail";
     }
 
     const lsRes = resp.data as ListUsersResp;
@@ -555,24 +555,24 @@ export class Updater {
     });
     this.props.admin.users = users;
 
-    return true;
+    return "";
   };
 
-  addRole = async (role: string): Promise<boolean> => {
+  addRole = async (role: string): Promise<string> => {
     const resp = await this.usersClient.addRole(role);
-    // TODO: should return uid instead
-    return resp.status === 200;
+    // TODO: should return id instead
+    return resp.status === 200 ? "" : "server.fail";
   };
 
-  delRole = async (role: string): Promise<boolean> => {
+  delRole = async (role: string): Promise<string> => {
     const resp = await this.usersClient.delRole(role);
-    return resp.status === 200;
+    return resp.status === 200 ? "" : "server.fail";
   };
 
-  listRoles = async (): Promise<boolean> => {
+  listRoles = async (): Promise<string> => {
     const resp = await this.usersClient.listRoles();
     if (resp.status !== 200) {
-      return false;
+      return "server.fail";
     }
 
     const lsRes = resp.data as ListRolesResp;
@@ -582,7 +582,7 @@ export class Updater {
     });
     this.props.admin.roles = roles;
 
-    return true;
+    return "";
   };
 
   login = async (
@@ -590,7 +590,7 @@ export class Updater {
     pwd: string,
     captchaID: string,
     captchaInput: string
-  ): Promise<boolean> => {
+  ): Promise<string> => {
     const resp = await this.usersClient.login(
       user,
       pwd,
@@ -598,13 +598,13 @@ export class Updater {
       captchaInput
     );
     this.props.login.authed = resp.status === 200;
-    return resp.status === 200;
+    return resp.status === 200 ? "" : "server.fail";
   };
 
-  logout = async (): Promise<boolean> => {
+  logout = async (): Promise<string> => {
     const resp = await this.usersClient.logout();
     this.resetUser();
-    return resp.status === 200;
+    return resp.status === 200 ? "" : "server.fail";
   };
 
   syncIsAuthed = async (): Promise<string> => {
@@ -617,19 +617,6 @@ export class Updater {
     return "";
   };
 
-  // initIsAuthed = async (): Promise<string> => {
-  // const status = await this.isAuthed();
-  // if (status !== "") {
-  //   return status;
-  // }
-  // updater().setAuthed(isAuthed);
-  // return
-  // };
-
-  // setAuthed = (isAuthed: boolean) => {
-  //   this.props.login.authed = isAuthed;
-  // };
-
   getCaptchaID = async (): Promise<string> => {
     const resp = await this.usersClient.getCaptchaID();
     if (resp.status !== 200) {
@@ -639,9 +626,9 @@ export class Updater {
     return "";
   };
 
-  setPwd = async (oldPwd: string, newPwd: string): Promise<boolean> => {
+  setPwd = async (oldPwd: string, newPwd: string): Promise<string> => {
     const resp = await this.usersClient.setPwd(oldPwd, newPwd);
-    return resp.status === 200;
+    return resp.status === 200 ? "" : "server.fail";
   };
 
   setLan = (lan: string) => {
@@ -679,17 +666,17 @@ export class Updater {
     return true;
   };
 
-  generateHash = async (filePath: string): Promise<boolean> => {
+  generateHash = async (filePath: string): Promise<string> => {
     const resp = await this.filesClient.generateHash(filePath);
-    return resp.status === 200;
+    return resp.status === 200 ? "" : "server.fail";
   };
 
-  setClientCfgRemote = async (cfg: ClientConfig): Promise<number> => {
+  setClientCfgRemote = async (cfg: ClientConfig): Promise<string> => {
     const resp = await this.settingsClient.setClientCfg(cfg);
-    return resp.status;
+    return resp.status === 200 ? "" : "server.fail";
   };
 
-  setClientCfg = async (cfg: ClientConfig): Promise<void> => {
+  setClientCfg = (cfg: ClientConfig) => {
     this.props.ui = {
       ...this.props.ui,
       siteName: cfg.siteName,
@@ -702,11 +689,11 @@ export class Updater {
     this.props.login.preferences = { ...prefer };
   };
 
-  syncPreferences = async (): Promise<number> => {
+  syncPreferences = async (): Promise<string> => {
     const resp = await this.usersClient.setPreferences(
       this.props.login.preferences
     );
-    return resp.status;
+    return resp.status === 200 ? "" : "server.fail";
   };
 
   getClientCfg = async (): Promise<string> => {
