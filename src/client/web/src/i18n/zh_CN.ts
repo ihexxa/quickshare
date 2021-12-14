@@ -6,7 +6,6 @@ export const msgs: Map<string, string> = Map({
   "browser.folder.add.fail": "文件夹名不可为空",
   "browser.del.fail": "至少选择一个文件或文件夹",
   "browser.move.fail": "源与目标相同",
-  "browser.share.add.fail": "共享失败",
   "browser.share.del.fail": "删除共享失败",
   "browser.share.del": "停止共享",
   "browser.share.add": "共享路径",

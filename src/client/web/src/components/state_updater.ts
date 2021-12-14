@@ -108,11 +108,13 @@ export class Updater {
     return resp.status === 200 ? "" : "server.fail";
   };
 
-  isSharing = async (dirPath: string): Promise<string> => {
+  syncIsSharing = async (dirPath: string): Promise<string> => {
     const resp = await this.filesClient.isSharing(dirPath);
-    // TODO: differentiate 404 and error
     this.props.filesInfo.isSharing = resp.status === 200;
-    return resp.status === 200 ? "" : "server.fail";
+    if (resp.status !== 200 && resp.status !== 404) {
+      return "server.fail";
+    }
+    return "";
   };
 
   setSharing = (shared: boolean) => {
@@ -175,18 +177,20 @@ export class Updater {
     return Up().stop(filePath);
   };
 
-  mkDir = async (dirPath: string): Promise<void> => {
+  mkDir = async (dirPath: string): Promise<string> => {
     const resp = await this.filesClient.mkdir(dirPath);
     if (resp.status !== 200) {
       alertMsg(`failed to make dir ${dirPath}`);
+      return "server.fail";
     }
+    return "";
   };
 
   delete = async (
     dirParts: List<string>,
     items: List<MetadataResp>,
     selectedItems: Map<string, boolean>
-  ): Promise<boolean> => {
+  ): Promise<string> => {
     const pathsToDel = items
       .filter((item) => {
         return selectedItems.has(item.name);
@@ -222,36 +226,37 @@ export class Updater {
       alertMsg(
         `${this.props.msg.pkg.get("delete.fail")}: ${fails.join(",\n")}`
       );
+      return "server.fail";
     }
 
     return this.setItems(dirParts);
   };
 
-  setItems = async (dirParts: List<string>): Promise<boolean> => {
+  setItems = async (dirParts: List<string>): Promise<string> => {
     const dirPath = dirParts.join("/");
     const listResp = await this.filesClient.list(dirPath);
 
     if (listResp.status === 200) {
       this.props.filesInfo.dirPath = dirParts;
       this.props.filesInfo.items = List<MetadataResp>(listResp.data.metadatas);
-      return true;
+      return "";
     }
     this.props.filesInfo.dirPath = List<string>([]);
     this.props.filesInfo.items = List<MetadataResp>([]);
-    return false;
+    return "server.fail";
   };
 
-  setHomeItems = async (): Promise<boolean> => {
+  setHomeItems = async (): Promise<string> => {
     const listResp = await this.filesClient.listHome();
 
     if (listResp.status === 200) {
       this.props.filesInfo.dirPath = List<string>(listResp.data.cwd.split("/"));
       this.props.filesInfo.items = List<MetadataResp>(listResp.data.metadatas);
-      return true;
+      return "";
     }
     this.props.filesInfo.dirPath = List<string>([]);
     this.props.filesInfo.items = List<MetadataResp>([]);
-    return false;
+    return "server.fail";
   };
 
   updateItems = (items: List<MetadataResp>) => {
@@ -262,14 +267,12 @@ export class Updater {
     srcDir: string,
     dstDir: string,
     selectedItems: Map<string, boolean>
-  ): Promise<boolean> => {
+  ): Promise<string> => {
     const itemsToMove = List<string>(selectedItems.keys()).map(
       (itemName: string): any => {
         const from = getItemPath(srcDir, itemName);
         const to = getItemPath(dstDir, itemName);
         return { from, to };
-        // const resp = await this.filesClient.move(oldPath, newPath);
-        // return resp.status === 200 ? "" : itemName;
       }
     );
 
@@ -300,6 +303,7 @@ export class Updater {
 
     if (fails.size > 0) {
       alertMsg(`${this.props.msg.pkg.get("move.fail")}: ${fails.join(",\n")}`);
+      return "server.fail";
     }
 
     return this.setItems(List<string>(dstDir.split("/")));
@@ -366,41 +370,61 @@ export class Updater {
   };
 
   initStateForVisitor = async (): Promise<any> => {
-    // TOOD: status is ignored, should return alert
-    return Promise.all([
+    const statuses = await Promise.all([
       this.getClientCfg(),
-      this.syncLan(),
-      this.isSharing(this.props.filesInfo.dirPath.join("/")), // TODO: they return Promise<string>, check its status
+      this.syncIsSharing(this.props.filesInfo.dirPath.join("/")),
     ]);
+    if (statuses.join("") !== "") {
+      return statuses.join(";");
+    }
+
+    const syncLanStatus = await this.syncLan();
+    if (syncLanStatus !== "" && syncLanStatus !== "server.fail.ignore") {
+      return syncLanStatus;
+    }
+    return "";
   };
 
-  initStateForAuthedUser = async (): Promise<any> => {
-    // TOOD: status is ignored, should return alert
-    this.initUploads(); // ignore return because it always succeed
-    return Promise.all([this.refreshUploadings(), this.listSharings()]); // TODO: they return Promise<string>, check its status
+  initStateForAuthedUser = async (): Promise<string> => {
+    const statuses = await Promise.all([
+      this.refreshUploadings(),
+      this.listSharings(),
+      this.initUploads(),
+    ]);
+    if (statuses.join("") !== "") {
+      return statuses.join(";");
+    }
+    return "";
   };
 
-  initStateForAdmin = async (): Promise<any> => {
-    return this.initStateForVisitor()
-      .then(() => {
-        return this.initStateForAuthedUser();
-      })
-      .then(() => {
-        return Promise.all([this.listRoles(), this.listUsers()]);
-      });
+  initStateForAdmin = async (): Promise<string> => {
+    const initVisitorStatus = await this.initStateForVisitor();
+    if (initVisitorStatus !== "") {
+      return initVisitorStatus;
+    }
+    const initAuthedUserStatus = await this.initStateForAuthedUser();
+    if (initAuthedUserStatus !== "") {
+      return initAuthedUserStatus;
+    }
+    const statuses = await Promise.all([this.listRoles(), this.listUsers()]);
+    if (statuses.join("") !== "") {
+      return statuses.join(";");
+    }
+    return "";
   };
 
-  syncCwd = async () => {
+  syncCwd = async (): Promise<string> => {
     if (this.props.filesInfo.dirPath.size !== 0) {
       return this.setItems(this.props.filesInfo.dirPath);
     }
     return this.setHomeItems();
   };
 
-  initCwd = async (params: URLSearchParams): Promise<any> => {
+  initCwd = async (params: URLSearchParams): Promise<string> => {
     const dir = params.get("dir");
 
     if (dir != null && dir !== "") {
+      // in sharing mode
       const dirPath = List(dir.split("/"));
       this.props.ui.control.controls = this.props.ui.control.controls.set(
         sharingCtrl,
@@ -414,27 +438,38 @@ export class Updater {
       );
       this.props.filesInfo.dirPath = List([]);
     }
+
+    return "";
   };
 
-  initAll = async (params: URLSearchParams): Promise<any> => {
-    return Promise.all([this.self(), this.initIsAuthed(), this.initCwd(params)])
-      .then(() => {
-        this.initUITree();
-      })
-      .then(() => {
-        return this.syncCwd();
-      })
-      .then(() => {
-        return this.getCaptchaID();
-      })
-      .then(() => {
-        if (this.props.login.userRole === roleAdmin) {
-          return this.initStateForAdmin();
-        } else if (this.props.login.userRole === roleVisitor) {
-          return this.initStateForVisitor();
-        }
-        return this.initStateForAuthedUser();
-      });
+  initAll = async (params: URLSearchParams): Promise<string> => {
+    const isAuthedStatus = await this.syncIsAuthed();
+    if (isAuthedStatus !== "" && isAuthedStatus !== "server.fail.ignore") {
+      return isAuthedStatus;
+    }
+
+    const statuses = await Promise.all([this.self(), this.initCwd(params)]);
+    if (statuses.join("") !== "") {
+      return statuses.join(";");
+    }
+
+    this.initUITree();
+    const syncCwdStatus = await this.syncCwd();
+    if (syncCwdStatus !== "") {
+      return syncCwdStatus;
+    }
+
+    const getCapStatus = await this.getCaptchaID();
+    if (getCapStatus !== "") {
+      return getCapStatus;
+    }
+
+    if (this.props.login.userRole === roleAdmin) {
+      return this.initStateForAdmin();
+    } else if (this.props.login.userRole === roleVisitor) {
+      return this.initStateForVisitor();
+    }
+    return this.initStateForAuthedUser();
   };
 
   resetUser = () => {
@@ -462,7 +497,7 @@ export class Updater {
     };
   };
 
-  self = async (): Promise<boolean> => {
+  self = async (): Promise<string> => {
     const resp = await this.usersClient.self();
     if (resp.status === 200) {
       this.props.login.userID = resp.data.id;
@@ -471,10 +506,10 @@ export class Updater {
       this.props.login.usedSpace = resp.data.usedSpace;
       this.props.login.quota = resp.data.quota;
       this.props.login.preferences = resp.data.preferences;
-      return true;
+      return "";
     }
     this.resetUser();
-    return false;
+    return "server.fail";
   };
 
   addUser = async (user: User): Promise<boolean> => {
@@ -562,7 +597,7 @@ export class Updater {
       captchaID,
       captchaInput
     );
-    updater().setAuthed(resp.status === 200);
+    this.props.login.authed = resp.status === 200;
     return resp.status === 200;
   };
 
@@ -572,28 +607,36 @@ export class Updater {
     return resp.status === 200;
   };
 
-  isAuthed = async (): Promise<boolean> => {
+  syncIsAuthed = async (): Promise<string> => {
     const resp = await this.usersClient.isAuthed();
-    return resp.status === 200;
+    if (resp.status !== 200) {
+      this.props.login.authed = false;
+      return resp.status === 401 ? "server.fail.ignore" : "server.fail";
+    }
+    this.props.login.authed = true;
+    return "";
   };
 
-  initIsAuthed = async (): Promise<void> => {
-    return this.isAuthed().then((isAuthed) => {
-      updater().setAuthed(isAuthed);
-    });
-  };
+  // initIsAuthed = async (): Promise<string> => {
+  // const status = await this.isAuthed();
+  // if (status !== "") {
+  //   return status;
+  // }
+  // updater().setAuthed(isAuthed);
+  // return
+  // };
 
-  setAuthed = (isAuthed: boolean) => {
-    this.props.login.authed = isAuthed;
-  };
+  // setAuthed = (isAuthed: boolean) => {
+  //   this.props.login.authed = isAuthed;
+  // };
 
-  getCaptchaID = async (): Promise<boolean> => {
-    return this.usersClient.getCaptchaID().then((resp) => {
-      if (resp.status === 200) {
-        this.props.login.captchaID = resp.data.id;
-      }
-      return resp.status === 200;
-    });
+  getCaptchaID = async (): Promise<string> => {
+    const resp = await this.usersClient.getCaptchaID();
+    if (resp.status !== 200) {
+      return "server.fail";
+    }
+    this.props.login.captchaID = resp.data.id;
+    return "";
   };
 
   setPwd = async (oldPwd: string, newPwd: string): Promise<boolean> => {
@@ -666,19 +709,19 @@ export class Updater {
     return resp.status;
   };
 
-  getClientCfg = async (): Promise<number> => {
+  getClientCfg = async (): Promise<string> => {
     const resp = await this.settingsClient.getClientCfg();
-    if (resp.status === 200) {
-      const clientCfg = resp.data.clientCfg as ClientConfig;
-      this.props.ui.siteName = clientCfg.siteName;
-      this.props.ui.siteDesc = clientCfg.siteDesc;
-      this.props.ui.bg = clientCfg.bg;
+    if (resp.status !== 200) {
+      return "server.fail";
     }
-
-    return resp.status;
+    const clientCfg = resp.data.clientCfg as ClientConfig;
+    this.props.ui.siteName = clientCfg.siteName;
+    this.props.ui.siteDesc = clientCfg.siteDesc;
+    this.props.ui.bg = clientCfg.bg;
+    return "";
   };
 
-  syncLan = async (): Promise<number> => {
+  syncLan = async (): Promise<string> => {
     const url = this.props.login.preferences.lanPackURL;
     if (url === "") {
       const lan = this.props.login.preferences.lan;
@@ -691,7 +734,7 @@ export class Updater {
         this.props.msg.lan = "en_US";
         this.props.msg.pkg = MsgPackage.get("en_US");
       }
-      return 404;
+      return "fe.fail.ignore";
     }
 
     const resp = await this.filesClient.download(url);
@@ -705,11 +748,11 @@ export class Updater {
     if (!isValid) {
       this.props.msg.lan = "en_US";
       this.props.msg.pkg = MsgPackage.get("en_US");
-      return 400;
+      return "server.fail.ignore";
     }
     this.props.msg.lan = resp.data.lan;
     this.props.msg.pkg = Map<string, string>(resp.data);
-    return resp.status;
+    return "";
   };
 
   updateAll = (prevState: ICoreState): ICoreState => {

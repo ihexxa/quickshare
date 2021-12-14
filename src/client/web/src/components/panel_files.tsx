@@ -107,7 +107,10 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     if (refresh) {
       updater()
         .setItems(this.props.filesInfo.dirPath)
-        .then(() => {
+        .then((status: string) => {
+          if (status !== "") {
+            alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+          }
           this.props.update(updater().updateFilesInfo);
           this.props.update(updater().updateUploadingsInfo);
         });
@@ -151,11 +154,17 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     );
     updater()
       .mkDir(dirPath)
-      .then(() => {
+      .then((status: string) => {
+        if (status !== "") {
+          alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+        }
         this.setState({ newFolderName: "" });
         return updater().setItems(this.props.filesInfo.dirPath);
       })
-      .then(() => {
+      .then((status: string) => {
+        if (status !== "") {
+          alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+        }
         this.props.update(updater().updateFilesInfo);
         this.props.update(updater().updateSharingsInfo);
       });
@@ -189,7 +198,10 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         this.props.filesInfo.items,
         this.state.selectedItems
       )
-      .then(() => {
+      .then((status: string) => {
+        if (status !== "") {
+          alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+        }
         return updater().self();
       })
       .then(() => {
@@ -249,8 +261,11 @@ export class FilesPanel extends React.Component<Props, State, {}> {
 
     return updater()
       .setItems(dirPath)
-      .then(() => {
-        return updater().isSharing(dirPath.join("/"));
+      .then((status: string) => {
+        if (status !== "") {
+          alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+        }
+        return updater().syncIsSharing(dirPath.join("/"));
       })
       .then((status: string) => {
         if (status !== "") {
