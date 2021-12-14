@@ -75,13 +75,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
         }
       })
       .then(() => {
-        this.update(updater().updateFilesInfo);
-        this.update(updater().updateUploadingsInfo);
-        this.update(updater().updateSharingsInfo);
-        this.update(updater().updateLogin);
-        this.update(updater().updateAdmin);
-        this.update(updater().updateUI);
-        this.update(updater().updateMsg);
+        this.update(updater().updateAll);
       });
   };
 
