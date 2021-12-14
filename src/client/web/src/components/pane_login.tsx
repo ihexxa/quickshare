@@ -62,9 +62,9 @@ export class AuthPane extends React.Component<Props, State, {}> {
         this.props.login.captchaID,
         this.state.captchaInput
       )
-      .then((ok: boolean): Promise<any> => {
+      .then((status: string): Promise<any> => {
         this.setState({ captchaInput: "" });
-        if (ok) {
+        if (status === "") {
           const params = new URLSearchParams(
             document.location.search.substring(1)
           );

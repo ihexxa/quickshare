@@ -107,8 +107,8 @@ export class UserForm extends React.Component<
 
     return updater()
       .forceSetPwd(this.state.id, this.state.newPwd1)
-      .then((ok: boolean) => {
-        if (ok) {
+      .then((status: string) => {
+        if (status === "") {
           alertMsg(this.props.msg.pkg.get("update.ok"));
         } else {
           alertMsg(this.props.msg.pkg.get("update.fail"));
@@ -123,11 +123,11 @@ export class UserForm extends React.Component<
   setUser = async () => {
     return updater()
       .setUser(this.props.id, this.state.role, this.state.quota)
-      .then((ok: boolean) => {
-        if (!ok) {
-          alertMsg(this.props.msg.pkg.get("update.fail"));
-        } else {
+      .then((status: string) => {
+        if (status === "") {
           alertMsg(this.props.msg.pkg.get("update.ok"));
+        } else {
+          alertMsg(this.props.msg.pkg.get("update.fail"));
         }
         return updater().listUsers();
       })
@@ -139,13 +139,13 @@ export class UserForm extends React.Component<
   delUser = async () => {
     return updater()
       .delUser(this.state.id)
-      .then((ok: boolean) => {
-        if (!ok) {
+      .then((status: string) => {
+        if (status !== "") {
           alertMsg(this.props.msg.pkg.get("delete.fail"));
         }
         return updater().listUsers();
       })
-      .then((_: boolean) => {
+      .then((_: string) => {
         this.props.update(updater().updateAdmin);
       });
   };
@@ -345,8 +345,8 @@ export class AdminPane extends React.Component<Props, State, {}> {
   addRole = async () => {
     return updater()
       .addRole(this.state.newRole)
-      .then((ok: boolean) => {
-        if (!ok) {
+      .then((status: string) => {
+        if (status !== "") {
           alertMsg(this.props.msg.pkg.get("add.fail"));
         } else {
           alertMsg(this.props.msg.pkg.get("add.ok"));
@@ -365,8 +365,8 @@ export class AdminPane extends React.Component<Props, State, {}> {
 
     return updater()
       .delRole(role)
-      .then((ok: boolean) => {
-        if (!ok) {
+      .then((status: string) => {
+        if (status !== "") {
           this.props.msg.pkg.get("delete.fail");
         } else {
           this.props.msg.pkg.get("delete.ok");
@@ -394,8 +394,8 @@ export class AdminPane extends React.Component<Props, State, {}> {
         usedSpace: "0",
         preferences: undefined,
       })
-      .then((ok: boolean) => {
-        if (!ok) {
+      .then((status: string) => {
+        if (status !== "") {
           alertMsg(this.props.msg.pkg.get("add.fail"));
         } else {
           alertMsg(this.props.msg.pkg.get("add.ok"));
@@ -669,8 +669,8 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
         siteDesc: this.props.ui.siteDesc,
         bg: this.props.ui.bg,
       })
-      .then((code: number) => {
-        if (code === 200) {
+      .then((status: string) => {
+        if (status === "") {
           alertMsg(this.props.msg.pkg.get("update.ok"));
         } else {
           alertMsg(this.props.msg.pkg.get("update.fail"));
@@ -698,9 +698,7 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
       <div>
         <Flexbox
           children={List([
-            <h5 className="title">
-              {this.props.msg.pkg.get("cfg.bg")}
-            </h5>,
+            <h5 className="title">{this.props.msg.pkg.get("cfg.bg")}</h5>,
 
             <span>
               <button onClick={this.resetClientCfg} className="margin-r-m">

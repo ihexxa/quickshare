@@ -39,8 +39,8 @@ export class TopBar extends React.Component<Props, State, {}> {
 
     return updater()
       .logout()
-      .then((ok: boolean) => {
-        if (ok) {
+      .then((status: string) => {
+        if (status === "") {
           const params = new URLSearchParams(
             document.location.search.substring(1)
           );
