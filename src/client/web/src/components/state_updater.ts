@@ -35,6 +35,7 @@ import { LocalStorage } from "../common/localstorage";
 import { controlName as panelTabs } from "./root_frame";
 import { settingsTabsCtrl } from "./dialog_settings";
 import { settingsDialogCtrl } from "./layers";
+import { errUpdater, errServer } from "../common/errors";
 
 import { MsgPackage, isValidLanPack } from "../i18n/msger";
 
@@ -86,7 +87,7 @@ export class Updater {
     }
 
     const resp = await this.filesClient.deleteUploading(filePath);
-    return resp.status === 200 ? "" : "server.fail";
+    return resp.status === 200 ? "" : errServer;
   };
 
   setUploads = (infos: Map<string, UploadEntry>) => {
@@ -100,19 +101,19 @@ export class Updater {
   addSharing = async (): Promise<string> => {
     const dirPath = this.props.filesInfo.dirPath.join("/");
     const resp = await this.filesClient.addSharing(dirPath);
-    return resp.status === 200 ? "" : "server.fail";
+    return resp.status === 200 ? "" : errServer;
   };
 
   deleteSharing = async (dirPath: string): Promise<string> => {
     const resp = await this.filesClient.deleteSharing(dirPath);
-    return resp.status === 200 ? "" : "server.fail";
+    return resp.status === 200 ? "" : errServer;
   };
 
   syncIsSharing = async (dirPath: string): Promise<string> => {
     const resp = await this.filesClient.isSharing(dirPath);
     this.props.filesInfo.isSharing = resp.status === 200;
     if (resp.status !== 200 && resp.status !== 404) {
-      return "server.fail";
+      return errServer;
     }
     return "";
   };
@@ -127,7 +128,7 @@ export class Updater {
       resp.status === 200
         ? List<string>(resp.data.sharingDirs)
         : this.props.sharingsInfo.sharings;
-    return resp.status === 200 ? "" : "server.fail";
+    return resp.status === 200 ? "" : errServer;
   };
 
   // this function gets information from server and merge them with local information
@@ -137,7 +138,7 @@ export class Updater {
     if (luResp.status !== 200) {
       // TODO: log error
       console.error(luResp.data);
-      return "server.fail";
+      return errServer;
     }
 
     let localUploads = Map<string, UploadEntry>([]);
@@ -181,7 +182,7 @@ export class Updater {
     const resp = await this.filesClient.mkdir(dirPath);
     if (resp.status !== 200) {
       alertMsg(`failed to make dir ${dirPath}`);
-      return "server.fail";
+      return errServer;
     }
     return "";
   };
@@ -226,7 +227,7 @@ export class Updater {
       alertMsg(
         `${this.props.msg.pkg.get("delete.fail")}: ${fails.join(",\n")}`
       );
-      return "server.fail";
+      return errServer;
     }
 
     return this.setItems(dirParts);
@@ -243,7 +244,7 @@ export class Updater {
     }
     this.props.filesInfo.dirPath = List<string>([]);
     this.props.filesInfo.items = List<MetadataResp>([]);
-    return "server.fail";
+    return errServer;
   };
 
   setHomeItems = async (): Promise<string> => {
@@ -256,7 +257,7 @@ export class Updater {
     }
     this.props.filesInfo.dirPath = List<string>([]);
     this.props.filesInfo.items = List<MetadataResp>([]);
-    return "server.fail";
+    return errServer;
   };
 
   updateItems = (items: List<MetadataResp>) => {
@@ -303,7 +304,7 @@ export class Updater {
 
     if (fails.size > 0) {
       alertMsg(`${this.props.msg.pkg.get("move.fail")}: ${fails.join(",\n")}`);
-      return "server.fail";
+      return errServer;
     }
 
     return this.setItems(List<string>(dstDir.split("/")));
@@ -379,7 +380,7 @@ export class Updater {
     }
 
     const syncLanStatus = await this.syncLan();
-    if (syncLanStatus !== "" && syncLanStatus !== "server.fail.ignore") {
+    if (syncLanStatus !== "") {
       return syncLanStatus;
     }
     return "";
@@ -444,7 +445,7 @@ export class Updater {
 
   initAll = async (params: URLSearchParams): Promise<string> => {
     const isAuthedStatus = await this.syncIsAuthed();
-    if (isAuthedStatus !== "" && isAuthedStatus !== "server.fail.ignore") {
+    if (isAuthedStatus !== "") {
       return isAuthedStatus;
     }
 
@@ -509,18 +510,18 @@ export class Updater {
       return "";
     }
     this.resetUser();
-    return "server.fail";
+    return errServer;
   };
 
   addUser = async (user: User): Promise<string> => {
     const resp = await this.usersClient.addUser(user.name, user.pwd, user.role);
     // TODO: should return uid instead
-    return resp.status === 200 ? "" : "server.fail";
+    return resp.status === 200 ? "" : errServer;
   };
 
   delUser = async (userID: string): Promise<string> => {
     const resp = await this.usersClient.delUser(userID);
-    return resp.status === 200 ? "" : "server.fail";
+    return resp.status === 200 ? "" : errServer;
   };
 
   setUser = async (
@@ -529,23 +530,23 @@ export class Updater {
     quota: Quota
   ): Promise<string> => {
     const resp = await this.usersClient.setUser(userID, role, quota);
-    return resp.status === 200 ? "" : "server.fail";
+    return resp.status === 200 ? "" : errServer;
   };
 
   setRole = async (userID: string, role: string): Promise<string> => {
     const resp = await this.usersClient.delUser(userID);
-    return resp.status === 200 ? "" : "server.fail";
+    return resp.status === 200 ? "" : errServer;
   };
 
   forceSetPwd = async (userID: string, pwd: string): Promise<string> => {
     const resp = await this.usersClient.forceSetPwd(userID, pwd);
-    return resp.status === 200 ? "" : "server.fail";
+    return resp.status === 200 ? "" : errServer;
   };
 
   listUsers = async (): Promise<string> => {
     const resp = await this.usersClient.listUsers();
     if (resp.status !== 200) {
-      return "server.fail";
+      return errServer;
     }
 
     const lsRes = resp.data as ListUsersResp;
@@ -561,18 +562,18 @@ export class Updater {
   addRole = async (role: string): Promise<string> => {
     const resp = await this.usersClient.addRole(role);
     // TODO: should return id instead
-    return resp.status === 200 ? "" : "server.fail";
+    return resp.status === 200 ? "" : errServer;
   };
 
   delRole = async (role: string): Promise<string> => {
     const resp = await this.usersClient.delRole(role);
-    return resp.status === 200 ? "" : "server.fail";
+    return resp.status === 200 ? "" : errServer;
   };
 
   listRoles = async (): Promise<string> => {
     const resp = await this.usersClient.listRoles();
     if (resp.status !== 200) {
-      return "server.fail";
+      return errServer;
     }
 
     const lsRes = resp.data as ListRolesResp;
@@ -598,20 +599,20 @@ export class Updater {
       captchaInput
     );
     this.props.login.authed = resp.status === 200;
-    return resp.status === 200 ? "" : "server.fail";
+    return resp.status === 200 ? "" : errServer;
   };
 
   logout = async (): Promise<string> => {
     const resp = await this.usersClient.logout();
     this.resetUser();
-    return resp.status === 200 ? "" : "server.fail";
+    return resp.status === 200 ? "" : errServer;
   };
 
   syncIsAuthed = async (): Promise<string> => {
     const resp = await this.usersClient.isAuthed();
     if (resp.status !== 200) {
       this.props.login.authed = false;
-      return resp.status === 401 ? "server.fail.ignore" : "server.fail";
+      return resp.status === 401 ? "" : errServer;
     }
     this.props.login.authed = true;
     return "";
@@ -620,7 +621,7 @@ export class Updater {
   getCaptchaID = async (): Promise<string> => {
     const resp = await this.usersClient.getCaptchaID();
     if (resp.status !== 200) {
-      return "server.fail";
+      return errServer;
     }
     this.props.login.captchaID = resp.data.id;
     return "";
@@ -628,7 +629,7 @@ export class Updater {
 
   setPwd = async (oldPwd: string, newPwd: string): Promise<string> => {
     const resp = await this.usersClient.setPwd(oldPwd, newPwd);
-    return resp.status === 200 ? "" : "server.fail";
+    return resp.status === 200 ? "" : errServer;
   };
 
   setLan = (lan: string) => {
@@ -668,12 +669,12 @@ export class Updater {
 
   generateHash = async (filePath: string): Promise<string> => {
     const resp = await this.filesClient.generateHash(filePath);
-    return resp.status === 200 ? "" : "server.fail";
+    return resp.status === 200 ? "" : errServer;
   };
 
   setClientCfgRemote = async (cfg: ClientConfig): Promise<string> => {
     const resp = await this.settingsClient.setClientCfg(cfg);
-    return resp.status === 200 ? "" : "server.fail";
+    return resp.status === 200 ? "" : errServer;
   };
 
   setClientCfg = (cfg: ClientConfig) => {
@@ -693,13 +694,13 @@ export class Updater {
     const resp = await this.usersClient.setPreferences(
       this.props.login.preferences
     );
-    return resp.status === 200 ? "" : "server.fail";
+    return resp.status === 200 ? "" : errServer;
   };
 
   getClientCfg = async (): Promise<string> => {
     const resp = await this.settingsClient.getClientCfg();
     if (resp.status !== 200) {
-      return "server.fail";
+      return errServer;
     }
     const clientCfg = resp.data.clientCfg as ClientConfig;
     this.props.ui.siteName = clientCfg.siteName;
@@ -721,7 +722,8 @@ export class Updater {
         this.props.msg.lan = "en_US";
         this.props.msg.pkg = MsgPackage.get("en_US");
       }
-      return "fe.fail.ignore";
+      // TODO: should warning here
+      return "";
     }
 
     const resp = await this.filesClient.download(url);
@@ -735,7 +737,8 @@ export class Updater {
     if (!isValid) {
       this.props.msg.lan = "en_US";
       this.props.msg.pkg = MsgPackage.get("en_US");
-      return "server.fail.ignore";
+      // TODO: should warning here
+      return "";
     }
     this.props.msg.lan = resp.data.lan;
     this.props.msg.pkg = Map<string, string>(resp.data);

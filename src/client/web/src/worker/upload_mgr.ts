@@ -11,6 +11,7 @@ import {
   uploadInfoKind,
   UploadState,
 } from "./interface";
+import { errUploadMgr } from "../common/errors";
 
 const win: Window = self as any;
 
@@ -141,7 +142,7 @@ export class UploadMgr {
           state: UploadState.Ready,
         });
       } else {
-        status = "uploadMgr.err";
+        status = errUploadMgr;
       }
     }
 
@@ -159,7 +160,7 @@ export class UploadMgr {
         state: UploadState.Stopped,
       });
     } else {
-      status = "uploadMgr.err";
+      status = errUploadMgr;
     }
 
     this.statusCb(this.infos.toMap(), false);
