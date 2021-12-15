@@ -41,21 +41,26 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
       .deleteUpload(filePath)
       .then((status: string) => {
         if (status !== "") {
-          alertMsg(
-            getErrMsg(this.props.msg.pkg, "browser.upload.del.fail", status)
-          );
+          throw status;
         }
         return updater().refreshUploadings();
       })
       .then((status: string) => {
         if (status !== "") {
-          alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+          throw status;
         }
         return updater().self();
       })
-      .then(() => {
+      .then((status: string) => {
+        if (status !== "") {
+          throw status;
+        }
+
         this.props.update(updater().updateUploadingsInfo);
         this.props.update(updater().updateLogin);
+      })
+      .catch((status: Error) => {
+        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status.toString()));
       });
   };
 
