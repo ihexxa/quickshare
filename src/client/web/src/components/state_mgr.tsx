@@ -4,6 +4,8 @@ import { initUploadMgr } from "../worker/upload_mgr";
 import BgWorker from "../worker/upload.bg.worker";
 import { FgWorker } from "../worker/upload.fg.worker";
 
+import { alertMsg } from "../common/env";
+import { getErrMsg } from "../common/utils";
 import { updater } from "./state_updater";
 import { ICoreState, newState } from "./core_state";
 import { RootFrame } from "./root_frame";
@@ -63,7 +65,10 @@ export class StateMgr extends React.Component<Props, State, {}> {
 
     return updater()
       .initAll(query)
-      .then(() => {
+      .then((status: string) => {
+        if (status !== "") {
+          alertMsg(getErrMsg(state.msg.pkg, "op.fail", status.toString()));
+        }
         this.update(updater().updateAll);
       });
   };

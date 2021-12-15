@@ -6,6 +6,7 @@ import { Flexbox } from "./layout/flexbox";
 import { updater } from "./state_updater";
 import { alertMsg } from "../common/env";
 import { Quota, Preferences } from "../client";
+import { getErrMsg } from "../common/utils";
 
 export interface LoginProps {
   userID: string;
@@ -70,20 +71,30 @@ export class AuthPane extends React.Component<Props, State, {}> {
           );
           return updater().initAll(params);
         } else {
-          alertMsg(this.props.msg.pkg.get("op.fail"));
-          return updater().getCaptchaID();
+          throw status;
         }
       })
-      .then(() => {
+      .then((status: string) => {
+        if (status !== "") {
+          throw status;
+        }
         this.update(updater().updateAll);
+      })
+      .catch((status: Error) => {
+        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status.toString()));
+        return updater().getCaptchaID();
       });
   };
 
   refreshCaptcha = async () => {
     return updater()
       .getCaptchaID()
-      .then(() => {
-        this.props.update(updater().updateLogin);
+      .then((status: string) => {
+        if (status !== "") {
+          alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+        } else {
+          this.props.update(updater().updateLogin);
+        }
       });
   };
 

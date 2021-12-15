@@ -131,10 +131,10 @@ export class PaneSettings extends React.Component<Props, State, {}> {
       .then((status: string) => {
         if (status === "") {
           alertMsg(this.props.msg.pkg.get("update.ok"));
+          this.props.update(updater().updateMsg);
         } else {
           alertMsg(this.props.msg.pkg.get("update.fail"));
         }
-        this.props.update(updater().updateMsg);
       });
   };
 

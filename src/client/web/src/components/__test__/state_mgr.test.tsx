@@ -17,6 +17,10 @@ import { MsgPackage } from "../../i18n/msger";
 describe("State Manager", () => {
   initMockWorker();
   const emptyQuery = new URLSearchParams("");
+  // stub alert
+  // window.alert = (message?: string): void => {
+  //   console.log(message);
+  // };
 
   test("initUpdater for admin", async () => {
     const usersCl = new MockUsersClient("");
@@ -111,7 +115,9 @@ describe("State Manager", () => {
     expect(coreState.msg.pkg).toEqual(MsgPackage.get("en_US"));
 
     // ui
-    expect(coreState.ui.bg).toEqual(settingsResps.getClientCfgMockResp.data.clientCfg.bg);
+    expect(coreState.ui.bg).toEqual(
+      settingsResps.getClientCfgMockResp.data.clientCfg.bg
+    );
   });
 
   test("initUpdater for visitor in sharing mode", async () => {
@@ -211,6 +217,8 @@ describe("State Manager", () => {
     expect(coreState.msg.pkg).toEqual(MsgPackage.get("en_US"));
 
     // ui
-    expect(coreState.ui.bg).toEqual(settingsResps.getClientCfgMockResp.data.clientCfg.bg);
+    expect(coreState.ui.bg).toEqual(
+      settingsResps.getClientCfgMockResp.data.clientCfg.bg
+    );
   });
 });

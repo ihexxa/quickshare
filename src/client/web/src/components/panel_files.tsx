@@ -110,9 +110,10 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         .then((status: string) => {
           if (status !== "") {
             alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+          } else {
+            this.props.update(updater().updateFilesInfo);
+            this.props.update(updater().updateUploadingsInfo);
           }
-          this.props.update(updater().updateFilesInfo);
-          this.props.update(updater().updateUploadingsInfo);
         });
     } else {
       this.props.update(updater().updateFilesInfo);
@@ -156,17 +157,20 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       .mkDir(dirPath)
       .then((status: string) => {
         if (status !== "") {
-          alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+          throw status;
         }
         this.setState({ newFolderName: "" });
         return updater().setItems(this.props.filesInfo.dirPath);
       })
       .then((status: string) => {
         if (status !== "") {
-          alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+          throw status;
         }
         this.props.update(updater().updateFilesInfo);
         this.props.update(updater().updateSharingsInfo);
+      })
+      .catch((status: Error) => {
+        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status.toString()));
       });
   };
 
@@ -200,11 +204,15 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       )
       .then((status: string) => {
         if (status !== "") {
-          alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+          throw status;
         }
         return updater().self();
       })
-      .then(() => {
+      .then((status: string) => {
+        if (status !== "") {
+          throw status;
+        }
+
         this.props.update(updater().updateFilesInfo);
         this.props.update(updater().updateSharingsInfo);
         this.props.update(updater().updateLogin);
@@ -212,6 +220,9 @@ export class FilesPanel extends React.Component<Props, State, {}> {
           selectedSrc: "",
           selectedItems: Map<string, boolean>(),
         });
+      })
+      .catch((status: Error) => {
+        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status.toString()));
       });
   };
 
@@ -229,13 +240,19 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         this.props.filesInfo.dirPath.join("/"),
         this.state.selectedItems
       )
-      .then(() => {
+      .then((status: string) => {
+        if (status !== "") {
+          throw status;
+        }
         this.props.update(updater().updateFilesInfo);
         this.props.update(updater().updateSharingsInfo);
         this.setState({
           selectedSrc: "",
           selectedItems: Map<string, boolean>(),
         });
+      })
+      .catch((status: Error) => {
+        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status.toString()));
       });
   };
 
@@ -246,8 +263,14 @@ export class FilesPanel extends React.Component<Props, State, {}> {
   goHome = async () => {
     return updater()
       .setHomeItems()
-      .then(() => {
+      .then((status: string) => {
+        if (status !== "") {
+          throw status;
+        }
         this.props.update(updater().updateFilesInfo);
+      })
+      .catch((status: Error) => {
+        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status.toString()));
       });
   };
 
@@ -263,16 +286,19 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       .setItems(dirPath)
       .then((status: string) => {
         if (status !== "") {
-          alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+          throw status;
         }
         return updater().syncIsSharing(dirPath.join("/"));
       })
       .then((status: string) => {
         if (status !== "") {
-          alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+          throw status;
         }
         this.props.update(updater().updateFilesInfo);
         this.props.update(updater().updateSharingsInfo);
+      })
+      .catch((status: Error) => {
+        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status.toString()));
       });
   };
 
@@ -323,8 +349,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       .addSharing()
       .then((status: string) => {
         if (status !== "") {
-          alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
-          return "";
+          throw status;
         } else {
           updater().setSharing(true);
           return updater().listSharings();
@@ -332,10 +357,13 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       })
       .then((status: string) => {
         if (status !== "") {
-          alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+          throw status;
         }
         this.props.update(updater().updateSharingsInfo);
         this.props.update(updater().updateFilesInfo);
+      })
+      .catch((status: Error) => {
+        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status.toString()));
       });
   };
 
@@ -344,8 +372,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       .deleteSharing(dirPath)
       .then((status) => {
         if (status !== "") {
-          alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
-          return "";
+          throw status;
         } else {
           updater().setSharing(false);
           return updater().listSharings();
@@ -353,10 +380,13 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       })
       .then((status: string) => {
         if (status !== "") {
-          alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+          throw status;
         }
         this.props.update(updater().updateSharingsInfo);
         this.props.update(updater().updateFilesInfo);
+      })
+      .catch((status: Error) => {
+        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status.toString()));
       });
   };
 
