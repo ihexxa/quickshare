@@ -67,7 +67,7 @@ export class StateMgr extends React.Component<Props, State, {}> {
       .initAll(query)
       .then((status: string) => {
         if (status !== "") {
-          alertMsg(getErrMsg(state.msg.pkg, "op.fail", status.toString()));
+          alertMsg(getErrMsg(state.msg.pkg, "op.fail", status));
         }
         this.update(updater().updateAll);
       });

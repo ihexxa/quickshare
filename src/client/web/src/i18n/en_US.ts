@@ -113,4 +113,9 @@ export const msgs: Map<string, string> = Map({
   "control.settingsTabs.preferencePane": "Preference",
   "upload.add.fail": "Some files conflict with uploading files, please check.",
   "server.fail": "The operation failed in the server",
+  "err.updater": "updater error",
+  "err.uploadMgr": "upload Manager error",
+  "err.server": "The operation failed in the server",
+  "err.script.cors": "script error with CORS",
+  "err.unknown": "unknown error",
 });
