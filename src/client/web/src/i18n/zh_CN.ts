@@ -110,5 +110,9 @@ export const msgs: Map<string, string> = Map({
   "control.settingsTabs.managementPane": "管理",
   "control.settingsTabs.preferencePane": "设置",
   "upload.add.fail": "有些文件与上传任务冲突，请检查",
-  "server.fail": "操作在服务器端失败",
+  "err.updater": "updater错误",
+  "err.uploadMgr": "upload Manager错误",
+  "err.server": "服务器端操作失败",
+  "err.script.cors": "跨域脚本错误",
+  "err.unknown": "未知错误",
 });

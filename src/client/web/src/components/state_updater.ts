@@ -31,7 +31,6 @@ import { SettingsClient } from "../client/settings";
 import { UploadEntry, UploadState } from "../worker/interface";
 import { Up } from "../worker/upload_mgr";
 import { alertMsg } from "../common/env";
-import { LocalStorage } from "../common/localstorage";
 import { controlName as panelTabs } from "./root_frame";
 import { settingsTabsCtrl } from "./dialog_settings";
 import { settingsDialogCtrl } from "./layers";
@@ -371,10 +370,7 @@ export class Updater {
   };
 
   initStateForVisitor = async (): Promise<any> => {
-    const statuses = await Promise.all([
-      this.getClientCfg(),
-      this.syncIsSharing(this.props.filesInfo.dirPath.join("/")),
-    ]);
+    const statuses = await Promise.all([this.getClientCfg()]);
     if (statuses.join("") !== "") {
       return statuses.join(";");
     }
@@ -449,20 +445,28 @@ export class Updater {
       return isAuthedStatus;
     }
 
-    const statuses = await Promise.all([this.self(), this.initCwd(params)]);
-    if (statuses.join("") !== "") {
-      return statuses.join(";");
-    }
-
-    this.initUITree();
-    const syncCwdStatus = await this.syncCwd();
-    if (syncCwdStatus !== "") {
-      return syncCwdStatus;
-    }
-
     const getCapStatus = await this.getCaptchaID();
     if (getCapStatus !== "") {
       return getCapStatus;
+    }
+
+    const selfStatuses = await Promise.all([this.self(), this.initCwd(params)]);
+    if (selfStatuses.join("") !== "") {
+      return selfStatuses.join(";");
+    }
+
+    this.initUITree();
+
+    const cwdStatus = await this.syncCwd();
+    if (cwdStatus !== "") {
+      return cwdStatus;
+    }
+
+    const isSharingStatus = await this.syncIsSharing(
+      this.props.filesInfo.dirPath.join("/")
+    );
+    if (isSharingStatus !== "") {
+      return isSharingStatus;
     }
 
     if (this.props.login.userRole === roleAdmin) {
@@ -500,6 +504,7 @@ export class Updater {
 
   self = async (): Promise<string> => {
     const resp = await this.usersClient.self();
+
     if (resp.status === 200) {
       this.props.login.userID = resp.data.id;
       this.props.login.userName = resp.data.name;
@@ -508,7 +513,10 @@ export class Updater {
       this.props.login.quota = resp.data.quota;
       this.props.login.preferences = resp.data.preferences;
       return "";
+    } else if (resp.status === 401) {
+      return "";
     }
+
     this.resetUser();
     return errServer;
   };
