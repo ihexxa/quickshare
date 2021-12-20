@@ -10,7 +10,7 @@ import { MockUsersClient, resps as usersResps } from "../../client/users_mock";
 import { MockFilesClient, resps as filesResps } from "../../client/files_mock";
 import { MockSettingsClient } from "../../client/settings_mock";
 
-xdescribe("SharingsPanel", () => {
+describe("SharingsPanel", () => {
   const initSharingsPanel = (): any => {
     const mockWorkerClass = mock(MockWorker);
     const mockWorker = instance(mockWorkerClass);
