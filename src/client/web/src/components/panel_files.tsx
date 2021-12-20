@@ -416,32 +416,40 @@ export class FilesPanel extends React.Component<Props, State, {}> {
 
     const ops = (
       <div id="upload-op">
-        <div className="float">
-          <input
-            type="text"
-            onChange={this.onNewFolderNameChange}
-            value={this.state.newFolderName}
-            placeholder={this.props.msg.pkg.get("browser.folder.name")}
-            className="float"
-          />
-          <button onClick={this.onMkDir} className="float">
-            {this.props.msg.pkg.get("browser.folder.add")}
-          </button>
-        </div>
+        <Flexbox
+          children={List([
+            <div>
+              <button onClick={this.onMkDir} className="float cyan-btn">
+                {this.props.msg.pkg.get("browser.folder.add")}
+              </button>
+              <input
+                type="text"
+                onChange={this.onNewFolderNameChange}
+                value={this.state.newFolderName}
+                placeholder={this.props.msg.pkg.get("browser.folder.name")}
+                className="float"
+              />
+            </div>,
 
-        <div className="float">
-          <button onClick={this.onClickUpload}>
-            {this.props.msg.pkg.get("browser.upload")}
-          </button>
-          <input
-            type="file"
-            onChange={this.addUploads}
-            multiple={true}
-            value={this.state.uploadFiles}
-            ref={this.assignInput}
-            className="hidden"
-          />
-        </div>
+            <div>
+              <button onClick={this.onClickUpload} className="cyan-btn">
+                {this.props.msg.pkg.get("browser.upload")}
+              </button>
+              <input
+                type="file"
+                onChange={this.addUploads}
+                multiple={true}
+                value={this.state.uploadFiles}
+                ref={this.assignInput}
+                className="hidden"
+              />
+            </div>,
+          ])}
+          childrenStyles={List([
+            { flex: "0 0 70%" },
+            { flex: "0 0 30%", justifyContent: "flex-end" },
+          ])}
+        />
       </div>
     );
 

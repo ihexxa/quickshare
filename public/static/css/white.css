@@ -34,7 +34,7 @@
 }
 
 .theme-default #top-menu {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.5);
   box-shadow: 0 5px 30px 0 rgba(31, 38, 135, 0.1);
   backdrop-filter: blur(9.5px);
   color: #16a085;
