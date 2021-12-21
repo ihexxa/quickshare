@@ -167,7 +167,8 @@
   margin-top: 2rem;
 }
 
-.theme-default #item-rows .name, .theme-default #item-rows .name a {
+.theme-default #item-rows .name,
+.theme-default #item-rows .name a {
   color: #34495e;
   font-size: 1.8rem;
   line-height: 2rem;
@@ -229,8 +230,24 @@
   padding: 0 1rem;
 }
 
+.theme-default #upload-list .desc {
+  font-size: 1.2rem;
+  line-height: 2rem;
+}
+
+.theme-default #upload-list .progress-grey {
+  background-color: #ecf0f6;
+  width: 100%;
+  height: 0.3rem;
+}
+
+.theme-default #upload-list .progress-green {
+  background-color: #1abc9c;
+  height: 100%
+}
+
 .theme-default .upload-item {
-  padding: 0 0 1rem 0;
+  padding: 1rem 0 1rem 0;
 }
 
 .theme-default .share-item {

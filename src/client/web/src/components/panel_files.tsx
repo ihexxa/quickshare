@@ -480,7 +480,9 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         </div>
       );
 
-      const detailColor = this.state.showDetail.has(item.name) ? "cyan0" : "grey0";
+      const detailColor = this.state.showDetail.has(item.name)
+        ? "cyan0"
+        : "grey0";
       const op = item.isDir ? (
         <div className={`v-mid item-cell item-op ${showOp}`}>
           <span onClick={() => this.select(item.name)} className="float-l">
