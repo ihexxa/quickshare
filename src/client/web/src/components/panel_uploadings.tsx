@@ -78,9 +78,11 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
       (uploading: UploadEntry) => {
         const pathParts = uploading.filePath.split("/");
         const fileName = pathParts[pathParts.length - 1];
-
+        const progress = `${Math.floor(
+          (uploading.uploaded / uploading.size) * 100
+        )}%`;
         return (
-          <div key={uploading.filePath}>
+          <div key={uploading.filePath} className="upload-item">
             <Flexbox
               children={List([
                 <Flexbox
@@ -91,12 +93,17 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
                       className="margin-r-m blue0-font"
                     />,
 
-                    <div className={`${nameWidthClass}`}>
-                      <span className="title-m">{fileName}</span>
-                      <div className="desc-m grey0-font">
+                    <div className={`font-s ${nameWidthClass}`}>
+                      <span className="">{fileName}&nbsp;</span>
+                      <span className="desc grey0-font">
                         {FileSize(uploading.uploaded, { round: 0 })}
-                        &nbsp;/&nbsp;{FileSize(uploading.size, { round: 0 })}
-                      </div>
+                        &nbsp;/&nbsp;
+                        {FileSize(uploading.size, {
+                          round: 0,
+                        })}
+                        &nbsp;/&nbsp;
+                        {progress}
+                      </span>
                     </div>,
                   ])}
                 />,
@@ -118,6 +125,12 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
               ])}
               childrenStyles={List([{}, { justifyContent: "flex-end" }])}
             />
+            <div className="progress-grey">
+              <div
+                className="progress-green"
+                style={{ width: `${progress}` }}
+              ></div>
+            </div>
             {uploading.err.trim() === "" ? null : (
               <div className="error">{uploading.err.trim()}</div>
             )}
