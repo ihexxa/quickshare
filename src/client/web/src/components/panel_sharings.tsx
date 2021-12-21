@@ -66,8 +66,12 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
 
     const sharingList = this.props.sharingsInfo.sharings.map(
       (dirPath: string) => {
+        const sharingURL = `${
+          document.location.href.split("?")[0]
+        }?dir=${encodeURIComponent(dirPath)}`;
+
         return (
-          <div id="share-list" key={dirPath}>
+          <div className="sharing-item" key={dirPath}>
             <Flexbox
               children={List([
                 <Flexbox
@@ -80,24 +84,13 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
                   ])}
                 />,
 
-                <span
+                <button
                   onClick={() => {
                     this.deleteSharing(dirPath);
                   }}
-                  className="margin-r-m"
                 >
-                  {getIcon("RiDeleteBin2Fill", "1.8rem", "red0")}
-                </span>,
-
-                <span>
-                  <input
-                    type="text"
-                    readOnly
-                    value={`${
-                      document.location.href.split("?")[0]
-                    }?dir=${encodeURIComponent(dirPath)}`}
-                  />
-                </span>,
+                  {this.props.msg.pkg.get("browser.delete")}
+                </button>,
               ])}
               childrenStyles={List([
                 { alignItems: "center" },
@@ -105,6 +98,9 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
                 { alignItems: "center", justifyContent: "flex-end" },
               ])}
             />
+
+            <div className="desc">{sharingURL}</div>
+            <div className="hr grey0-bg"></div>
           </div>
         );
       }
