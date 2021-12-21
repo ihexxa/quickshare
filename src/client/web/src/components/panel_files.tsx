@@ -541,7 +541,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
           <span onClick={() => this.select(item.name)} className="float-l">
             {isSelected
               ? getIcon("RiCheckboxFill", "1.8rem", "cyan0")
-              : getIcon("RiCheckboxBlankFill", "1.8rem", "grey1")}
+              : getIcon("RiCheckboxBlankFill", "1.8rem", "black1")}
           </span>
         </div>
       ) : (
@@ -550,13 +550,13 @@ export class FilesPanel extends React.Component<Props, State, {}> {
             onClick={() => this.toggleDetail(item.name)}
             className="float-l"
           >
-            {getIcon("RiInformationFill", "1.8rem", "grey1")}
+            {getIcon("RiInformationFill", "1.8rem", "black1")}
           </span>
 
           <span onClick={() => this.select(item.name)} className="float-l">
             {isSelected
               ? getIcon("RiCheckboxFill", "1.8rem", "cyan0")
-              : getIcon("RiCheckboxBlankFill", "1.8rem", "grey1")}
+              : getIcon("RiCheckboxBlankFill", "1.8rem", "black1")}
           </span>
         </div>
       );

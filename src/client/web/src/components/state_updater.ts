@@ -413,8 +413,11 @@ export class Updater {
   syncCwd = async (): Promise<string> => {
     if (this.props.filesInfo.dirPath.size !== 0) {
       return this.setItems(this.props.filesInfo.dirPath);
+    } else if (this.props.login.authed) {
+      return this.setHomeItems();
     }
-    return this.setHomeItems();
+    // cwd will not be synced if the user is not authned and without sharing mode
+    return "";
   };
 
   initCwd = async (params: URLSearchParams): Promise<string> => {
@@ -445,17 +448,25 @@ export class Updater {
       return isAuthedStatus;
     }
 
-    const getCapStatus = await this.getCaptchaID();
-    if (getCapStatus !== "") {
-      return getCapStatus;
-    }
-
     const selfStatuses = await Promise.all([this.self(), this.initCwd(params)]);
     if (selfStatuses.join("") !== "") {
       return selfStatuses.join(";");
     }
 
+    const getCapStatus = await this.getCaptchaID();
+    if (getCapStatus !== "") {
+      return getCapStatus;
+    }
+
     this.initUITree();
+
+    const isInSharingMode = this.props.ui.control.controls.get(sharingCtrl);
+    if (
+      this.props.login.userRole === roleVisitor &&
+      isInSharingMode !== ctrlOn
+    ) {
+      return this.initStateForVisitor();
+    }
 
     const cwdStatus = await this.syncCwd();
     if (cwdStatus !== "") {
@@ -472,6 +483,7 @@ export class Updater {
     if (this.props.login.userRole === roleAdmin) {
       return this.initStateForAdmin();
     } else if (this.props.login.userRole === roleVisitor) {
+      // visitor under sharing mode
       return this.initStateForVisitor();
     }
     return this.initStateForAuthedUser();
@@ -514,6 +526,7 @@ export class Updater {
       this.props.login.preferences = resp.data.preferences;
       return "";
     } else if (resp.status === 401) {
+      this.resetUser();
       return "";
     }
 
