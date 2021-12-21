@@ -480,6 +480,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         </div>
       );
 
+      const detailColor = this.state.showDetail.has(item.name) ? "cyan0" : "grey0";
       const op = item.isDir ? (
         <div className={`v-mid item-cell item-op ${showOp}`}>
           <span onClick={() => this.select(item.name)} className="float-l">
@@ -494,7 +495,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
             onClick={() => this.toggleDetail(item.name)}
             className="float-l"
           >
-            {getIcon("RiInformationFill", "1.8rem", "black1")}
+            {getIcon("RiInformationFill", "1.8rem", detailColor)}
           </span>
 
           <span onClick={() => this.select(item.name)} className="float-l">
@@ -781,6 +782,14 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       }
     );
 
+    const rowsViewColorClass =
+      this.props.ui.control.controls.get(filesViewCtrl) === "rows"
+        ? "cyan0-font"
+        : "black-font";
+    const tableViewColorClass =
+      this.props.ui.control.controls.get(filesViewCtrl) === "table"
+        ? "cyan0-font"
+        : "black-font";
     const itemListPane = (
       <div>
         <div className={showOp}>
@@ -836,15 +845,15 @@ export class FilesPanel extends React.Component<Props, State, {}> {
                 <Flexbox
                   children={List([
                     <BiListUl
-                      size="1.4rem"
-                      className="black-font margin-r-s"
+                      size="2rem"
+                      className={`${rowsViewColorClass} margin-r-s`}
                       onClick={() => {
                         this.setView("rows");
                       }}
                     />,
                     <BiTable
-                      size="1.4rem"
-                      className="black-font margin-r-s"
+                      size="2rem"
+                      className={`${tableViewColorClass} margin-r-s`}
                       onClick={() => {
                         this.setView("table");
                       }}
