@@ -313,15 +313,37 @@ export class Updater {
     const isAuthed = this.props.login.authed;
     const isSharing =
       this.props.ui.control.controls.get(sharingCtrl) === ctrlOn;
+    const leftControls = this.props.ui.control.controls.filter(
+      (_: string, key: string): boolean => {
+        return (
+          key !== panelTabs &&
+          key !== settingsDialogCtrl &&
+          key !== settingsTabsCtrl &&
+          key !== sharingCtrl
+        );
+      }
+    );
+    const leftOpts = this.props.ui.control.options.filter(
+      (_: Set<string>, key: string): boolean => {
+        return (
+          key !== panelTabs &&
+          key !== settingsDialogCtrl &&
+          key !== settingsTabsCtrl &&
+          key !== sharingCtrl
+        );
+      }
+    );
 
+    let newControls: Map<string, string> = undefined;
+    let newOptions: Map<string, Set<string>> = undefined;
     if (isAuthed) {
-      this.props.ui.control.controls = Map<string, string>({
+      newControls = Map<string, string>({
         [panelTabs]: "filesPanel",
         [settingsDialogCtrl]: ctrlOff,
         [settingsTabsCtrl]: "preferencePane",
         [sharingCtrl]: isSharing ? ctrlOn : ctrlOff,
       });
-      this.props.ui.control.options = Map<string, Set<string>>({
+      newOptions = Map<string, Set<string>>({
         [panelTabs]: Set<string>([
           "filesPanel",
           "uploadingsPanel",
@@ -333,33 +355,33 @@ export class Updater {
       });
 
       if (this.props.login.userRole == roleAdmin) {
-        this.props.ui.control.options = this.props.ui.control.options.set(
+        newOptions = newOptions.set(
           settingsTabsCtrl,
           Set<string>(["preferencePane", "managementPane"])
         );
       }
     } else {
       if (isSharing) {
-        this.props.ui.control.controls = Map<string, string>({
+        newControls = Map<string, string>({
           [panelTabs]: "filesPanel",
           [settingsDialogCtrl]: ctrlHidden,
           [settingsTabsCtrl]: ctrlHidden,
           [sharingCtrl]: ctrlOn,
         });
-        this.props.ui.control.options = Map<string, Set<string>>({
+        newOptions = Map<string, Set<string>>({
           [panelTabs]: Set<string>(["filesPanel"]),
           [settingsDialogCtrl]: Set<string>([ctrlHidden]),
           [settingsTabsCtrl]: Set<string>([ctrlHidden]),
           [sharingCtrl]: Set<string>([ctrlOn]),
         });
       } else {
-        this.props.ui.control.controls = Map<string, string>({
+        newControls = Map<string, string>({
           [panelTabs]: ctrlHidden,
           [settingsDialogCtrl]: ctrlHidden,
           [settingsTabsCtrl]: ctrlHidden,
           [sharingCtrl]: ctrlOff,
         });
-        this.props.ui.control.options = Map<string, Set<string>>({
+        newOptions = Map<string, Set<string>>({
           [panelTabs]: Set<string>([ctrlHidden]),
           [settingsDialogCtrl]: Set<string>([ctrlHidden]),
           [settingsTabsCtrl]: Set<string>([ctrlHidden]),
@@ -367,6 +389,9 @@ export class Updater {
         });
       }
     }
+
+    this.props.ui.control.controls = newControls.merge(leftControls);
+    this.props.ui.control.options = newOptions.merge(leftOpts);
   };
 
   initStateForVisitor = async (): Promise<any> => {

@@ -14,8 +14,9 @@ import { RiInformationFill } from "@react-icons/all-files/ri/RiInformationFill";
 import { RiDeleteBin2Fill } from "@react-icons/all-files/ri/RiDeleteBin2Fill";
 import { RiArchiveDrawerFill } from "@react-icons/all-files/ri/RiArchiveDrawerFill";
 import { RiFileList2Fill } from "@react-icons/all-files/ri/RiFileList2Fill";
-
-
+import { RiArrowUpDownFill } from "@react-icons/all-files/ri/RiArrowUpDownFill";
+import { BiTable } from "@react-icons/all-files/bi/BiTable";
+import { BiListUl } from "@react-icons/all-files/bi/BiListUl";
 
 import { colorClass } from "./colors";
 
@@ -38,6 +39,9 @@ const icons = Map<string, IconType>({
   RiInformationFill: RiInformationFill,
   RiDeleteBin2Fill: RiDeleteBin2Fill,
   RiArchiveDrawerFill: RiArchiveDrawerFill,
+  RiArrowUpDownFill: RiArrowUpDownFill,
+  BiTable: BiTable,
+  BiListUl: BiListUl,
 });
 
 export function getIconWithProps(

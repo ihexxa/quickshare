@@ -115,4 +115,11 @@ export const msgs: Map<string, string> = Map({
   "err.server": "服务器端操作失败",
   "err.script.cors": "跨域脚本错误",
   "err.unknown": "未知错误",
+  "item.type": "类型",
+  "item.type.folder": "文件夹",
+  "item.type.file": "文件",
+  "item.name": "名称",
+  "item.path": "路径",
+  "item.modTime": "修改时间",
+  "item.size": "大小",
 });

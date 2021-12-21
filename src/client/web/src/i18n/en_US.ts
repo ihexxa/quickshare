@@ -118,4 +118,11 @@ export const msgs: Map<string, string> = Map({
   "err.server": "The operation failed in the server",
   "err.script.cors": "script error with CORS",
   "err.unknown": "unknown error",
+  "item.type": "Item Type",
+  "item.type.folder": "Folder",
+  "item.type.file": "File",
+  "item.name": "Item Name",
+  "item.path": "Path",
+  "item.modTime": "Mod Time",
+  "item.size": "Size",
 });

@@ -18,6 +18,7 @@ import { MockSettingsClient } from "../../client/settings_mock";
 import { controlName as panelTabs } from "../root_frame";
 import { settingsDialogCtrl } from "../layers";
 import { settingsTabsCtrl } from "../dialog_settings";
+import { filesViewCtrl } from "../panel_files";
 
 describe("Login", () => {
   initMockWorker();
@@ -122,6 +123,7 @@ describe("Login", () => {
           [settingsDialogCtrl]: ctrlOff,
           [settingsTabsCtrl]: "preferencePane",
           [sharingCtrl]: ctrlOff,
+          [filesViewCtrl]: "rows",
         }),
         options: Map<string, Set<string>>({
           [panelTabs]: Set<string>([
@@ -132,6 +134,7 @@ describe("Login", () => {
           [settingsDialogCtrl]: Set<string>([ctrlOn, ctrlOff]),
           [settingsTabsCtrl]: Set<string>(["preferencePane", "managementPane"]),
           [sharingCtrl]: Set<string>([ctrlOn, ctrlOff]),
+          [filesViewCtrl]: Set<string>(["rows", "table"]),
         }),
       },
     });
