@@ -4,6 +4,7 @@ import { UploadEntry } from "../worker/interface";
 import { MsgPackage } from "../i18n/msger";
 import { User, MetadataResp } from "../client";
 import { settingsDialogCtrl } from "./layers";
+import { filesViewCtrl } from "./panel_files";
 import { FilesProps } from "./panel_files";
 import { UploadingsProps } from "./panel_uploadings";
 import { SharingsProps } from "./panel_sharings";
@@ -112,6 +113,7 @@ export function initState(): ICoreState {
           [settingsDialogCtrl]: "off",
           [settingsTabsCtrl]: "preferencePane",
           [sharingCtrl]: "off",
+          [filesViewCtrl]: "rows",
         }),
         options: Map<string, Set<string>>({
           [panelTabs]: Set<string>([
@@ -122,6 +124,7 @@ export function initState(): ICoreState {
           [settingsDialogCtrl]: Set<string>(["on", "off"]),
           [settingsTabsCtrl]: Set<string>(["preferencePane", "managementPane"]),
           [sharingCtrl]: Set<string>(["on", "off"]),
+          [filesViewCtrl]: Set<string>(["rows", "table"]),
         }),
       },
     },

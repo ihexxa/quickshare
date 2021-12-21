@@ -135,7 +135,7 @@
   margin-bottom: 1rem;
 }
 
-.theme-default #browser-op button {
+.theme-default #browser-op .left {
   margin: 0 1rem 0 0;
 }
 
@@ -161,6 +161,36 @@
 .theme-default #item-table th {
   display: inline-block;
   padding: 0;
+}
+
+.theme-default #item-rows {
+  margin-top: 2rem;
+}
+
+.theme-default #item-rows .name, .theme-default #item-rows .name a {
+  color: #34495e;
+  font-size: 1.8rem;
+  line-height: 2rem;
+  display: block;
+  margin: 2rem 0;
+}
+
+.theme-default #item-rows .desc {
+  color: #95a5a6;
+  font-size: 1.4rem;
+  line-height: 2rem;
+  display: block;
+}
+
+.theme-default #item-rows .hr {
+  height: 1px;
+  margin: 2rem 0;
+  background-color: #ecf0f1;
+}
+
+.theme-default #item-rows .card {
+  padding: 0.5rem 0;
+  text-align: left;
 }
 
 .theme-default .item-cell {
@@ -349,7 +379,7 @@
   color: #34495e;
   background-color: #ecf0f6;
   border: solid 1px #95a5a6;
-  margin: 0.5rem 0 1rem 0;
+  /* margin: 0.5rem 0 1rem 0; */
 }
 
 .captcha {
