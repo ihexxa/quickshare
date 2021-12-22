@@ -122,4 +122,5 @@ export const msgs: Map<string, string> = Map({
   "item.path": "路径",
   "item.modTime": "修改时间",
   "item.size": "大小",
+  "item.progress": "进度",
 });
