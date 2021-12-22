@@ -69,8 +69,6 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
       const fileName = pathParts[pathParts.length - 1];
       const progress = Math.floor((uploading.uploaded / uploading.size) * 100);
 
-      // const title = <Flexbox children={List([])} />;
-
       const op = (
         <div className="item-op">
           <button
@@ -206,7 +204,7 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
         <Container>
           <Flexbox
             children={List([
-              <span className="upload-item">
+              <span className="margin-b-l">
                 <Flexbox
                   children={List([
                     <RiUploadCloudFill

@@ -267,6 +267,10 @@ export class Updater {
     this.props.uploadingsInfo.uploadings = uploadings;
   };
 
+  updateSharings = (sharings: List<string>) => {
+    this.props.sharingsInfo.sharings = sharings;
+  };
+
   moveHere = async (
     srcDir: string,
     dstDir: string,
