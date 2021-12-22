@@ -263,6 +263,10 @@ export class Updater {
     this.props.filesInfo.items = items;
   };
 
+  updateUploadings = (uploadings: List<UploadEntry>) => {
+    this.props.uploadingsInfo.uploadings = uploadings;
+  };
+
   moveHere = async (
     srcDir: string,
     dstDir: string,

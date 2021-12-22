@@ -14,12 +14,12 @@ import { LoginProps } from "./pane_login";
 import { UploadEntry, UploadState } from "../worker/interface";
 import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
+import { Rows, Row } from "./layout/rows";
 
 export interface UploadingsProps {
   uploadings: List<UploadEntry>;
   uploadFiles: List<File>;
 }
-
 export interface Props {
   uploadingsInfo: UploadingsProps;
   msg: MsgProps;
@@ -36,32 +36,26 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
     this.state = {};
   }
 
-  deleteUpload = (filePath: string): Promise<void> => {
-    return updater()
-      .deleteUpload(filePath)
-      .then((status: string) => {
-        if (status !== "") {
-          throw status;
-        }
-        return updater().refreshUploadings();
-      })
-      .then((status: string) => {
-        if (status !== "") {
-          throw status;
-        }
-        return updater().self();
-      })
-      .then((status: string) => {
-        if (status !== "") {
-          throw status;
-        }
+  deleteUpload = async (filePath: string): Promise<void> => {
+    try {
+      const deleteStatus = await updater().deleteUpload(filePath);
+      if (deleteStatus !== "") {
+        throw deleteStatus;
+      }
 
-        this.props.update(updater().updateUploadingsInfo);
-        this.props.update(updater().updateLogin);
-      })
-      .catch((status: Error) => {
-        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status.toString()));
-      });
+      const statuses = await Promise.all([
+        updater().refreshUploadings(),
+        updater().self(),
+      ]);
+      if (statuses.join("") !== "") {
+        throw statuses.join(";");
+      }
+
+      this.props.update(updater().updateLogin);
+      this.props.update(updater().updateUploadingsInfo);
+    } catch (status: any) {
+      alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status.toString()));
+    }
   };
 
   stopUploading = (filePath: string) => {
@@ -69,97 +63,145 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
     this.props.update(updater().updateUploadingsInfo);
   };
 
-  render() {
-    const nameWidthClass = `item-name item-name-${
-      this.props.ui.isVertical ? "vertical" : "horizontal"
-    } pointer`;
+  makeRowsInputs = (uploadings: List<UploadEntry>): List<Row> => {
+    const uploadingRows = uploadings.map((uploading: UploadEntry) => {
+      const pathParts = uploading.filePath.split("/");
+      const fileName = pathParts[pathParts.length - 1];
+      const progress = Math.floor((uploading.uploaded / uploading.size) * 100);
 
-    const uploadingList = this.props.uploadingsInfo.uploadings.map(
-      (uploading: UploadEntry) => {
-        const pathParts = uploading.filePath.split("/");
-        const fileName = pathParts[pathParts.length - 1];
-        const progress = `${Math.floor(
-          (uploading.uploaded / uploading.size) * 100
-        )}%`;
-        return (
-          <div key={uploading.filePath} className="upload-item">
-            <Flexbox
-              children={List([
-                <Flexbox
-                  children={List([
-                    <RiUploadCloudLine
-                      size="3rem"
-                      id="icon-upload"
-                      className="margin-r-m blue0-font"
-                    />,
+      // const title = <Flexbox children={List([])} />;
 
-                    <div className={`font-s ${nameWidthClass}`}>
-                      <span className="">{fileName}&nbsp;</span>
-                      <span className="desc grey0-font">
-                        {FileSize(uploading.uploaded, { round: 0 })}
-                        &nbsp;/&nbsp;
-                        {FileSize(uploading.size, {
-                          round: 0,
-                        })}
-                        &nbsp;/&nbsp;
-                        {progress}
-                      </span>
-                    </div>,
-                  ])}
-                />,
+      const op = (
+        <div className="item-op">
+          <button
+            onClick={() => this.stopUploading(uploading.filePath)}
+            className="float-input"
+          >
+            {this.props.msg.pkg.get("browser.stop")}
+          </button>
+          <button
+            onClick={() => this.deleteUpload(uploading.filePath)}
+            className="float-input"
+          >
+            {this.props.msg.pkg.get("browser.delete")}
+          </button>
+        </div>
+      );
 
-                <div className="item-op">
-                  <button
-                    onClick={() => this.stopUploading(uploading.filePath)}
-                    className="float-input"
-                  >
-                    {this.props.msg.pkg.get("browser.stop")}
-                  </button>
-                  <button
-                    onClick={() => this.deleteUpload(uploading.filePath)}
-                    className="float-input"
-                  >
-                    {this.props.msg.pkg.get("browser.delete")}
-                  </button>
-                </div>,
-              ])}
-              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
-            />
-            <div className="progress-grey">
-              <div
-                className="progress-green"
-                style={{ width: `${progress}` }}
-              ></div>
-            </div>
-            {uploading.err.trim() === "" ? null : (
-              <div className="error">{uploading.err.trim()}</div>
-            )}
-          </div>
+      const progressBar = (
+        <div className="progress-grey">
+          <div
+            className="progress-green"
+            style={{ width: `${progress}%` }}
+          ></div>
+        </div>
+      );
+
+      const errorInfo =
+        uploading.err.trim() === "" ? null : (
+          <div className="error">{uploading.err.trim()}</div>
         );
-      }
+
+      const elem = (
+        <div key={uploading.filePath} className="upload-item">
+          <Flexbox
+            children={List([
+              <RiUploadCloudLine
+                size="3rem"
+                id="icon-upload"
+                className="margin-r-m blue0-font"
+              />,
+
+              <div className={`font-s`}>
+                <span className="">{fileName}&nbsp;</span>
+                <span className="desc grey0-font">
+                  {FileSize(uploading.uploaded, { round: 0 })}
+                  &nbsp;/&nbsp;
+                  {FileSize(uploading.size, {
+                    round: 0,
+                  })}
+                  &nbsp;/&nbsp;
+                  {`${progress}%`}
+                </span>
+              </div>,
+
+              op,
+            ])}
+            childrenStyles={List([
+              { flex: "0 0 auto" },
+              {},
+              { justifyContent: "flex-end" },
+            ])}
+          />
+          {progressBar}
+          {errorInfo}
+        </div>
+      );
+
+      // file path, size, progress
+      const sortVals = List<string>([
+        uploading.filePath,
+        `${uploading.size}`,
+        `${progress}`,
+      ]);
+      return {
+        elem,
+        sortVals,
+        val: uploading,
+      };
+    });
+
+    return uploadingRows;
+  };
+
+  updateUploadings = (uploadings: Object) => {
+    const newUploadings = uploadings as List<UploadEntry>;
+    updater().updateUploadings(newUploadings);
+    this.props.update(updater().updateUploadingsInfo);
+  };
+
+  render() {
+    const uploadingRows = this.makeRowsInputs(
+      this.props.uploadingsInfo.uploadings
+    );
+    const sortKeys = List([
+      this.props.msg.pkg.get("item.path"),
+      this.props.msg.pkg.get("item.size"),
+      this.props.msg.pkg.get("item.progress"),
+    ]);
+    const view = (
+      <Rows
+        sortKeys={sortKeys}
+        rows={uploadingRows}
+        updateRows={this.updateUploadings}
+      />
+    );
+
+    const noUploadingView = (
+      <Container>
+        <Flexbox
+          children={List([
+            <RiEmotionSadLine size="4rem" className="margin-r-m red0-font" />,
+            <span>
+              <h3 className="title-l">
+                {this.props.msg.pkg.get("upload.404.title")}
+              </h3>
+              <span className="desc-l grey0-font">
+                {this.props.msg.pkg.get("upload.404.desc")}
+              </span>
+            </span>,
+          ])}
+          childrenStyles={List([
+            { flex: "auto", justifyContent: "flex-end" },
+            { flex: "auto" },
+          ])}
+        />
+      </Container>
     );
 
     const list =
       this.props.uploadingsInfo.uploadings.size === 0 ? (
-        <Container>
-          <Flexbox
-            children={List([
-              <RiEmotionSadLine size="4rem" className="margin-r-m red0-font" />,
-              <span>
-                <h3 className="title-l">
-                  {this.props.msg.pkg.get("upload.404.title")}
-                </h3>
-                <span className="desc-l grey0-font">
-                  {this.props.msg.pkg.get("upload.404.desc")}
-                </span>
-              </span>,
-            ])}
-            childrenStyles={List([
-              { flex: "auto", justifyContent: "flex-end" },
-              { flex: "auto" },
-            ])}
-          />
-        </Container>
+        noUploadingView
       ) : (
         <Container>
           <Flexbox
@@ -188,7 +230,7 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
             ])}
           />
 
-          {uploadingList}
+          {view}
         </Container>
       );
 
