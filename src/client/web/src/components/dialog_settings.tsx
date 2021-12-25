@@ -45,12 +45,12 @@ export class SettingsDialog extends React.Component<Props, State, {}> {
               preferencePane: {
                 name: "RiSettings3Fill",
                 size: "1.6rem",
-                color: "cyan0",
+                color: "cyan1",
               },
               managementPane: {
                 name: "RiWindowFill",
                 size: "1.6rem",
-                color: "cyan0",
+                color: "cyan1",
               },
             })}
             login={this.props.login}
