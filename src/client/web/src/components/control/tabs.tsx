@@ -14,7 +14,7 @@ import { colorClass } from "../visual/colors";
 const defaultIconProps: IconProps = {
   name: "RiFolder2Fill",
   size: "1.6rem",
-  color: `${colorClass("1")}-font`,
+  color: `${colorClass("cyan1")}-font`,
 };
 
 export interface Props {
