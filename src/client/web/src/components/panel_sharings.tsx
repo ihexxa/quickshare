@@ -64,32 +64,19 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
       }?dir=${encodeURIComponent(dirPath)}`;
 
       const row1 = (
-        <Flexbox
-          children={List([
-            <RiFolderSharedFill
-              size="3rem"
-              className="purple0-font margin-r-m"
-            />,
-            <span>{dirPath}</span>,
+        <div>
+          <div className="info">{dirPath}</div>
 
+          <div className="op">
             <button
               onClick={() => {
                 this.deleteSharing(dirPath);
               }}
             >
               {this.props.msg.pkg.get("browser.delete")}
-            </button>,
-          ])}
-          childrenStyles={List([
-            { flex: "0 0 auto", alignItems: "center" },
-            { alignItems: "center", justifyContent: "flex-start" },
-            {
-              flex: "0 0 auto",
-              alignItems: "center",
-              justifyContent: "flex-end",
-            },
-          ])}
-        />
+            </button>
+          </div>
+        </div>
       );
 
       const elem = (

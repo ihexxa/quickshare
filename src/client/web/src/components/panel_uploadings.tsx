@@ -102,35 +102,21 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
 
       const elem = (
         <div key={uploading.filePath} className="upload-item">
-          <Flexbox
-            children={List([
-              <RiUploadCloudLine
-                size="3rem"
-                id="icon-upload"
-                className="margin-r-m blue0-font"
-              />,
+          <div className={`font-s info`}>
+            <span className="title">{fileName}&nbsp;</span>
+            <span className="desc grey0-font">
+              {FileSize(uploading.uploaded, { round: 0 })}
+              &nbsp;/&nbsp;
+              {FileSize(uploading.size, {
+                round: 0,
+              })}
+              &nbsp;/&nbsp;
+              {`${progress}%`}
+            </span>
+          </div>
 
-              <div className={`font-s`}>
-                <span className="">{fileName}&nbsp;</span>
-                <span className="desc grey0-font">
-                  {FileSize(uploading.uploaded, { round: 0 })}
-                  &nbsp;/&nbsp;
-                  {FileSize(uploading.size, {
-                    round: 0,
-                  })}
-                  &nbsp;/&nbsp;
-                  {`${progress}%`}
-                </span>
-              </div>,
+          <div className="op">{op}</div>
 
-              op,
-            ])}
-            childrenStyles={List([
-              { flex: "0 0 auto" },
-              {},
-              { justifyContent: "flex-end" },
-            ])}
-          />
           {progressBar}
           {errorInfo}
         </div>

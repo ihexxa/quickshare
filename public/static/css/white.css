@@ -230,9 +230,27 @@
   padding: 0 1rem;
 }
 
+.theme-default #upload-list .info {
+  display: inline-block;
+  width: 70%;
+}
+
+.theme-default #upload-list .op {
+  display: inline-block;
+  width: 30%;
+  text-align: right;
+}
+
+.theme-default #upload-list .title {
+  font-size: 1.4rem;
+  line-height: 4rem;
+  overflow-wrap: break-word;
+}
+
 .theme-default #upload-list .desc {
   font-size: 1.2rem;
-  line-height: 2rem;
+  line-height: 4rem;
+  overflow-wrap: break-word;
 }
 
 .theme-default #upload-list .progress-grey {
@@ -258,6 +276,18 @@
   background-color: #2c3e50;
 }
 
+.theme-default #sharing-list .info {
+  display: inline-block;
+  width: 70%;
+  overflow-wrap: break-word;
+}
+
+.theme-default #sharing-list .op {
+  display: inline-block;
+  width: 30%;
+  text-align: right;
+}
+
 .theme-default #sharing-list .desc {
   background-color: #ecf0f1;
   font-size: 1.2rem;
@@ -265,6 +295,7 @@
   color: #697384;
   padding: 1rem;
   border: dashed 1px #95a5a6;
+  overflow-wrap: break-word;
 }
 
 .theme-default .sharing-item {
