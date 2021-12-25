@@ -370,6 +370,7 @@
 
 .theme-default .pane-title {
   color: black;
+  line-height: 4rem;
 }
 
 .theme-default #pane-settings {
