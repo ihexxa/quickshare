@@ -238,7 +238,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
           <div>
             <Flexbox
               children={List([
-                <h5 className="title">
+                <h5 className="pane-title">
                   {this.props.msg.pkg.get("settings.chooseLan")}
                 </h5>,
               ])}
@@ -269,7 +269,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
           <div>
             <Flexbox
               children={List([
-                <h5 className="title">
+                <h5 className="pane-title">
                   {this.props.msg.pkg.get("settings.customLan")}
                 </h5>,
 
@@ -302,7 +302,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
           <div>
             <Flexbox
               children={List([
-                <h5 className="title">{this.props.msg.pkg.get("cfg.bg")}</h5>,
+                <h5 className="pane-title">{this.props.msg.pkg.get("cfg.bg")}</h5>,
 
                 <button onClick={this.syncPreferences}>
                   {this.props.msg.pkg.get("update")}
