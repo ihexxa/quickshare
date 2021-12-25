@@ -88,17 +88,17 @@ export class RootFrame extends React.Component<Props, State, {}> {
                 filesPanel: {
                   name: "RiFolder2Fill",
                   size: "1.6rem",
-                  color: "cyan0",
+                  color: "cyan1",
                 },
                 uploadingsPanel: {
                   name: "RiUploadCloudFill",
                   size: "1.6rem",
-                  color: "blue0",
+                  color: "cyan1",
                 },
                 sharingsPanel: {
                   name: "RiShareBoxLine",
                   size: "1.6rem",
-                  color: "purple0",
+                  color: "cyan1",
                 },
               })}
               login={this.props.login}

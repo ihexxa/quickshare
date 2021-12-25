@@ -98,7 +98,7 @@ export class TopBar extends React.Component<Props, State, {}> {
                   className={`margin-r-m ${showSettings}`}
                 >
                   {this.props.msg.pkg.get("settings")}
-                  {/* {getIcon("RiSettings4Line", "1.8rem", "cyan0")} */}
+                  {/* {getIcon("RiSettings4Line", "1.8rem", "cyan1")} */}
                 </button>,
 
                 <button onClick={this.logout} className={`${showLogin}`}>

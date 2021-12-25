@@ -421,7 +421,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         </div>
       ) : (
         <div className="v-mid item-cell">
-          <RiFile2Fill size="3rem" className="cyan0-font" />
+          <RiFile2Fill size="3rem" className="cyan1-font" />
         </div>
       );
 
@@ -481,13 +481,13 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       );
 
       const detailColor = this.state.showDetail.has(item.name)
-        ? "cyan0"
+        ? "cyan1"
         : "grey0";
       const op = item.isDir ? (
         <div className={`v-mid item-cell item-op ${showOp}`}>
           <span onClick={() => this.select(item.name)} className="float-l">
             {isSelected
-              ? getIcon("RiCheckboxFill", "1.8rem", "cyan0")
+              ? getIcon("RiCheckboxFill", "1.8rem", "cyan1")
               : getIcon("RiCheckboxBlankFill", "1.8rem", "black1")}
           </span>
         </div>
@@ -502,7 +502,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
 
           <span onClick={() => this.select(item.name)} className="float-l">
             {isSelected
-              ? getIcon("RiCheckboxFill", "1.8rem", "cyan0")
+              ? getIcon("RiCheckboxFill", "1.8rem", "cyan1")
               : getIcon("RiCheckboxBlankFill", "1.8rem", "black1")}
           </span>
         </div>
@@ -569,14 +569,14 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         ? `${dirPath}${item.name}`
         : `${dirPath}/${item.name}`;
 
-      const selectedIconColor = isSelected ? "cyan0-font" : "grey0-font";
+      const selectedIconColor = isSelected ? "cyan1-font" : "grey0-font";
       const descIconColor = this.state.showDetail.has(item.name)
-        ? "cyan0-font"
+        ? "cyan1-font"
         : "grey0-font";
       const icon = item.isDir ? (
         <RiFolder2Fill size="1.8rem" className="yellow0-font" />
       ) : (
-        <RiFile2Fill size="1.8rem" className="cyan0-font" />
+        <RiFile2Fill size="1.8rem" className="cyan1-font" />
       );
       const fileType = item.isDir
         ? this.props.msg.pkg.get("item.type.folder")
@@ -786,11 +786,11 @@ export class FilesPanel extends React.Component<Props, State, {}> {
 
     const rowsViewColorClass =
       this.props.ui.control.controls.get(filesViewCtrl) === "rows"
-        ? "cyan0-font"
+        ? "cyan1-font"
         : "black-font";
     const tableViewColorClass =
       this.props.ui.control.controls.get(filesViewCtrl) === "table"
-        ? "cyan0-font"
+        ? "cyan1-font"
         : "black-font";
     const itemListPane = (
       <div>
