@@ -177,196 +177,200 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               />
             </div>
           </div>
+        </Container>
+
+        <Container>
+          <Flexbox
+            children={List([
+              <h5 className="pane-title">
+                {this.props.msg.pkg.get("settings.pwd.update")}
+              </h5>,
+              <button onClick={this.setPwd}>
+                {this.props.msg.pkg.get("update")}
+              </button>,
+            ])}
+            childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+          />
 
           <div className="hr"></div>
 
-          <div>
-            <Flexbox
-              children={List([
-                <h5 className="pane-title">
-                  {this.props.msg.pkg.get("settings.pwd.update")}
-                </h5>,
-                <button onClick={this.setPwd}>
-                  {this.props.msg.pkg.get("update")}
-                </button>,
-              ])}
-              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
-            />
-
-            <span className="float-input">
-              <div className="label">
-                {this.props.msg.pkg.get("settings.pwd.old")}
-              </div>
-              <input
-                name="old_pwd"
-                type="password"
-                onChange={this.changeOldPwd}
-                value={this.state.oldPwd}
-                placeholder={this.props.msg.pkg.get("settings.pwd.old")}
-              />
-            </span>
-
-            <span className="float-input">
-              <div className="label">
-                {this.props.msg.pkg.get("settings.pwd.new1")}
-              </div>
-              <input
-                name="new_pwd1"
-                type="password"
-                onChange={this.changeNewPwd1}
-                value={this.state.newPwd1}
-                placeholder={this.props.msg.pkg.get("settings.pwd.new1")}
-              />
-            </span>
-
-            <span className="float-input">
-              <div className="label">
-                {this.props.msg.pkg.get("settings.pwd.new2")}
-              </div>
-              <input
-                name="new_pwd2"
-                type="password"
-                onChange={this.changeNewPwd2}
-                value={this.state.newPwd2}
-                placeholder={this.props.msg.pkg.get("settings.pwd.new2")}
-              />
-            </span>
-          </div>
-
-          <div className="hr"></div>
-
-          <div>
-            <Flexbox
-              children={List([
-                <h5 className="pane-title">
-                  {this.props.msg.pkg.get("settings.chooseLan")}
-                </h5>,
-              ])}
-              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
-            />
-            <div>
-              <button
-                onClick={() => {
-                  this.setLan("en_US");
-                }}
-                className="float-input"
-              >
-                {this.props.msg.pkg.get("enUS")}
-              </button>
-              <button
-                onClick={() => {
-                  this.setLan("zh_CN");
-                }}
-                className="float-input"
-              >
-                {this.props.msg.pkg.get("zhCN")}
-              </button>
+          <span className="float-input">
+            <div className="label">
+              {this.props.msg.pkg.get("settings.pwd.old")}
             </div>
-          </div>
+            <input
+              name="old_pwd"
+              type="password"
+              onChange={this.changeOldPwd}
+              value={this.state.oldPwd}
+              placeholder={this.props.msg.pkg.get("settings.pwd.old")}
+            />
+          </span>
+
+          <span className="float-input">
+            <div className="label">
+              {this.props.msg.pkg.get("settings.pwd.new1")}
+            </div>
+            <input
+              name="new_pwd1"
+              type="password"
+              onChange={this.changeNewPwd1}
+              value={this.state.newPwd1}
+              placeholder={this.props.msg.pkg.get("settings.pwd.new1")}
+            />
+          </span>
+
+          <span className="float-input">
+            <div className="label">
+              {this.props.msg.pkg.get("settings.pwd.new2")}
+            </div>
+            <input
+              name="new_pwd2"
+              type="password"
+              onChange={this.changeNewPwd2}
+              value={this.state.newPwd2}
+              placeholder={this.props.msg.pkg.get("settings.pwd.new2")}
+            />
+          </span>
+        </Container>
+
+        <Container>
+          <Flexbox
+            children={List([
+              <h5 className="pane-title">
+                {this.props.msg.pkg.get("settings.chooseLan")}
+              </h5>,
+            ])}
+            childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+          />
 
           <div className="hr"></div>
 
           <div>
-            <Flexbox
-              children={List([
-                <h5 className="pane-title">
-                  {this.props.msg.pkg.get("settings.customLan")}
-                </h5>,
+            <button
+              onClick={() => {
+                this.setLan("en_US");
+              }}
+              className="float-input"
+            >
+              {this.props.msg.pkg.get("enUS")}
+            </button>
+            <button
+              onClick={() => {
+                this.setLan("zh_CN");
+              }}
+              className="float-input"
+            >
+              {this.props.msg.pkg.get("zhCN")}
+            </button>
+          </div>
+        </Container>
 
-                <span>
-                  <button onClick={this.syncPreferences}>
-                    {this.props.msg.pkg.get("update")}
-                  </button>
-                </span>,
-              ])}
-              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+        <Container>
+          <Flexbox
+            children={List([
+              <h5 className="pane-title">
+                {this.props.msg.pkg.get("settings.customLan")}
+              </h5>,
+
+              <span>
+                <button onClick={this.syncPreferences}>
+                  {this.props.msg.pkg.get("update")}
+                </button>
+              </span>,
+            ])}
+            childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+          />
+
+          <div className="hr"></div>
+
+          <div className="float-input">
+            <div className="label">
+              {this.props.msg.pkg.get("settings.lanPackURL")}
+            </div>
+            <input
+              type="text"
+              onChange={this.changeLanPackURL}
+              value={this.props.login.preferences.lanPackURL}
+              className="black0-font"
+              style={{ width: "20rem" }}
+              placeholder={this.props.msg.pkg.get("settings.lanPackURL")}
             />
+          </div>
+        </Container>
+
+        <Container>
+          <Flexbox
+            children={List([
+              <h5 className="pane-title">
+                {this.props.msg.pkg.get("cfg.bg")}
+              </h5>,
+
+              <button onClick={this.syncPreferences}>
+                {this.props.msg.pkg.get("update")}
+              </button>,
+            ])}
+            childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+          />
+
+          <div className="hr"></div>
+
+          <div>
+            <div className="float-input">
+              <div className="label">
+                {this.props.msg.pkg.get("cfg.bg.url")}
+              </div>
+              <input
+                name="bg_url"
+                type="text"
+                onChange={this.changeBgUrl}
+                value={this.props.login.preferences.bg.url}
+                placeholder={this.props.msg.pkg.get("cfg.bg.url")}
+              />
+            </div>
 
             <div className="float-input">
               <div className="label">
-                {this.props.msg.pkg.get("settings.lanPackURL")}
+                {this.props.msg.pkg.get("cfg.bg.repeat")}
               </div>
               <input
+                name="bg_repeat"
                 type="text"
-                onChange={this.changeLanPackURL}
-                value={this.props.login.preferences.lanPackURL}
-                className="black0-font"
-                style={{ width: "20rem" }}
-                placeholder={this.props.msg.pkg.get("settings.lanPackURL")}
+                onChange={this.changeBgRepeat}
+                value={this.props.login.preferences.bg.repeat}
+                placeholder={this.props.msg.pkg.get("cfg.bg.repeat")}
+              />
+            </div>
+
+            <div className="float-input">
+              <div className="label">
+                {this.props.msg.pkg.get("cfg.bg.pos")}
+              </div>
+              <input
+                name="bg_pos"
+                type="text"
+                onChange={this.changeBgPos}
+                value={this.props.login.preferences.bg.position}
+                placeholder={this.props.msg.pkg.get("cfg.bg.pos")}
+              />
+            </div>
+
+            <div className="float-input">
+              <div className="label">
+                {this.props.msg.pkg.get("cfg.bg.align")}
+              </div>
+              <input
+                name="bg_align"
+                type="text"
+                onChange={this.changeBgAlign}
+                value={this.props.login.preferences.bg.align}
+                placeholder={this.props.msg.pkg.get("cfg.bg.align")}
               />
             </div>
           </div>
+        </Container>
 
-          <div className="hr"></div>
-
-          <div>
-            <Flexbox
-              children={List([
-                <h5 className="pane-title">{this.props.msg.pkg.get("cfg.bg")}</h5>,
-
-                <button onClick={this.syncPreferences}>
-                  {this.props.msg.pkg.get("update")}
-                </button>,
-              ])}
-              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
-            />
-
-            <div>
-              <div className="float-input">
-                <div className="label">
-                  {this.props.msg.pkg.get("cfg.bg.url")}
-                </div>
-                <input
-                  name="bg_url"
-                  type="text"
-                  onChange={this.changeBgUrl}
-                  value={this.props.login.preferences.bg.url}
-                  placeholder={this.props.msg.pkg.get("cfg.bg.url")}
-                />
-              </div>
-
-              <div className="float-input">
-                <div className="label">
-                  {this.props.msg.pkg.get("cfg.bg.repeat")}
-                </div>
-                <input
-                  name="bg_repeat"
-                  type="text"
-                  onChange={this.changeBgRepeat}
-                  value={this.props.login.preferences.bg.repeat}
-                  placeholder={this.props.msg.pkg.get("cfg.bg.repeat")}
-                />
-              </div>
-
-              <div className="float-input">
-                <div className="label">
-                  {this.props.msg.pkg.get("cfg.bg.pos")}
-                </div>
-                <input
-                  name="bg_pos"
-                  type="text"
-                  onChange={this.changeBgPos}
-                  value={this.props.login.preferences.bg.position}
-                  placeholder={this.props.msg.pkg.get("cfg.bg.pos")}
-                />
-              </div>
-
-              <div className="float-input">
-                <div className="label">
-                  {this.props.msg.pkg.get("cfg.bg.align")}
-                </div>
-                <input
-                  name="bg_align"
-                  type="text"
-                  onChange={this.changeBgAlign}
-                  value={this.props.login.preferences.bg.align}
-                  placeholder={this.props.msg.pkg.get("cfg.bg.align")}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* <div className="hr"></div>
+        {/* <div className="hr"></div>
           <div>
             <Flexbox
               children={List([
@@ -400,7 +404,6 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               ])}
             />
           </div> */}
-        </Container>
       </div>
     );
   }

@@ -2,6 +2,8 @@ import * as React from "react";
 import { List, Map, Set } from "immutable";
 import FileSize from "filesize";
 
+import { RiMore2Fill } from "@react-icons/all-files/ri/RiMore2Fill";
+
 import { alertMsg, confirmMsg } from "../common/env";
 import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { User, Quota } from "../client";
@@ -39,6 +41,7 @@ export interface UserFormState {
   newPwd2: string;
   role: string;
   quota: Quota;
+  folded: boolean;
 }
 
 export class UserForm extends React.Component<
@@ -59,6 +62,7 @@ export class UserForm extends React.Component<
         uploadSpeedLimit: p.quota.uploadSpeedLimit,
         downloadSpeedLimit: p.quota.downloadSpeedLimit,
       },
+      folded: true,
     };
   }
 
@@ -150,25 +154,40 @@ export class UserForm extends React.Component<
       });
   };
 
+  toggle = () => {
+    this.setState({ folded: !this.state.folded });
+  };
+
   render() {
+    const foldedClass = this.state.folded ? "hidden" : "";
+    const foldIconColor = this.state.folded ? "black-font" : "cyan1-font";
+
     return (
       <div className="user-form">
         <Flexbox
           children={List([
             <div>
-              <div className="key-value">
-                {`${this.props.msg.pkg.get("user.name")}: `}
-                <span className="value">{this.props.name}</span>
-              </div>
-              <div className="key-value">
-                {`${this.props.msg.pkg.get("user.id")}: `}
-                <span className="value">{this.props.id}</span>
-              </div>
+              <span className="bold">{`${this.props.msg.pkg.get(
+                "user.name"
+              )}: `}</span>
+              <span className="margin-r-m">{this.props.name}</span>
+              <span className="bold">{`${this.props.msg.pkg.get(
+                "user.id"
+              )}: `}</span>
+              <span>{this.props.id}</span>
             </div>,
 
-            <button onClick={this.delUser}>
-              {this.props.msg.pkg.get("delete")}
-            </button>,
+            <span>
+              <RiMore2Fill
+                size="1.2rem"
+                className={`margin-r-m ${foldIconColor}`}
+                onClick={this.toggle}
+              />
+
+              <button onClick={this.delUser}>
+                {this.props.msg.pkg.get("delete")}
+              </button>
+            </span>,
           ])}
           childrenStyles={List([
             { alignItems: "flex-start", flexBasis: "70%" },
@@ -178,130 +197,134 @@ export class UserForm extends React.Component<
           ])}
         />
 
-        <div className="hr"></div>
+        <div className={foldedClass}>
+          <div className="hr"></div>
 
-        <Flexbox
-          children={List([
-            <div>
-              <span className="float-input">
-                <div className="label">
-                  {this.props.msg.pkg.get("user.role")}
+          <Flexbox
+            className="margin-t-m"
+            children={List([
+              <div>
+                <span className="float-input">
+                  <div className="label">
+                    {this.props.msg.pkg.get("user.role")}
+                  </div>
+                  <input
+                    name={`${this.props.id}-role`}
+                    type="text"
+                    onChange={this.changeRole}
+                    value={this.state.role}
+                    placeholder={this.state.role}
+                  />
+                </span>
+
+                <span className="float-input">
+                  <div className="label">
+                    {`${this.props.msg.pkg.get("spaceLimit")} (${FileSize(
+                      parseInt(this.state.quota.spaceLimit, 10),
+                      { round: 0 }
+                    )})`}
+                  </div>
+                  <input
+                    name={`${this.props.id}-spaceLimit`}
+                    type="number"
+                    onChange={this.changeSpaceLimit}
+                    value={this.state.quota.spaceLimit}
+                    placeholder={`${this.state.quota.spaceLimit}`}
+                  />
+                </span>
+
+                <span className="float-input">
+                  <div className="label">
+                    {`${this.props.msg.pkg.get("uploadLimit")} (${FileSize(
+                      this.state.quota.uploadSpeedLimit,
+                      { round: 0 }
+                    )})`}
+                  </div>
+                  <input
+                    name={`${this.props.id}-uploadSpeedLimit`}
+                    type="number"
+                    onChange={this.changeUploadSpeedLimit}
+                    value={this.state.quota.uploadSpeedLimit}
+                    placeholder={`${this.state.quota.uploadSpeedLimit}`}
+                  />
+                </span>
+
+                <span className="float-input">
+                  <div className="label">
+                    {`${this.props.msg.pkg.get("downloadLimit")} (${FileSize(
+                      this.state.quota.downloadSpeedLimit,
+                      { round: 0 }
+                    )})`}
+                  </div>
+                  <input
+                    name={`${this.props.id}-downloadSpeedLimit`}
+                    type="number"
+                    onChange={this.changeDownloadSpeedLimit}
+                    value={this.state.quota.downloadSpeedLimit}
+                    placeholder={`${this.state.quota.downloadSpeedLimit}`}
+                  />
+                </span>
+              </div>,
+
+              <button onClick={this.setUser}>
+                {this.props.msg.pkg.get("update")}
+              </button>,
+            ])}
+            childrenStyles={List([
+              { alignItems: "flex-start", flexBasis: "70%" },
+              {
+                justifyContent: "flex-end",
+                flexBasis: "30%",
+              },
+            ])}
+          />
+
+          <div className="hr"></div>
+
+          <Flexbox
+            className="margin-t-m"
+            children={List([
+              <div>
+                <div className="float-input">
+                  <div className="label">
+                    {this.props.msg.pkg.get("settings.pwd.new1")}
+                  </div>
+
+                  <input
+                    name={`${this.props.id}-pwd1`}
+                    type="password"
+                    onChange={this.changePwd1}
+                    value={this.state.newPwd1}
+                    placeholder={this.props.msg.pkg.get("settings.pwd.new1")}
+                  />
                 </div>
-                <input
-                  name={`${this.props.id}-role`}
-                  type="text"
-                  onChange={this.changeRole}
-                  value={this.state.role}
-                  placeholder={this.state.role}
-                />
-              </span>
 
-              <span className="float-input">
-                <div className="label">
-                  {`${this.props.msg.pkg.get("spaceLimit")} (${FileSize(
-                    parseInt(this.state.quota.spaceLimit, 10),
-                    { round: 0 }
-                  )})`}
+                <div className="float-input">
+                  <div className="label">
+                    {this.props.msg.pkg.get("settings.pwd.new2")}
+                  </div>
+                  <input
+                    name={`${this.props.id}-pwd2`}
+                    type="password"
+                    onChange={this.changePwd2}
+                    value={this.state.newPwd2}
+                    placeholder={this.props.msg.pkg.get("settings.pwd.new2")}
+                  />
                 </div>
-                <input
-                  name={`${this.props.id}-spaceLimit`}
-                  type="number"
-                  onChange={this.changeSpaceLimit}
-                  value={this.state.quota.spaceLimit}
-                  placeholder={`${this.state.quota.spaceLimit}`}
-                />
-              </span>
+              </div>,
 
-              <span className="float-input">
-                <div className="label">
-                  {`${this.props.msg.pkg.get("uploadLimit")} (${FileSize(
-                    this.state.quota.uploadSpeedLimit,
-                    { round: 0 }
-                  )})`}
-                </div>
-                <input
-                  name={`${this.props.id}-uploadSpeedLimit`}
-                  type="number"
-                  onChange={this.changeUploadSpeedLimit}
-                  value={this.state.quota.uploadSpeedLimit}
-                  placeholder={`${this.state.quota.uploadSpeedLimit}`}
-                />
-              </span>
-
-              <span className="float-input">
-                <div className="label">
-                  {`${this.props.msg.pkg.get("downloadLimit")} (${FileSize(
-                    this.state.quota.downloadSpeedLimit,
-                    { round: 0 }
-                  )})`}
-                </div>
-                <input
-                  name={`${this.props.id}-downloadSpeedLimit`}
-                  type="number"
-                  onChange={this.changeDownloadSpeedLimit}
-                  value={this.state.quota.downloadSpeedLimit}
-                  placeholder={`${this.state.quota.downloadSpeedLimit}`}
-                />
-              </span>
-            </div>,
-
-            <button onClick={this.setUser}>
-              {this.props.msg.pkg.get("update")}
-            </button>,
-          ])}
-          childrenStyles={List([
-            { alignItems: "flex-start", flexBasis: "70%" },
-            {
-              justifyContent: "flex-end",
-              flexBasis: "30%",
-            },
-          ])}
-        />
-
-        <div className="hr"></div>
-
-        <Flexbox
-          children={List([
-            <div>
-              <div className="float-input">
-                <div className="label">
-                  {this.props.msg.pkg.get("settings.pwd.new1")}
-                </div>
-
-                <input
-                  name={`${this.props.id}-pwd1`}
-                  type="password"
-                  onChange={this.changePwd1}
-                  value={this.state.newPwd1}
-                  placeholder={this.props.msg.pkg.get("settings.pwd.new1")}
-                />
-              </div>
-
-              <div className="float-input">
-                <div className="label">
-                  {this.props.msg.pkg.get("settings.pwd.new2")}
-                </div>
-                <input
-                  name={`${this.props.id}-pwd2`}
-                  type="password"
-                  onChange={this.changePwd2}
-                  value={this.state.newPwd2}
-                  placeholder={this.props.msg.pkg.get("settings.pwd.new2")}
-                />
-              </div>
-            </div>,
-
-            <button onClick={this.setPwd}>
-              {this.props.msg.pkg.get("update")}
-            </button>,
-          ])}
-          childrenStyles={List([
-            { alignItems: "flex-start", flexBasis: "70%" },
-            {
-              justifyContent: "flex-end",
-            },
-          ])}
-        />
+              <button onClick={this.setPwd}>
+                {this.props.msg.pkg.get("update")}
+              </button>,
+            ])}
+            childrenStyles={List([
+              { alignItems: "flex-start", flexBasis: "70%" },
+              {
+                justifyContent: "flex-end",
+              },
+            ])}
+          />
+        </div>
       </div>
     );
   }
@@ -343,19 +366,14 @@ export class AdminPane extends React.Component<Props, State, {}> {
   };
 
   addRole = async () => {
-    return updater()
-      .addRole(this.state.newRole)
-      .then((status: string) => {
-        if (status !== "") {
-          alertMsg(this.props.msg.pkg.get("add.fail"));
-        } else {
-          alertMsg(this.props.msg.pkg.get("add.ok"));
-        }
-        return updater().listRoles();
-      })
-      .then(() => {
-        this.props.update(updater().updateAdmin);
-      });
+    const status = await updater().addRole(this.state.newRole);
+    if (status !== "") {
+      alertMsg(this.props.msg.pkg.get("add.fail"));
+    } else {
+      alertMsg(this.props.msg.pkg.get("add.ok"));
+      await updater().listRoles();
+      this.props.update(updater().updateAdmin);
+    }
   };
 
   delRole = async (role: string) => {
@@ -363,19 +381,14 @@ export class AdminPane extends React.Component<Props, State, {}> {
       return;
     }
 
-    return updater()
-      .delRole(role)
-      .then((status: string) => {
-        if (status !== "") {
-          this.props.msg.pkg.get("delete.fail");
-        } else {
-          this.props.msg.pkg.get("delete.ok");
-        }
-        return updater().listRoles();
-      })
-      .then(() => {
-        this.props.update(updater().updateAdmin);
-      });
+    const status = await updater().delRole(role);
+    if (status !== "") {
+      this.props.msg.pkg.get("delete.fail");
+    } else {
+      this.props.msg.pkg.get("delete.ok");
+      await updater().listRoles();
+      this.props.update(updater().updateAdmin);
+    }
   };
 
   addUser = async () => {
@@ -384,33 +397,29 @@ export class AdminPane extends React.Component<Props, State, {}> {
       return;
     }
 
-    return updater()
-      .addUser({
-        id: "", // backend will fill it
-        name: this.state.newUserName,
-        pwd: this.state.newUserPwd1,
-        role: this.state.newUserRole,
-        quota: undefined,
-        usedSpace: "0",
-        preferences: undefined,
-      })
-      .then((status: string) => {
-        if (status !== "") {
-          alertMsg(this.props.msg.pkg.get("add.fail"));
-        } else {
-          alertMsg(this.props.msg.pkg.get("add.ok"));
-        }
-        this.setState({
-          newUserName: "",
-          newUserPwd1: "",
-          newUserPwd2: "",
-          newUserRole: "",
-        });
-        return updater().listUsers();
-      })
-      .then(() => {
-        this.props.update(updater().updateAdmin);
+    const status = await updater().addUser({
+      id: "", // backend will fill it
+      name: this.state.newUserName,
+      pwd: this.state.newUserPwd1,
+      role: this.state.newUserRole,
+      quota: undefined,
+      usedSpace: "0",
+      preferences: undefined,
+    });
+
+    if (status !== "") {
+      alertMsg(this.props.msg.pkg.get("add.fail"));
+    } else {
+      alertMsg(this.props.msg.pkg.get("add.ok"));
+      this.setState({
+        newUserName: "",
+        newUserPwd1: "",
+        newUserPwd2: "",
+        newUserRole: "",
       });
+      await updater().listUsers();
+      this.props.update(updater().updateAdmin);
+    }
   };
 
   render() {
@@ -464,13 +473,17 @@ export class AdminPane extends React.Component<Props, State, {}> {
         <Container>
           <Flexbox
             children={List([
-              <h5 className="title">{this.props.msg.pkg.get("user.add")}</h5>,
+              <h5 className="pane-title">
+                {this.props.msg.pkg.get("user.add")}
+              </h5>,
               <button onClick={this.addUser}>
                 {this.props.msg.pkg.get("add")}
               </button>,
             ])}
             childrenStyles={List([{}, { justifyContent: "flex-end" }])}
           />
+
+          <div className="hr"></div>
 
           <span className="float-input">
             <div className="label">{this.props.msg.pkg.get("user.name")}</div>
@@ -520,12 +533,15 @@ export class AdminPane extends React.Component<Props, State, {}> {
         <Container>
           <Flexbox
             children={List([
-              <h5 className="title">
+              <h5 className="pane-title">
                 {this.props.msg.pkg.get("admin.users")}
               </h5>,
               <span></span>,
             ])}
           />
+
+          <div className="hr"></div>
+
           {userList}
         </Container>
 
@@ -533,10 +549,14 @@ export class AdminPane extends React.Component<Props, State, {}> {
           <div>
             <Flexbox
               children={List([
-                <h5 className="title">{this.props.msg.pkg.get("role.add")}</h5>,
+                <h5 className="pane-title">
+                  {this.props.msg.pkg.get("role.add")}
+                </h5>,
                 <span></span>,
               ])}
             />
+
+            <div className="hr"></div>
 
             <Flexbox
               children={List([
@@ -553,17 +573,20 @@ export class AdminPane extends React.Component<Props, State, {}> {
               childrenStyles={List([{}, { justifyContent: "flex-end" }])}
             />
           </div>
+        </Container>
 
-          <div className="hr"></div>
-
+        <Container>
           <Flexbox
             children={List([
-              <h5 className="title">
+              <h5 className="pane-title">
                 {this.props.msg.pkg.get("admin.roles")}
               </h5>,
               <span></span>,
             ])}
           />
+
+          <div className="hr"></div>
+
           {roleList}
         </Container>
       </div>
@@ -698,7 +721,7 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
       <div>
         <Flexbox
           children={List([
-            <h5 className="title">{this.props.msg.pkg.get("cfg.bg")}</h5>,
+            <h5 className="pane-title">{this.props.msg.pkg.get("cfg.bg")}</h5>,
 
             <span>
               <button onClick={this.resetClientCfg} className="margin-r-m">
@@ -711,6 +734,8 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
           ])}
           childrenStyles={List([{}, { justifyContent: "flex-end" }])}
         />
+
+        <div className="hr"></div>
 
         <div>
           <div className="float-input">
