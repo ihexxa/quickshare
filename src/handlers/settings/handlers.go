@@ -77,3 +77,20 @@ func validateClientCfg(cfg *sitestore.ClientConfig) error {
 	}
 	return nil
 }
+
+type ClientErrorReport struct {
+	Report  string `json:"report"`
+	Version string `json:"version"`
+}
+
+func (h *SettingsSvc) ReportError(c *gin.Context) {
+	var err error
+	req := &ClientErrorReport{}
+	if err = c.ShouldBindJSON(&req); err != nil {
+		c.JSON(q.ErrResp(c, 400, err))
+		return
+	}
+
+	h.deps.Log().Errorf("version:%s,error:%s", req.Version, req.Report)
+	c.JSON(q.Resp(200))
+}

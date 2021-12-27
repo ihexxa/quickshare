@@ -54,3 +54,10 @@ func (cl *SettingsClient) SetClientCfg(cfg *sitestore.ClientConfig, token *http.
 		}).
 		End()
 }
+
+func (cl *SettingsClient) ReportError(report *settings.ClientErrorReport, token *http.Cookie) (*http.Response, string, []error) {
+	return cl.r.Post(cl.url("/v1/settings/errors")).
+		AddCookie(token).
+		Send(report).
+		End()
+}
