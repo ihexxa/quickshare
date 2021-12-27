@@ -1,9 +1,14 @@
 package server
 
 import (
+	"fmt"
+	"github.com/ihexxa/quickshare/src/handlers/settings"
+	"io/ioutil"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/ihexxa/quickshare/src/client"
 	"github.com/ihexxa/quickshare/src/db/sitestore"
@@ -43,13 +48,12 @@ func TestSettingsHandlers(t *testing.T) {
 	adminName := "qs"
 	adminPwd := "quicksh@re"
 	userPwd := "1234"
-	// adminNewPwd := "quicksh@re2"
 	setUpEnv(t, rootPath, adminName, adminPwd)
 	defer os.RemoveAll(rootPath)
 
 	srv := startTestServer(config)
 	defer srv.Shutdown()
-	// fs := srv.depsFS()
+	fs := srv.depsFS()
 
 	if !isServerReady(addr) {
 		t.Fatal("fail to start server")
@@ -119,6 +123,39 @@ func TestSettingsHandlers(t *testing.T) {
 					t.Fatalf("client cfgs are not equal for user: got(%v) expected(%v)", clientCfgMsg.ClientCfg, cfg)
 				}
 			}
+		}
+	})
+
+	t.Run("ReportError", func(t *testing.T) {
+		settingsCl := client.NewSettingsClient(addr)
+		reportContent := `{state: "{}", error: "empty state"}`
+		report := &settings.ClientErrorReport{
+			Report:  reportContent,
+			Version: "0.0.1",
+		}
+
+		reportResp, _, errs := settingsCl.ReportError(report, adminToken)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if reportResp.StatusCode != 200 {
+			t.Fatal(reportResp.StatusCode)
+		}
+
+		file, id, err := fs.GetFileReader("quickshare.log")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer fs.CloseReader(fmt.Sprint(id))
+
+		// TODO: it is flaky
+		time.Sleep(time.Duration(1) * time.Second)
+
+		content, err := ioutil.ReadAll(file)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(string(content), `"msg":"version:0.0.1,error:{state: \"{}\", error: \"empty state\"}"`) {
+			t.Fatalf("log does not contain error: %s", content)
 		}
 	})
 }
