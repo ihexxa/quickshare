@@ -143,7 +143,9 @@ export class PaneSettings extends React.Component<Props, State, {}> {
       <div id="pane-settings">
         <Container>
           <div id="profile">
-            <h5 className="title">{this.props.msg.pkg.get("user.profile")}</h5>
+            <h5 className="pane-title">{this.props.msg.pkg.get("user.profile")}</h5>
+
+            <div className="hr"></div>
 
             <div>
               <Card
