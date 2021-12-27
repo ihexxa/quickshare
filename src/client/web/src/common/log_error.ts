@@ -1,12 +1,27 @@
+import { Map } from "immutable";
+import { sha1 } from "object-hash";
+
 import { ILocalStorage, Storage } from "./localstorage";
 import { ISettingsClient } from "../client";
 import { SettingsClient } from "../client/settings";
+import { ICoreState } from "../components/core_state";
+import { updater } from "../components/state_updater";
+
+const errorVer = "0.0.1";
+const cookieKeyClErrs = "qs_cli_errs";
+
+export interface ClientErrorV001 {
+  version: string;
+  error: string;
+  state: ICoreState;
+}
 
 export interface IErrorLogger {
   setClient: (client: ISettingsClient) => void;
   setStorage: (storage: ILocalStorage) => void;
-  error: (key: string, msg: string) => void;
-  report: () => void;
+  error: (msg: string) => null | Error;
+  report: () => Promise<null | Error>;
+  readErrs: () => Map<string, ClientErrorV001>;
 }
 
 export class ErrorLog {
@@ -25,18 +40,61 @@ export class ErrorLog {
     this.storage = storage;
   }
 
-  error = (key: string, msg: string) => {
-    const existKey = this.storage.get(key);
-    if (existKey === "") {
-      this.storage.set(key, msg);
-    }
+  private getErrorSign = (errMsg: string): string => {
+    return `e:${sha1(errMsg)}`;
   };
 
-  report = () => {
-    // TODO:
-    // check last submitting, and set submit time
-    // report all errors to backend
-    // clean storage
+  readErrs = (): Map<string, ClientErrorV001> => {
+    const errsStr = this.storage.get(cookieKeyClErrs);
+    const errsObj = JSON.parse(errsStr);
+    return Map(errsObj);
+  };
+
+  private writeErrs = (errs: Map<string, ClientErrorV001>) => {
+    const errsObj = errs.toObject();
+    const errsStr = JSON.stringify(errsObj);
+    this.storage.set(cookieKeyClErrs, errsStr);
+  };
+
+  error = (msg: string): null | Error => {
+    try {
+      const sign = this.getErrorSign(msg);
+      const clientErr: ClientErrorV001 = {
+        version: errorVer,
+        error: msg,
+        state: updater().props,
+      };
+      let errs = this.readErrs();
+      if (!errs.has(sign)) {
+        errs = errs.set(sign, clientErr);
+        this.writeErrs(errs);
+      }
+    } catch (err: any) {
+      return Error(`failed to save err log: ${err}`);
+    }
+
+    return null;
+  };
+
+  report = async (): Promise<null | Error> => {
+    try {
+      const errs = this.readErrs();
+
+      for (let sign of errs.keySeq().toArray()) {
+        const err = errs.get(sign);
+        const resp = await this.client.reportError(sign, JSON.stringify(err));
+        if (resp.status !== 200) {
+          return Error(`failed to report error: ${resp.data}`);
+        }
+      }
+
+      // truncate errors
+      this.writeErrs(Map());
+    } catch (e: any) {
+      return Error(e);
+    }
+
+    return null;
   };
 }
 
