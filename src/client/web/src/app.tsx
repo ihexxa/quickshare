@@ -14,9 +14,9 @@ window.onerror = (
 ) => {
   const lowerMsg = msg.toLowerCase();
   if (lowerMsg.indexOf("script error") > -1) {
-    ErrorLogger().error(errCorsScript, "Check Browser Console for Detail");
+    ErrorLogger().error("Check Browser Console for Detail");
   }
-  ErrorLogger().error(`${source}:${lineno}:${colno}: ${error.toString()}`, "");
+  ErrorLogger().error(`${source}:${lineno}:${colno}: ${error.toString()}`);
 };
 
 ReactDOM.render(<StateMgr />, document.getElementById("mount"));

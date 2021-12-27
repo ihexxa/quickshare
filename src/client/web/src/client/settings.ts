@@ -30,4 +30,15 @@ export class SettingsClient extends BaseClient {
       },
     });
   };
+
+  reportError = (content: string, version: string): Promise<Response> => {
+    return this.do({
+      method: "post",
+      url: `${this.url}/v1/settings/errors`,
+      data: {
+        content,
+        version,
+      },
+    });
+  };
 }

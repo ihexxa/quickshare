@@ -139,6 +139,7 @@ export interface ISettingsClient {
   health: () => Promise<Response>;
   getClientCfg: () => Promise<Response>;
   setClientCfg: (cfg: ClientConfig) => Promise<Response>;
+  reportError: (content: string, version: string) => Promise<Response>;
 }
 
 export interface Response<T = any> {
