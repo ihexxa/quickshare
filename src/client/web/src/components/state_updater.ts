@@ -35,6 +35,7 @@ import { controlName as panelTabs } from "./root_frame";
 import { settingsTabsCtrl } from "./dialog_settings";
 import { settingsDialogCtrl } from "./layers";
 import { errUpdater, errServer } from "../common/errors";
+import { ErrorLogger } from "../common/log_error";
 
 import { MsgPackage, isValidLanPack } from "../i18n/msger";
 
@@ -135,8 +136,11 @@ export class Updater {
   refreshUploadings = async (): Promise<string> => {
     const luResp = await this.filesClient.listUploadings();
     if (luResp.status !== 200) {
-      // TODO: log error
-      console.error(luResp.data);
+      // this method is called for authed users
+      // other status codes are unexpected, including 401
+      ErrorLogger().error(
+        `refreshUploadings: unexpected response ${luResp.status} ${luResp.data}`
+      );
       return errServer;
     }
 
@@ -767,16 +771,15 @@ export class Updater {
     const url = this.props.login.preferences.lanPackURL;
     if (url === "") {
       const lan = this.props.login.preferences.lan;
-      if (lan == "en_US" || lan == "zh_CN") {
+      if (lan === "en_US" || lan === "zh_CN") {
         // fallback to build-in language pack
         this.props.msg.lan = lan;
         this.props.msg.pkg = MsgPackage.get(lan);
       } else {
-        // fallback to english
+        ErrorLogger().error(`syncLan: unexpected lan ${lan}`);
         this.props.msg.lan = "en_US";
         this.props.msg.pkg = MsgPackage.get("en_US");
       }
-      // TODO: should warning here
       return "";
     }
 

@@ -6,9 +6,11 @@ import { ICoreState, UIProps, MsgProps } from "./core_state";
 import { LoginProps } from "./pane_login";
 import { Flexbox } from "./layout/flexbox";
 import { updater } from "./state_updater";
-import { alertMsg } from "../common/env";
+import { alertMsg, confirmMsg } from "../common/env";
 import { Container } from "./layout/container";
 import { Card } from "./layout/card";
+import { Rows, Row } from "./layout/rows";
+import { ClientErrorV001, ErrorLogger } from "../common/log_error";
 export interface Props {
   login: LoginProps;
   msg: MsgProps;
@@ -138,12 +140,53 @@ export class PaneSettings extends React.Component<Props, State, {}> {
       });
   };
 
+  truncateErrors = () => {
+    if (confirmMsg(this.props.msg.pkg.get("op.confirm"))) {
+      ErrorLogger().truncate();
+    }
+  };
+
+  reportErrors = () => {
+    if (confirmMsg(this.props.msg.pkg.get("op.confirm"))) {
+      ErrorLogger().report();
+    }
+  };
+
+  prepareErrorRows = (): List<Row> => {
+    let errRows = List<Row>();
+
+    ErrorLogger()
+      .readErrs()
+      .forEach((clientErr: ClientErrorV001, sign: string) => {
+        const elem = (
+          <div>
+            <div className="error-inline">{JSON.stringify(clientErr)}</div>
+            <div className="hr"></div>
+          </div>
+        );
+        const val = clientErr;
+        const sortVals = List<string>([]);
+
+        errRows = errRows.push({
+          elem,
+          val,
+          sortVals,
+        });
+      });
+
+    return errRows;
+  };
+
   render() {
+    const errRows = this.prepareErrorRows();
+
     return (
       <div id="pane-settings">
         <Container>
           <div id="profile">
-            <h5 className="pane-title">{this.props.msg.pkg.get("user.profile")}</h5>
+            <h5 className="pane-title">
+              {this.props.msg.pkg.get("user.profile")}
+            </h5>
 
             <div className="hr"></div>
 
@@ -370,6 +413,30 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               />
             </div>
           </div>
+        </Container>
+
+        <Container>
+          <Flexbox
+            children={List([
+              <h5 className="pane-title">
+                {this.props.msg.pkg.get("error.report.title")}
+              </h5>,
+
+              <span>
+                <button className="margin-r-m" onClick={this.reportErrors}>
+                  {this.props.msg.pkg.get("op.submit")}
+                </button>
+                <button onClick={this.truncateErrors}>
+                  {this.props.msg.pkg.get("op.truncate")}
+                </button>
+              </span>,
+            ])}
+            childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+          />
+
+          <div className="hr"></div>
+
+          <Rows rows={errRows} sortKeys={List([])} />
         </Container>
 
         {/* <div className="hr"></div>

@@ -98,12 +98,8 @@ export class Rows extends React.Component<Props, State, {}> {
       }
     );
 
-    return (
-      <div
-        id={this.props.id}
-        style={this.props.style}
-        className={this.props.className}
-      >
+    const orderByList =
+      sortBtns.size > 0 ? (
         <div className="margin-b-l">
           <Flexbox
             children={List([
@@ -116,6 +112,15 @@ export class Rows extends React.Component<Props, State, {}> {
             childrenStyles={List([{ flex: "0 0 auto" }, { flex: "0 0 auto" }])}
           />
         </div>
+      ) : null;
+
+    return (
+      <div
+        id={this.props.id}
+        style={this.props.style}
+        className={this.props.className}
+      >
+        {orderByList}
         {bodyRows}
       </div>
     );

@@ -12,6 +12,7 @@ import {
   UploadState,
 } from "./interface";
 import { errUploadMgr } from "../common/errors";
+import { ErrorLogger } from "../common/log_error";
 
 const win: Window = self as any;
 
@@ -197,8 +198,7 @@ export class UploadMgr {
             err: errResp.err,
           });
         } else {
-          // TODO: refine this
-          console.error(`uploading ${errResp.filePath} may already be deleted`);
+          ErrorLogger().error(`respHandler: entry not found ${errResp.err}`);
         }
 
         this.statusCb(this.infos.toMap(), false);
@@ -225,17 +225,16 @@ export class UploadMgr {
             this.statusCb(this.infos.toMap(), false);
           }
         } else {
-          // TODO: refine this
-          console.error(
-            `respHandler: may already be deleted: file(${
-              infoResp.filePath
-            }) infos(${this.infos.toObject()})`
+          ErrorLogger().error(
+            `respHandler: entry(uploadInfoKind) not found ${infoResp.err}`
           );
         }
 
         break;
       default:
-        console.error(`respHandler: response kind not found: ${resp}`);
+        ErrorLogger().error(
+          `respHandler: unknown kind: ${JSON.stringify(resp)}`
+        );
     }
   };
 }
