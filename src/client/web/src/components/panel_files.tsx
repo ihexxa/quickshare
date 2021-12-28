@@ -8,11 +8,11 @@ import { RiArchiveDrawerFill } from "@react-icons/all-files/ri/RiArchiveDrawerFi
 import { RiFile2Fill } from "@react-icons/all-files/ri/RiFile2Fill";
 import { RiFileList2Fill } from "@react-icons/all-files/ri/RiFileList2Fill";
 import { RiCheckboxFill } from "@react-icons/all-files/ri/RiCheckboxFill";
-import { RiCheckboxBlankFill } from "@react-icons/all-files/ri/RiCheckboxBlankFill";
 import { RiInformationFill } from "@react-icons/all-files/ri/RiInformationFill";
 import { BiTable } from "@react-icons/all-files/bi/BiTable";
 import { BiListUl } from "@react-icons/all-files/bi/BiListUl";
 
+import { ErrorLogger } from "../common/log_error";
 import { alertMsg, confirmMsg } from "../common/env";
 import { getErrMsg } from "../common/utils";
 import { updater } from "./state_updater";
@@ -699,12 +699,12 @@ export class FilesPanel extends React.Component<Props, State, {}> {
   };
 
   setView = (opt: string) => {
-    if (opt === "rows" || opt === "table") {
-      updater().setControlOption(filesViewCtrl, opt);
-      this.props.update(updater().updateUI);
+    if (opt !== "rows" && opt !== "table") {
+      ErrorLogger().error(`FilesPanel:setView: unknown view ${opt}`);
       return;
     }
-    // TODO: log error
+    updater().setControlOption(filesViewCtrl, opt);
+    this.props.update(updater().updateUI);
   };
 
   render() {

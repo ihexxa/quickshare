@@ -6,6 +6,7 @@ import { ISettingsClient } from "../client";
 import { SettingsClient } from "../client/settings";
 import { ICoreState } from "../components/core_state";
 import { updater } from "../components/state_updater";
+import { alertMsg } from "./env";
 
 const errorVer = "0.0.1";
 const cookieKeyClErrs = "qs_cli_errs";
@@ -13,6 +14,7 @@ const cookieKeyClErrs = "qs_cli_errs";
 export interface ClientErrorV001 {
   version: string;
   error: string;
+  timestamp: string;
   state: ICoreState;
 }
 
@@ -22,9 +24,10 @@ export interface IErrorLogger {
   error: (msg: string) => null | Error;
   report: () => Promise<null | Error>;
   readErrs: () => Map<string, ClientErrorV001>;
+  truncate: () => void;
 }
 
-export class ErrorLog {
+export class SimpleErrorLogger {
   private client: ISettingsClient;
   private storage: ILocalStorage = Storage();
 
@@ -45,9 +48,18 @@ export class ErrorLog {
   };
 
   readErrs = (): Map<string, ClientErrorV001> => {
-    const errsStr = this.storage.get(cookieKeyClErrs);
-    const errsObj = JSON.parse(errsStr);
-    return Map(errsObj);
+    try {
+      const errsStr = this.storage.get(cookieKeyClErrs);
+      if (errsStr === "") {
+        return Map();
+      }
+
+      const errsObj = JSON.parse(errsStr);
+      return Map(errsObj);
+    } catch (e: any) {
+      this.truncate(); // reset
+    }
+    return Map();
   };
 
   private writeErrs = (errs: Map<string, ClientErrorV001>) => {
@@ -62,6 +74,7 @@ export class ErrorLog {
       const clientErr: ClientErrorV001 = {
         version: errorVer,
         error: msg,
+        timestamp: `${Date.now()}`,
         state: updater().props,
       };
       let errs = this.readErrs();
@@ -88,17 +101,20 @@ export class ErrorLog {
         }
       }
 
-      // truncate errors
-      this.writeErrs(Map());
+      this.truncate();
     } catch (e: any) {
       return Error(e);
     }
 
     return null;
   };
+
+  truncate = () => {
+    this.writeErrs(Map());
+  };
 }
 
-const errorLogger = new ErrorLog(new SettingsClient(""));
+const errorLogger = new SimpleErrorLogger(new SettingsClient(""));
 export const ErrorLogger = (): IErrorLogger => {
   return errorLogger;
 };
