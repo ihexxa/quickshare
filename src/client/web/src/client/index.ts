@@ -1,4 +1,5 @@
 import axios, { AxiosRequestConfig } from "axios";
+import { List } from "immutable";
 
 export const defaultTimeout = 10000;
 export const userIDParam = "uid";
@@ -88,6 +89,11 @@ export interface ClientConfig {
   bg: BgConfig;
 }
 
+export interface ClientErrorReport {
+  report: string;
+  version: string;
+}
+
 export interface IUsersClient {
   login: (
     user: string,
@@ -139,7 +145,7 @@ export interface ISettingsClient {
   health: () => Promise<Response>;
   getClientCfg: () => Promise<Response>;
   setClientCfg: (cfg: ClientConfig) => Promise<Response>;
-  reportError: (content: string, version: string) => Promise<Response>;
+  reportErrors: (reports: List<ClientErrorReport>) => Promise<Response>;
 }
 
 export interface Response<T = any> {

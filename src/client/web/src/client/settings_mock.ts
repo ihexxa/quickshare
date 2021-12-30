@@ -7,7 +7,7 @@ export interface SettingsClientResps {
   healthMockResp?: Response;
   setClientCfgMockResp?: Response;
   getClientCfgMockResp?: Response<ClientConfigMsg>;
-  reportErrorResp?: Response;
+  reportErrorsResp?: Response;
 }
 
 export const resps = {
@@ -29,7 +29,7 @@ export const resps = {
       },
     },
   },
-  reportErrorResp: {
+  reportErrorsResp: {
     status: 200,
     statusText: "",
     data: {},
@@ -66,7 +66,7 @@ export class MockSettingsClient {
     return this.wrapPromise(this.resps.getClientCfgMockResp);
   };
 
-  reportError = (): Promise<Response> => {
-    return this.wrapPromise(this.resps.reportErrorResp);
+  reportErrors = (): Promise<Response> => {
+    return this.wrapPromise(this.resps.reportErrorsResp);
   };
 }

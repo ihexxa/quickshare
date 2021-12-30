@@ -126,15 +126,22 @@ func TestSettingsHandlers(t *testing.T) {
 		}
 	})
 
-	t.Run("ReportError", func(t *testing.T) {
+	t.Run("ReportErrors", func(t *testing.T) {
 		settingsCl := client.NewSettingsClient(addr)
-		reportContent := `{state: "{}", error: "empty state"}`
-		report := &settings.ClientErrorReport{
-			Report:  reportContent,
-			Version: "0.0.1",
+		reports := &settings.ClientErrorReports{
+			Reports: []*settings.ClientErrorReport{
+				&settings.ClientErrorReport{
+					Report:  `{state: "{}", error: "empty state1"}`,
+					Version: "0.0.1",
+				},
+				&settings.ClientErrorReport{
+					Report:  `{state: "{}", error: "empty state2"}`,
+					Version: "0.0.1",
+				},
+			},
 		}
 
-		reportResp, _, errs := settingsCl.ReportError(report, adminToken)
+		reportResp, _, errs := settingsCl.ReportErrors(reports, adminToken)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if reportResp.StatusCode != 200 {
@@ -154,7 +161,10 @@ func TestSettingsHandlers(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !strings.Contains(string(content), `"msg":"version:0.0.1,error:{state: \"{}\", error: \"empty state\"}"`) {
+		if !strings.Contains(string(content), `"msg":"version:0.0.1,error:{state: \"{}\", error: \"empty state1\"}"`) {
+			t.Fatalf("log does not contain error: %s", content)
+		}
+		if !strings.Contains(string(content), `"msg":"version:0.0.1,error:{state: \"{}\", error: \"empty state2\"}"`) {
 			t.Fatalf("log does not contain error: %s", content)
 		}
 	})
