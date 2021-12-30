@@ -2,6 +2,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { List, Map, Set } from "immutable";
 import FileSize from "filesize";
+import QRCode from "react-qr-code";
 
 import { RiFolder2Fill } from "@react-icons/all-files/ri/RiFolder2Fill";
 import { RiArchiveDrawerFill } from "@react-icons/all-files/ri/RiArchiveDrawerFill";
@@ -11,6 +12,7 @@ import { RiCheckboxFill } from "@react-icons/all-files/ri/RiCheckboxFill";
 import { RiInformationFill } from "@react-icons/all-files/ri/RiInformationFill";
 import { BiTable } from "@react-icons/all-files/bi/BiTable";
 import { BiListUl } from "@react-icons/all-files/bi/BiListUl";
+import { RiRefreshLine } from "@react-icons/all-files/ri/RiRefreshLine";
 
 import { ErrorLogger } from "../common/log_error";
 import { alertMsg, confirmMsg } from "../common/env";
@@ -465,17 +467,17 @@ export class FilesPanel extends React.Component<Props, State, {}> {
           >
             <Flexbox
               children={List([
-                <span>
-                  <div className="label">{`SHA1: `}</div>
-                  <input type="text" readOnly={true} value={`${item.sha1}`} />
-                </span>,
-                <button onClick={() => this.generateHash(itemPath)}>
-                  {this.props.msg.pkg.get("refresh")}
-                </button>,
+                <div className="label">{`SHA1: `}</div>,
+                <RiRefreshLine
+                  onClick={() => this.generateHash(itemPath)}
+                  size={"2rem"}
+                  className="black-font"
+                />,
               ])}
               className="item-info"
               childrenStyles={List([{}, { justifyContent: "flex-end" }])}
             />
+            <div className="info">{item.sha1}</div>
           </div>
         </div>
       );
@@ -582,16 +584,13 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         ? this.props.msg.pkg.get("item.type.folder")
         : this.props.msg.pkg.get("item.type.file");
 
+      const downloadPath = `/v1/fs/files?fp=${itemPath}`;
       const name = item.isDir ? (
         <span className="clickable" onClick={() => this.gotoChild(item.name)}>
           {item.name}
         </span>
       ) : (
-        <a
-          className="title-m clickable"
-          href={`/v1/fs/files?fp=${itemPath}`}
-          target="_blank"
-        >
+        <a className="title-m clickable" href={downloadPath} target="_blank">
           {item.name}
         </a>
       );
@@ -620,7 +619,8 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         </div>
       );
 
-      const pathTitle = this.props.msg.pkg.get("item.path");
+      const absDownloadURL = `${document.location.protocol}//${document.location.hostname}${downloadPath}`;
+      const pathTitle = this.props.msg.pkg.get("item.downloadURL");
       const modTimeTitle = this.props.msg.pkg.get("item.modTime");
       const sizeTitle = this.props.msg.pkg.get("item.size");
       const fileTypeTitle = this.props.msg.pkg.get("item.type");
@@ -631,29 +631,45 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         : `${pathTitle}: ${itemPath} | ${modTimeTitle}: ${item.modTime} | ${sizeTitle}: ${itemSize} | sha1: ${item.sha1}`;
       const details = (
         <div>
-          <div className="card">
-            <span className="title-m black-font">{pathTitle}</span>
-            <span>{itemPath}</span>
+          <div className="column">
+            <div className="card">
+              <span className="title-m black-font">{pathTitle}</span>
+              <span>{itemPath}</span>
+            </div>
+            <div className="card">
+              <span className="title-m black-font">{modTimeTitle}</span>
+              <span>{item.modTime}</span>
+            </div>
+            <div className="card">
+              <span className="title-m black-font">{sizeTitle}</span>
+              <span>{itemSize}</span>
+            </div>
           </div>
-          <div className="card">
-            <span className="title-m black-font">{modTimeTitle}</span>
-            <span>{item.modTime}</span>
+
+          <div className="column">
+            <div className="card">
+              <span className="title-m black-font">{pathTitle}</span>
+              <div className="qrcode">
+                <QRCode value={absDownloadURL} size={128} />
+              </div>
+            </div>
           </div>
-          <div className="card">
-            <span className="title-m black-font">{sizeTitle}</span>
-            <span>{itemSize}</span>
-          </div>
-          <div className="card">
-            <span className="title-m black-font">SHA1</span>
-            <Flexbox
-              children={List([
-                <input type="text" readOnly={true} value={`${item.sha1}`} />,
-                <button onClick={() => this.generateHash(itemPath)}>
-                  {this.props.msg.pkg.get("refresh")}
-                </button>,
-              ])}
-              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
-            />
+
+          <div className="fix">
+            <div className="card">
+              <Flexbox
+                children={List([
+                  <span className="title-m black-font">SHA1</span>,
+                  <RiRefreshLine
+                    onClick={() => this.generateHash(itemPath)}
+                    size={"2rem"}
+                    className="black-font"
+                  />,
+                ])}
+                childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+              />
+              <div className="info">{item.sha1}</div>
+            </div>
           </div>
         </div>
       );

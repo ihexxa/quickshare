@@ -196,6 +196,29 @@
   text-align: left;
 }
 
+.theme-default #item-rows .column {
+  width: 50%;
+  max-width: 100%;
+  float: left;
+}
+
+.theme-default #browser .info {
+  border: dashed 1px #95a5a6;
+  font-size: 1.4rem;
+  padding: 1rem;
+  color: #697384;
+  margin: 1rem 0 0 0;
+  background-color: #ecf0f1;
+  white-space: nowrap;
+  overflow: auto;
+}
+
+.theme-default .qrcode {
+  padding: 1rem;
+  background-color: #ecf0f1;
+  display: inline-block;
+}
+
 .theme-default .item-cell {
   height: 5rem;
 }

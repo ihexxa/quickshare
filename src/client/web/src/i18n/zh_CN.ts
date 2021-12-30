@@ -123,6 +123,7 @@ export const msgs: Map<string, string> = Map({
   "item.modTime": "修改时间",
   "item.size": "大小",
   "item.progress": "进度",
+  "item.downloadURL": "下载链接",
   "error.report.title": "报告错误",
   "op.truncate": "清空",
   "op.submit": "提交",

@@ -498,3 +498,7 @@
 .bold {
   font-weight: bold;
 }
+
+.fix {
+  clear: both;
+}
