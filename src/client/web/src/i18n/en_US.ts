@@ -126,6 +126,7 @@ export const msgs: Map<string, string> = Map({
   "item.modTime": "Mod Time",
   "item.size": "Size",
   "item.progress": "Progress",
+  "item.downloadURL": "Download URL",
   "error.report.title": "Error Report",
   "op.truncate": "Truncate",
   "op.submit": "Submit",
