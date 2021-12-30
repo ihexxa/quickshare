@@ -83,14 +83,20 @@ type ClientErrorReport struct {
 	Version string `json:"version"`
 }
 
-func (h *SettingsSvc) ReportError(c *gin.Context) {
+type ClientErrorReports struct {
+	Reports []*ClientErrorReport `json:"reports"`
+}
+
+func (h *SettingsSvc) ReportErrors(c *gin.Context) {
 	var err error
-	req := &ClientErrorReport{}
+	req := &ClientErrorReports{}
 	if err = c.ShouldBindJSON(&req); err != nil {
 		c.JSON(q.ErrResp(c, 400, err))
 		return
 	}
 
-	h.deps.Log().Errorf("version:%s,error:%s", req.Version, req.Report)
+	for _, report := range req.Reports {
+		h.deps.Log().Errorf("version:%s,error:%s", report.Version, report.Report)
+	}
 	c.JSON(q.Resp(200))
 }

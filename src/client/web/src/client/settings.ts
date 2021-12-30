@@ -1,6 +1,7 @@
-import { BaseClient, Response, userIDParam, Quota } from ".";
+import { List } from "immutable";
 
-import { ClientConfig } from "./";
+import { BaseClient, Response, userIDParam, Quota } from ".";
+import { ClientConfig, ClientErrorReport } from "./";
 
 export class SettingsClient extends BaseClient {
   constructor(url: string) {
@@ -31,13 +32,12 @@ export class SettingsClient extends BaseClient {
     });
   };
 
-  reportError = (content: string, version: string): Promise<Response> => {
+  reportErrors = (reports: List<ClientErrorReport>): Promise<Response> => {
     return this.do({
       method: "post",
       url: `${this.url}/v1/settings/errors`,
       data: {
-        content,
-        version,
+        reports: reports.toArray(),
       },
     });
   };

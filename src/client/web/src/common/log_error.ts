@@ -1,4 +1,4 @@
-import { Map } from "immutable";
+import { Map, List } from "immutable";
 import { sha1 } from "object-hash";
 
 import { ILocalStorage, Storage } from "./localstorage";
@@ -6,13 +6,12 @@ import { ISettingsClient } from "../client";
 import { SettingsClient } from "../client/settings";
 import { ICoreState } from "../components/core_state";
 import { updater } from "../components/state_updater";
-import { alertMsg } from "./env";
+import { ClientErrorReport } from "../client";
 
 const errorVer = "0.0.1";
 const cookieKeyClErrs = "qs_cli_errs";
 
 export interface ClientErrorV001 {
-  version: string;
   error: string;
   timestamp: string;
   state: ICoreState;
@@ -72,7 +71,6 @@ export class SimpleErrorLogger {
     try {
       const sign = this.getErrorSign(msg);
       const clientErr: ClientErrorV001 = {
-        version: errorVer,
         error: msg,
         timestamp: `${Date.now()}`,
         state: updater().props,
@@ -92,16 +90,21 @@ export class SimpleErrorLogger {
   report = async (): Promise<null | Error> => {
     try {
       const errs = this.readErrs();
-
+      let reports = List<ClientErrorReport>();
       for (let sign of errs.keySeq().toArray()) {
-        const err = errs.get(sign);
-        const resp = await this.client.reportError(sign, JSON.stringify(err));
-        if (resp.status !== 200) {
-          return Error(`failed to report error: ${resp.data}`);
-        }
+        const errObj = errs.get(sign);
+        reports = reports.push({
+          report: JSON.stringify(errObj),
+          version: errorVer,
+        });
       }
 
-      this.truncate();
+      const resp = await this.client.reportErrors(reports);
+      if (resp.status !== 200) {
+        return Error(`failed to report error: ${resp.data}`);
+      } else {
+        this.truncate();
+      }
     } catch (e: any) {
       return Error(e);
     }

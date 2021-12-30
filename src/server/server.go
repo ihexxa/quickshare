@@ -304,7 +304,7 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 	settingsAPI.OPTIONS("/health", settingsSvc.Health)
 	settingsAPI.GET("/client", settingsSvc.GetClientCfg)
 	settingsAPI.PATCH("/client", settingsSvc.SetClientCfg)
-	settingsAPI.POST("/errors", settingsSvc.ReportError)
+	settingsAPI.POST("/errors", settingsSvc.ReportErrors)
 
 	return router, nil
 }

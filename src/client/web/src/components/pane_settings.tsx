@@ -179,6 +179,32 @@ export class PaneSettings extends React.Component<Props, State, {}> {
 
   render() {
     const errRows = this.prepareErrorRows();
+    const errorReportPane =
+      errRows.size > 0 ? (
+        <Container>
+          <Flexbox
+            children={List([
+              <h5 className="pane-title">
+                {this.props.msg.pkg.get("error.report.title")}
+              </h5>,
+
+              <span>
+                <button className="margin-r-m" onClick={this.reportErrors}>
+                  {this.props.msg.pkg.get("op.submit")}
+                </button>
+                <button onClick={this.truncateErrors}>
+                  {this.props.msg.pkg.get("op.truncate")}
+                </button>
+              </span>,
+            ])}
+            childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+          />
+
+          <div className="hr"></div>
+
+          <Rows rows={errRows} sortKeys={List([])} />
+        </Container>
+      ) : null;
 
     return (
       <div id="pane-settings">
@@ -415,29 +441,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
           </div>
         </Container>
 
-        <Container>
-          <Flexbox
-            children={List([
-              <h5 className="pane-title">
-                {this.props.msg.pkg.get("error.report.title")}
-              </h5>,
-
-              <span>
-                <button className="margin-r-m" onClick={this.reportErrors}>
-                  {this.props.msg.pkg.get("op.submit")}
-                </button>
-                <button onClick={this.truncateErrors}>
-                  {this.props.msg.pkg.get("op.truncate")}
-                </button>
-              </span>,
-            ])}
-            childrenStyles={List([{}, { justifyContent: "flex-end" }])}
-          />
-
-          <div className="hr"></div>
-
-          <Rows rows={errRows} sortKeys={List([])} />
-        </Container>
+        {errorReportPane}
 
         {/* <div className="hr"></div>
           <div>
