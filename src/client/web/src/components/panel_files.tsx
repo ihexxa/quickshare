@@ -9,7 +9,7 @@ import { RiArchiveDrawerFill } from "@react-icons/all-files/ri/RiArchiveDrawerFi
 import { RiFile2Fill } from "@react-icons/all-files/ri/RiFile2Fill";
 import { RiFileList2Fill } from "@react-icons/all-files/ri/RiFileList2Fill";
 import { RiCheckboxFill } from "@react-icons/all-files/ri/RiCheckboxFill";
-import { RiInformationFill } from "@react-icons/all-files/ri/RiInformationFill";
+import { RiMore2Fill } from "@react-icons/all-files/ri/RiMore2Fill";
 import { BiTable } from "@react-icons/all-files/bi/BiTable";
 import { BiListUl } from "@react-icons/all-files/bi/BiListUl";
 import { RiRefreshLine } from "@react-icons/all-files/ri/RiRefreshLine";
@@ -499,7 +499,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
             onClick={() => this.toggleDetail(item.name)}
             className="float-l"
           >
-            {getIcon("RiInformationFill", "1.8rem", detailColor)}
+            {getIcon("RiMore2Fill", "1.8rem", detailColor)}
           </span>
 
           <span onClick={() => this.select(item.name)} className="float-l">
@@ -605,7 +605,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         </div>
       ) : (
         <div className={`v-mid item-op ${showOp}`}>
-          <RiInformationFill
+          <RiMore2Fill
             size="1.8rem"
             className={`${descIconColor} margin-r-m`}
             onClick={() => this.toggleDetail(item.name)}
@@ -626,15 +626,22 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       const fileTypeTitle = this.props.msg.pkg.get("item.type");
       const itemSize = FileSize(item.size, { round: 0 });
 
-      const compact = item.isDir
-        ? `${pathTitle}: ${itemPath} | ${modTimeTitle}: ${item.modTime}`
-        : `${pathTitle}: ${itemPath} | ${modTimeTitle}: ${item.modTime} | ${sizeTitle}: ${itemSize} | sha1: ${item.sha1}`;
+      const compact = item.isDir ? (
+        <span>
+          <span className="grey3-font">{`${pathTitle}: `}</span>
+          <span>{`${absDownloadURL} | `}</span>
+          <span className="grey3-font">{`${modTimeTitle}: `}</span>
+          <span>{item.modTime}</span>
+        </span>
+      ) : (
+        `${pathTitle}: ${absDownloadURL} | ${modTimeTitle}: ${item.modTime} | ${sizeTitle}: ${itemSize} | sha1: ${item.sha1}`
+      );
       const details = (
         <div>
           <div className="column">
             <div className="card">
               <span className="title-m black-font">{pathTitle}</span>
-              <span>{itemPath}</span>
+              <span>{absDownloadURL}</span>
             </div>
             <div className="card">
               <span className="title-m black-font">{modTimeTitle}</span>

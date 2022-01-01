@@ -22,6 +22,8 @@
   color: #16a085;
   padding: 1rem 2rem 1rem 2rem;
   -webkit-backdrop-filter: blur(9.5px);
+  position: relative;
+  z-index: 2;
 }
 
 .theme-default #topbar-user-info {
@@ -40,6 +42,8 @@
   color: #16a085;
   padding: 0.5rem 1rem;
   -webkit-backdrop-filter: blur(9.5px);
+  position: relative;
+  z-index: 1;
 }
 
 .theme-default #top-menu button {
@@ -217,6 +221,26 @@
   padding: 1rem;
   background-color: #ecf0f1;
   display: inline-block;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 5px 30px 0 rgb(31 38 135 / 10%);
+  backdrop-filter: blur(9.5px);
+}
+
+.theme-default .qrcode-container {
+  height: 3rem;
+}
+
+.theme-default .qrcode-icon {
+  height: 3rem;
+}
+
+.theme-default .qrcode-child-container {
+  position: relative;
+  z-index: 50;
+}
+
+.theme-default .qrcode-child {
+  position: absolute;
 }
 
 .theme-default .item-cell {
@@ -463,11 +487,11 @@
 }
 
 .theme-default #login-layer {
-  z-index: 100;
+  z-index: 200;
 }
 
 .theme-default #settings-layer {
-  z-index: 1;
+  z-index: 100;
 }
 
 .theme-default .value {

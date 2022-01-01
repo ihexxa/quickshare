@@ -1,10 +1,12 @@
 import * as React from "react";
 import { List } from "immutable";
+import QRCode from "react-qr-code";
 
 import { RiShareBoxLine } from "@react-icons/all-files/ri/RiShareBoxLine";
 import { RiFolderSharedFill } from "@react-icons/all-files/ri/RiFolderSharedFill";
 import { RiEmotionSadLine } from "@react-icons/all-files/ri/RiEmotionSadLine";
 
+import { QRCodeIcon } from "./visual/qrcode";
 import { getErrMsg } from "../common/utils";
 import { alertMsg, confirmMsg } from "../common/env";
 import { updater } from "./state_updater";
@@ -68,13 +70,26 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
           <div className="info">{dirPath}</div>
 
           <div className="op">
-            <button
-              onClick={() => {
-                this.deleteSharing(dirPath);
-              }}
-            >
-              {this.props.msg.pkg.get("browser.delete")}
-            </button>
+            <Flexbox
+              children={List([
+                <span className="margin-r-m">
+                  <QRCodeIcon value={sharingURL} size={128} pos={false} />
+                </span>,
+
+                <button
+                  onClick={() => {
+                    this.deleteSharing(dirPath);
+                  }}
+                >
+                  {this.props.msg.pkg.get("browser.delete")}
+                </button>,
+              ])}
+              childrenStyles={List([
+                { flex: "0 0 auto" },
+                { flex: "0 0 auto" },
+              ])}
+              style={{ justifyContent: "flex-end" }}
+            />
           </div>
         </div>
       );
@@ -83,7 +98,7 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
         <div className="sharing-item" key={dirPath}>
           {row1}
           <div className="desc">{sharingURL}</div>
-          <div className="hr grey0-bg"></div>
+          <div className="hr"></div>
         </div>
       );
 
