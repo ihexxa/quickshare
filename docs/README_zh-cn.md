@@ -22,7 +22,9 @@
 
 ![Quickshare on desktop](./imgs/desktop_3.png)
 
-选择语言: [English](../README.md) | 简体中文
+[English](../README.md) | 简体中文
+
+[Screenshots](./screenshots.md) | [界面截图](./screenshots.md)
 
 ## 主要功能
 
