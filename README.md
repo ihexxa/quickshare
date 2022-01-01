@@ -20,7 +20,7 @@ This is a [demo on Heroku](https://hexxa-quickshare.herokuapp.com/).
 
 (User is `demo`, password is `Quicksh@re`, uploading/downloading speed is limited to around 100KB.)
 
-![Quickshare on desktop](./docs/imgs/desktop_2.png)
+![Quickshare on desktop](./docs/imgs/desktop_3.png)
 
 Choose Language: English | [简体中文](./docs/README_zh-cn.md)
 
@@ -31,6 +31,7 @@ Choose Language: English | [简体中文](./docs/README_zh-cn.md)
   - No limit on file size
   - Stop and resume uploading/downloading in the middle
   - Share directories to others
+  - Scan QR codes to download files/visit sharing folders/visit site
   - Upload hundreds of files at once
   - Steaming uploading: make it work behind CDN or reverse proxy
   - Files can also be managed from OS
