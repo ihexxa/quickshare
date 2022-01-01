@@ -20,7 +20,7 @@
 
 (用户名是 `demo`, 密码是 `Quicksh@re`, 上传/下载速度被限制在大约100KB.)
 
-![Quickshare on desktop](./imgs/desktop_2.png)
+![Quickshare on desktop](./imgs/desktop_3.png)
 
 选择语言: [English](../README.md) | 简体中文
 
@@ -31,6 +31,7 @@
   - 无文件大小限制
   - 上传下载的断点续传
   - 将目录共享他人
+  - 通过扫一扫下载文件/访问共享文件夹/访问网站
   - 一次上传上百个文件
   - 流式上传: 使它可工作在 CDN 或 反向代理 之后
   - 也可通过操作系统管理文件
