@@ -22,7 +22,11 @@ This is a [demo on Heroku](https://hexxa-quickshare.herokuapp.com/).
 
 ![Quickshare on desktop](./docs/imgs/desktop_3.png)
 
-Choose Language: English | [简体中文](./docs/README_zh-cn.md)
+
+
+English | [简体中文](./docs/README_zh-cn.md)
+
+[Screenshots](./docs/screenshots.md) | [界面截图](./docs/screenshots.md)
 
 ## Features
 
