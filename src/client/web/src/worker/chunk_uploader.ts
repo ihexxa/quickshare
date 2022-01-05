@@ -7,7 +7,7 @@ import { UploadStatus, UploadState } from "./interface";
 const defaultChunkLen = 1024 * 1024 * 1;
 const speedDownRatio = 0.5;
 const speedUpRatio = 1.1;
-const speedLimit = 1024 * 1024 * 10; // 10MB
+const chunkLimit = 1024 * 1024 * 50; // 50MB
 const createRetryLimit = 512;
 const uploadRetryLimit = 1024;
 const backoffMax = 2000;
@@ -22,7 +22,7 @@ export class ChunkUploader {
 
   private chunkLen: number = defaultChunkLen;
 
-  constructor() { }
+  constructor() {}
 
   setClient = (client: IFilesClient) => {
     this.client = client;
@@ -70,8 +70,8 @@ export class ChunkUploader {
   ): Promise<UploadStatus> => {
     if (this.chunkLen === 0) {
       this.chunkLen = 1; // reset it to 1B
-    } else if (this.chunkLen > speedLimit) {
-      this.chunkLen = speedLimit;
+    } else if (this.chunkLen > chunkLimit) {
+      this.chunkLen = chunkLimit;
     } else if (uploaded > file.size) {
       return {
         filePath,
@@ -143,7 +143,9 @@ export class ChunkUploader {
           filePath,
           uploaded,
           state: UploadState.Error,
-          err: `failed to upload chunk: ${uploadResp.statusText}, ${JSON.stringify(uploadResp.data)}`,
+          err: `failed to upload chunk: ${
+            uploadResp.statusText
+          }, ${JSON.stringify(uploadResp.data)}`,
         };
       }
 
@@ -153,17 +155,17 @@ export class ChunkUploader {
       const uploadStatusResp = await this.client.uploadStatus(filePath);
       return uploadStatusResp.status === 200
         ? {
-          filePath,
-          uploaded: uploadStatusResp.data.uploaded,
-          state: UploadState.Ready,
-          err: `retrying, error: ${JSON.stringify(uploadResp.data)}`,
-        }
+            filePath,
+            uploaded: uploadStatusResp.data.uploaded,
+            state: UploadState.Ready,
+            err: `retrying, error: ${JSON.stringify(uploadResp.data)}`,
+          }
         : {
-          filePath,
-          uploaded: uploaded,
-          state: UploadState.Error,
-          err: `failed to get upload status: ${uploadStatusResp.statusText}`,
-        };
+            filePath,
+            uploaded: uploaded,
+            state: UploadState.Error,
+            err: `failed to get upload status: ${uploadStatusResp.statusText}`,
+          };
     } catch (e) {
       return {
         filePath,

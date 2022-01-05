@@ -18,9 +18,9 @@ import (
 	"github.com/ihexxa/gocfg"
 	"github.com/ihexxa/multipart"
 
+	"github.com/ihexxa/quickshare/src/db/userstore"
 	"github.com/ihexxa/quickshare/src/depidx"
 	q "github.com/ihexxa/quickshare/src/handlers"
-	"github.com/ihexxa/quickshare/src/db/userstore"
 	"github.com/ihexxa/quickshare/src/worker/localworker"
 )
 
@@ -793,10 +793,20 @@ func (h *FileHandlers) DelUploading(c *gin.Context) {
 			return
 		}
 
-		err = h.deps.FS().Remove(tmpFilePath)
+		_, err = h.deps.FS().Stat(tmpFilePath)
 		if err != nil {
-			c.JSON(q.ErrResp(c, 500, err))
-			return
+			if os.IsNotExist(err) {
+				// no op
+			} else {
+				c.JSON(q.ErrResp(c, 500, err))
+				return
+			}
+		} else {
+			err = h.deps.FS().Remove(tmpFilePath)
+			if err != nil {
+				c.JSON(q.ErrResp(c, 500, err))
+				return
+			}
 		}
 
 		err = h.uploadMgr.DelInfo(userID, tmpFilePath)

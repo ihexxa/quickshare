@@ -31,7 +31,7 @@ export interface IChunkUploader {
   ) => Promise<UploadStatus>;
 }
 
-export type eventKind = SyncReqKind | ErrKind | UploadInfoKind;
+export type eventKind = SyncReqKind | ErrKind | UploadInfoKind | ImIdleKind;
 export interface WorkerEvent {
   kind: eventKind;
 }
@@ -41,7 +41,7 @@ export const syncReqKind: SyncReqKind = "worker.req.sync";
 
 export interface SyncReq extends WorkerEvent {
   kind: SyncReqKind;
-  file: File,
+  file: File;
   filePath: string;
   size: number;
   uploaded: number;
@@ -69,7 +69,13 @@ export interface UploadInfoResp extends WorkerEvent {
   err: string;
 }
 
-export type FileWorkerResp = ErrResp | UploadInfoResp;
+export type ImIdleKind = "worker.resp.idle";
+export const imIdleKind: ImIdleKind = "worker.resp.idle";
+export interface ImIdleResp extends WorkerEvent {
+  kind: ImIdleKind;
+}
+
+export type FileWorkerResp = ErrResp | UploadInfoResp | ImIdleResp;
 
 export class MockWorker {
   constructor() {}
