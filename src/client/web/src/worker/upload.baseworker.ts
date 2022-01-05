@@ -5,7 +5,9 @@ import {
   SyncReq,
   errKind,
   ErrResp,
+  ImIdleResp,
   uploadInfoKind,
+  imIdleKind,
   UploadInfoResp,
   FileWorkerResp,
   UploadStatus,
@@ -13,14 +15,32 @@ import {
   IChunkUploader,
 } from "./interface";
 
+const win: Window = self as any;
+
 export class UploadWorker {
   private uploader: IChunkUploader = new ChunkUploader();
+  private cycle: number = 100;
+  private working: boolean = false;
+
   sendEvent = (resp: FileWorkerResp): void => {
     // TODO: make this abstract
     throw new Error("not implemented");
   };
 
-  constructor() {}
+  constructor() {
+    win.setInterval(this.checkIdle, this.cycle);
+  }
+
+  checkIdle = () => {
+    if (this.working) {
+      return;
+    }
+
+    const resp: ImIdleResp = {
+      kind: imIdleKind,
+    };
+    this.sendEvent(resp);
+  };
 
   setUploader = (uploader: IChunkUploader) => {
     this.uploader = uploader;
@@ -46,7 +66,8 @@ export class UploadWorker {
     }
   };
 
-  onMsg = (event: MessageEvent) => {
+  onMsg = async (event: MessageEvent) => {
+    this.working = true;
     const req = event.data as FileWorkerReq;
 
     switch (req.kind) {
@@ -54,19 +75,25 @@ export class UploadWorker {
         const syncReq = req as SyncReq;
 
         if (syncReq.created) {
-          this.uploader
-            .upload(syncReq.filePath, syncReq.file, syncReq.uploaded)
-            .then(this.handleUploadStatus);
+          const status = await this.uploader.upload(
+            syncReq.filePath,
+            syncReq.file,
+            syncReq.uploaded
+          );
+          await this.handleUploadStatus(status);
         } else {
-          this.uploader
-            .create(syncReq.filePath, syncReq.file)
-            .then(this.handleUploadStatus);
+          const status = await this.uploader.create(
+            syncReq.filePath,
+            syncReq.file
+          );
+          await this.handleUploadStatus(status);
         }
-
         break;
       default:
         console.error(`unknown worker request(${JSON.stringify(req)})`);
     }
+
+    this.working = false;
   };
 
   onError = (ev: ErrorEvent) => {

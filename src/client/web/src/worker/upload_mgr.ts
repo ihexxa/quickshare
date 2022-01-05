@@ -9,6 +9,7 @@ import {
   syncReqKind,
   errKind,
   uploadInfoKind,
+  imIdleKind,
   UploadState,
 } from "./interface";
 import { errUploadMgr } from "../common/errors";
@@ -35,49 +36,44 @@ export class UploadMgr {
   constructor(worker: IWorker) {
     this.worker = worker;
     this.worker.onmessage = this.respHandler;
-
-    const syncing = () => {
-      if (this.infos.size === 0) {
-        return;
-      }
-      if (this.idx > 10000) {
-        this.idx = 0;
-      }
-
-      const start = this.idx % this.infos.size;
-      const infos = this.infos.valueSeq().toArray();
-      for (let i = 0; i < this.infos.size; i++) {
-        const pos = (start + i) % this.infos.size;
-        const info = infos[pos];
-
-        if (
-          info.state === UploadState.Ready ||
-          info.state === UploadState.Created
-        ) {
-          this.infos = this.infos.set(info.filePath, {
-            ...info,
-            state: UploadState.Uploading,
-          });
-
-          this.worker.postMessage({
-            kind: syncReqKind,
-            file: info.file,
-            filePath: info.filePath,
-            size: info.size,
-            uploaded: info.uploaded,
-            created: info.uploaded > 0 || info.state === UploadState.Created,
-          });
-          break;
-        }
-      }
-
-      this.idx++;
-    };
-    this.intervalID = win.setInterval(syncing, this.cycle);
   }
 
-  destory = () => {
-    win.clearInterval(this.intervalID);
+  syncing = () => {
+    if (this.infos.size === 0) {
+      return;
+    }
+    if (this.idx > 10000) {
+      this.idx = 0;
+    }
+
+    const start = this.idx % this.infos.size;
+    const infos = this.infos.valueSeq().toArray();
+    for (let i = 0; i < this.infos.size; i++) {
+      const pos = (start + i) % this.infos.size;
+      const info = infos[pos];
+
+      if (
+        info.state === UploadState.Ready ||
+        info.state === UploadState.Created
+      ) {
+        this.infos = this.infos.set(info.filePath, {
+          ...info,
+          state: UploadState.Uploading,
+        });
+
+        this.worker.postMessage({
+          kind: syncReqKind,
+          file: info.file,
+          filePath: info.filePath,
+          size: info.size,
+          uploaded: info.uploaded,
+          created: info.uploaded > 0 || info.state === UploadState.Created,
+        });
+        break;
+      }
+    }
+
+    this.idx++;
   };
 
   _setInfos = (infos: OrderedMap<string, UploadEntry>) => {
@@ -187,6 +183,9 @@ export class UploadMgr {
     const resp = event.data as FileWorkerResp;
 
     switch (resp.kind) {
+      case imIdleKind:
+        this.syncing();
+        break;
       case errKind:
         const errResp = resp as ErrResp;
         const errEntry = this.infos.get(errResp.filePath);
