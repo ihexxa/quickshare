@@ -162,7 +162,6 @@ describe("UploadMgr", () => {
       // TODO: find a better way to wait
       // polling needs several rounds to finish all the tasks
       await delay(tcs.length * up.getCycle() + 1000);
-      up.destory();
     }
   });
 
@@ -294,7 +293,6 @@ describe("UploadMgr", () => {
         });
       }
 
-      up.destory();
     }
   });
 });
