@@ -423,11 +423,12 @@ export class Updater {
     const statuses = await Promise.all([
       this.refreshUploadings(),
       this.listSharings(),
-      this.initUploads(),
     ]);
     if (statuses.join("") !== "") {
       return statuses.join(";");
     }
+
+    this.initUploads();
     return "";
   };
 
