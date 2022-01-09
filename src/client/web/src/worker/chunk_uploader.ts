@@ -1,5 +1,10 @@
 import { FilesClient } from "../client/files";
-import { IFilesClient, Response, isFatalErr } from "../client";
+import {
+  IFilesClient,
+  Response,
+  isFatalErr,
+  UploadStatusResp,
+} from "../client";
 import { UploadStatus, UploadState } from "./interface";
 
 // TODO: get settings from server
@@ -8,8 +13,9 @@ const defaultChunkLen = 1024 * 1024 * 1;
 const speedDownRatio = 0.5;
 const speedUpRatio = 1.1;
 const chunkLimit = 1024 * 1024 * 50; // 50MB
-const createRetryLimit = 512;
+const createRetryLimit = 1024;
 const uploadRetryLimit = 1024;
+const readRetryLimit = 8;
 const backoffMax = 2000;
 
 export interface ReaderResult {
@@ -96,7 +102,7 @@ export class ChunkUploader {
       }
     );
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < readRetryLimit; i++) {
       try {
         const chunkRightPos =
           uploaded + this.chunkLen > file.size
@@ -124,11 +130,21 @@ export class ChunkUploader {
     }
 
     try {
-      const uploadResp = await this.client.uploadChunk(
-        filePath,
-        result.chunk,
-        uploaded
-      );
+      let uploadResp: Response<UploadStatusResp> = undefined;
+      for (let i = 0; i < uploadRetryLimit; i++) {
+        uploadResp = await this.client.uploadChunk(
+          filePath,
+          result.chunk,
+          uploaded
+        );
+
+        if (uploadResp.status === 200) {
+          break;
+        } else if (uploadResp.status !== 429) {
+          break;
+        }
+        await this.backOff();
+      }
 
       if (uploadResp.status === 200 && uploadResp.data != null) {
         this.chunkLen = Math.ceil(this.chunkLen * speedUpRatio);
@@ -152,7 +168,18 @@ export class ChunkUploader {
       this.chunkLen = Math.ceil(this.chunkLen * speedDownRatio);
       await this.backOff();
 
-      const uploadStatusResp = await this.client.uploadStatus(filePath);
+      let uploadStatusResp: Response<UploadStatusResp> = undefined;
+      for (let i = 0; i < uploadRetryLimit; i++) {
+        uploadStatusResp = await this.client.uploadStatus(filePath);
+
+        if (uploadStatusResp.status === 200) {
+          break;
+        } else if (uploadStatusResp.status !== 429) {
+          break;
+        }
+        await this.backOff();
+      }
+
       return uploadStatusResp.status === 200
         ? {
             filePath,
