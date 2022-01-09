@@ -94,7 +94,6 @@ func checkCompatibility(deps *depidx.Deps) error {
 	}
 
 	for _, user := range users {
-		fmt.Println(user, user.Preferences)
 		if user.Preferences == nil {
 			deps.Users().SetPreferences(user.ID, &userstore.DefaultPreferences)
 		}
