@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/ihexxa/quickshare/src/golimiter"
 	"github.com/ihexxa/quickshare/src/db/userstore"
+	"github.com/ihexxa/quickshare/src/golimiter"
 )
 
 const cacheSizeLimit = 1024
