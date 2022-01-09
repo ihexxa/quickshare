@@ -1,6 +1,6 @@
 fs:
   root: "tmp"
-  opensLimit: 128
+  opensLimit: 1024
   openTTL: 60 # 1 min
 secrets:
   tokenSecret: ""
