@@ -8,9 +8,9 @@ import (
 )
 
 type FSConfig struct {
-	Root       string `json:"root"`
-	OpensLimit int    `json:"opensLimit"`
-	OpenTTL    int    `json:"openTTL"`
+	Root       string `json:"root" yaml:"root"`
+	OpensLimit int    `json:"opensLimit" yaml:"opensLimit"`
+	OpenTTL    int    `json:"openTTL" yaml:"openTTL"`
 }
 
 type UsersCfg struct {
