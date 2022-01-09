@@ -16,7 +16,7 @@ const chunkLimit = 1024 * 1024 * 50; // 50MB
 const createRetryLimit = 1024;
 const uploadRetryLimit = 1024;
 const readRetryLimit = 8;
-const backoffMax = 2000;
+const backoffMax = 5000;
 
 export interface ReaderResult {
   chunk?: string;
@@ -56,9 +56,9 @@ export class ChunkUploader {
           };
         }
       } catch (e) {
-        await this.backOff();
         console.error(e);
       }
+      await this.backOff();
     }
 
     return {
@@ -130,21 +130,11 @@ export class ChunkUploader {
     }
 
     try {
-      let uploadResp: Response<UploadStatusResp> = undefined;
-      for (let i = 0; i < uploadRetryLimit; i++) {
-        uploadResp = await this.client.uploadChunk(
-          filePath,
-          result.chunk,
-          uploaded
-        );
-
-        if (uploadResp.status === 200) {
-          break;
-        } else if (uploadResp.status !== 429) {
-          break;
-        }
-        await this.backOff();
-      }
+      const uploadResp = await this.client.uploadChunk(
+        filePath,
+        result.chunk,
+        uploaded
+      );
 
       if (uploadResp.status === 200 && uploadResp.data != null) {
         this.chunkLen = Math.ceil(this.chunkLen * speedUpRatio);
@@ -194,6 +184,9 @@ export class ChunkUploader {
             err: `failed to get upload status: ${uploadStatusResp.statusText}`,
           };
     } catch (e) {
+      this.chunkLen = Math.ceil(this.chunkLen * speedDownRatio);
+      await this.backOff();
+
       return {
         filePath,
         uploaded: uploaded,
