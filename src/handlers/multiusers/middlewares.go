@@ -1,6 +1,7 @@
 package multiusers
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -8,9 +9,11 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	q "github.com/ihexxa/quickshare/src/handlers"
 	"github.com/ihexxa/quickshare/src/db/userstore"
+	q "github.com/ihexxa/quickshare/src/handlers"
 )
+
+var ErrExpired = errors.New("token is expired")
 
 func apiRuleCname(role, method, path string) string {
 	return fmt.Sprintf("%s-%s-%s", role, method, path)
@@ -43,8 +46,11 @@ func (h *MultiUsersSvc) AuthN() gin.HandlerFunc {
 
 				now := time.Now().Unix()
 				expire, err := strconv.ParseInt(claims[q.ExpireParam], 10, 64)
-				if err != nil || expire <= now {
+				if err != nil {
 					c.AbortWithStatusJSON(q.ErrResp(c, 401, err))
+					return
+				} else if expire <= now {
+					c.AbortWithStatusJSON(q.ErrResp(c, 401, ErrExpired))
 					return
 				}
 			}
