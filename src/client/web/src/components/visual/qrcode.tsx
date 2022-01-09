@@ -36,8 +36,8 @@ export class QRCodeIcon extends React.Component<Props, State, {}> {
   render() {
     const widthInRem = `${Math.floor(this.props.size / 10)}rem`;
     const posStyle = this.props.pos
-      ? { right: `-${widthInRem}rem` }
-      : { left: `-${widthInRem}rem` };
+      ? { left: `0` }
+      : { left: `-${widthInRem}` };
     const qrcode = this.state.show ? (
       <div className="qrcode-child" style={{ ...posStyle }}>
         <div className="qrcode">
