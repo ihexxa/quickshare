@@ -15,15 +15,12 @@ import {
 import { errUploadMgr } from "../common/errors";
 import { ErrorLogger } from "../common/log_error";
 
-const win: Window = self as any;
-
 export interface IWorker {
   onmessage: (event: MessageEvent) => void;
   postMessage: (event: FileWorkerReq) => void;
 }
 
 export class UploadMgr {
-  private idx = 0;
   private cycle: number = 500;
   private intervalID: number;
   private worker: IWorker;
@@ -42,15 +39,10 @@ export class UploadMgr {
     if (this.infos.size === 0) {
       return;
     }
-    if (this.idx > 10000) {
-      this.idx = 0;
-    }
 
-    const start = this.idx % this.infos.size;
     const infos = this.infos.valueSeq().toArray();
     for (let i = 0; i < this.infos.size; i++) {
-      const pos = (start + i) % this.infos.size;
-      const info = infos[pos];
+      const info = infos[i];
 
       if (
         info.state === UploadState.Ready ||
@@ -72,8 +64,6 @@ export class UploadMgr {
         break;
       }
     }
-
-    this.idx++;
   };
 
   _setInfos = (infos: OrderedMap<string, UploadEntry>) => {
