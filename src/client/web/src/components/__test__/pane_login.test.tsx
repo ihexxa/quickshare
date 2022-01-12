@@ -3,22 +3,24 @@ import { List, Set, Map } from "immutable";
 import { initMockWorker } from "../../test/helpers";
 import { User, UploadInfo } from "../../client";
 import { AuthPane } from "../pane_login";
-import {
-  ICoreState,
-  newState,
-  sharingCtrl,
-  ctrlOn,
-  ctrlOff,
-} from "../core_state";
+import { ICoreState, newState } from "../core_state";
 import { updater } from "../state_updater";
 import { UploadState, UploadEntry } from "../../worker/interface";
 import { MockUsersClient, resps as usersResps } from "../../client/users_mock";
 import { MockFilesClient, resps as filesResps } from "../../client/files_mock";
 import { MockSettingsClient } from "../../client/settings_mock";
 import { controlName as panelTabs } from "../root_frame";
-import { settingsDialogCtrl } from "../layers";
-import { settingsTabsCtrl } from "../dialog_settings";
-import { filesViewCtrl } from "../panel_files";
+import {} from "../layers";
+import {} from "../dialog_settings";
+import {} from "../panel_files";
+import {
+  sharingCtrl,
+  ctrlOn,
+  ctrlOff,
+  settingsDialogCtrl,
+  settingsTabsCtrl,
+  filesViewCtrl,
+} from "../../common/controls";
 
 describe("Login", () => {
   initMockWorker();
