@@ -3,20 +3,21 @@ import { List, Set, Map } from "immutable";
 import { UploadEntry } from "../worker/interface";
 import { MsgPackage } from "../i18n/msger";
 import { User, MetadataResp } from "../client";
-import { settingsDialogCtrl } from "./layers";
-import { filesViewCtrl } from "./panel_files";
 import { FilesProps } from "./panel_files";
 import { UploadingsProps } from "./panel_uploadings";
 import { SharingsProps } from "./panel_sharings";
 import { controlName as panelTabs } from "./root_frame";
-import { settingsTabsCtrl } from "./dialog_settings";
+import {
+  filesViewCtrl,
+  settingsTabsCtrl,
+  settingsDialogCtrl,
+  sharingCtrl,
+  ctrlOn,
+  ctrlOff,
+} from "../common/controls";
 import { LoginProps } from "./pane_login";
 import { AdminProps } from "./pane_admin";
 
-export const ctrlHidden = "hidden";
-export const ctrlOn = "on";
-export const ctrlOff = "off";
-export const sharingCtrl = "sharingCtrl";
 export interface MsgProps {
   lan: string;
   pkg: Map<string, string>;
@@ -110,9 +111,9 @@ export function initState(): ICoreState {
       control: {
         controls: Map<string, string>({
           [panelTabs]: "filesPanel",
-          [settingsDialogCtrl]: "off",
+          [settingsDialogCtrl]: ctrlOff,
           [settingsTabsCtrl]: "preferencePane",
-          [sharingCtrl]: "off",
+          [sharingCtrl]: ctrlOff,
           [filesViewCtrl]: "rows",
         }),
         options: Map<string, Set<string>>({
@@ -121,9 +122,9 @@ export function initState(): ICoreState {
             "uploadingsPanel",
             "sharingsPanel",
           ]),
-          [settingsDialogCtrl]: Set<string>(["on", "off"]),
+          [settingsDialogCtrl]: Set<string>([ctrlOn, ctrlOff]),
           [settingsTabsCtrl]: Set<string>(["preferencePane", "managementPane"]),
-          [sharingCtrl]: Set<string>(["on", "off"]),
+          [sharingCtrl]: Set<string>([ctrlOn, ctrlOff]),
           [filesViewCtrl]: Set<string>(["rows", "table"]),
         }),
       },

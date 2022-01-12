@@ -28,8 +28,7 @@ import { Rows, Row } from "./layout/rows";
 import { Up } from "../worker/upload_mgr";
 import { UploadEntry, UploadState } from "../worker/interface";
 import { getIcon } from "./visual/icons";
-
-export const filesViewCtrl = "filesView";
+import { filesViewCtrl } from "../common/controls";
 
 export interface Item {
   name: string;

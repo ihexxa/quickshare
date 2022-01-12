@@ -141,6 +141,10 @@ export class UserForm extends React.Component<
   };
 
   delUser = async () => {
+    if (!confirmMsg(this.props.msg.pkg.get("op.confirm"))) {
+      return;
+    }
+
     return updater()
       .delUser(this.state.id)
       .then((status: string) => {

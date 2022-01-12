@@ -11,8 +11,7 @@ import { Tabs } from "./control/tabs";
 import { Container } from "./layout/container";
 import { LoginProps } from "./pane_login";
 import { roleAdmin } from "../client";
-
-export const settingsTabsCtrl = "settingsTabs";
+import { settingsTabsCtrl } from "../common/controls";
 
 export interface Props {
   admin: AdminProps;
