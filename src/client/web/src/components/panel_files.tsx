@@ -24,6 +24,7 @@ import { MetadataResp, roleVisitor, roleAdmin } from "../client";
 import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
 import { Table, Cell, Head } from "./layout/table";
+import { Segments } from "./layout/segments";
 import { Rows, Row } from "./layout/rows";
 import { Up } from "../worker/upload_mgr";
 import { UploadEntry, UploadState } from "../worker/interface";
@@ -734,15 +735,19 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     const breadcrumb = this.props.filesInfo.dirPath.map(
       (pathPart: string, key: number) => {
         return (
-          <button
-            key={pathPart}
-            onClick={() =>
-              this.chdir(this.props.filesInfo.dirPath.slice(0, key + 1))
-            }
-            className="item"
-          >
-            <span className="content">{pathPart}</span>
-          </button>
+          <span key={pathPart}>
+            <a
+              onClick={() =>
+                this.chdir(this.props.filesInfo.dirPath.slice(0, key + 1))
+              }
+              className="item clickable"
+            >
+              <span className="content">{pathPart}</span>
+            </a>
+            <span className="item">
+              <span className="content">{"/"}</span>
+            </span>
+          </span>
         );
       }
     );
@@ -902,37 +907,29 @@ export class FilesPanel extends React.Component<Props, State, {}> {
             />
           </div>
 
-          <Flexbox
+          <Segments
+            id="breadcrumb"
             children={List([
-              <span id="breadcrumb">
-                <Flexbox
-                  children={List([
-                    <RiArchiveDrawerFill
-                      size="3rem"
-                      id="icon-home"
-                      className="clickable"
-                      onClick={this.goHome}
-                    />,
-                    <Flexbox children={breadcrumb} />,
-                  ])}
-                  childrenStyles={List([
-                    { flex: "0 0 auto" },
-                    { flex: "0 0 auto" },
-                  ])}
-                />
-              </span>,
-
-              <span>
-                <span
-                  id="space-used"
-                  className="desc-m grey0-font"
-                >{`${this.props.msg.pkg.get(
-                  "browser.used"
-                )} ${usedSpace} / ${spaceLimit}`}</span>
-              </span>,
+              <div>
+                <span className="location-item">
+                  <span className="content">
+                    {`${this.props.msg.pkg.get("breadcrumb.loc")}:`}
+                  </span>
+                </span>
+                {breadcrumb}
+              </div>,
+              <div
+                id="space-used"
+                className="grey0-font"
+              >{`${this.props.msg.pkg.get(
+                "browser.used"
+              )} ${usedSpace} / ${spaceLimit}`}</div>,
             ])}
-            childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+            ratios={List([60, 40])}
+            dir={true}
           />
+
+          <div className="hr grey0-bg"></div>
 
           {view}
         </Container>

@@ -128,4 +128,5 @@ export const msgs: Map<string, string> = Map({
   "op.truncate": "清空",
   "op.submit": "提交",
   "term.time": "时间",
+  "breadcrumb.loc": "位置",
 });

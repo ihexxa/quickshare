@@ -131,4 +131,5 @@ export const msgs: Map<string, string> = Map({
   "op.truncate": "Truncate",
   "op.submit": "Submit",
   "term.time": "Time",
+  "breadcrumb.loc": "Location",
 });
