@@ -234,6 +234,13 @@
   backdrop-filter: blur(9.5px);
 }
 
+.theme-default .qrcode-flat {
+  padding: 1rem;
+  background-color: #ecf0f1;
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.8);
+}
+
 .theme-default .qrcode-container {
   height: 3rem;
 }
