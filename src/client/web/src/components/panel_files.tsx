@@ -735,7 +735,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     const breadcrumb = this.props.filesInfo.dirPath.map(
       (pathPart: string, key: number) => {
         return (
-          <span key={pathPart}>
+          <span key={`${pathPart}-${key}`}>
             <a
               onClick={() =>
                 this.chdir(this.props.filesInfo.dirPath.slice(0, key + 1))
