@@ -656,7 +656,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
           <div className="column">
             <div className="card">
               <span className="title-m black-font">{pathTitle}</span>
-              <div className="qrcode">
+              <div className="qrcode-flat">
                 <QRCode value={absDownloadURL} size={128} />
               </div>
             </div>
