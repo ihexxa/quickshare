@@ -460,8 +460,8 @@ func (h *MultiUsersSvc) DelUser(c *gin.Context) {
 	if err != nil {
 		c.JSON(q.ErrResp(c, 400, fmt.Errorf("invalid users ID %w", err)))
 		return
-	} else if userID == 0 {
-		c.JSON(q.ErrResp(c, 400, errors.New("It is not allowed to delete root")))
+	} else if userID == 0 || userID == 1 { // 0=root, 1=visitor
+		c.JSON(q.ErrResp(c, 400, errors.New("It is not allowed to delete predefined users")))
 		return
 	}
 
