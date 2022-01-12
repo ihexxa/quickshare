@@ -1,12 +1,6 @@
 import { List, Map, Set } from "immutable";
 
-import {
-  ICoreState,
-  sharingCtrl,
-  ctrlOn,
-  ctrlOff,
-  ctrlHidden,
-} from "./core_state";
+import { ICoreState } from "./core_state";
 import { getItemPath } from "../common/utils";
 import {
   User,
@@ -32,10 +26,16 @@ import { UploadEntry, UploadState } from "../worker/interface";
 import { Up } from "../worker/upload_mgr";
 import { alertMsg } from "../common/env";
 import { controlName as panelTabs } from "./root_frame";
-import { settingsTabsCtrl } from "./dialog_settings";
-import { settingsDialogCtrl } from "./layers";
 import { errUpdater, errServer } from "../common/errors";
 import { ErrorLogger } from "../common/log_error";
+import {
+  settingsTabsCtrl,
+  settingsDialogCtrl,
+  sharingCtrl,
+  ctrlOn,
+  ctrlOff,
+  ctrlHidden,
+} from "../common/controls";
 
 import { MsgPackage, isValidLanPack } from "../i18n/msger";
 

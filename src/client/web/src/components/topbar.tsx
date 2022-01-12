@@ -2,17 +2,11 @@ import * as React from "react";
 import { List } from "immutable";
 import { alertMsg, confirmMsg } from "../common/env";
 
-import {
-  ICoreState,
-  MsgProps,
-  UIProps,
-  ctrlOn,
-  ctrlHidden,
-} from "./core_state";
+import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { LoginProps } from "./pane_login";
 import { updater } from "./state_updater";
 import { Flexbox } from "./layout/flexbox";
-import { settingsDialogCtrl } from "./layers";
+import { ctrlOn, ctrlHidden, settingsDialogCtrl } from "../common/controls";
 import { QRCodeIcon } from "./visual/qrcode";
 
 export interface State {}
@@ -91,7 +85,12 @@ export class TopBar extends React.Component<Props, State, {}> {
             >
               Quickshare
             </a>,
-            <QRCodeIcon value={document.URL} size={128} pos={true} className="margin-l-m"/>,
+            <QRCodeIcon
+              value={document.URL}
+              size={128}
+              pos={true}
+              className="margin-l-m"
+            />,
 
             <Flexbox
               children={List([

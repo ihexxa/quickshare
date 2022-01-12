@@ -179,6 +179,7 @@
   line-height: 2rem;
   display: block;
   margin: 2rem 0;
+  word-break: break-all;
 }
 
 .theme-default #item-rows .desc {
