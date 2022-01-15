@@ -1,9 +1,12 @@
 package fileinfostore
 
 import (
+	"crypto/sha1"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"strings"
 	"sync"
 	"time"
 
@@ -13,11 +16,16 @@ import (
 const (
 	InitNs      = "Init"
 	InfoNs      = "sharing"
+	ShareIDNs   = "sharingKey"
 	InitTimeKey = "initTime"
 )
 
 var (
-	ErrNotFound = errors.New("file info not found")
+	ErrEmpty           = errors.New("can not hash empty string")
+	ErrNotFound        = errors.New("file info not found")
+	ErrSharingNotFound = errors.New("sharing id not found")
+	ErrConflicted      = errors.New("conflict found in hashing")
+	maxHashingTime     = 10
 )
 
 func IsNotFound(err error) bool {
@@ -25,21 +33,23 @@ func IsNotFound(err error) bool {
 }
 
 type FileInfo struct {
-	IsDir  bool   `json:"isDir"`
-	Shared bool   `json:"shared"`
-	Sha1   string `json:"sha1"`
+	IsDir   bool   `json:"isDir"`
+	Shared  bool   `json:"shared"`
+	ShareID string `json:"shareID"` // for short url
+	Sha1    string `json:"sha1"`
 }
 
 type IFileInfoStore interface {
 	AddSharing(dirPath string) error
 	DelSharing(dirPath string) error
 	GetSharing(dirPath string) (bool, bool)
-	ListSharings(prefix string) (map[string]bool, error)
+	ListSharings(prefix string) (map[string]string, error)
 	GetInfo(itemPath string) (*FileInfo, error)
 	SetInfo(itemPath string, info *FileInfo) error
 	DelInfo(itemPath string) error
 	SetSha1(itemPath, sign string) error
 	GetInfos(itemPaths []string) (map[string]*FileInfo, error)
+	GetSharingDir(hashID string) (string, error)
 }
 
 type FileInfoStore struct {
@@ -54,6 +64,7 @@ func NewFileInfoStore(store kvstore.IKVStore) (*FileInfoStore, error) {
 		for _, nsName := range []string{
 			InitNs,
 			InfoNs,
+			ShareIDNs,
 		} {
 			if err = store.AddNamespace(nsName); err != nil {
 				return nil, err
@@ -85,7 +96,19 @@ func (fi *FileInfoStore) AddSharing(dirPath string) error {
 			IsDir: true,
 		}
 	}
+
+	// TODO: ensure Atomicity
+	shareID, err := fi.getShareID(dirPath)
+	if err != nil {
+		return err
+	}
+	err = fi.store.SetStringIn(ShareIDNs, shareID, dirPath)
+	if err != nil {
+		return err
+	}
+
 	info.Shared = true
+	info.ShareID = shareID
 	return fi.SetInfo(dirPath, info)
 }
 
@@ -98,6 +121,16 @@ func (fi *FileInfoStore) DelSharing(dirPath string) error {
 		return err
 	}
 	info.Shared = false
+	info.ShareID = ""
+
+	// TODO: ensure Atomicity
+	// In the bolt, if the key does not exist
+	// then nothing is done and a nil error is returned
+	err = fi.store.DelStringIn(ShareIDNs, info.ShareID)
+	if err != nil {
+		return err
+	}
+
 	return fi.SetInfo(dirPath, info)
 }
 
@@ -105,6 +138,7 @@ func (fi *FileInfoStore) GetSharing(dirPath string) (bool, bool) {
 	fi.mtx.Lock()
 	defer fi.mtx.Unlock()
 
+	// TODO: differentiate error and not exist
 	info, err := fi.GetInfo(dirPath)
 	if err != nil {
 		return false, false
@@ -112,21 +146,21 @@ func (fi *FileInfoStore) GetSharing(dirPath string) (bool, bool) {
 	return info.IsDir && info.Shared, true
 }
 
-func (fi *FileInfoStore) ListSharings(prefix string) (map[string]bool, error) {
+func (fi *FileInfoStore) ListSharings(prefix string) (map[string]string, error) {
 	infoStrs, err := fi.store.ListStringsByPrefixIn(prefix, InfoNs)
 	if err != nil {
 		return nil, err
 	}
 
 	info := &FileInfo{}
-	sharings := map[string]bool{}
+	sharings := map[string]string{}
 	for itemPath, infoStr := range infoStrs {
 		err = json.Unmarshal([]byte(infoStr), info)
 		if err != nil {
 			return nil, fmt.Errorf("list sharing error: %w", err)
 		}
 		if info.IsDir && info.Shared {
-			sharings[itemPath] = true
+			sharings[itemPath] = info.ShareID
 		}
 	}
 
@@ -196,4 +230,34 @@ func (fi *FileInfoStore) SetSha1(itemPath, sign string) error {
 	}
 	info.Sha1 = sign
 	return fi.SetInfo(itemPath, info)
+}
+
+func (fi *FileInfoStore) getShareID(payload string) (string, error) {
+	if len(payload) == 0 {
+		return "", ErrEmpty
+	}
+
+	for i := 0; i < maxHashingTime; i++ {
+		msg := strings.Repeat(payload, i+1)
+		h := sha1.New()
+		_, err := io.WriteString(h, msg)
+		if err != nil {
+			return "", err
+		}
+
+		shareID := fmt.Sprintf("%x", h.Sum(nil))[:7]
+		if _, ok := fi.store.GetStringIn(ShareIDNs, shareID); !ok {
+			return shareID, nil
+		}
+	}
+
+	return "", ErrConflicted
+}
+
+func (fi *FileInfoStore) GetSharingDir(hashID string) (string, error) {
+	dirPath, ok := fi.store.GetStringIn(ShareIDNs, hashID)
+	if !ok {
+		return "", ErrSharingNotFound
+	}
+	return dirPath, nil
 }
