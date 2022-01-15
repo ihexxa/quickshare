@@ -4,6 +4,7 @@ import {
   ListResp,
   ListUploadingsResp,
   ListSharingsResp,
+  ListSharingIDsResp,
 } from "./";
 
 export interface FilesClientResps {
@@ -24,10 +25,15 @@ export interface FilesClientResps {
   addSharingMockResp?: Response;
   deleteSharingMockResp?: Response;
   listSharingsMockResp?: Response<ListSharingsResp>;
+  listSharingIDsMockResp?: Response<ListSharingIDsResp>;
   isSharingMockResp?: Response;
   generateHashMockResp?: Response;
   downloadMockResp: Response;
 }
+
+const sharingIDs = new Map<string, string>();
+sharingIDs.set("/admin/f1", "e123456");
+sharingIDs.set("/admin/f1", "f123456");
 
 export const resps = {
   createMockResp: { status: 200, statusText: "", data: {} },
@@ -131,6 +137,13 @@ export const resps = {
       sharingDirs: ["mock_sharingfolder1", "mock_sharingfolder2"],
     },
   },
+  listSharingIDsMockResp: {
+    status: 200,
+    statusText: "",
+    data: {
+      IDs: sharingIDs,
+    },
+  },
   isSharingMockResp: { status: 200, statusText: "", data: {} },
   generateHashMockResp: { status: 200, statusText: "", data: {} },
   downloadMockResp: {
@@ -217,6 +230,9 @@ export class MockFilesClient {
 
   listSharings = (): Promise<Response<ListSharingsResp>> => {
     return this.wrapPromise(this.resps.listSharingsMockResp);
+  };
+  listSharingIDs = (): Promise<Response<ListSharingIDsResp>> => {
+    return this.wrapPromise(this.resps.listSharingIDsMockResp);
   };
 
   isSharing = (dirPath: string): Promise<Response> => {

@@ -44,7 +44,7 @@ describe("State Manager", () => {
     expect(coreState.filesInfo.dirPath.join("/")).toEqual("mock_home/files");
     expect(coreState.filesInfo.isSharing).toEqual(true);
     expect(coreState.sharingsInfo.sharings).toEqual(
-      List(filesResps.listSharingsMockResp.data.sharingDirs)
+      Map(filesResps.listSharingIDsMockResp.data.IDs.entries())
     );
     expect(coreState.uploadingsInfo.uploadings).toEqual(
       List<UploadEntry>(
@@ -180,7 +180,7 @@ describe("State Manager", () => {
     expect(coreState.filesInfo.items).toEqual(
       List(filesResps.listHomeMockResp.data.metadatas)
     );
-    expect(coreState.sharingsInfo.sharings).toEqual(List([]));
+    expect(coreState.sharingsInfo.sharings).toEqual(Map<string, string>());
     expect(coreState.uploadingsInfo.uploadings).toEqual(List<UploadEntry>([]));
 
     // login

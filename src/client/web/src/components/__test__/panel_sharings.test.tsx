@@ -1,5 +1,5 @@
 import { mock, instance, verify, when, anything } from "ts-mockito";
-import { List } from "immutable";
+import { List, Map } from "immutable";
 
 import { SharingsPanel } from "../panel_sharings";
 import { initUploadMgr } from "../../worker/upload_mgr";
@@ -42,15 +42,19 @@ describe("SharingsPanel", () => {
   test("delete sharing", async () => {
     const { sharingsPanel, usersCl, filesCl } = initSharingsPanel();
 
-    const newSharings = ["mock_sharingfolder1", "mock_sharingfolder2"];
+    const newSharings = Map<string, string>({
+      "mock_sharingfolder1": "f123456",
+      "mock_sharingfolder2": "f123456",
+    })
 
     filesCl.setMock({
       ...filesResps,
-      listSharingsMockResp: {
+      listSharingIDsMockResp: {
         status: 200,
         statusText: "",
         data: {
-          sharingDirs: newSharings,
+          // it seems immutable map will be converted into built-in map automatically
+          IDs: newSharings, 
         },
       },
     });
@@ -59,6 +63,6 @@ describe("SharingsPanel", () => {
 
     // TODO: check delSharing's input
     expect(updater().props.filesInfo.isSharing).toEqual(false);
-    expect(updater().props.sharingsInfo.sharings).toEqual(List(newSharings));
+    expect(updater().props.sharingsInfo.sharings).toEqual(newSharings);
   });
 });
