@@ -190,6 +190,7 @@ func (cl *FilesClient) IsSharing(dirpath string) (*http.Response, string, []erro
 		End()
 }
 
+// Deprecated: use ListSharingIDs intead
 func (cl *FilesClient) ListSharings() (*http.Response, *fileshdr.SharingResp, []error) {
 	resp, body, errs := cl.r.Get(cl.url("/v1/fs/sharings")).
 		AddCookie(cl.token).
@@ -206,6 +207,22 @@ func (cl *FilesClient) ListSharings() (*http.Response, *fileshdr.SharingResp, []
 	return resp, shResp, nil
 }
 
+func (cl *FilesClient) ListSharingIDs() (*http.Response, *fileshdr.SharingIDsResp, []error) {
+	resp, body, errs := cl.r.Get(cl.url("/v1/fs/sharings/ids")).
+		AddCookie(cl.token).
+		End()
+	if len(errs) > 0 {
+		return nil, nil, errs
+	}
+
+	shResp := &fileshdr.SharingIDsResp{}
+	err := json.Unmarshal([]byte(body), shResp)
+	if err != nil {
+		return nil, nil, append(errs, err)
+	}
+	return resp, shResp, nil
+}
+
 func (cl *FilesClient) GenerateHash(filepath string) (*http.Response, string, []error) {
 	return cl.r.Post(cl.url("/v1/fs/hashes/sha1")).
 		AddCookie(cl.token).
@@ -213,4 +230,21 @@ func (cl *FilesClient) GenerateHash(filepath string) (*http.Response, string, []
 			FilePath: filepath,
 		}).
 		End()
+}
+
+func (cl *FilesClient) GetSharingDir(shareID string) (*http.Response, string, []error) {
+	resp, body, errs := cl.r.Get(cl.url("/v1/fs/sharings/dirs")).
+		AddCookie(cl.token).
+		Param(fileshdr.ShareIDQuery, shareID).
+		End()
+	if len(errs) > 0 {
+		return nil, "", errs
+	}
+
+	sdResp := &fileshdr.GetSharingDirResp{}
+	err := json.Unmarshal([]byte(body), sdResp)
+	if err != nil {
+		return nil, "", append(errs, err)
+	}
+	return resp, sdResp.SharingDir, nil
 }
