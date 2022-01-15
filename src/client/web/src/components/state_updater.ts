@@ -123,12 +123,18 @@ export class Updater {
   };
 
   listSharings = async (): Promise<string> => {
-    const resp = await this.filesClient.listSharings();
-    this.props.sharingsInfo.sharings =
-      resp.status === 200
-        ? List<string>(resp.data.sharingDirs)
-        : this.props.sharingsInfo.sharings;
-    return resp.status === 200 ? "" : errServer;
+    const resp = await this.filesClient.listSharingIDs();
+    if (resp.status !== 200) {
+      return errServer;
+    }
+
+    // transform from built-in map to immutable map
+    let sharings = Map<string, string>();
+    resp.data.IDs.forEach((shareID: string, dirPath: string) => {
+      sharings = sharings.set(dirPath, shareID);
+    });
+    this.props.sharingsInfo.sharings = sharings;
+    return "";
   };
 
   // this function gets information from server and merge them with local information
@@ -271,7 +277,7 @@ export class Updater {
     this.props.uploadingsInfo.uploadings = uploadings;
   };
 
-  updateSharings = (sharings: List<string>) => {
+  updateSharings = (sharings: Map<string, string>) => {
     this.props.sharingsInfo.sharings = sharings;
   };
 

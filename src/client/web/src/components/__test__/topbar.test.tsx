@@ -93,7 +93,7 @@ describe("TopBar", () => {
     );
     expect(coreState.filesInfo.isSharing).toEqual(false);
     expect(coreState.filesInfo.items).toEqual(List());
-    expect(coreState.sharingsInfo.sharings).toEqual(List());
+    expect(coreState.sharingsInfo.sharings).toEqual(Map<string, string>());
     expect(coreState.uploadingsInfo.uploadings).toEqual(List<UploadEntry>());
 
     // login

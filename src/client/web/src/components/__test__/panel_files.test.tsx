@@ -1,4 +1,5 @@
 import { List } from "immutable";
+import * as immutable from "immutable";
 
 import { initMockWorker } from "../../test/helpers";
 import { FilesPanel } from "../panel_files";
@@ -53,25 +54,27 @@ describe("FilesPanel", () => {
     const { filesPanel, usersCl, filesCl } = initFilesPanel();
 
     const newSharingPath = List(["newPos", "subFolder"]);
-    const sharingDirs = [newSharingPath.join("/")];
+    const sharingDir = newSharingPath.join("/");
+    const newSharings = immutable.Map<string, string>({
+      [sharingDir]: "f123456",
+    });
+    const newSharingsResp = new Map<string, string>();
+    newSharingsResp.set(sharingDir, "f123456");
 
     filesCl.setMock({
       ...filesResps,
-      listSharingsMockResp: {
+      listSharingIDsMockResp: {
         status: 200,
         statusText: "",
         data: {
-          sharingDirs: sharingDirs,
+          IDs: newSharingsResp,
         },
       },
     });
 
     await filesPanel.addSharing(newSharingPath);
 
-
     expect(updater().props.filesInfo.isSharing).toEqual(true);
-    expect(updater().props.sharingsInfo.sharings).toEqual(
-      List(sharingDirs)
-    );
+    expect(updater().props.sharingsInfo.sharings).toEqual(newSharings);
   });
 });

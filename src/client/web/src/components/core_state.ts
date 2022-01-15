@@ -64,7 +64,7 @@ export function initState(): ICoreState {
       uploadFiles: List<File>([]),
     },
     sharingsInfo: {
-      sharings: List<string>([]),
+      sharings: Map<string, string>(),
     },
     admin: {
       users: Map<string, User>(),

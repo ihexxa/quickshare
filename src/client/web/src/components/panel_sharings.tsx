@@ -1,5 +1,5 @@
 import * as React from "react";
-import { List } from "immutable";
+import { List, Map } from "immutable";
 import QRCode from "react-qr-code";
 
 import { RiShareBoxLine } from "@react-icons/all-files/ri/RiShareBoxLine";
@@ -17,7 +17,7 @@ import { Container } from "./layout/container";
 import { Rows, Row } from "./layout/rows";
 
 export interface SharingsProps {
-  sharings: List<string>;
+  sharings: Map<string, string>;
 }
 
 export interface Props {
@@ -59,11 +59,12 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
     this.props.update(updater().updateSharingsInfo);
   };
 
-  makeRows = (sharings: List<string>): List<Row> => {
-    const sharingRows = sharings.map((dirPath: string) => {
+  makeRows = (sharings: Map<string, string>): List<Row> => {
+    const sharingRows = sharings.keySeq().map((dirPath: string) => {
+      const shareID = sharings.get(dirPath);
       const sharingURL = `${
         document.location.href.split("?")[0]
-      }?dir=${encodeURIComponent(dirPath)}`;
+      }?sh=${shareID}`;
 
       const row1 = (
         <div>
@@ -109,11 +110,16 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
       };
     });
 
-    return sharingRows;
+    return sharingRows.toList();
   };
 
   updateSharings = (sharings: List<Object>) => {
-    const newSharings = sharings as List<string>;
+    const newSharingDirs = sharings as List<string>;
+    let newSharings = Map<string, string>();
+    newSharingDirs.forEach((dirPath) => {
+      const shareID = this.props.sharingsInfo.sharings.get(dirPath);
+      newSharings = newSharings.set(dirPath, shareID);
+    });
     updater().updateSharings(newSharings);
     this.props.update(updater().updateSharingsInfo);
   };
