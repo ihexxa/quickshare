@@ -127,13 +127,7 @@ export class Updater {
     if (resp.status !== 200) {
       return errServer;
     }
-
-    // transform from built-in map to immutable map
-    let sharings = Map<string, string>();
-    resp.data.IDs.forEach((shareID: string, dirPath: string) => {
-      sharings = sharings.set(dirPath, shareID);
-    });
-    this.props.sharingsInfo.sharings = sharings;
+    this.props.sharingsInfo.sharings = Map<string, string>(resp.data.IDs);
     return "";
   };
 
@@ -464,8 +458,28 @@ export class Updater {
     return "";
   };
 
+  getParamMap = async (params: URLSearchParams): Promise<Map<string, string>> => {
+    let paramMap = Map<string, string>();
+    paramMap = paramMap.set("sh", "");
+    paramMap = paramMap.set("dir", "");
+
+    let shareID = params.get("sh");
+    if (shareID != null && shareID !== "") {
+      paramMap = paramMap.set("sh", shareID);
+      const resp = await this.filesClient.getSharingDir(shareID)
+      if (resp.status === 200) {
+        paramMap = paramMap.set("dir", resp.data.sharingDir);
+      }
+    } else {
+      paramMap = paramMap.set("dir", params.get("dir"));
+    }
+
+    return paramMap;
+  };
+
   initCwd = async (params: URLSearchParams): Promise<string> => {
-    const dir = params.get("dir");
+    const paramMap = await this.getParamMap(params)
+    const dir = paramMap.get("dir", "");
 
     if (dir != null && dir !== "") {
       // in sharing mode

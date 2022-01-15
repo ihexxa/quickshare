@@ -7,10 +7,12 @@ import {
   ListUploadingsResp,
   ListSharingsResp,
   ListSharingIDsResp,
+  GetSharingDirResp,
 } from "./";
 
 const filePathQuery = "fp";
 const listDirQuery = "dp";
+const shareIDQuery = "sh";
 // TODO: get timeout from server
 
 function translateResp(resp: Response<any>): Response<any> {
@@ -205,6 +207,16 @@ export class FilesClient extends BaseClient {
     return this.do({
       method: "get",
       url: `${this.url}/v1/fs/sharings/ids`,
+    });
+  };
+
+  getSharingDir = (shareID: string): Promise<Response<GetSharingDirResp>> => {
+    return this.do({
+      method: "get",
+      url: `${this.url}/v1/fs/sharings/dirs`,
+      params: {
+        [shareIDQuery]: shareID,
+      },
     });
   };
 

@@ -5,6 +5,7 @@ import {
   ListUploadingsResp,
   ListSharingsResp,
   ListSharingIDsResp,
+  GetSharingDirResp,
 } from "./";
 
 export interface FilesClientResps {
@@ -26,6 +27,7 @@ export interface FilesClientResps {
   deleteSharingMockResp?: Response;
   listSharingsMockResp?: Response<ListSharingsResp>;
   listSharingIDsMockResp?: Response<ListSharingIDsResp>;
+  getSharingDirMockResp?: Response<GetSharingDirResp>;
   isSharingMockResp?: Response;
   generateHashMockResp?: Response;
   downloadMockResp: Response;
@@ -144,6 +146,13 @@ export const resps = {
       IDs: sharingIDs,
     },
   },
+  getSharingDirMockResp: {
+    status: 200,
+    statusText: "",
+    data: {
+      sharingDir: "/admin/sharing",
+    },
+  },
   isSharingMockResp: { status: 200, statusText: "", data: {} },
   generateHashMockResp: { status: 200, statusText: "", data: {} },
   downloadMockResp: {
@@ -231,9 +240,14 @@ export class MockFilesClient {
   listSharings = (): Promise<Response<ListSharingsResp>> => {
     return this.wrapPromise(this.resps.listSharingsMockResp);
   };
+
   listSharingIDs = (): Promise<Response<ListSharingIDsResp>> => {
     return this.wrapPromise(this.resps.listSharingIDsMockResp);
   };
+
+  getSharingDir = (): Promise<Response<GetSharingDirResp>> => {
+    return this.wrapPromise(this.resps.getSharingDirMockResp);
+  }
 
   isSharing = (dirPath: string): Promise<Response> => {
     return this.wrapPromise(this.resps.isSharingMockResp);

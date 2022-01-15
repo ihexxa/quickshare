@@ -84,6 +84,10 @@ export interface ListSharingIDsResp {
   IDs: Map<string, string>;
 }
 
+export interface GetSharingDirResp {
+  sharingDir: string;
+}
+
 export interface ClientConfigMsg {
   clientCfg: ClientConfig;
 }
@@ -142,6 +146,7 @@ export interface IFilesClient {
   isSharing: (dirPath: string) => Promise<Response>;
   listSharings: () => Promise<Response<ListSharingsResp>>;
   listSharingIDs: () => Promise<Response<ListSharingIDsResp>>;
+  getSharingDir: (shareID: string) => Promise<Response<GetSharingDirResp>>;
   generateHash: (filePath: string) => Promise<Response>;
   download: (url: string) => Promise<Response>;
 }
