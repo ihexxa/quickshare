@@ -24,17 +24,31 @@ func TestUserStores(t *testing.T) {
 
 		// list sharings
 		prefix := "admin"
-		sharingMap, err := store.ListSharings(prefix)
+		dirToID, err := store.ListSharings(prefix)
 		if err != nil {
 			t.Fatal(err)
 		}
 		for _, sharingDir := range dirPaths {
-			if !sharingMap[sharingDir] {
+			if _, ok := dirToID[sharingDir]; !ok {
 				t.Fatalf("sharing(%s) not found", sharingDir)
 			}
 			mustTrue, exist := store.GetSharing(sharingDir)
 			if !mustTrue || !exist {
 				t.Fatalf("get sharing(%t %t) should exist", mustTrue, exist)
+			}
+
+			info, err := store.GetInfo(sharingDir)
+			if err != nil {
+				t.Fatal(err)
+			} else if len(info.ShareID) != 7 {
+				t.Fatalf("incorrect ShareID %s", info.ShareID)
+			}
+
+			gotSharingDir, err := store.GetSharingDir(info.ShareID)
+			if err != nil {
+				t.Fatal(err)
+			} else if sharingDir != gotSharingDir {
+				t.Fatalf("sharing dir not consist: (%s) (%s)", sharingDir, gotSharingDir)
 			}
 		}
 
@@ -46,17 +60,29 @@ func TestUserStores(t *testing.T) {
 			}
 		}
 
-		sharingMap, err = store.ListSharings(prefix)
+		dirToID, err = store.ListSharings(prefix)
 		if err != nil {
 			t.Fatal(err)
 		}
 		for _, dirPath := range dirPaths {
-			if _, ok := sharingMap[dirPath]; ok {
+			if _, ok := dirToID[dirPath]; ok {
 				t.Fatalf("sharing(%s) should not exist", dirPath)
 			}
 			shared, exist := store.GetSharing(dirPath)
 			if shared {
 				t.Fatalf("get sharing(%t, %t) should not shared but exist", shared, exist)
+			}
+
+			info, err := store.GetInfo(dirPath)
+			if err != nil {
+				t.Fatal(err)
+			} else if len(info.ShareID) != 0 {
+				t.Fatalf("ShareID should be empty %s", info.ShareID)
+			}
+
+			_, err = store.GetSharingDir(info.ShareID)
+			if err != ErrSharingNotFound {
+				t.Fatal("should return ErrSharingNotFound")
 			}
 		}
 	}
