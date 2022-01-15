@@ -8,16 +8,17 @@ import (
 	"io"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/ihexxa/quickshare/src/kvstore"
 )
 
 const (
-	InitNs      = "Init"
-	InfoNs      = "sharing"
-	ShareIDNs   = "sharingKey"
-	InitTimeKey = "initTime"
+	InitNs       = "Init"
+	InfoNs       = "sharing"
+	ShareIDNs    = "sharingKey"
+	InitTimeKey  = "initTime"
+	SchemaVerKey = "SchemaVersion"
+	SchemaV1     = "v1"
 )
 
 var (
@@ -25,6 +26,7 @@ var (
 	ErrNotFound        = errors.New("file info not found")
 	ErrSharingNotFound = errors.New("sharing id not found")
 	ErrConflicted      = errors.New("conflict found in hashing")
+	ErrVerNotFound     = errors.New("file info schema version not found")
 	maxHashingTime     = 10
 )
 
@@ -57,30 +59,99 @@ type FileInfoStore struct {
 	store kvstore.IKVStore
 }
 
+func migrate(fi *FileInfoStore) error {
+	ver := "v0"
+	schemaVer, ok := fi.store.GetStringIn(InitNs, SchemaVerKey)
+	if ok {
+		ver = schemaVer
+	}
+
+	switch ver {
+	case "v0":
+		// add ShareID to FileInfos
+		infoStrs, err := fi.store.ListStringsIn(InfoNs)
+		if err != nil {
+			return err
+		}
+
+		type FileInfoV0 struct {
+			IsDir  bool   `json:"isDir"`
+			Shared bool   `json:"shared"`
+			Sha1   string `json:"sha1"`
+		}
+
+		infoV0 := &FileInfoV0{}
+		for itemPath, infoStr := range infoStrs {
+			err = json.Unmarshal([]byte(infoStr), infoV0)
+			if err != nil {
+				return fmt.Errorf("list sharing error: %w", err)
+			}
+
+			shareID := ""
+			if infoV0.IsDir && infoV0.Shared {
+				dirShareID, err := fi.getShareID(itemPath)
+				if err != nil {
+					return err
+				}
+				shareID = dirShareID
+
+				err = fi.store.SetStringIn(ShareIDNs, shareID, itemPath)
+				if err != nil {
+					return err
+				}
+			}
+
+			newInfo := &FileInfo{
+				IsDir:   infoV0.IsDir,
+				Shared:  infoV0.Shared,
+				ShareID: shareID,
+				Sha1:    infoV0.Sha1,
+			}
+			if err = fi.SetInfo(itemPath, newInfo); err != nil {
+				return err
+			}
+		}
+
+		err = fi.store.SetStringIn(InitNs, SchemaVerKey, SchemaV1)
+		if err != nil {
+			return err
+		}
+	case "v1":
+		// no op
+	default:
+		return fmt.Errorf("file info: unknown schema version (%s)", ver)
+	}
+
+	return nil
+}
+
 func NewFileInfoStore(store kvstore.IKVStore) (*FileInfoStore, error) {
-	_, ok := store.GetStringIn(InitNs, InitTimeKey)
-	if !ok {
-		var err error
-		for _, nsName := range []string{
-			InitNs,
-			InfoNs,
-			ShareIDNs,
-		} {
+	var err error
+	for _, nsName := range []string{
+		InitNs,
+		InfoNs,
+		ShareIDNs,
+	} {
+		if !store.HasNamespace(nsName) {
 			if err = store.AddNamespace(nsName); err != nil {
 				return nil, err
 			}
 		}
 	}
 
-	err := store.SetStringIn(InitNs, InitTimeKey, fmt.Sprintf("%d", time.Now().Unix()))
-	if err != nil {
-		return nil, err
-	}
+	// err = store.SetStringIn(InitNs, SchemaVerKey, SchemaV1)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	return &FileInfoStore{
+	fi := &FileInfoStore{
 		store: store,
 		mtx:   &sync.RWMutex{},
-	}, nil
+	}
+	if err = migrate(fi); err != nil {
+		return nil, err
+	}
+	return fi, nil
 }
 
 func (fi *FileInfoStore) AddSharing(dirPath string) error {
@@ -159,6 +230,8 @@ func (fi *FileInfoStore) ListSharings(prefix string) (map[string]string, error) 
 		if err != nil {
 			return nil, fmt.Errorf("list sharing error: %w", err)
 		}
+
+		fmt.Println(infoStr)
 		if info.IsDir && info.Shared {
 			sharings[itemPath] = info.ShareID
 		}
