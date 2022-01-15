@@ -28,7 +28,14 @@ func TestFileHandlers(t *testing.T) {
 			"downloadSpeedLimit": 409600,
 			"spaceLimit": 1000,
 			"limiterCapacity": 1000,
-			"limiterCyc": 1000
+			"limiterCyc": 1000,
+			"predefinedUsers": [
+				{
+					"name": "demo",
+					"pwd": "Quicksh@re",
+					"role": "user"
+				}
+			]
 		},
 		"server": {
 			"debug": true,
@@ -380,10 +387,10 @@ func TestFileHandlers(t *testing.T) {
 		}
 	})
 
-	t.Run("test sharing APIs: Upload-AddSharing-ListSharings-List-Download-DelSharing-ListSharings", func(t *testing.T) {
+	t.Run("test sharing APIs: Upload-AddSharing-ListSharings-IsSharing-List-Download-DelSharing-ListSharings", func(t *testing.T) {
 		files := map[string]string{
-			"qs/files/sharing/path1/f1":    "123456",
-			"qs/files/sharing/path2/path2": "12345678",
+			"qs/files/sharing/path1/f1": "123456",
+			"qs/files/sharing/path2/f2": "12345678",
 		}
 
 		for filePath, content := range files {
@@ -394,98 +401,144 @@ func TestFileHandlers(t *testing.T) {
 			}
 		}
 
-		// add sharings
-		sharedPaths := map[string]bool{}
-		for filePath := range files {
-			dirPath := filepath.Dir(filePath)
-			sharedPaths[dirPath] = true
-
-			res, _, errs := cl.AddSharing(dirPath)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if res.StatusCode != 200 {
-				t.Fatal(res.StatusCode)
-			}
-		}
-
-		// check listSharings
-		res, shRes, errs := cl.ListSharings()
+		userUsersCl := client.NewSingleUserClient(addr)
+		resp, _, errs := userUsersCl.Login("demo", "Quicksh@re")
 		if len(errs) > 0 {
 			t.Fatal(errs)
-		} else if res.StatusCode != 200 {
-			t.Fatal(res.StatusCode)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
 		}
-		for _, dirPath := range shRes.SharingDirs {
-			if !sharedPaths[dirPath] {
-				t.Fatalf("sharing %s not found", dirPath)
-			}
-		}
+		userUsersToken := client.GetCookie(resp.Cookies(), q.TokenCookie)
+		userFilesCl := client.NewFilesClient(addr, userUsersToken)
 
-		for dirPath := range sharedPaths {
-			res, _, errs := cl.IsSharing(dirPath)
+		for i := 0; i < 2; i++ {
+			// add sharings
+			sharedPaths := map[string]bool{}
+			for filePath := range files {
+				dirPath := filepath.Dir(filePath)
+				sharedPaths[dirPath] = true
+
+				res, _, errs := cl.AddSharing(dirPath)
+				if len(errs) > 0 {
+					t.Fatal(errs)
+				} else if res.StatusCode != 200 {
+					t.Fatal(res.StatusCode)
+				}
+			}
+
+			// check listSharings
+			res, shRes, errs := cl.ListSharingIDs()
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if res.StatusCode != 200 {
+				t.Fatal(res.StatusCode)
+			}
+			for dirPath, shareID := range shRes.IDs {
+				if !sharedPaths[dirPath] {
+					t.Fatalf("sharing %s not found", dirPath)
+				}
+
+				// check getShareDir
+				res, sharingDir, errs := userFilesCl.GetSharingDir(shareID)
+				if len(errs) > 0 {
+					t.Fatal(errs)
+				} else if res.StatusCode != 200 {
+					t.Fatal(res.StatusCode)
+				} else if sharingDir != dirPath {
+					t.Fatalf("sharing path not equal: got(%s) (%s)", sharingDir, dirPath)
+				}
+			}
+
+			// check isSharing
+			for dirPath := range sharedPaths {
+				res, _, errs := userFilesCl.IsSharing(dirPath)
+				if len(errs) > 0 {
+					t.Fatal(errs)
+				} else if res.StatusCode != 200 {
+					t.Fatal(res.StatusCode)
+				}
+
+				res, _, errs = userFilesCl.IsSharing(fmt.Sprintf("%s/", dirPath))
+				if len(errs) > 0 {
+					t.Fatal(errs)
+				} else if res.StatusCode != 404 {
+					t.Fatal(res.StatusCode)
+				}
+			}
+
+			// check listing
+			for dirPath := range shRes.IDs {
+				res, lsResp, errs := userFilesCl.List(dirPath)
+				if len(errs) > 0 {
+					t.Fatal(errs)
+				} else if res.StatusCode != 200 {
+					t.Fatal(res.StatusCode)
+				}
+				if lsResp.Cwd != dirPath {
+					t.Fatalf("list sharing folder: incorrect cwd (%s)", lsResp.Cwd)
+				}
+				if len(lsResp.Metadatas) != 1 {
+					t.Fatalf("list sharing folder: incorrect metadata size (%d)", len(lsResp.Metadatas))
+				}
+			}
+
+			// check downloading
+			for filePath, content := range files {
+				assertDownloadOK(t, filePath, content, addr, userUsersToken)
+			}
+
+			// delete sharing
+			for filePath := range files {
+				dirPath := filepath.Dir(filePath)
+
+				res, _, errs := cl.DelSharing(dirPath)
+				if len(errs) > 0 {
+					t.Fatal(errs)
+				} else if res.StatusCode != 200 {
+					t.Fatal(res.StatusCode)
+				}
+			}
+
+			// check listSharings
+			res, shRes, errs = cl.ListSharingIDs()
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if res.StatusCode != 200 {
 				t.Fatal(res.StatusCode)
 			}
 
-			res, _, errs = cl.IsSharing(fmt.Sprintf("%s/", dirPath))
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if res.StatusCode != 404 {
-				t.Fatal(res.StatusCode)
+			if len(shRes.IDs) > 0 {
+				t.Fatalf("sharings should be deleted len(%d)", len(shRes.IDs))
 			}
-		}
 
-		for _, dirPath := range shRes.SharingDirs {
-			res, lsResp, errs := cl.List(dirPath)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if res.StatusCode != 200 {
-				t.Fatal(res.StatusCode)
+			// check isSharing
+			for dirPath := range sharedPaths {
+				res, _, errs := userFilesCl.IsSharing(dirPath)
+				if len(errs) > 0 {
+					t.Fatal(errs)
+				} else if res.StatusCode != 404 {
+					t.Fatal(res.StatusCode)
+				}
 			}
-			if lsResp.Cwd != dirPath {
-				t.Fatalf("list sharing folder: incorrect cwd (%s)", lsResp.Cwd)
+
+			// check rejecting listing
+			for dirPath, _ := range shRes.IDs {
+				res, _, errs := userFilesCl.List(dirPath)
+				if len(errs) > 0 {
+					t.Fatal(errs)
+				} else if res.StatusCode != 403 {
+					t.Fatal(res.StatusCode)
+				}
 			}
-			if len(lsResp.Metadatas) != 1 {
-				t.Fatalf("list sharing folder: incorrect metadata size (%d)", len(lsResp.Metadatas))
-			}
-		}
 
-		for filePath, content := range files {
-			assertDownloadOK(t, filePath, content, addr, token)
-		}
-
-		for filePath := range files {
-			dirPath := filepath.Dir(filePath)
-
-			res, _, errs := cl.DelSharing(dirPath)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if res.StatusCode != 200 {
-				t.Fatal(res.StatusCode)
-			}
-		}
-
-		// check listSharings
-		res, shRes, errs = cl.ListSharings()
-		if len(errs) > 0 {
-			t.Fatal(errs)
-		} else if res.StatusCode != 200 {
-			t.Fatal(res.StatusCode)
-		}
-		for _, dirPath := range shRes.SharingDirs {
-			if sharedPaths[dirPath] {
-				t.Fatalf("sharing %s should be deleted", dirPath)
-			}
-		}
-
-		for dirPath := range sharedPaths {
-			res, _, errs := cl.IsSharing(dirPath)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if res.StatusCode != 404 {
-				t.Fatal(res.StatusCode)
+			// check rejecting downloading
+			for filePath, _ := range files {
+				res, _, errs = userFilesCl.Download(filePath, map[string]string{})
+				if len(errs) > 0 {
+					t.Fatal(errs)
+				} else if res.StatusCode != 403 {
+					t.Fatal(res.StatusCode)
+				}
 			}
 		}
 	})

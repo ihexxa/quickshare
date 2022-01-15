@@ -28,6 +28,7 @@ var (
 	// queries
 	FilePathQuery = "fp"
 	ListDirQuery  = "dp"
+	ShareIDQuery  = "sh"
 
 	// headers
 	rangeHeader       = "Range"
@@ -113,8 +114,8 @@ func (h *FileHandlers) canAccess(userName, role, op, sharedPath string) bool {
 		return false
 	}
 
-	_, ok := h.deps.FileInfos().GetSharing(sharedPath)
-	return ok
+	isSharing, ok := h.deps.FileInfos().GetSharing(sharedPath)
+	return isSharing && ok
 }
 
 type CreateReq struct {
@@ -535,7 +536,8 @@ func (h *FileHandlers) Download(c *gin.Context) {
 	}
 	role := c.MustGet(q.RoleParam).(string)
 	userName := c.MustGet(q.UserParam).(string)
-	if !h.canAccess(userName, role, "download", filePath) {
+	dirPath := filepath.Dir(filePath)
+	if !h.canAccess(userName, role, "download", dirPath) {
 		c.JSON(q.ErrResp(c, 403, q.ErrAccessDenied))
 		return
 	}
@@ -895,6 +897,7 @@ type SharingResp struct {
 	SharingDirs []string `json:"sharingDirs"`
 }
 
+// Deprecated: use ListSharingIDs instead
 func (h *FileHandlers) ListSharings(c *gin.Context) {
 	// TODO: move canAccess to authedFS
 	userName := c.MustGet(q.UserParam).(string)
@@ -910,6 +913,22 @@ func (h *FileHandlers) ListSharings(c *gin.Context) {
 		dirs = append(dirs, sharingDir)
 	}
 	c.JSON(200, &SharingResp{SharingDirs: dirs})
+}
+
+type SharingIDsResp struct {
+	IDs map[string]string `json:"IDs"`
+}
+
+func (h *FileHandlers) ListSharingIDs(c *gin.Context) {
+	// TODO: move canAccess to authedFS
+	userName := c.MustGet(q.UserParam).(string)
+
+	dirToID, err := h.deps.FileInfos().ListSharings(q.FsRootPath(userName, "/"))
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+	c.JSON(200, &SharingIDsResp{IDs: dirToID})
 }
 
 type GenerateHashReq struct {
@@ -950,6 +969,25 @@ func (h *FileHandlers) GenerateHash(c *gin.Context) {
 		return
 	}
 	c.JSON(q.Resp(200))
+}
+
+type GetSharingDirResp struct {
+	SharingDir string `json:"sharingDir"`
+}
+
+func (h *FileHandlers) GetSharingDir(c *gin.Context) {
+	shareID := c.Query(ShareIDQuery)
+	if shareID == "" {
+		c.JSON(q.ErrResp(c, 400, errors.New("invalid share ID")))
+		return
+	}
+
+	dirPath, err := h.deps.FileInfos().GetSharingDir(shareID)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+	c.JSON(200, &GetSharingDirResp{SharingDir: dirPath})
 }
 
 func (h *FileHandlers) GetStreamReader(userID uint64, fd io.Reader) (io.ReadCloser, error) {
