@@ -29,7 +29,7 @@ import { Rows, Row } from "./layout/rows";
 import { Up } from "../worker/upload_mgr";
 import { UploadEntry, UploadState } from "../worker/interface";
 import { getIcon } from "./visual/icons";
-import { filesViewCtrl } from "../common/controls";
+import { ctrlOn, sharingCtrl, filesViewCtrl } from "../common/controls";
 
 export interface Item {
   name: string;
@@ -559,6 +559,11 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     sortedItems: List<MetadataResp>,
     showOp: string
   ): React.ReactNode => {
+    const shareModeClass =
+      this.props.ui.control.controls.get(sharingCtrl) === ctrlOn
+        ? "hidden"
+        : "";
+
     const sortKeys = List<string>([
       this.props.msg.pkg.get("item.type"),
       this.props.msg.pkg.get("item.name"),
@@ -599,7 +604,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         <div className={`v-mid item-op ${showOp}`}>
           <RiCheckboxFill
             size="1.8rem"
-            className={selectedIconColor}
+            className={`${selectedIconColor} ${shareModeClass}`}
             onClick={() => this.select(item.name)}
           />
         </div>
@@ -613,7 +618,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
 
           <RiCheckboxFill
             size="1.8rem"
-            className={selectedIconColor}
+            className={`${selectedIconColor} ${shareModeClass}`}
             onClick={() => this.select(item.name)}
           />
         </div>
@@ -670,7 +675,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
                   <RiRefreshLine
                     onClick={() => this.generateHash(itemPath)}
                     size={"2rem"}
-                    className="black-font"
+                    className={`black-font ${shareModeClass}`}
                   />,
                 ])}
                 childrenStyles={List([{}, { justifyContent: "flex-end" }])}
@@ -731,6 +736,11 @@ export class FilesPanel extends React.Component<Props, State, {}> {
   };
 
   render() {
+    const shareModeClass =
+      this.props.ui.control.controls.get(sharingCtrl) === ctrlOn
+        ? "hidden"
+        : "";
+
     const showOp = this.props.login.userRole === roleVisitor ? "hidden" : "";
     const breadcrumb = this.props.filesInfo.dirPath.map(
       (pathPart: string, key: number) => {
@@ -920,7 +930,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
               </div>,
               <div
                 id="space-used"
-                className="grey0-font"
+                className={`grey0-font ${shareModeClass}`}
               >{`${this.props.msg.pkg.get(
                 "browser.used"
               )} ${usedSpace} / ${spaceLimit}`}</div>,
