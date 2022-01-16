@@ -81,7 +81,7 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
                     this.deleteSharing(dirPath);
                   }}
                 >
-                  {this.props.msg.pkg.get("browser.delete")}
+                  {this.props.msg.pkg.get("op.cancel")}
                 </button>,
               ])}
               childrenStyles={List([

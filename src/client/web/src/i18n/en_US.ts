@@ -130,6 +130,7 @@ export const msgs: Map<string, string> = Map({
   "error.report.title": "Error Report",
   "op.truncate": "Truncate",
   "op.submit": "Submit",
+  "op.cancel": "Cancel",
   "term.time": "Time",
   "breadcrumb.loc": "Location",
 });

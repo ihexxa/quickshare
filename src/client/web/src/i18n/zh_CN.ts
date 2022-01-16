@@ -127,6 +127,7 @@ export const msgs: Map<string, string> = Map({
   "error.report.title": "报告错误",
   "op.truncate": "清空",
   "op.submit": "提交",
+  "op.cancel": "取消",
   "term.time": "时间",
   "breadcrumb.loc": "位置",
 });
