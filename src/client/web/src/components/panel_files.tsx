@@ -664,11 +664,11 @@ export class FilesPanel extends React.Component<Props, State, {}> {
           </div>
 
           <div className="column">
-            <div className="card">
+            <div className="card margin-l-m">
               <span className="title-m black-font">{modTimeTitle}</span>
               <span>{item.modTime}</span>
             </div>
-            <div className="card">
+            <div className="card margin-l-m">
               <span className="title-m black-font">{sizeTitle}</span>
               <span>{itemSize}</span>
             </div>
