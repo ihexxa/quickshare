@@ -194,7 +194,7 @@
   font-size: 1.4rem;
   line-height: 2rem;
   display: block;
-  overflow-wrap: break-word;
+  word-break: break-all;
 }
 
 .theme-default #item-rows .hr {

@@ -3,8 +3,7 @@ import { List, Map } from "immutable";
 import QRCode from "react-qr-code";
 
 import { RiShareBoxLine } from "@react-icons/all-files/ri/RiShareBoxLine";
-import { RiFolderSharedFill } from "@react-icons/all-files/ri/RiFolderSharedFill";
-import { RiEmotionSadLine } from "@react-icons/all-files/ri/RiEmotionSadLine";
+import { RiCloudOffFill } from "@react-icons/all-files/ri/RiCloudOffFill";
 
 import { QRCodeIcon } from "./visual/qrcode";
 import { getErrMsg } from "../common/utils";
@@ -137,7 +136,7 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
       <Container>
         <Flexbox
           children={List([
-            <RiEmotionSadLine size="4rem" className="margin-r-m red0-font" />,
+            <RiCloudOffFill size="4rem" className="margin-r-m red0-font" />,
             <span>
               <h3 className="title-l">
                 {this.props.msg.pkg.get("share.404.title")}
