@@ -12,7 +12,8 @@ import { RiCheckboxFill } from "@react-icons/all-files/ri/RiCheckboxFill";
 import { RiMore2Fill } from "@react-icons/all-files/ri/RiMore2Fill";
 import { BiTable } from "@react-icons/all-files/bi/BiTable";
 import { BiListUl } from "@react-icons/all-files/bi/BiListUl";
-import { RiRefreshLine } from "@react-icons/all-files/ri/RiRefreshLine";
+import { RiRestartFill } from "@react-icons/all-files/ri/RiRestartFill";
+import { RiCheckboxBlankLine } from "@react-icons/all-files/ri/RiCheckboxBlankLine";
 
 import { ErrorLogger } from "../common/log_error";
 import { alertMsg, confirmMsg } from "../common/env";
@@ -468,10 +469,10 @@ export class FilesPanel extends React.Component<Props, State, {}> {
             <Flexbox
               children={List([
                 <div className="label">{`SHA1: `}</div>,
-                <RiRefreshLine
+                <RiRestartFill
                   onClick={() => this.generateHash(itemPath)}
                   size={"2rem"}
-                  className="black-font"
+                  className="grey3-font"
                 />,
               ])}
               className="item-info"
@@ -490,7 +491,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
           <span onClick={() => this.select(item.name)} className="float-l">
             {isSelected
               ? getIcon("RiCheckboxFill", "1.8rem", "cyan1")
-              : getIcon("RiCheckboxBlankFill", "1.8rem", "black1")}
+              : getIcon("RiCheckboxBlankLine", "1.8rem", "black1")}
           </span>
         </div>
       ) : (
@@ -505,7 +506,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
           <span onClick={() => this.select(item.name)} className="float-l">
             {isSelected
               ? getIcon("RiCheckboxFill", "1.8rem", "cyan1")
-              : getIcon("RiCheckboxBlankFill", "1.8rem", "black1")}
+              : getIcon("RiCheckboxBlankLine", "1.8rem", "black1")}
           </span>
         </div>
       );
@@ -577,6 +578,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         : `${dirPath}/${item.name}`;
 
       const selectedIconColor = isSelected ? "cyan1-font" : "grey0-font";
+
       const descIconColor = this.state.showDetail.has(item.name)
         ? "cyan1-font"
         : "grey0-font";
@@ -600,14 +602,22 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         </a>
       );
 
+      const checkIcon = isSelected ? (
+        <RiCheckboxFill
+          size="1.8rem"
+          className={`${selectedIconColor} ${shareModeClass}`}
+          onClick={() => this.select(item.name)}
+        />
+      ) : (
+        <RiCheckboxBlankLine
+          size="1.8rem"
+          className={`${selectedIconColor} ${shareModeClass}`}
+          onClick={() => this.select(item.name)}
+        />
+      );
+
       const op = item.isDir ? (
-        <div className={`v-mid item-op ${showOp}`}>
-          <RiCheckboxFill
-            size="1.8rem"
-            className={`${selectedIconColor} ${shareModeClass}`}
-            onClick={() => this.select(item.name)}
-          />
-        </div>
+        <div className={`v-mid item-op ${showOp}`}>{checkIcon}</div>
       ) : (
         <div className={`v-mid item-op ${showOp}`}>
           <RiMore2Fill
@@ -616,11 +626,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
             onClick={() => this.toggleDetail(item.name)}
           />
 
-          <RiCheckboxFill
-            size="1.8rem"
-            className={`${selectedIconColor} ${shareModeClass}`}
-            onClick={() => this.select(item.name)}
-          />
+          {checkIcon}
         </div>
       );
 
@@ -633,13 +639,20 @@ export class FilesPanel extends React.Component<Props, State, {}> {
 
       const compact = item.isDir ? (
         <span>
-          <span className="grey3-font">{`${pathTitle}: `}</span>
-          <span>{`${absDownloadURL} | `}</span>
           <span className="grey3-font">{`${modTimeTitle}: `}</span>
           <span>{item.modTime}</span>
         </span>
       ) : (
-        `${pathTitle}: ${absDownloadURL} | ${modTimeTitle}: ${item.modTime} | ${sizeTitle}: ${itemSize} | sha1: ${item.sha1}`
+        <span>
+          <span className="grey3-font">{`${pathTitle}: `}</span>
+          <span>{`${absDownloadURL} | `}</span>
+          <span className="grey3-font">{`${modTimeTitle}: `}</span>
+          <span>{`${item.modTime} | `}</span>
+          <span className="grey3-font">{`${sizeTitle}: `}</span>
+          <span>{`${itemSize} | `}</span>
+          <span className="grey3-font">{`SHA1: `}</span>
+          <span>{item.sha1}</span>
+        </span>
       );
       const details = (
         <div>
@@ -648,6 +661,9 @@ export class FilesPanel extends React.Component<Props, State, {}> {
               <span className="title-m black-font">{pathTitle}</span>
               <span>{absDownloadURL}</span>
             </div>
+          </div>
+
+          <div className="column">
             <div className="card">
               <span className="title-m black-font">{modTimeTitle}</span>
               <span>{item.modTime}</span>
@@ -658,24 +674,15 @@ export class FilesPanel extends React.Component<Props, State, {}> {
             </div>
           </div>
 
-          <div className="column">
-            <div className="card">
-              <span className="title-m black-font">{pathTitle}</span>
-              <div className="qrcode-flat">
-                <QRCode value={absDownloadURL} size={128} />
-              </div>
-            </div>
-          </div>
-
           <div className="fix">
             <div className="card">
               <Flexbox
                 children={List([
                   <span className="title-m black-font">SHA1</span>,
-                  <RiRefreshLine
+                  <RiRestartFill
                     onClick={() => this.generateHash(itemPath)}
                     size={"2rem"}
-                    className={`black-font ${shareModeClass}`}
+                    className={`grey3-font ${shareModeClass}`}
                   />,
                 ])}
                 childrenStyles={List([{}, { justifyContent: "flex-end" }])}

@@ -1,7 +1,8 @@
 import * as React from "react";
-import { List, Map, Set } from "immutable";
+import { List } from "immutable";
 
-import { RiArrowUpDownFill } from "@react-icons/all-files/ri/RiArrowUpDownFill";
+import { BiSortUp } from "@react-icons/all-files/bi/BiSortUp";
+
 
 import { Flexbox } from "./flexbox";
 
@@ -103,7 +104,7 @@ export class Rows extends React.Component<Props, State, {}> {
         <div className="margin-b-l">
           <Flexbox
             children={List([
-              <RiArrowUpDownFill
+              <BiSortUp
                 size="3rem"
                 className="black-font margin-r-m"
               />,

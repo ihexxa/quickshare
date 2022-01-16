@@ -4,7 +4,7 @@ import FileSize from "filesize";
 
 import { RiUploadCloudFill } from "@react-icons/all-files/ri/RiUploadCloudFill";
 import { RiUploadCloudLine } from "@react-icons/all-files/ri/RiUploadCloudLine";
-import { RiEmotionSadLine } from "@react-icons/all-files/ri/RiEmotionSadLine";
+import { RiCloudOffFill } from "@react-icons/all-files/ri/RiCloudOffFill";
 
 import { alertMsg } from "../common/env";
 import { getErrMsg } from "../common/utils";
@@ -165,7 +165,7 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
       <Container>
         <Flexbox
           children={List([
-            <RiEmotionSadLine size="4rem" className="margin-r-m red0-font" />,
+            <RiCloudOffFill size="4rem" className="margin-r-m red0-font" />,
             <span>
               <h3 className="title-l">
                 {this.props.msg.pkg.get("upload.404.title")}
