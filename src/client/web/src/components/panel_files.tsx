@@ -428,6 +428,10 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         </div>
       );
 
+      const modTimeTitle = this.props.msg.pkg.get("item.modTime");
+      const sizeTitle = this.props.msg.pkg.get("item.size");
+      const itemSize = FileSize(item.size, { round: 0 });
+
       const content = item.isDir ? (
         <div className={`v-mid item-cell`}>
           <div className="full-width">
@@ -438,7 +442,10 @@ export class FilesPanel extends React.Component<Props, State, {}> {
               {item.name}
             </div>
             <div className="desc-m grey0-font">
-              <span>{item.modTime.slice(0, item.modTime.indexOf("T"))}</span>
+              <span>
+                <span className="grey3-font">{`${modTimeTitle}: `}</span>
+                <span>{`${item.modTime}`}</span>
+              </span>
             </div>
           </div>
         </div>
@@ -454,38 +461,16 @@ export class FilesPanel extends React.Component<Props, State, {}> {
                 {item.name}
               </a>
               <div className="desc-m grey0-font">
-                <span>{item.modTime.slice(0, item.modTime.indexOf("T"))}</span>
-                &nbsp;/&nbsp;
-                <span>{FileSize(item.size, { round: 0 })}</span>
+                <span className="grey3-font">{`${sizeTitle}: `}</span>
+                <span>{`${itemSize} | `}</span>
+                <span className="grey3-font">{`SHA1: `}</span>
+                <span>{item.sha1}</span>
               </div>
             </div>
-          </div>
-
-          <div
-            className={`${
-              this.state.showDetail.has(item.name) ? "" : "hidden"
-            }`}
-          >
-            <Flexbox
-              children={List([
-                <div className="label">{`SHA1: `}</div>,
-                <RiRestartFill
-                  onClick={() => this.generateHash(itemPath)}
-                  size={"2rem"}
-                  className="grey3-font"
-                />,
-              ])}
-              className="item-info"
-              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
-            />
-            <div className="info">{item.sha1}</div>
           </div>
         </div>
       );
 
-      const detailColor = this.state.showDetail.has(item.name)
-        ? "cyan1"
-        : "grey0";
       const op = item.isDir ? (
         <div className={`v-mid item-cell item-op ${showOp}`}>
           <span onClick={() => this.select(item.name)} className="float-l">
@@ -496,13 +481,6 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         </div>
       ) : (
         <div className={`v-mid item-cell item-op ${showOp}`}>
-          <span
-            onClick={() => this.toggleDetail(item.name)}
-            className="float-l"
-          >
-            {getIcon("RiMore2Fill", "1.8rem", detailColor)}
-          </span>
-
           <span onClick={() => this.select(item.name)} className="float-l">
             {isSelected
               ? getIcon("RiCheckboxFill", "1.8rem", "cyan1")
@@ -577,7 +555,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         ? `${dirPath}${item.name}`
         : `${dirPath}/${item.name}`;
 
-      const selectedIconColor = isSelected ? "cyan1-font" : "grey0-font";
+      const selectedIconColor = isSelected ? "cyan1-font" : "black1-font";
 
       const descIconColor = this.state.showDetail.has(item.name)
         ? "cyan1-font"
