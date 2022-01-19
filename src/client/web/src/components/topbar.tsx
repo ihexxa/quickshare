@@ -1,7 +1,7 @@
 import * as React from "react";
 import { List } from "immutable";
-import { alertMsg, confirmMsg } from "../common/env";
 
+import { alertMsg, confirmMsg } from "../common/env";
 import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { LoginProps } from "./pane_login";
 import { updater } from "./state_updater";

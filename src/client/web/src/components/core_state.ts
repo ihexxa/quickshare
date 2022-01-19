@@ -74,7 +74,9 @@ export function initState(): ICoreState {
       userID: "",
       userName: "",
       userRole: "",
-      usedSpace: "0",
+      extInfo: {
+        usedSpace: "0",
+      },
       quota: {
         spaceLimit: "0",
         uploadSpeedLimit: 0,

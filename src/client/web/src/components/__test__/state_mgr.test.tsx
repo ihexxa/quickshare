@@ -1,5 +1,4 @@
 import { List, Set, Map } from "immutable";
-import { mock, instance } from "ts-mockito";
 
 import { initMockWorker } from "../../test/helpers";
 import { StateMgr } from "../state_mgr";
@@ -72,7 +71,9 @@ describe("State Manager", () => {
       userID: "0",
       userName: "mockUser",
       userRole: "admin",
-      usedSpace: "256",
+      extInfo: {
+        usedSpace: "256",
+      },
       quota: {
         spaceLimit: "7",
         uploadSpeedLimit: 3,
@@ -189,7 +190,9 @@ describe("State Manager", () => {
       userName: mockSelfResp.data.name,
       userRole: mockSelfResp.data.role,
       quota: mockSelfResp.data.quota,
-      usedSpace: mockSelfResp.data.usedSpace,
+      extInfo: {
+        usedSpace: mockSelfResp.data.usedSpace,
+      },
       authed: false,
       captchaID: "mockCaptchaID",
       preferences: {

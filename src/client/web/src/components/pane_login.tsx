@@ -8,14 +8,17 @@ import { alertMsg } from "../common/env";
 import { Quota, Preferences } from "../client";
 import { getErrMsg } from "../common/utils";
 
+export interface ExtInfo {
+  usedSpace: string;
+}
 export interface LoginProps {
+  authed: boolean;
+  captchaID: string;
   userID: string;
   userName: string;
   userRole: string;
-  usedSpace: string;
+  extInfo: ExtInfo;
   quota: Quota;
-  authed: boolean;
-  captchaID: string;
   preferences: Preferences;
 }
 
