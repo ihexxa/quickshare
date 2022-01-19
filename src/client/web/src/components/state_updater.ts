@@ -458,7 +458,9 @@ export class Updater {
     return "";
   };
 
-  getParamMap = async (params: URLSearchParams): Promise<Map<string, string>> => {
+  getParamMap = async (
+    params: URLSearchParams
+  ): Promise<Map<string, string>> => {
     let paramMap = Map<string, string>();
     paramMap = paramMap.set("sh", "");
     paramMap = paramMap.set("dir", "");
@@ -466,7 +468,7 @@ export class Updater {
     let shareID = params.get("sh");
     if (shareID != null && shareID !== "") {
       paramMap = paramMap.set("sh", shareID);
-      const resp = await this.filesClient.getSharingDir(shareID)
+      const resp = await this.filesClient.getSharingDir(shareID);
       if (resp.status === 200) {
         paramMap = paramMap.set("dir", resp.data.sharingDir);
       }
@@ -478,7 +480,7 @@ export class Updater {
   };
 
   initCwd = async (params: URLSearchParams): Promise<string> => {
-    const paramMap = await this.getParamMap(params)
+    const paramMap = await this.getParamMap(params);
     const dir = paramMap.get("dir", "");
 
     if (dir != null && dir !== "") {
@@ -551,7 +553,7 @@ export class Updater {
     this.props.login.userID = visitorID;
     this.props.login.userName = "visitor";
     this.props.login.userRole = roleVisitor;
-    this.props.login.usedSpace = "0";
+    this.props.login.extInfo.usedSpace = "0";
     this.props.login.quota = {
       uploadSpeedLimit: 0,
       downloadSpeedLimit: 0,
@@ -579,7 +581,7 @@ export class Updater {
       this.props.login.userID = resp.data.id;
       this.props.login.userName = resp.data.name;
       this.props.login.userRole = resp.data.role;
-      this.props.login.usedSpace = resp.data.usedSpace;
+      this.props.login.extInfo.usedSpace = resp.data.usedSpace;
       this.props.login.quota = resp.data.quota;
       this.props.login.preferences = resp.data.preferences;
       return "";

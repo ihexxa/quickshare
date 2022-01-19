@@ -796,7 +796,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         this.prepareTable(this.props.filesInfo.items, showOp)
       );
 
-    const usedSpace = FileSize(parseInt(this.props.login.usedSpace, 10), {
+    const usedSpace = FileSize(parseInt(this.props.login.extInfo.usedSpace, 10), {
       round: 0,
     });
     const spaceLimit = FileSize(

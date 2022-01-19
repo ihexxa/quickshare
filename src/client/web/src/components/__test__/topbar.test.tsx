@@ -101,7 +101,9 @@ describe("TopBar", () => {
       userID: visitorID,
       userName: "visitor",
       userRole: roleVisitor,
-      usedSpace: "0",
+      extInfo: {
+        usedSpace: "0",
+      },
       quota: {
         spaceLimit: "0",
         uploadSpeedLimit: 0,
