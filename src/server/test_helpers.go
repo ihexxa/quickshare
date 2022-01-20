@@ -14,8 +14,8 @@ import (
 
 	"github.com/ihexxa/gocfg"
 	"github.com/ihexxa/quickshare/src/client"
-	fspkg "github.com/ihexxa/quickshare/src/fs"
 	"github.com/ihexxa/quickshare/src/db/userstore"
+	fspkg "github.com/ihexxa/quickshare/src/fs"
 )
 
 func startTestServer(config string) *Server {

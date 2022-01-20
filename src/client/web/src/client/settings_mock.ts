@@ -1,13 +1,11 @@
-// TODO: replace this with jest mocks
-import { Response } from ".";
-
-import { ClientConfigMsg } from "./";
+import { Response, ISettingsClient, ClientConfigMsg } from "./";
+import { makePromise } from "../test/helpers";
 
 export interface SettingsClientResps {
   healthMockResp?: Response;
   setClientCfgMockResp?: Response;
   getClientCfgMockResp?: Response<ClientConfigMsg>;
-  reportErrorsResp?: Response;
+  reportErrorsMockResp?: Response;
 }
 
 export const resps = {
@@ -29,7 +27,7 @@ export const resps = {
       },
     },
   },
-  reportErrorsResp: {
+  reportErrorsMockResp: {
     status: 200,
     statusText: "",
     data: {},
@@ -67,6 +65,28 @@ export class MockSettingsClient {
   };
 
   reportErrors = (): Promise<Response> => {
-    return this.wrapPromise(this.resps.reportErrorsResp);
+    return this.wrapPromise(this.resps.reportErrorsMockResp);
   };
 }
+
+export class JestSettingsClient {
+  url: string = "";
+  constructor(url: string) {
+    this.url = url;
+  }
+
+  health = jest.fn().mockReturnValueOnce(makePromise(resps.healthMockResp));
+  getClientCfg = jest
+    .fn()
+    .mockReturnValueOnce(makePromise(resps.getClientCfgMockResp));
+  setClientCfg = jest
+    .fn()
+    .mockReturnValueOnce(makePromise(resps.setClientCfgMockResp));
+  reportErrors = jest
+    .fn()
+    .mockReturnValueOnce(makePromise(resps.reportErrorsMockResp));
+}
+
+export const NewMockSettingsClient = (url: string): ISettingsClient => {
+  return new JestSettingsClient(url);
+};
