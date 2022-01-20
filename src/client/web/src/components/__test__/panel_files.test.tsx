@@ -6,8 +6,12 @@ import { FilesPanel } from "../panel_files";
 import { ICoreState, newState } from "../core_state";
 import { updater } from "../state_updater";
 import { MockUsersClient, resps as usersResps } from "../../client/users_mock";
-import { MockFilesClient, resps as filesResps } from "../../client/files_mock";
+import {
+  NewMockFilesClient,
+  resps as filesResps,
+} from "../../client/files_mock";
 import { MockSettingsClient } from "../../client/settings_mock";
+import { makePromise } from "../../test/helpers";
 
 describe("FilesPanel", () => {
   const initFilesPanel = (): any => {
@@ -15,7 +19,7 @@ describe("FilesPanel", () => {
 
     const coreState = newState();
     const usersCl = new MockUsersClient("");
-    const filesCl = new MockFilesClient("");
+    const filesCl = NewMockFilesClient("");
     const settingsCl = new MockSettingsClient("");
 
     updater().init(coreState);
@@ -61,16 +65,15 @@ describe("FilesPanel", () => {
     const newSharingsResp = new Map<string, string>();
     newSharingsResp.set(sharingDir, "f123456");
 
-    filesCl.setMock({
-      ...filesResps,
-      listSharingIDsMockResp: {
+    filesCl.listSharingIDs = jest.fn().mockReturnValueOnce(
+      makePromise({
         status: 200,
         statusText: "",
         data: {
           IDs: newSharingsResp,
         },
-      },
-    });
+      })
+    );
 
     await filesPanel.addSharing(newSharingPath);
 

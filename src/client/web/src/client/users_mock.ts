@@ -1,22 +1,22 @@
-// TODO: replace this with jest mocks
-import { Response, Quota, Preferences } from "./";
+import { makePromise } from "../test/helpers";
+import { IUsersClient, Response, Quota, Preferences } from "./";
 
 export interface UsersClientResps {
-  loginMockResp: Response;
-  logoutMockResp: Response;
-  isAuthedMockResp: Response;
-  setPwdMockResp: Response;
-  setUserMockResp: Response;
-  forceSetPwdMockResp: Response;
-  addUserMockResp: Response;
-  delUserMockResp: Response;
-  listUsersMockResp: Response;
-  addRoleMockResp: Response;
-  delRoleMockResp: Response;
-  listRolesMockResp: Response;
-  selfMockResp: Response;
-  getCaptchaIDMockResp: Response;
-  setPreferencesMockResp: Response;
+  loginMockResp?: Response;
+  logoutMockResp?: Response;
+  isAuthedMockResp?: Response;
+  setPwdMockResp?: Response;
+  setUserMockResp?: Response;
+  forceSetPwdMockResp?: Response;
+  addUserMockResp?: Response;
+  delUserMockResp?: Response;
+  listUsersMockResp?: Response;
+  addRoleMockResp?: Response;
+  delRoleMockResp?: Response;
+  listRolesMockResp?: Response;
+  selfMockResp?: Response;
+  getCaptchaIDMockResp?: Response;
+  setPreferencesMockResp?: Response;
 }
 
 export const resps = {
@@ -187,3 +187,36 @@ export class MockUsersClient {
     return this.wrapPromise(this.resps.setPreferencesMockResp);
   };
 }
+
+export class JestUsersClient {
+  url: string = "";
+  constructor(url: string) {
+    this.url = url;
+  }
+
+  login = jest.fn().mockReturnValue(makePromise(resps.loginMockResp));
+  logout = jest.fn().mockReturnValue(makePromise(resps.logoutMockResp));
+  isAuthed = jest.fn().mockReturnValue(makePromise(resps.isAuthedMockResp));
+  self = jest.fn().mockReturnValue(makePromise(resps.selfMockResp));
+  setPwd = jest.fn().mockReturnValue(makePromise(resps.setPwdMockResp));
+  setUser = jest.fn().mockReturnValue(makePromise(resps.setUserMockResp));
+  forceSetPwd = jest
+    .fn()
+    .mockReturnValue(makePromise(resps.forceSetPwdMockResp));
+  addUser = jest.fn().mockReturnValue(makePromise(resps.addUserMockResp));
+  delUser = jest.fn().mockReturnValue(makePromise(resps.delUserMockResp));
+  listUsers = jest.fn().mockReturnValue(makePromise(resps.listUsersMockResp));
+  addRole = jest.fn().mockReturnValue(makePromise(resps.addRoleMockResp));
+  delRole = jest.fn().mockReturnValue(makePromise(resps.delRoleMockResp));
+  listRoles = jest.fn().mockReturnValue(makePromise(resps.listRolesMockResp));
+  getCaptchaID = jest
+    .fn()
+    .mockReturnValue(makePromise(resps.getCaptchaIDMockResp));
+  setPreferences = jest
+    .fn()
+    .mockReturnValue(makePromise(resps.setPreferencesMockResp));
+}
+
+export const NewMockUsersClient = (url: string): IUsersClient => {
+  return new JestUsersClient(url);
+};
