@@ -13,6 +13,7 @@ import { FilesClient } from "../client/files";
 import { UsersClient } from "../client/users";
 import { SettingsClient } from "../client/settings";
 import { IUsersClient, IFilesClient, ISettingsClient } from "../client";
+import { loadingCtrl, ctrlOn, ctrlOff } from "../common/controls";
 
 export interface Props {}
 export interface State extends ICoreState {}
@@ -49,6 +50,9 @@ export class StateMgr extends React.Component<Props, State, {}> {
     query: URLSearchParams
   ): Promise<void> => {
     updater().init(state);
+    updater().setControlOption(loadingCtrl, ctrlOn);
+    this.update(updater().updateUI);
+
     if (
       this.usersClient == null ||
       this.filesClient == null ||
@@ -63,14 +67,12 @@ export class StateMgr extends React.Component<Props, State, {}> {
       this.settingsClient
     );
 
-    return updater()
-      .initAll(query)
-      .then((status: string) => {
-        if (status !== "") {
-          alertMsg(getErrMsg(state.msg.pkg, "op.fail", status));
-        }
-        this.update(updater().updateAll);
-      });
+    const status = await updater().initAll(query);
+    if (status !== "") {
+      alertMsg(getErrMsg(state.msg.pkg, "op.fail", status));
+    }
+    updater().setControlOption(loadingCtrl, ctrlOff);
+    this.update(updater().updateAll);
   };
 
   update = (update: (prevState: ICoreState) => ICoreState): void => {

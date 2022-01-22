@@ -14,6 +14,7 @@ import {
   sharingCtrl,
   ctrlOn,
   ctrlOff,
+  loadingCtrl,
 } from "../common/controls";
 import { LoginProps } from "./pane_login";
 import { AdminProps } from "./pane_admin";
@@ -117,6 +118,7 @@ export function initState(): ICoreState {
           [settingsTabsCtrl]: "preferencePane",
           [sharingCtrl]: ctrlOff,
           [filesViewCtrl]: "rows",
+          [loadingCtrl]: ctrlOff,
         }),
         options: Map<string, Set<string>>({
           [panelTabs]: Set<string>([
@@ -128,6 +130,7 @@ export function initState(): ICoreState {
           [settingsTabsCtrl]: Set<string>(["preferencePane", "managementPane"]),
           [sharingCtrl]: Set<string>([ctrlOn, ctrlOff]),
           [filesViewCtrl]: Set<string>(["rows", "table"]),
+          [loadingCtrl]: Set<string>([ctrlOn, ctrlOff]),
         }),
       },
     },
