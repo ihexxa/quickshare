@@ -5,12 +5,15 @@ import { initMockWorker } from "../../test/helpers";
 import { FilesPanel } from "../panel_files";
 import { ICoreState, newState } from "../core_state";
 import { updater } from "../state_updater";
-import { MockUsersClient, resps as usersResps } from "../../client/users_mock";
+import {
+  NewMockUsersClient,
+  resps as usersResps,
+} from "../../client/users_mock";
 import {
   NewMockFilesClient,
   resps as filesResps,
 } from "../../client/files_mock";
-import { MockSettingsClient } from "../../client/settings_mock";
+import { NewMockSettingsClient } from "../../client/settings_mock";
 import { makePromise } from "../../test/helpers";
 
 describe("FilesPanel", () => {
@@ -18,9 +21,9 @@ describe("FilesPanel", () => {
     initMockWorker();
 
     const coreState = newState();
-    const usersCl = new MockUsersClient("");
+    const usersCl = NewMockUsersClient("");
     const filesCl = NewMockFilesClient("");
-    const settingsCl = new MockSettingsClient("");
+    const settingsCl = NewMockSettingsClient("");
 
     updater().init(coreState);
     updater().setClients(usersCl, filesCl, settingsCl);

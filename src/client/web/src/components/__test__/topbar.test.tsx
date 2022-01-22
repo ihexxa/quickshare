@@ -1,12 +1,18 @@
 import { List, Set, Map } from "immutable";
 
-import { initMockWorker } from "../../test/helpers";
+import { initMockWorker, makePromise } from "../../test/helpers";
 import { TopBar } from "../topbar";
 import { ICoreState, newState } from "../core_state";
 import { updater } from "../state_updater";
-import { MockUsersClient, resps as usersResps } from "../../client/users_mock";
-import { MockFilesClient, resps as filesResps } from "../../client/files_mock";
-import { MockSettingsClient } from "../../client/settings_mock";
+import {
+  NewMockUsersClient,
+  resps as usersResps,
+} from "../../client/users_mock";
+import {
+  NewMockFilesClient,
+  resps as filesResps,
+} from "../../client/files_mock";
+import { NewMockSettingsClient } from "../../client/settings_mock";
 
 import { UploadInfo, visitorID, roleVisitor, MetadataResp } from "../../client";
 import { UploadEntry, UploadState } from "../../worker/interface";
@@ -69,11 +75,27 @@ describe("TopBar", () => {
       isAuthedMockResp,
     };
 
-    const filesCl = new MockFilesClient("");
-    filesCl.setMock(mockFileResps);
-    const usersCl = new MockUsersClient("");
-    usersCl.setMock(mockUserResps);
-    const settingsCl = new MockSettingsClient("");
+    const filesCl = NewMockFilesClient("");
+    filesCl.listHome = jest
+      .fn()
+      .mockReturnValueOnce(makePromise(listHomeMockResp));
+    filesCl.isSharing = jest
+      .fn()
+      .mockReturnValueOnce(makePromise(isSharingMockResp));
+    filesCl.listSharings = jest
+      .fn()
+      .mockReturnValueOnce(makePromise(listSharingsMockResp));
+    filesCl.listUploadings = jest
+      .fn()
+      .mockReturnValueOnce(makePromise(listUploadingsMockResp));
+
+    const usersCl = NewMockUsersClient("");
+    usersCl.self = jest.fn().mockReturnValueOnce(makePromise(selfMockResp));
+    usersCl.isAuthed = jest
+      .fn()
+      .mockReturnValueOnce(makePromise(isAuthedMockResp));
+
+    const settingsCl = NewMockSettingsClient("");
 
     updater().init(coreState);
     updater().setClients(usersCl, filesCl, settingsCl);

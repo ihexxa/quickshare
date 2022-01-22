@@ -5,9 +5,9 @@ import { initUploadMgr } from "../../worker/upload_mgr";
 import { ICoreState, newState } from "../core_state";
 import { updater } from "../state_updater";
 import { MockWorker } from "../../worker/interface";
-import { MockUsersClient, resps as usersResps } from "../../client/users_mock";
-import { MockFilesClient, resps as filesResps } from "../../client/files_mock";
-import { MockSettingsClient } from "../../client/settings_mock";
+import { NewMockUsersClient, resps as usersResps } from "../../client/users_mock";
+import { NewMockFilesClient, resps as filesResps } from "../../client/files_mock";
+import { NewMockSettingsClient } from "../../client/settings_mock";
 
 describe("UploadingsPanel", () => {
   const initUploadingsPanel = (): any => {
@@ -16,9 +16,9 @@ describe("UploadingsPanel", () => {
     initUploadMgr(mockWorker);
 
     const coreState = newState();
-    const usersCl = new MockUsersClient("");
-    const filesCl = new MockFilesClient("");
-    const settingsCl = new MockSettingsClient("");
+    const usersCl = NewMockUsersClient("");
+    const filesCl = NewMockFilesClient("");
+    const settingsCl = NewMockSettingsClient("");
 
     updater().init(coreState);
     updater().setClients(usersCl, filesCl, settingsCl);

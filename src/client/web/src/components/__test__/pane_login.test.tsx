@@ -6,13 +6,16 @@ import { AuthPane } from "../pane_login";
 import { ICoreState, newState } from "../core_state";
 import { updater } from "../state_updater";
 import { UploadState, UploadEntry } from "../../worker/interface";
-import { MockUsersClient, resps as usersResps } from "../../client/users_mock";
-import { MockFilesClient, resps as filesResps } from "../../client/files_mock";
-import { MockSettingsClient } from "../../client/settings_mock";
+import {
+  NewMockUsersClient,
+  resps as usersResps,
+} from "../../client/users_mock";
+import {
+  NewMockFilesClient,
+  resps as filesResps,
+} from "../../client/files_mock";
+import { NewMockSettingsClient } from "../../client/settings_mock";
 import { controlName as panelTabs } from "../root_frame";
-import {} from "../layers";
-import {} from "../dialog_settings";
-import {} from "../panel_files";
 import {
   sharingCtrl,
   ctrlOn,
@@ -33,9 +36,9 @@ describe("Login", () => {
       update: (updater: (prevState: ICoreState) => ICoreState) => {},
     });
 
-    const usersCl = new MockUsersClient("");
-    const filesCl = new MockFilesClient("");
-    const settingsCl = new MockSettingsClient("");
+    const usersCl = NewMockUsersClient("");
+    const filesCl = NewMockFilesClient("");
+    const settingsCl = NewMockSettingsClient("");
     updater().init(coreState);
     updater().setClients(usersCl, filesCl, settingsCl);
 
