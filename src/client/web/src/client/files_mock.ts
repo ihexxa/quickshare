@@ -10,6 +10,7 @@ import {
 } from "./";
 
 import { makePromise } from "../test/helpers";
+
 export interface FilesClientResps {
   createMockRespID?: number;
   createMockResp?: Response;
@@ -271,47 +272,47 @@ export class JestFilesClient {
     this.url = url;
   }
 
-  create = jest.fn().mockReturnValueOnce(makePromise(resps.createMockResp));
-  delete = jest.fn().mockReturnValueOnce(makePromise(resps.deleteMockResp));
-  metadata = jest.fn().mockReturnValueOnce(makePromise(resps.metadataMockResp));
-  mkdir = jest.fn().mockReturnValueOnce(makePromise(resps.mkdirMockResp));
-  move = jest.fn().mockReturnValueOnce(makePromise(resps.moveMockResp));
+  create = jest.fn().mockReturnValue(makePromise(resps.createMockResp));
+  delete = jest.fn().mockReturnValue(makePromise(resps.deleteMockResp));
+  metadata = jest.fn().mockReturnValue(makePromise(resps.metadataMockResp));
+  mkdir = jest.fn().mockReturnValue(makePromise(resps.mkdirMockResp));
+  move = jest.fn().mockReturnValue(makePromise(resps.moveMockResp));
   uploadChunk = jest
     .fn()
-    .mockReturnValueOnce(makePromise(resps.uploadChunkMockResp));
+    .mockReturnValue(makePromise(resps.uploadChunkMockResp));
   uploadStatus = jest
     .fn()
-    .mockReturnValueOnce(makePromise(resps.uploadStatusMockResp));
-  list = jest.fn().mockReturnValueOnce(makePromise(resps.listMockResp));
-  listHome = jest.fn().mockReturnValueOnce(makePromise(resps.listHomeMockResp));
+    .mockReturnValue(makePromise(resps.uploadStatusMockResp));
+  list = jest.fn().mockReturnValue(makePromise(resps.listMockResp));
+  listHome = jest.fn().mockReturnValue(makePromise(resps.listHomeMockResp));
   listUploadings = jest
     .fn()
-    .mockReturnValueOnce(makePromise(resps.listUploadingsMockResp));
+    .mockReturnValue(makePromise(resps.listUploadingsMockResp));
   deleteUploading = jest
     .fn()
-    .mockReturnValueOnce(makePromise(resps.deleteUploadingMockResp));
+    .mockReturnValue(makePromise(resps.deleteUploadingMockResp));
   addSharing = jest
     .fn()
-    .mockReturnValueOnce(makePromise(resps.addSharingMockResp));
+    .mockReturnValue(makePromise(resps.addSharingMockResp));
   deleteSharing = jest
     .fn()
-    .mockReturnValueOnce(makePromise(resps.deleteSharingMockResp));
+    .mockReturnValue(makePromise(resps.deleteSharingMockResp));
   isSharing = jest
     .fn()
-    .mockReturnValueOnce(makePromise(resps.isSharingMockResp));
+    .mockReturnValue(makePromise(resps.isSharingMockResp));
   listSharings = jest
     .fn()
-    .mockReturnValueOnce(makePromise(resps.listSharingsMockResp));
+    .mockReturnValue(makePromise(resps.listSharingsMockResp));
   listSharingIDs = jest
     .fn()
-    .mockReturnValueOnce(makePromise(resps.listSharingIDsMockResp));
+    .mockReturnValue(makePromise(resps.listSharingIDsMockResp));
   getSharingDir = jest
     .fn()
-    .mockReturnValueOnce(makePromise(resps.getSharingDirMockResp));
+    .mockReturnValue(makePromise(resps.getSharingDirMockResp));
   generateHash = jest
     .fn()
-    .mockReturnValueOnce(makePromise(resps.generateHashMockResp));
-  download = jest.fn().mockReturnValueOnce(makePromise(resps.downloadMockResp));
+    .mockReturnValue(makePromise(resps.generateHashMockResp));
+  download = jest.fn().mockReturnValue(makePromise(resps.downloadMockResp));
 }
 
 export const NewMockFilesClient = (url: string): IFilesClient => {

@@ -14,12 +14,13 @@ import {
   Quota,
   Response,
   roleVisitor,
+  roleUser,
   roleAdmin,
   visitorID,
   ClientConfig,
   Preferences,
 } from "../client";
-import { FilesClient } from "../client/files";
+import { FilesClient, shareIDQuery, shareDirQuery } from "../client/files";
 import { UsersClient } from "../client/users";
 import { SettingsClient } from "../client/settings";
 import { UploadEntry, UploadState } from "../worker/interface";
@@ -406,10 +407,74 @@ export class Updater {
     this.props.ui.control.options = newOptions.merge(leftOpts);
   };
 
-  initStateForVisitor = async (): Promise<any> => {
-    const statuses = await Promise.all([this.getClientCfg()]);
+  initClientCfg = async (): Promise<string> => {
+    const status = await this.getClientCfg();
+    if (status !== "") {
+      return status;
+    }
+
+    return await this.syncLan();
+  };
+
+  initCwd = async (shareDir: string): Promise<string> => {
+    if (shareDir !== "") {
+      // in sharing mode
+      const dirPath = List(shareDir.split("/"));
+      this.props.ui.control.controls = this.props.ui.control.controls.set(
+        sharingCtrl,
+        ctrlOn
+      );
+      this.props.filesInfo.dirPath = dirPath;
+    } else {
+      this.props.ui.control.controls = this.props.ui.control.controls.set(
+        sharingCtrl,
+        ctrlOff
+      );
+      this.props.filesInfo.dirPath = List([]);
+    }
+
+    return "";
+  };
+
+  initFiles = async (shareDir: string): Promise<string> => {
+    let status = await this.initCwd(shareDir);
+    if (status !== "") {
+      return status;
+    }
+
+    status = await this.syncCwd();
+    if (status !== "") {
+      return status;
+    }
+
+    return await this.syncIsSharing(this.props.filesInfo.dirPath.join("/"));
+  };
+
+  initUploadings = async (): Promise<string> => {
+    const status = await this.refreshUploadings();
+    if (status !== "") {
+      return status;
+    }
+    this.initUploads();
+    return "";
+  };
+
+  initSharings = async (): Promise<string> => {
+    return await this.listSharings();
+  };
+
+  initAdmin = async (): Promise<string> => {
+    const statuses = await Promise.all([this.listRoles(), this.listUsers()]);
     if (statuses.join("") !== "") {
       return statuses.join(";");
+    }
+    return "";
+  };
+
+  initStateForVisitor = async (): Promise<any> => {
+    const status = await this.getClientCfg();
+    if (status !== "") {
+      return status;
     }
 
     const syncLanStatus = await this.syncLan();
@@ -458,59 +523,40 @@ export class Updater {
     return "";
   };
 
-  getParamMap = async (
+  initParams = async (
     params: URLSearchParams
   ): Promise<Map<string, string>> => {
     let paramMap = Map<string, string>();
-    paramMap = paramMap.set("sh", "");
-    paramMap = paramMap.set("dir", "");
+    const paramKeys = [shareIDQuery, shareDirQuery];
+    paramKeys.forEach((key) => {
+      const val = params.get(key);
+      paramMap = paramMap.set(key, val != null ? val : "");
+    });
 
-    let shareID = params.get("sh");
-    if (shareID != null && shareID !== "") {
-      paramMap = paramMap.set("sh", shareID);
+    const shareID = paramMap.get(shareIDQuery);
+    if (shareID !== "") {
       const resp = await this.filesClient.getSharingDir(shareID);
       if (resp.status === 200) {
-        paramMap = paramMap.set("dir", resp.data.sharingDir);
+        paramMap = paramMap.set(shareDirQuery, resp.data.sharingDir);
+      } else {
+        ErrorLogger().error(
+          `initParams: unexpected response ${resp.status} ${resp.data}`
+        );
       }
-    } else {
-      paramMap = paramMap.set("dir", params.get("dir"));
     }
 
     return paramMap;
   };
 
-  initCwd = async (params: URLSearchParams): Promise<string> => {
-    const paramMap = await this.getParamMap(params);
-    const dir = paramMap.get("dir", "");
-
-    if (dir != null && dir !== "") {
-      // in sharing mode
-      const dirPath = List(dir.split("/"));
-      this.props.ui.control.controls = this.props.ui.control.controls.set(
-        sharingCtrl,
-        ctrlOn
-      );
-      this.props.filesInfo.dirPath = dirPath;
-    } else {
-      this.props.ui.control.controls = this.props.ui.control.controls.set(
-        sharingCtrl,
-        ctrlOff
-      );
-      this.props.filesInfo.dirPath = List([]);
-    }
-
-    return "";
-  };
-
-  initAll = async (params: URLSearchParams): Promise<string> => {
+  initAuth = async (): Promise<string> => {
     const isAuthedStatus = await this.syncIsAuthed();
     if (isAuthedStatus !== "") {
       return isAuthedStatus;
     }
 
-    const selfStatuses = await Promise.all([this.self(), this.initCwd(params)]);
-    if (selfStatuses.join("") !== "") {
-      return selfStatuses.join(";");
+    const selfStatuses = await this.self();
+    if (selfStatuses !== "") {
+      return selfStatuses;
     }
 
     const getCapStatus = await this.getCaptchaID();
@@ -518,35 +564,58 @@ export class Updater {
       return getCapStatus;
     }
 
+    return "";
+  };
+
+  initAll = async (params: URLSearchParams): Promise<string> => {
+    const paramMap = await this.initParams(params);
+    const authStatus = await this.initAuth();
+    if (authStatus !== "") {
+      return authStatus;
+    }
+
+    const initClientCfgStatus = await this.initClientCfg();
+    if (initClientCfgStatus !== "") {
+      return initClientCfgStatus;
+    }
+
     this.initUITree();
 
     const isInSharingMode = this.props.ui.control.controls.get(sharingCtrl);
     if (
-      this.props.login.userRole === roleVisitor &&
-      isInSharingMode !== ctrlOn
+      (this.props.login.userRole === roleVisitor &&
+        isInSharingMode !== ctrlOn) ||
+      this.props.login.userRole === roleUser ||
+      this.props.login.userRole === roleAdmin
     ) {
-      return this.initStateForVisitor();
+      const shareDir = paramMap.get(shareDirQuery);
+      const initFilesStatus = await this.initFiles(shareDir);
+      if (initFilesStatus !== "") {
+        return initFilesStatus;
+      }
     }
 
-    const cwdStatus = await this.syncCwd();
-    if (cwdStatus !== "") {
-      return cwdStatus;
-    }
-
-    const isSharingStatus = await this.syncIsSharing(
-      this.props.filesInfo.dirPath.join("/")
-    );
-    if (isSharingStatus !== "") {
-      return isSharingStatus;
+    if (
+      this.props.login.userRole === roleUser ||
+      this.props.login.userRole === roleAdmin
+    ) {
+      const statuses = await Promise.all([
+        this.initUploadings(),
+        this.initSharings(),
+      ]);
+      if (statuses.join("") !== "") {
+        return statuses.join(";");
+      }
     }
 
     if (this.props.login.userRole === roleAdmin) {
-      return this.initStateForAdmin();
-    } else if (this.props.login.userRole === roleVisitor) {
-      // visitor under sharing mode
-      return this.initStateForVisitor();
+      const status = await this.initAdmin();
+      if (status !== "") {
+        return status;
+      }
     }
-    return this.initStateForAuthedUser();
+
+    return "";
   };
 
   resetUser = () => {

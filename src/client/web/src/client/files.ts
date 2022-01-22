@@ -10,9 +10,10 @@ import {
   GetSharingDirResp,
 } from "./";
 
-const filePathQuery = "fp";
-const listDirQuery = "dp";
-const shareIDQuery = "sh";
+export const filePathQuery = "fp";
+export const listDirQuery = "dp";
+export const shareIDQuery = "shid";
+export const shareDirQuery = "shdir";
 // TODO: get timeout from server
 
 function translateResp(resp: Response<any>): Response<any> {

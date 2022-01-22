@@ -14,6 +14,7 @@ import { LoginProps } from "./pane_login";
 import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
 import { Rows, Row } from "./layout/rows";
+import { shareIDQuery } from "../client/files";
 
 export interface SharingsProps {
   sharings: Map<string, string>;
@@ -63,7 +64,7 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
       const shareID = sharings.get(dirPath);
       const sharingURL = `${
         document.location.href.split("?")[0]
-      }?sh=${shareID}`;
+      }?${shareIDQuery}=${shareID}`;
 
       const row1 = (
         <div>
