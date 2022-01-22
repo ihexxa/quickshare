@@ -1,14 +1,15 @@
 import { mock, instance, verify, when, anything } from "ts-mockito";
-import { List, Map } from "immutable";
+import { Map } from "immutable";
 
 import { SharingsPanel } from "../panel_sharings";
 import { initUploadMgr } from "../../worker/upload_mgr";
 import { ICoreState, newState } from "../core_state";
 import { updater } from "../state_updater";
 import { MockWorker } from "../../worker/interface";
-import { MockUsersClient, resps as usersResps } from "../../client/users_mock";
-import { MockFilesClient, resps as filesResps } from "../../client/files_mock";
-import { MockSettingsClient } from "../../client/settings_mock";
+import { NewMockUsersClient } from "../../client/users_mock";
+import { NewMockFilesClient } from "../../client/files_mock";
+import { NewMockSettingsClient } from "../../client/settings_mock";
+import { makePromise } from "../../test/helpers";
 
 describe("SharingsPanel", () => {
   const initSharingsPanel = (): any => {
@@ -17,9 +18,9 @@ describe("SharingsPanel", () => {
     initUploadMgr(mockWorker);
 
     const coreState = newState();
-    const usersCl = new MockUsersClient("");
-    const filesCl = new MockFilesClient("");
-    const settingsCl = new MockSettingsClient("");
+    const usersCl = NewMockUsersClient("");
+    const filesCl = NewMockFilesClient("");
+    const settingsCl = NewMockSettingsClient("");
 
     updater().init(coreState);
     updater().setClients(usersCl, filesCl, settingsCl);
@@ -43,21 +44,20 @@ describe("SharingsPanel", () => {
     const { sharingsPanel, usersCl, filesCl } = initSharingsPanel();
 
     const newSharings = Map<string, string>({
-      "mock_sharingfolder1": "f123456",
-      "mock_sharingfolder2": "f123456",
-    })
+      mock_sharingfolder1: "f123456",
+      mock_sharingfolder2: "f123456",
+    });
 
-    filesCl.setMock({
-      ...filesResps,
-      listSharingIDsMockResp: {
+    filesCl.listSharingIDs = jest.fn().mockReturnValueOnce(
+      makePromise({
         status: 200,
         statusText: "",
         data: {
           // it seems immutable map will be converted into built-in map automatically
-          IDs: newSharings, 
+          IDs: newSharings,
         },
-      },
-    });
+      })
+    );
 
     await sharingsPanel.deleteSharing();
 

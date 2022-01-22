@@ -1,12 +1,19 @@
 import { List, Set, Map } from "immutable";
 
-import { initMockWorker } from "../../test/helpers";
+import { initMockWorker, makePromise } from "../../test/helpers";
 import { StateMgr } from "../state_mgr";
 import { User, UploadInfo } from "../../client";
-import { MockFilesClient, resps as filesResps } from "../../client/files_mock";
-import { MockUsersClient, resps as usersResps } from "../../client/users_mock";
 import {
-  MockSettingsClient,
+  NewMockFilesClient,
+  resps as filesResps,
+} from "../../client/files_mock";
+import { shareDirQuery } from "../../client/files";
+import {
+  NewMockUsersClient,
+  resps as usersResps,
+} from "../../client/users_mock";
+import {
+  NewMockSettingsClient,
   resps as settingsResps,
 } from "../../client/settings_mock";
 import { ICoreState, newState } from "../core_state";
@@ -22,9 +29,9 @@ describe("State Manager", () => {
   // };
 
   test("initUpdater for admin", async () => {
-    const usersCl = new MockUsersClient("");
-    const filesCl = new MockFilesClient("");
-    const settingsCl = new MockSettingsClient("");
+    const usersCl = NewMockUsersClient("");
+    const filesCl = NewMockFilesClient("");
+    const settingsCl = NewMockSettingsClient("");
 
     const mgr = new StateMgr({}); // it will call initUpdater
     mgr.setUsersClient(usersCl);
@@ -122,9 +129,10 @@ describe("State Manager", () => {
   });
 
   test("initUpdater for visitor in sharing mode", async () => {
-    const usersCl = new MockUsersClient("");
-    const filesCl = new MockFilesClient("");
-    const settingsCl = new MockSettingsClient("");
+    const usersCl = NewMockUsersClient("");
+    const filesCl = NewMockFilesClient("");
+    const settingsCl = NewMockSettingsClient("");
+
     const mockSelfResp = {
       status: 200,
       statusText: "",
@@ -151,13 +159,12 @@ describe("State Manager", () => {
         },
       },
     };
-    const mockIsAuthedResp = { status: 401, statusText: "", data: {} };
-    const mockUserResps = {
-      ...usersResps,
-      isAuthedMockResp: mockIsAuthedResp,
-      selfMockResp: mockSelfResp,
-    };
-    usersCl.setMock(mockUserResps);
+    usersCl.isAuthed = jest
+      .fn()
+      .mockReturnValue(
+        makePromise({ status: 401, statusText: "", data: {} })
+      );
+    usersCl.self = jest.fn().mockReturnValue(makePromise(mockSelfResp));
 
     const coreState = newState();
 
@@ -171,7 +178,8 @@ describe("State Manager", () => {
     };
 
     const sharingPath = "sharingPath/files";
-    const query = new URLSearchParams(`?dir=${sharingPath}`);
+    const query = new URLSearchParams(`?${shareDirQuery}=${sharingPath}`);
+
     await mgr.initUpdater(coreState, query);
 
     // browser
