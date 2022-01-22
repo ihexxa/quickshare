@@ -28,7 +28,7 @@ var (
 	// queries
 	FilePathQuery = "fp"
 	ListDirQuery  = "dp"
-	ShareIDQuery  = "sh"
+	ShareIDQuery  = "shid"
 
 	// headers
 	rangeHeader       = "Range"

@@ -75,16 +75,16 @@ export class JestSettingsClient {
     this.url = url;
   }
 
-  health = jest.fn().mockReturnValueOnce(makePromise(resps.healthMockResp));
+  health = jest.fn().mockReturnValue(makePromise(resps.healthMockResp));
   getClientCfg = jest
     .fn()
-    .mockReturnValueOnce(makePromise(resps.getClientCfgMockResp));
+    .mockReturnValue(makePromise(resps.getClientCfgMockResp));
   setClientCfg = jest
     .fn()
-    .mockReturnValueOnce(makePromise(resps.setClientCfgMockResp));
+    .mockReturnValue(makePromise(resps.setClientCfgMockResp));
   reportErrors = jest
     .fn()
-    .mockReturnValueOnce(makePromise(resps.reportErrorsMockResp));
+    .mockReturnValue(makePromise(resps.reportErrorsMockResp));
 }
 
 export const NewMockSettingsClient = (url: string): ISettingsClient => {
