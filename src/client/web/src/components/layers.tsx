@@ -1,6 +1,8 @@
 import * as React from "react";
 import { List } from "immutable";
 
+import { RiTimer2Line } from "@react-icons/all-files/ri/RiTimer2Line";
+
 import { updater } from "./state_updater";
 import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { AdminProps } from "./pane_admin";
@@ -10,7 +12,7 @@ import { AuthPane, LoginProps } from "./pane_login";
 import { FilesProps } from "./panel_files";
 import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
-import { sharingCtrl, ctrlOn } from "../common/controls";
+import { sharingCtrl, loadingCtrl, ctrlOn } from "../common/controls";
 
 export interface Props {
   filesInfo: FilesProps;
@@ -40,9 +42,11 @@ export class Layers extends React.Component<Props, State, {}> {
         ? "hidden"
         : "";
     const showSettings =
-      this.props.ui.control.controls.get("settingsDialog") === "on"
+      this.props.ui.control.controls.get("settingsDialog") === ctrlOn
         ? ""
         : "hidden";
+    const showLoading =
+      this.props.ui.control.controls.get(loadingCtrl) == ctrlOn ? "" : "hidden";
 
     return (
       <div id="layers">
@@ -53,6 +57,12 @@ export class Layers extends React.Component<Props, State, {}> {
               update={this.props.update}
               msg={this.props.msg}
             />
+          </div>
+        </div>
+
+        <div id="loading-layer" className={showLoading}>
+          <div id="loading-container">
+            <RiTimer2Line size="3rem" className="cyan1-font anm-rotate" />
           </div>
         </div>
 

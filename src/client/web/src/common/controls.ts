@@ -5,3 +5,4 @@ export const filesViewCtrl = "filesView";
 export const ctrlHidden = "hidden";
 export const ctrlOn = "on";
 export const ctrlOff = "off";
+export const loadingCtrl = "loading";

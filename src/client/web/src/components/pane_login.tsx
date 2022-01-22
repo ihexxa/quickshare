@@ -7,6 +7,7 @@ import { updater } from "./state_updater";
 import { alertMsg } from "../common/env";
 import { Quota, Preferences } from "../client";
 import { getErrMsg } from "../common/utils";
+import { ctrlOn, ctrlOff, loadingCtrl } from "../common/controls";
 
 export interface ExtInfo {
   usedSpace: string;
@@ -59,46 +60,47 @@ export class AuthPane extends React.Component<Props, State, {}> {
   };
 
   login = async () => {
-    return updater()
-      .login(
+    updater().setControlOption(loadingCtrl, ctrlOn);
+    this.props.update(updater().updateUI);
+
+    try {
+      const loginStatus = await updater().login(
         this.state.user,
         this.state.pwd,
         this.props.login.captchaID,
         this.state.captchaInput
-      )
-      .then((status: string): Promise<any> => {
-        this.setState({ captchaInput: "" });
-        if (status === "") {
-          const params = new URLSearchParams(
-            document.location.search.substring(1)
-          );
-          return updater().initAll(params);
-        } else {
-          throw status;
-        }
-      })
-      .then((status: string) => {
-        if (status !== "") {
-          throw status;
-        }
-        this.update(updater().updateAll);
-      })
-      .catch((status: Error) => {
-        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status.toString()));
-        return updater().getCaptchaID();
-      });
+      );
+      if (loginStatus !== "") {
+        alertMsg(
+          getErrMsg(this.props.msg.pkg, "op.fail", loginStatus.toString())
+        );
+        return;
+      }
+
+      const params = new URLSearchParams(document.location.search.substring(1));
+      const initStatus = await updater().initAll(params);
+      if (initStatus !== "") {
+        alertMsg(
+          getErrMsg(this.props.msg.pkg, "op.fail", initStatus.toString())
+        );
+      }
+
+      this.setState({ user: "", pwd: "" });
+    } finally {
+      this.setState({ pwd: "", captchaInput: "" });
+      updater().setControlOption(loadingCtrl, ctrlOff);
+      await this.refreshCaptcha();
+      this.props.update(updater().updateAll);
+    }
   };
 
   refreshCaptcha = async () => {
-    return updater()
-      .getCaptchaID()
-      .then((status: string) => {
-        if (status !== "") {
-          alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
-        } else {
-          this.props.update(updater().updateLogin);
-        }
-      });
+    const status = await updater().getCaptchaID();
+    if (status !== "") {
+      alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+    } else {
+      this.props.update(updater().updateLogin);
+    }
   };
 
   render() {

@@ -70,6 +70,7 @@
 
 .theme-default #layers {
   height: 0;
+  z-index: 3;
 }
 
 .theme-default #panes .container {
@@ -499,10 +500,26 @@
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
   overflow: scroll;
+  z-index: 100;
 }
 
 .theme-default #login-layer {
   z-index: 200;
+}
+
+.theme-default #loading-layer {
+  z-index: 201;
+}
+
+.theme-default #loading-container {
+  background-color: rgba(255, 255, 255, 1);
+  border-radius: 0.6rem;
+  padding: 0.5rem;
+  position: fixed;
+  right: 2rem;
+  bottom: 2rem;
+  height: 3rem;
+  z-index: 201;
 }
 
 .theme-default #settings-layer {
