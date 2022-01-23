@@ -1,8 +1,6 @@
 import * as React from "react";
 import { List } from "immutable";
 
-import { RiTimer2Line } from "@react-icons/all-files/ri/RiTimer2Line";
-
 import { updater } from "./state_updater";
 import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { AdminProps } from "./pane_admin";
@@ -13,6 +11,7 @@ import { FilesProps } from "./panel_files";
 import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
 import { sharingCtrl, loadingCtrl, ctrlOn } from "../common/controls";
+import { LoadingIcon } from "./visual/loading";
 
 export interface Props {
   filesInfo: FilesProps;
@@ -50,6 +49,10 @@ export class Layers extends React.Component<Props, State, {}> {
 
     return (
       <div id="layers">
+        <div id="loading-layer" className={showLoading}>
+          <LoadingIcon />
+        </div>
+
         <div id="login-layer" className={`layer ${showLogin}`}>
           <div id="root-container">
             <AuthPane
@@ -57,12 +60,6 @@ export class Layers extends React.Component<Props, State, {}> {
               update={this.props.update}
               msg={this.props.msg}
             />
-          </div>
-        </div>
-
-        <div id="loading-layer" className={showLoading}>
-          <div id="loading-container">
-            <RiTimer2Line size="3rem" className="cyan1-font anm-rotate" />
           </div>
         </div>
 

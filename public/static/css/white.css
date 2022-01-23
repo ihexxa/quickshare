@@ -513,13 +513,14 @@
 
 .theme-default #loading-container {
   background-color: rgba(255, 255, 255, 1);
-  border-radius: 0.6rem;
+  border-radius: 3rem;
   padding: 0.5rem;
   position: fixed;
   right: 2rem;
   bottom: 2rem;
-  height: 3rem;
   z-index: 201;
+  height: 5rem;
+  width: 5rem;
 }
 
 .theme-default #settings-layer {

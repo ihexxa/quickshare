@@ -2,10 +2,8 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { List, Map, Set } from "immutable";
 import FileSize from "filesize";
-import QRCode from "react-qr-code";
 
 import { RiFolder2Fill } from "@react-icons/all-files/ri/RiFolder2Fill";
-import { RiArchiveDrawerFill } from "@react-icons/all-files/ri/RiArchiveDrawerFill";
 import { RiFile2Fill } from "@react-icons/all-files/ri/RiFile2Fill";
 import { RiFileList2Fill } from "@react-icons/all-files/ri/RiFileList2Fill";
 import { RiCheckboxFill } from "@react-icons/all-files/ri/RiCheckboxFill";
@@ -30,7 +28,13 @@ import { Rows, Row } from "./layout/rows";
 import { Up } from "../worker/upload_mgr";
 import { UploadEntry, UploadState } from "../worker/interface";
 import { getIcon } from "./visual/icons";
-import { ctrlOn, sharingCtrl, filesViewCtrl } from "../common/controls";
+import {
+  ctrlOff,
+  ctrlOn,
+  sharingCtrl,
+  filesViewCtrl,
+  loadingCtrl,
+} from "../common/controls";
 
 export interface Item {
   name: string;
@@ -95,6 +99,11 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     };
   }
 
+  setLoading = (state: boolean) => {
+    updater().setControlOption(loadingCtrl, state ? ctrlOn : ctrlOff);
+    this.props.update(updater().updateUI);
+  };
+
   updateProgress = async (
     infos: Map<string, UploadEntry>,
     refresh: boolean
@@ -107,29 +116,24 @@ export class FilesPanel extends React.Component<Props, State, {}> {
 
     if (infos.size === 0 || infos.size === errCount) {
       // refresh used space
-      updater()
-        .self()
-        .then(() => {
-          this.props.update(updater().updateLogin);
-          this.props.update(updater().updateUploadingsInfo);
-        });
+      const status = await updater().self();
+      if (status !== "") {
+        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+        return;
+      }
+      this.props.update(updater().updateLogin);
+      this.props.update(updater().updateUploadingsInfo);
     }
 
     if (refresh) {
-      updater()
-        .setItems(this.props.filesInfo.dirPath)
-        .then((status: string) => {
-          if (status !== "") {
-            alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
-          } else {
-            this.props.update(updater().updateFilesInfo);
-            this.props.update(updater().updateUploadingsInfo);
-          }
-        });
-    } else {
-      this.props.update(updater().updateFilesInfo);
-      this.props.update(updater().updateUploadingsInfo);
+      const status = await updater().setItems(this.props.filesInfo.dirPath);
+      if (status !== "") {
+        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+        return;
+      }
     }
+    this.props.update(updater().updateFilesInfo);
+    this.props.update(updater().updateUploadingsInfo);
   };
 
   addUploads = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -154,7 +158,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     this.setState({ newFolderName: ev.target.value });
   };
 
-  onMkDir = () => {
+  onMkDir = async () => {
     if (this.state.newFolderName === "") {
       alertMsg(this.props.msg.pkg.get("browser.folder.add.fail"));
       return;
@@ -164,28 +168,37 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       this.props.filesInfo.dirPath.join("/"),
       this.state.newFolderName
     );
-    updater()
-      .mkDir(dirPath)
-      .then((status: string) => {
-        if (status !== "") {
-          throw status;
-        }
-        this.setState({ newFolderName: "" });
-        return updater().setItems(this.props.filesInfo.dirPath);
-      })
-      .then((status: string) => {
-        if (status !== "") {
-          throw status;
-        }
-        this.props.update(updater().updateFilesInfo);
-        this.props.update(updater().updateSharingsInfo);
-      })
-      .catch((status: Error) => {
-        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status.toString()));
-      });
+
+    this.setLoading(true);
+
+    try {
+      const mkDirStatus = await updater().mkDir(dirPath);
+      if (mkDirStatus !== "") {
+        alertMsg(
+          getErrMsg(this.props.msg.pkg, "op.fail", mkDirStatus.toString())
+        );
+        return;
+      }
+
+      const setItemsStatus = await updater().setItems(
+        this.props.filesInfo.dirPath
+      );
+      if (setItemsStatus !== "") {
+        alertMsg(
+          getErrMsg(this.props.msg.pkg, "op.fail", setItemsStatus.toString())
+        );
+        return;
+      }
+
+      this.setState({ newFolderName: "" });
+      this.props.update(updater().updateFilesInfo);
+      this.props.update(updater().updateSharingsInfo);
+    } finally {
+      this.setLoading(false);
+    }
   };
 
-  delete = () => {
+  delete = async () => {
     // TODO: selected should be cleaned after change the cwd
     if (this.props.filesInfo.dirPath.join("/") !== this.state.selectedSrc) {
       alertMsg(this.props.msg.pkg.get("browser.del.fail"));
@@ -207,37 +220,42 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       }
     }
 
-    updater()
-      .delete(
+    this.setLoading(true);
+
+    try {
+      const deleteStatus = await updater().delete(
         this.props.filesInfo.dirPath,
         this.props.filesInfo.items,
         this.state.selectedItems
-      )
-      .then((status: string) => {
-        if (status !== "") {
-          throw status;
-        }
-        return updater().self();
-      })
-      .then((status: string) => {
-        if (status !== "") {
-          throw status;
-        }
+      );
+      if (deleteStatus !== "") {
+        alertMsg(
+          getErrMsg(this.props.msg.pkg, "op.fail", deleteStatus.toString())
+        );
+        return deleteStatus;
+      }
 
-        this.props.update(updater().updateFilesInfo);
-        this.props.update(updater().updateSharingsInfo);
-        this.props.update(updater().updateLogin);
-        this.setState({
-          selectedSrc: "",
-          selectedItems: Map<string, boolean>(),
-        });
-      })
-      .catch((status: Error) => {
-        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status.toString()));
+      const selfStatus = await updater().self();
+      if (selfStatus !== "") {
+        alertMsg(
+          getErrMsg(this.props.msg.pkg, "op.fail", selfStatus.toString())
+        );
+        return selfStatus;
+      }
+
+      this.props.update(updater().updateFilesInfo);
+      this.props.update(updater().updateSharingsInfo);
+      this.props.update(updater().updateLogin);
+      this.setState({
+        selectedSrc: "",
+        selectedItems: Map<string, boolean>(),
       });
+    } finally {
+      this.setLoading(false);
+    }
   };
 
-  moveHere = () => {
+  moveHere = async () => {
     const oldDir = this.state.selectedSrc;
     const newDir = this.props.filesInfo.dirPath.join("/");
     if (oldDir === newDir) {
@@ -245,26 +263,30 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       return;
     }
 
-    updater()
-      .moveHere(
+    this.setLoading(true);
+
+    try {
+      const moveStatus = await updater().moveHere(
         this.state.selectedSrc,
         this.props.filesInfo.dirPath.join("/"),
         this.state.selectedItems
-      )
-      .then((status: string) => {
-        if (status !== "") {
-          throw status;
-        }
-        this.props.update(updater().updateFilesInfo);
-        this.props.update(updater().updateSharingsInfo);
-        this.setState({
-          selectedSrc: "",
-          selectedItems: Map<string, boolean>(),
-        });
-      })
-      .catch((status: Error) => {
-        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status.toString()));
+      );
+      if (moveStatus !== "") {
+        alertMsg(
+          getErrMsg(this.props.msg.pkg, "op.fail", moveStatus.toString())
+        );
+        return;
+      }
+
+      this.props.update(updater().updateFilesInfo);
+      this.props.update(updater().updateSharingsInfo);
+      this.setState({
+        selectedSrc: "",
+        selectedItems: Map<string, boolean>(),
       });
+    } finally {
+      this.setLoading(false);
+    }
   };
 
   gotoChild = async (childDirName: string) => {
@@ -272,17 +294,18 @@ export class FilesPanel extends React.Component<Props, State, {}> {
   };
 
   goHome = async () => {
-    return updater()
-      .setHomeItems()
-      .then((status: string) => {
-        if (status !== "") {
-          throw status;
-        }
-        this.props.update(updater().updateFilesInfo);
-      })
-      .catch((status: Error) => {
-        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status.toString()));
-      });
+    this.setLoading(true);
+
+    try {
+      const status = await updater().setHomeItems();
+      if (status !== "") {
+        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+        return;
+      }
+      this.props.update(updater().updateFilesInfo);
+    } finally {
+      this.setLoading(false);
+    }
   };
 
   chdir = async (dirPath: List<string>) => {
@@ -293,24 +316,25 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       return;
     }
 
-    return updater()
-      .setItems(dirPath)
-      .then((status: string) => {
-        if (status !== "") {
-          throw status;
-        }
-        return updater().syncIsSharing(dirPath.join("/"));
-      })
-      .then((status: string) => {
-        if (status !== "") {
-          throw status;
-        }
-        this.props.update(updater().updateFilesInfo);
-        this.props.update(updater().updateSharingsInfo);
-      })
-      .catch((status: Error) => {
-        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status.toString()));
-      });
+    this.setLoading(true);
+    try {
+      const status = await updater().setItems(dirPath);
+      if (status !== "") {
+        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+        return;
+      }
+
+      const isSharingStatus = await updater().syncIsSharing(dirPath.join("/"));
+      if (isSharingStatus !== "") {
+        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", isSharingStatus));
+        return;
+      }
+
+      this.props.update(updater().updateFilesInfo);
+      this.props.update(updater().updateSharingsInfo);
+    } finally {
+      this.setLoading(false);
+    }
   };
 
   select = (itemName: string) => {
@@ -356,49 +380,59 @@ export class FilesPanel extends React.Component<Props, State, {}> {
   };
 
   addSharing = async () => {
-    return updater()
-      .addSharing()
-      .then((status: string) => {
-        if (status !== "") {
-          throw status;
-        } else {
-          updater().setSharing(true);
-          return updater().listSharings();
-        }
-      })
-      .then((status: string) => {
-        if (status !== "") {
-          throw status;
-        }
-        this.props.update(updater().updateSharingsInfo);
-        this.props.update(updater().updateFilesInfo);
-      })
-      .catch((status: Error) => {
-        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status.toString()));
-      });
+    this.setLoading(true);
+
+    try {
+      const addStatus = await updater().addSharing();
+      if (addStatus !== "") {
+        alertMsg(
+          getErrMsg(this.props.msg.pkg, "op.fail", addStatus.toString())
+        );
+        return;
+      }
+
+      updater().setSharing(true);
+      const listStatus = await updater().listSharings();
+      if (listStatus !== "") {
+        alertMsg(
+          getErrMsg(this.props.msg.pkg, "op.fail", listStatus.toString())
+        );
+        return;
+      }
+
+      this.props.update(updater().updateSharingsInfo);
+      this.props.update(updater().updateFilesInfo);
+    } finally {
+      this.setLoading(false);
+    }
   };
 
   deleteSharing = async (dirPath: string) => {
-    return updater()
-      .deleteSharing(dirPath)
-      .then((status) => {
-        if (status !== "") {
-          throw status;
-        } else {
-          updater().setSharing(false);
-          return updater().listSharings();
-        }
-      })
-      .then((status: string) => {
-        if (status !== "") {
-          throw status;
-        }
-        this.props.update(updater().updateSharingsInfo);
-        this.props.update(updater().updateFilesInfo);
-      })
-      .catch((status: Error) => {
-        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status.toString()));
-      });
+    this.setLoading(true);
+
+    try {
+      const delStatus = await updater().deleteSharing(dirPath);
+      if (delStatus !== "") {
+        alertMsg(
+          getErrMsg(this.props.msg.pkg, "op.fail", delStatus.toString())
+        );
+        return;
+      }
+
+      updater().setSharing(false);
+      const listStatus = await updater().listSharings();
+      if (listStatus !== "") {
+        alertMsg(
+          getErrMsg(this.props.msg.pkg, "op.fail", listStatus.toString())
+        );
+        return;
+      }
+
+      this.props.update(updater().updateSharingsInfo);
+      this.props.update(updater().updateFilesInfo);
+    } finally {
+      this.setLoading(false);
+    }
   };
 
   updateItems = (items: Object) => {
@@ -796,9 +830,12 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         this.prepareTable(this.props.filesInfo.items, showOp)
       );
 
-    const usedSpace = FileSize(parseInt(this.props.login.extInfo.usedSpace, 10), {
-      round: 0,
-    });
+    const usedSpace = FileSize(
+      parseInt(this.props.login.extInfo.usedSpace, 10),
+      {
+        round: 0,
+      }
+    );
     const spaceLimit = FileSize(
       parseInt(this.props.login.quota.spaceLimit, 10),
       {
