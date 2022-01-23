@@ -503,11 +503,19 @@
   clear: both;
 }
 
-.anm-rotate {
-  animation: trm-rotate 1s infinite linear;
+.anm-rotate-s {
+  animation: trm-rotate-s 1s infinite linear;
 }
 
-@keyframes trm-rotate {
+.anm-rotate-m {
+  animation: trm-rotate-m 1s infinite linear;
+}
+
+.anm-rotate-f {
+  animation: trm-rotate-f 1s infinite linear;
+}
+
+@keyframes trm-rotate-f {
   20% {
     transform: rotate(72deg);
   }
@@ -519,6 +527,42 @@
   }
   80% {
     transform: rotate(288deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes trm-rotate-m {
+  20% {
+    transform: rotate(36deg);
+  }
+  40% {
+    transform: rotate(72deg);
+  }
+  60% {
+    transform: rotate(144deg);
+  }
+  80% {
+    transform: rotate(288deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes trm-rotate-s {
+  20% {
+    transform: rotate(18deg);
+  }
+  40% {
+    transform: rotate(36deg);
+  }
+  60% {
+    transform: rotate(72deg);
+  }
+  80% {
+    transform: rotate(144deg);
   }
   100% {
     transform: rotate(360deg);
