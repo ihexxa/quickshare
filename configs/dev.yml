@@ -42,7 +42,7 @@ site:
     siteName: "Quickshare"
     siteDesc: "quick and simple file sharing"
     bg:
-      url: "/v1/fs/files?fp=qs/files/Screen%20Shot%202021-08-07%20at%2020.03.08%20PM.png"
+      url: "/static/img/textured_paper.png"
       repeat: "repeat"
-      position: "fixed"
-      align: "center"
+      position: "center"
+      align: "fixed"
