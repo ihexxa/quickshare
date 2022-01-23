@@ -539,10 +539,9 @@ export class Updater {
 
     this.initUITree();
 
-    const isInSharingMode = this.props.ui.control.controls.get(sharingCtrl);
+    const isInSharingMode = paramMap.get(shareDirQuery) !== "";
     if (
-      (this.props.login.userRole === roleVisitor &&
-        isInSharingMode === ctrlOn) ||
+      (this.props.login.userRole === roleVisitor && isInSharingMode) ||
       this.props.login.userRole === roleUser ||
       this.props.login.userRole === roleAdmin
     ) {
