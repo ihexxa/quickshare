@@ -11,6 +11,7 @@ import { Container } from "./layout/container";
 import { Card } from "./layout/card";
 import { Rows, Row } from "./layout/rows";
 import { ClientErrorV001, ErrorLogger } from "../common/log_error";
+import { loadingCtrl, ctrlOn, ctrlOff } from "../common/controls";
 export interface Props {
   login: LoginProps;
   msg: MsgProps;
@@ -85,59 +86,74 @@ export class PaneSettings extends React.Component<Props, State, {}> {
     };
   }
 
+  setLoading = (state: boolean) => {
+    updater().setControlOption(loadingCtrl, state ? ctrlOn : ctrlOff);
+    this.props.update(updater().updateUI);
+  };
+
   syncPreferences = async () => {
-    updater()
-      .syncPreferences()
-      .then((status: string) => {
-        if (status === "") {
-          alertMsg(this.props.msg.pkg.get("update.ok"));
-        } else {
-          alertMsg(this.props.msg.pkg.get("update.fail"));
-        }
-      });
+    this.setLoading(true);
+    try {
+      const status = await updater().syncPreferences();
+      if (status !== "") {
+        alertMsg(this.props.msg.pkg.get("update.fail"));
+        return;
+      }
+      alertMsg(this.props.msg.pkg.get("update.ok"));
+    } finally {
+      this.setLoading(false);
+    }
   };
 
   setPwd = async (): Promise<any> => {
     if (this.state.newPwd1 !== this.state.newPwd2) {
       alertMsg(this.props.msg.pkg.get("settings.pwd.notSame"));
+      return;
     } else if (
       this.state.oldPwd == "" ||
       this.state.newPwd1 == "" ||
       this.state.newPwd2 == ""
     ) {
       alertMsg(this.props.msg.pkg.get("settings.pwd.empty"));
+      return;
     } else if (this.state.oldPwd == this.state.newPwd1) {
       alertMsg(this.props.msg.pkg.get("settings.pwd.notChanged"));
-    } else {
-      return updater()
-        .setPwd(this.state.oldPwd, this.state.newPwd1)
-        .then((status: string) => {
-          if (status === "") {
-            alertMsg(this.props.msg.pkg.get("update.ok"));
-          } else {
-            alertMsg(this.props.msg.pkg.get("update.fail"));
-          }
-          this.setState({
-            oldPwd: "",
-            newPwd1: "",
-            newPwd2: "",
-          });
-        });
+      return;
+    }
+
+    this.setLoading(true);
+    try {
+      const status = await updater().setPwd(
+        this.state.oldPwd,
+        this.state.newPwd1
+      );
+      if (status !== "") {
+        alertMsg(this.props.msg.pkg.get("update.fail"));
+        return;
+      }
+
+      alertMsg(this.props.msg.pkg.get("update.ok"));
+    } finally {
+      this.setState({
+        oldPwd: "",
+        newPwd1: "",
+        newPwd2: "",
+      });
+      this.setLoading(false);
     }
   };
 
-  setLan = (lan: string) => {
+  setLan = async (lan: string) => {
     updater().setLan(lan);
-    updater()
-      .syncPreferences()
-      .then((status: string) => {
-        if (status === "") {
-          alertMsg(this.props.msg.pkg.get("update.ok"));
-          this.props.update(updater().updateMsg);
-        } else {
-          alertMsg(this.props.msg.pkg.get("update.fail"));
-        }
-      });
+    try {
+      const status = await updater().syncPreferences();
+      if (status !== "") {
+        alertMsg(this.props.msg.pkg.get("update.fail"));
+      }
+    } finally {
+      alertMsg(this.props.msg.pkg.get("update.ok"));
+      this.props.update(updater().updateMsg);
+    }
   };
 
   truncateErrors = () => {
