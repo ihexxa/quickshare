@@ -3,6 +3,7 @@
 </h1>
 <p align="center">
   Quick and simple file sharing between different devices.
+  (<a href="https://github.com/ihexxa/quickshare/blob/main/docs/screenshots.md">Screenshots</a>)
 </p>
 <p align="center">
   <a href="https://github.com/ihexxa/quickshare/actions">
@@ -22,11 +23,7 @@ This is a [demo on Heroku](https://hexxa-quickshare.herokuapp.com/).
 
 ![Quickshare on desktop](./docs/imgs/desktop_3.png)
 
-
-
 English | [简体中文](./docs/README_zh-cn.md)
-
-[Screenshots](./docs/screenshots.md) | [界面截图](./docs/screenshots.md)
 
 ## Features
 
@@ -49,7 +46,6 @@ English | [简体中文](./docs/README_zh-cn.md)
   - I18n support
   - Wallpaper customization
   - Cross-platform: support Linux, Mac and Windows
-
 
 ## Quick Start
 

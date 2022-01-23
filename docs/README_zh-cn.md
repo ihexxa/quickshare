@@ -3,6 +3,7 @@
 </h1>
 <p align="center">
   简单的文件共享服务, 使用Go/Golang, Typescript, Gin, React, Boltdb等构建.
+  (<a href="https://github.com/ihexxa/quickshare/blob/main/docs/screenshots.md">界面截图</a>)
 </p>
 <p align="center">
   <a href="https://github.com/ihexxa/quickshare/actions">
@@ -23,8 +24,6 @@
 ![Quickshare on desktop](./imgs/desktop_3.png)
 
 [English](../README.md) | 简体中文
-
-[Screenshots](./screenshots.md) | [界面截图](./screenshots.md)
 
 ## 主要功能
 
