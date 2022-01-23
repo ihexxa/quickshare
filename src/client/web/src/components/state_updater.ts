@@ -420,16 +420,8 @@ export class Updater {
     if (shareDir !== "") {
       // in sharing mode
       const dirPath = List(shareDir.split("/"));
-      this.props.ui.control.controls = this.props.ui.control.controls.set(
-        sharingCtrl,
-        ctrlOn
-      );
       this.props.filesInfo.dirPath = dirPath;
     } else {
-      this.props.ui.control.controls = this.props.ui.control.controls.set(
-        sharingCtrl,
-        ctrlOff
-      );
       this.props.filesInfo.dirPath = List([]);
     }
 
@@ -506,6 +498,14 @@ export class Updater {
     return paramMap;
   };
 
+  initControls = async (params: Map<string, string>) => {
+    const shareDir = params.get(shareDirQuery);
+    this.props.ui.control.controls = this.props.ui.control.controls.set(
+      sharingCtrl,
+      shareDir !== "" ? ctrlOn : ctrlOff
+    );
+  };
+
   initAuth = async (): Promise<string> => {
     const isAuthedStatus = await this.syncIsAuthed();
     if (isAuthedStatus !== "") {
@@ -537,6 +537,7 @@ export class Updater {
       return initClientCfgStatus;
     }
 
+    this.initControls(paramMap);
     this.initUITree();
 
     const isInSharingMode = paramMap.get(shareDirQuery) !== "";

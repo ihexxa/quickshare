@@ -161,9 +161,7 @@ describe("State Manager", () => {
     };
     usersCl.isAuthed = jest
       .fn()
-      .mockReturnValue(
-        makePromise({ status: 401, statusText: "", data: {} })
-      );
+      .mockReturnValue(makePromise({ status: 401, statusText: "", data: {} }));
     usersCl.self = jest.fn().mockReturnValue(makePromise(mockSelfResp));
 
     const coreState = newState();
@@ -187,7 +185,7 @@ describe("State Manager", () => {
     expect(coreState.filesInfo.dirPath.join("/")).toEqual(sharingPath);
     expect(coreState.filesInfo.isSharing).toEqual(true);
     expect(coreState.filesInfo.items).toEqual(
-      List(filesResps.listHomeMockResp.data.metadatas)
+      List(filesResps.listMockResp.data.metadatas)
     );
     expect(coreState.sharingsInfo.sharings).toEqual(Map<string, string>());
     expect(coreState.uploadingsInfo.uploadings).toEqual(List<UploadEntry>([]));
