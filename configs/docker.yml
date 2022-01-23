@@ -8,7 +8,7 @@ server:
   debug: false
   host: "0.0.0.0"
   port: 8686
-  readTimeout: 8000
+  readTimeout: 5000
   writerTimeout: 86400000 # 1 day
   maxHeaderBytes: 512
   publicPath: "/quickshare/public"
@@ -44,5 +44,5 @@ site:
     bg:
       url: "/static/img/textured_paper.png"
       repeat: "repeat"
-      position: "fixed"
-      align: "center"
+      position: "center"
+      align: "fixed"
