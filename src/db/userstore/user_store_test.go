@@ -219,6 +219,13 @@ func TestUserStores(t *testing.T) {
 			}
 		}
 
+		nameToID, err := store.ListUserIDs()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(nameToID) != len(users) {
+			t.Fatalf("nameToID size (%d) should be same as (%d)", len(nameToID), len(users))
+		}
 	}
 
 	testRoleMethods := func(t *testing.T, store IUserStore) {

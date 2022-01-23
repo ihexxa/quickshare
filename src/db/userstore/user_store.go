@@ -91,6 +91,7 @@ type IUserStore interface {
 	SetPwd(id uint64, pwd string) error
 	SetPreferences(id uint64, settings *Preferences) error
 	ListUsers() ([]*User, error)
+	ListUserIDs() (map[string]string, error)
 	AddRole(role string) error
 	DelRole(role string) error
 	ListRoles() (map[string]bool, error)
@@ -208,16 +209,21 @@ func (us *KVUserStore) DelUser(id uint64) error {
 	defer us.mtx.Unlock()
 
 	userID := fmt.Sprint(id)
-	name, ok := us.store.GetStringIn(UsersNs, userID)
+	infoStr, ok := us.store.GetStringIn(UsersNs, userID)
 	if !ok {
 		return fmt.Errorf("userID (%s) does not exist", userID)
 	}
+	user := &User{}
+	err := json.Unmarshal([]byte(infoStr), user)
+	if err != nil {
+		return err
+	}
 
 	// TODO: add complement operations if part of the actions fails
-	err1 := us.store.DelStringIn(IDsNs, name)
+	err1 := us.store.DelStringIn(IDsNs, user.Name)
 	err2 := us.store.DelStringIn(UsersNs, userID)
 	if err1 != nil || err2 != nil {
-		return fmt.Errorf("get id(%s) user(%s)", err1, err2)
+		return fmt.Errorf("DelUser: err1(%s) err2(%s)", err1, err2)
 	}
 	return nil
 }
@@ -425,6 +431,10 @@ func (us *KVUserStore) ListUsers() ([]*User, error) {
 	if err != nil {
 		return nil, err
 	}
+	nameToID, err := us.store.ListStringsIn(IDsNs)
+	if err != nil {
+		return nil, err
+	}
 
 	users := []*User{}
 	for _, infoStr := range idToInfo {
@@ -438,7 +448,39 @@ func (us *KVUserStore) ListUsers() ([]*User, error) {
 		users = append(users, user)
 	}
 
+	// redundant check
+	if len(idToInfo) != len(nameToID) {
+		if len(idToInfo) > len(nameToID) {
+			for _, user := range users {
+				_, ok := nameToID[user.Name]
+				if !ok {
+					err = us.store.DelStringIn(UsersNs, fmt.Sprint(user.ID))
+					if err != nil {
+						return nil, err
+					}
+				}
+			}
+		} else {
+			for name, id := range nameToID {
+				_, ok := idToInfo[id]
+				if !ok {
+					err = us.store.DelStringIn(IDsNs, name)
+					if err != nil {
+						return nil, err
+					}
+				}
+			}
+		}
+	}
+
 	return users, nil
+}
+
+func (us *KVUserStore) ListUserIDs() (map[string]string, error) {
+	us.mtx.RLock()
+	defer us.mtx.RUnlock()
+
+	return us.store.ListStringsIn(IDsNs)
 }
 
 func (us *KVUserStore) AddRole(role string) error {
