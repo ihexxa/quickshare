@@ -471,48 +471,6 @@ export class Updater {
     return "";
   };
 
-  initStateForVisitor = async (): Promise<any> => {
-    const status = await this.getClientCfg();
-    if (status !== "") {
-      return status;
-    }
-
-    const syncLanStatus = await this.syncLan();
-    if (syncLanStatus !== "") {
-      return syncLanStatus;
-    }
-    return "";
-  };
-
-  initStateForAuthedUser = async (): Promise<string> => {
-    const statuses = await Promise.all([
-      this.refreshUploadings(),
-      this.listSharings(),
-    ]);
-    if (statuses.join("") !== "") {
-      return statuses.join(";");
-    }
-
-    this.initUploads();
-    return "";
-  };
-
-  initStateForAdmin = async (): Promise<string> => {
-    const initVisitorStatus = await this.initStateForVisitor();
-    if (initVisitorStatus !== "") {
-      return initVisitorStatus;
-    }
-    const initAuthedUserStatus = await this.initStateForAuthedUser();
-    if (initAuthedUserStatus !== "") {
-      return initAuthedUserStatus;
-    }
-    const statuses = await Promise.all([this.listRoles(), this.listUsers()]);
-    if (statuses.join("") !== "") {
-      return statuses.join(";");
-    }
-    return "";
-  };
-
   syncCwd = async (): Promise<string> => {
     if (this.props.filesInfo.dirPath.size !== 0) {
       return this.setItems(this.props.filesInfo.dirPath);
@@ -584,7 +542,7 @@ export class Updater {
     const isInSharingMode = this.props.ui.control.controls.get(sharingCtrl);
     if (
       (this.props.login.userRole === roleVisitor &&
-        isInSharingMode !== ctrlOn) ||
+        isInSharingMode === ctrlOn) ||
       this.props.login.userRole === roleUser ||
       this.props.login.userRole === roleAdmin
     ) {

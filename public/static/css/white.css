@@ -119,12 +119,17 @@
   height: 3.8rem;
 }
 
-.theme-default #pane-login input {
+.theme-default #pane-login input,
+.theme-default #pane-login input:hover,
+.theme-default #pane-login input:focus,
+.theme-default #pane-login input:active {
   width: 100%;
   padding: 0;
   border: none;
   margin: 0 1rem;
   background-color: transparent;
+  outline: none;
+  box-shadow: none;
 }
 
 .theme-default #btn-login {

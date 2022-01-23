@@ -33,6 +33,7 @@ export interface State {
   user: string;
   pwd: string;
   captchaInput: string;
+  captchaLoaded: boolean;
 }
 
 export class AuthPane extends React.Component<Props, State, {}> {
@@ -44,6 +45,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
       user: "",
       pwd: "",
       captchaInput: "",
+      captchaLoaded: false,
     };
   }
 
@@ -153,11 +155,15 @@ export class AuthPane extends React.Component<Props, State, {}> {
                   placeholder={this.props.msg.pkg.get("login.captcha")}
                 />
               </div>,
+
               <img
                 id="captcha"
                 src={`/v1/captchas/imgs?capid=${this.props.login.captchaID}`}
-                className="captcha"
+                className={`captcha ${
+                  this.state.captchaLoaded ? "" : "hidden"
+                }`}
                 onClick={this.refreshCaptcha}
+                onLoad={() => this.setState({ captchaLoaded: true })}
               />,
             ])}
             childrenStyles={List([
