@@ -10,6 +10,7 @@ import { User, Quota } from "../client";
 import { updater } from "./state_updater";
 import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
+import { loadingCtrl, ctrlOn, ctrlOff } from "../common/controls";
 
 export interface AdminProps {
   users: Map<string, User>;
@@ -103,41 +104,57 @@ export class UserForm extends React.Component<
     });
   };
 
+  setLoading = (state: boolean) => {
+    updater().setControlOption(loadingCtrl, state ? ctrlOn : ctrlOff);
+    this.props.update(updater().updateUI);
+  };
+
   setPwd = async () => {
     if (this.state.newPwd1 !== this.state.newPwd2) {
       alertMsg(this.props.msg.pkg.get("settings.pwd.notSame"));
       return;
     }
 
-    return updater()
-      .forceSetPwd(this.state.id, this.state.newPwd1)
-      .then((status: string) => {
-        if (status === "") {
-          alertMsg(this.props.msg.pkg.get("update.ok"));
-        } else {
-          alertMsg(this.props.msg.pkg.get("update.fail"));
-        }
-        this.setState({
-          newPwd1: "",
-          newPwd2: "",
-        });
-      });
+    this.setLoading(true);
+    try {
+      const status = await updater().forceSetPwd(
+        this.state.id,
+        this.state.newPwd1
+      );
+      if (status !== "") {
+        alertMsg(this.props.msg.pkg.get("update.fail"));
+        return;
+      }
+      alertMsg(this.props.msg.pkg.get("update.ok"));
+    } finally {
+      this.setLoading(false);
+    }
   };
 
   setUser = async () => {
-    return updater()
-      .setUser(this.props.id, this.state.role, this.state.quota)
-      .then((status: string) => {
-        if (status === "") {
-          alertMsg(this.props.msg.pkg.get("update.ok"));
-        } else {
-          alertMsg(this.props.msg.pkg.get("update.fail"));
-        }
-        return updater().listUsers();
-      })
-      .then(() => {
-        this.props.update(updater().updateAdmin);
-      });
+    this.setLoading(true);
+    try {
+      const status = await updater().setUser(
+        this.props.id,
+        this.state.role,
+        this.state.quota
+      );
+      if (status !== "") {
+        alertMsg(this.props.msg.pkg.get("update.fail"));
+        return;
+      }
+
+      const listStatus = await updater().listUsers();
+      if (listStatus !== "") {
+        alertMsg(this.props.msg.pkg.get("update.fail"));
+        return;
+      }
+
+      alertMsg(this.props.msg.pkg.get("update.ok"));
+    } finally {
+      this.props.update(updater().updateAdmin);
+      this.setLoading(false);
+    }
   };
 
   delUser = async () => {
@@ -145,17 +162,25 @@ export class UserForm extends React.Component<
       return;
     }
 
-    return updater()
-      .delUser(this.state.id)
-      .then((status: string) => {
-        if (status !== "") {
-          alertMsg(this.props.msg.pkg.get("delete.fail"));
-        }
-        return updater().listUsers();
-      })
-      .then((_: string) => {
-        this.props.update(updater().updateAdmin);
-      });
+    this.setLoading(true);
+    try {
+      const status = await updater().delUser(this.state.id);
+      if (status !== "") {
+        alertMsg(this.props.msg.pkg.get("delete.fail"));
+        return;
+      }
+
+      const listStatus = await updater().listUsers();
+      if (listStatus !== "") {
+        alertMsg(this.props.msg.pkg.get("op.fail"));
+        return;
+      }
+
+      alertMsg(this.props.msg.pkg.get("delete.ok"));
+    } finally {
+      this.props.update(updater().updateAdmin);
+      this.setLoading(false);
+    }
   };
 
   toggle = () => {
@@ -369,14 +394,30 @@ export class AdminPane extends React.Component<Props, State, {}> {
     this.setState({ newRole: ev.target.value });
   };
 
+  setLoading = (state: boolean) => {
+    updater().setControlOption(loadingCtrl, state ? ctrlOn : ctrlOff);
+    this.props.update(updater().updateUI);
+  };
+
   addRole = async () => {
-    const status = await updater().addRole(this.state.newRole);
-    if (status !== "") {
-      alertMsg(this.props.msg.pkg.get("add.fail"));
-    } else {
+    this.setLoading(true);
+    try {
+      const status = await updater().addRole(this.state.newRole);
+      if (status !== "") {
+        alertMsg(this.props.msg.pkg.get("add.fail"));
+        return;
+      }
+
+      const listStatus = await updater().listRoles();
+      if (listStatus !== "") {
+        alertMsg(this.props.msg.pkg.get("add.fail"));
+        return;
+      }
+
       alertMsg(this.props.msg.pkg.get("add.ok"));
-      await updater().listRoles();
+    } finally {
       this.props.update(updater().updateAdmin);
+      this.setLoading(false);
     }
   };
 
@@ -385,12 +426,24 @@ export class AdminPane extends React.Component<Props, State, {}> {
       return;
     }
 
-    const status = await updater().delRole(role);
-    if (status !== "") {
-      this.props.msg.pkg.get("delete.fail");
-    } else {
+    this.setLoading(true);
+
+    try {
+      const status = await updater().delRole(role);
+      if (status !== "") {
+        this.props.msg.pkg.get("delete.fail");
+        return;
+      }
+
+      const listStatus = await updater().listRoles();
+      if (listStatus !== "") {
+        alertMsg(this.props.msg.pkg.get("add.fail"));
+        return;
+      }
+
       this.props.msg.pkg.get("delete.ok");
-      await updater().listRoles();
+    } finally {
+      this.setLoading(false);
       this.props.update(updater().updateAdmin);
     }
   };
@@ -401,27 +454,38 @@ export class AdminPane extends React.Component<Props, State, {}> {
       return;
     }
 
-    const status = await updater().addUser({
-      id: "", // backend will fill it
-      name: this.state.newUserName,
-      pwd: this.state.newUserPwd1,
-      role: this.state.newUserRole,
-      quota: undefined,
-      usedSpace: "0",
-      preferences: undefined,
-    });
+    this.setLoading(true);
 
-    if (status !== "") {
-      alertMsg(this.props.msg.pkg.get("add.fail"));
-    } else {
+    try {
+      const status = await updater().addUser({
+        id: "", // backend will fill it
+        name: this.state.newUserName,
+        pwd: this.state.newUserPwd1,
+        role: this.state.newUserRole,
+        quota: undefined,
+        usedSpace: "0",
+        preferences: undefined,
+      });
+      if (status !== "") {
+        alertMsg(this.props.msg.pkg.get("add.fail"));
+        return;
+      }
+
+      const listStatus = await updater().listUsers();
+      if (listStatus !== "") {
+        alertMsg(this.props.msg.pkg.get("op.fail"));
+        return;
+      }
+
       alertMsg(this.props.msg.pkg.get("add.ok"));
+    } finally {
       this.setState({
         newUserName: "",
         newUserPwd1: "",
         newUserPwd2: "",
         newUserRole: "",
       });
-      await updater().listUsers();
+      this.setLoading(false);
       this.props.update(updater().updateAdmin);
     }
   };
@@ -652,6 +716,11 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
     super(p);
   }
 
+  setLoading = (state: boolean) => {
+    updater().setControlOption(loadingCtrl, state ? ctrlOn : ctrlOff);
+    this.props.update(updater().updateUI);
+  };
+
   setClientCfg = async () => {
     const bgURL = this.props.ui.bg.url;
     if (bgURL.length === 0 || bgURL.length >= 4096) {
@@ -690,19 +759,23 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
       return;
     }
 
-    return updater()
-      .setClientCfgRemote({
+    this.setLoading(true);
+
+    try {
+      const status = await updater().setClientCfgRemote({
         siteName: this.props.ui.siteName,
         siteDesc: this.props.ui.siteDesc,
         bg: this.props.ui.bg,
-      })
-      .then((status: string) => {
-        if (status === "") {
-          alertMsg(this.props.msg.pkg.get("update.ok"));
-        } else {
-          alertMsg(this.props.msg.pkg.get("update.fail"));
-        }
       });
+      if (status !== "") {
+        alertMsg(this.props.msg.pkg.get("update.fail"));
+        return;
+      }
+
+      alertMsg(this.props.msg.pkg.get("update.ok"));
+    } finally {
+      this.setLoading(false);
+    }
   };
 
   resetClientCfg = () => {

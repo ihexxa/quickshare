@@ -1,6 +1,5 @@
 import * as React from "react";
 import { List, Map } from "immutable";
-import QRCode from "react-qr-code";
 
 import { RiShareBoxLine } from "@react-icons/all-files/ri/RiShareBoxLine";
 import { RiCloudOffFill } from "@react-icons/all-files/ri/RiCloudOffFill";
@@ -15,6 +14,7 @@ import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
 import { Rows, Row } from "./layout/rows";
 import { shareIDQuery } from "../client/files";
+import { loadingCtrl, ctrlOn, ctrlOff } from "../common/controls";
 
 export interface SharingsProps {
   sharings: Map<string, string>;
@@ -36,7 +36,14 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
     this.state = {};
   }
 
+  setLoading = (state: boolean) => {
+    updater().setControlOption(loadingCtrl, state ? ctrlOn : ctrlOff);
+    this.props.update(updater().updateUI);
+  };
+
   deleteSharing = async (dirPath: string) => {
+    this.setLoading(true);
+
     try {
       const deleteStatus = await updater().deleteSharing(dirPath);
       if (deleteStatus !== "") {
@@ -47,16 +54,23 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
       await this.listSharings();
     } catch (e: any) {
       alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+    } finally {
+      this.setLoading(false);
     }
   };
 
   listSharings = async () => {
-    const status = await updater().listSharings();
-    if (status !== "") {
-      alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+    this.setLoading(true);
+    try {
+      const status = await updater().listSharings();
+      if (status !== "") {
+        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+      }
+      this.props.update(updater().updateFilesInfo);
+      this.props.update(updater().updateSharingsInfo);
+    } finally {
+      this.setLoading(false);
     }
-    this.props.update(updater().updateFilesInfo);
-    this.props.update(updater().updateSharingsInfo);
   };
 
   makeRows = (sharings: Map<string, string>): List<Row> => {

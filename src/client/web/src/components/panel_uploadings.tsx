@@ -3,7 +3,6 @@ import { List } from "immutable";
 import FileSize from "filesize";
 
 import { RiUploadCloudFill } from "@react-icons/all-files/ri/RiUploadCloudFill";
-import { RiUploadCloudLine } from "@react-icons/all-files/ri/RiUploadCloudLine";
 import { RiCloudOffFill } from "@react-icons/all-files/ri/RiCloudOffFill";
 
 import { alertMsg } from "../common/env";
@@ -15,6 +14,7 @@ import { UploadEntry, UploadState } from "../worker/interface";
 import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
 import { Rows, Row } from "./layout/rows";
+import { loadingCtrl, ctrlOn, ctrlOff } from "../common/controls";
 
 export interface UploadingsProps {
   uploadings: List<UploadEntry>;
@@ -36,7 +36,14 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
     this.state = {};
   }
 
+  setLoading = (state: boolean) => {
+    updater().setControlOption(loadingCtrl, state ? ctrlOn : ctrlOff);
+    this.props.update(updater().updateUI);
+  };
+
   deleteUpload = async (filePath: string): Promise<void> => {
+    this.setLoading(true);
+
     try {
       const deleteStatus = await updater().deleteUpload(filePath);
       if (deleteStatus !== "") {
@@ -55,6 +62,8 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
       this.props.update(updater().updateUploadingsInfo);
     } catch (status: any) {
       alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status.toString()));
+    } finally {
+      this.setLoading(false);
     }
   };
 
@@ -122,12 +131,8 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
         </div>
       );
 
-      // file path, size, progress
-      const sortVals = List<string>([
-        uploading.filePath,
-        `${uploading.size}`,
-        `${progress}`,
-      ]);
+      // file path
+      const sortVals = List<string>([uploading.filePath]);
       return {
         elem,
         sortVals,
@@ -148,11 +153,7 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
     const uploadingRows = this.makeRowsInputs(
       this.props.uploadingsInfo.uploadings
     );
-    const sortKeys = List([
-      this.props.msg.pkg.get("item.path"),
-      this.props.msg.pkg.get("item.size"),
-      this.props.msg.pkg.get("item.progress"),
-    ]);
+    const sortKeys = List([this.props.msg.pkg.get("item.path")]);
     const view = (
       <Rows
         sortKeys={sortKeys}
