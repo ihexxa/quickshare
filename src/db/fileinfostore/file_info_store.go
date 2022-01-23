@@ -139,11 +139,6 @@ func NewFileInfoStore(store kvstore.IKVStore) (*FileInfoStore, error) {
 		}
 	}
 
-	// err = store.SetStringIn(InitNs, SchemaVerKey, SchemaV1)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
 	fi := &FileInfoStore{
 		store: store,
 		mtx:   &sync.RWMutex{},
@@ -191,17 +186,29 @@ func (fi *FileInfoStore) DelSharing(dirPath string) error {
 	if err != nil {
 		return err
 	}
-	info.Shared = false
-	info.ShareID = ""
 
 	// TODO: ensure Atomicity
 	// In the bolt, if the key does not exist
 	// then nothing is done and a nil error is returned
-	err = fi.store.DelStringIn(ShareIDNs, info.ShareID)
+
+	// because before this version, shareIDs are not removed correctly
+	// so it iterates all shareIDs and cleans remaining entries
+	shareIDtoDir, err := fi.store.ListStringsIn(ShareIDNs)
 	if err != nil {
 		return err
 	}
 
+	for shareID, shareDir := range shareIDtoDir {
+		if shareDir == dirPath {
+			err = fi.store.DelStringIn(ShareIDNs, shareID)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	info.ShareID = ""
+	info.Shared = false
 	return fi.SetInfo(dirPath, info)
 }
 
@@ -231,7 +238,6 @@ func (fi *FileInfoStore) ListSharings(prefix string) (map[string]string, error) 
 			return nil, fmt.Errorf("list sharing error: %w", err)
 		}
 
-		fmt.Println(infoStr)
 		if info.IsDir && info.Shared {
 			sharings[itemPath] = info.ShareID
 		}
@@ -319,7 +325,10 @@ func (fi *FileInfoStore) getShareID(payload string) (string, error) {
 		}
 
 		shareID := fmt.Sprintf("%x", h.Sum(nil))[:7]
-		if _, ok := fi.store.GetStringIn(ShareIDNs, shareID); !ok {
+		shareDir, ok := fi.store.GetStringIn(ShareIDNs, shareID)
+		if !ok {
+			return shareID, nil
+		} else if ok && shareDir == payload {
 			return shareID, nil
 		}
 	}

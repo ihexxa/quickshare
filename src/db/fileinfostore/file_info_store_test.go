@@ -60,12 +60,12 @@ func TestUserStores(t *testing.T) {
 			}
 		}
 
-		dirToID, err = store.ListSharings(prefix)
+		dirToIDAfterDel, err := store.ListSharings(prefix)
 		if err != nil {
 			t.Fatal(err)
 		}
 		for _, dirPath := range dirPaths {
-			if _, ok := dirToID[dirPath]; ok {
+			if _, ok := dirToIDAfterDel[dirPath]; ok {
 				t.Fatalf("sharing(%s) should not exist", dirPath)
 			}
 			shared, exist := store.GetSharing(dirPath)
@@ -80,7 +80,13 @@ func TestUserStores(t *testing.T) {
 				t.Fatalf("ShareID should be empty %s", info.ShareID)
 			}
 
-			_, err = store.GetSharingDir(info.ShareID)
+			// shareIDs are removed, use original dirToID to get shareID
+			originalShareID, ok := dirToID[dirPath]
+			if !ok {
+				t.Fatalf("dir (%s) should exist in originalShareID", dirPath)
+			}
+
+			_, err = store.GetSharingDir(originalShareID)
 			if err != ErrSharingNotFound {
 				t.Fatal("should return ErrSharingNotFound")
 			}
