@@ -85,7 +85,54 @@
 }
 
 .theme-default #pane-login {
+  max-width: 48rem;
   padding: 2rem;
+}
+
+.theme-default #pane-login #title {
+  font-size: 2rem;
+  text-align: center;
+}
+
+.theme-default #pane-login .login-container {
+  margin: 2rem;
+}
+
+.theme-default #pane-login .input-wrap {
+  width: 100%;
+  background-color: #eaebf6;
+  margin: 2rem 0 0 0;
+  border-radius: 0.6rem;
+  line-height: 4rem;
+}
+
+.theme-default #pane-login #captcha-input {
+  width: calc(100% - 1rem);
+}
+
+.theme-default #pane-login #captcha {
+  width: calc(100% - 1rem);
+  background-color: #eaebf6;
+  border: solid 1px #eaebf6;
+  margin: 2rem 0 0 0;
+  border-radius: 0.6rem;
+  height: 3.8rem;
+}
+
+.theme-default #pane-login input {
+  width: 100%;
+  padding: 0;
+  border: none;
+  margin: 0 1rem;
+  background-color: transparent;
+}
+
+.theme-default #btn-login {
+  background-color: #1abc9c;
+  color: #fff;
+  width: 100%;
+  margin-top: 2rem;
+  height: 4rem;
 }
 
 .theme-default #breadcrumb {
@@ -124,8 +171,8 @@
   color: #34495e;
   background-color: white;
   border-radius: 0.8rem;
-  margin-bottom: 2rem;
   box-shadow: 0 5px 30px 0 rgb(31 38 135 / 10%);
+  margin: auto auto 2rem auto;
 }
 
 .container-padding {
@@ -438,11 +485,6 @@
   color: #7f8c8d;
 }
 
-.theme-default #btn-login {
-  background-color: #1abc9c;
-  color: #fff;
-}
-
 .theme-default .pane-title {
   color: black;
   font-size: 1.6rem;
@@ -498,7 +540,7 @@
   right: 0;
   top: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: url("/static/img/textured_paper.png") repeat fixed center;
   overflow: scroll;
   z-index: 100;
 }
@@ -544,13 +586,6 @@
   background-color: #ecf0f6;
   border: solid 1px #95a5a6;
   /* margin: 0.5rem 0 1rem 0; */
-}
-
-.captcha {
-  width: 14rem;
-  height: 3rem;
-  border: solid 1px #95a5a6;
-  border-radius: 0.5rem;
 }
 
 .theme-default .h1,
