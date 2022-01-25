@@ -67,33 +67,46 @@ export class UploadWorker {
   };
 
   onMsg = async (event: MessageEvent) => {
-    this.working = true;
-    const req = event.data as FileWorkerReq;
+    try {
+      this.working = true;
+      const req = event.data as FileWorkerReq;
 
-    switch (req.kind) {
-      case syncReqKind:
-        const syncReq = req as SyncReq;
+      switch (req.kind) {
+        case syncReqKind:
+          const syncReq = req as SyncReq;
 
-        if (syncReq.created) {
-          const status = await this.uploader.upload(
-            syncReq.filePath,
-            syncReq.file,
-            syncReq.uploaded
-          );
-          await this.handleUploadStatus(status);
-        } else {
-          const status = await this.uploader.create(
-            syncReq.filePath,
-            syncReq.file
-          );
-          await this.handleUploadStatus(status);
-        }
-        break;
-      default:
-        console.error(`unknown worker request(${JSON.stringify(req)})`);
+          if (syncReq.created) {
+            if (syncReq.file.size === 0) {
+              const resp: UploadInfoResp = {
+                kind: uploadInfoKind,
+                filePath: syncReq.filePath,
+                uploaded: 0,
+                state: UploadState.Ready,
+                err: "",
+              };
+              this.sendEvent(resp);
+            } else {
+              const status = await this.uploader.upload(
+                syncReq.filePath,
+                syncReq.file,
+                syncReq.uploaded
+              );
+              await this.handleUploadStatus(status);
+            }
+          } else {
+            const status = await this.uploader.create(
+              syncReq.filePath,
+              syncReq.file
+            );
+            await this.handleUploadStatus(status);
+          }
+          break;
+        default:
+          console.error(`unknown worker request(${JSON.stringify(req)})`);
+      }
+    } finally {
+      this.working = false;
     }
-
-    this.working = false;
   };
 
   onError = (ev: ErrorEvent) => {

@@ -143,6 +143,55 @@ func (h *FileHandlers) Create(c *gin.Context) {
 		return
 	}
 
+	if req.FileSize == 0 {
+		err = h.deps.FS().MkdirAll(filepath.Dir(req.Path))
+		if err != nil {
+			c.JSON(q.ErrResp(c, 500, err))
+			return
+		}
+
+		// TODO: limit the number of files with 0 byte
+
+		fsFilePath, err := h.getFSFilePath(userID, req.Path)
+		if err != nil {
+			c.JSON(q.ErrResp(c, 500, err))
+			return
+		}
+
+		err = h.deps.FS().Create(fsFilePath)
+		if err != nil {
+			if os.IsExist(err) {
+				c.JSON(q.ErrResp(c, 304, fmt.Errorf("file(%s) exists", fsFilePath)))
+			} else {
+				c.JSON(q.ErrResp(c, 500, err))
+			}
+			return
+		}
+
+		msg, err := json.Marshal(Sha1Params{
+			FilePath: fsFilePath,
+		})
+		if err != nil {
+			c.JSON(q.ErrResp(c, 500, err))
+			return
+		}
+
+		err = h.deps.Workers().TryPut(
+			localworker.NewMsg(
+				h.deps.ID().Gen(),
+				map[string]string{localworker.MsgTypeKey: MsgTypeSha1},
+				string(msg),
+			),
+		)
+		if err != nil {
+			c.JSON(q.ErrResp(c, 500, err))
+			return
+		}
+
+		c.JSON(q.Resp(200))
+		return
+	}
+
 	tmpFilePath := q.UploadPath(userName, req.Path)
 	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {
