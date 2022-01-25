@@ -130,4 +130,7 @@ export const msgs: Map<string, string> = Map({
   "op.cancel": "取消",
   "term.time": "时间",
   "breadcrumb.loc": "位置",
+  "endpoints": "端点",
+  "endpoints.root": "根",
+  "endpoints.home": "家",
 });

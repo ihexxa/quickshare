@@ -755,6 +755,24 @@ export class FilesPanel extends React.Component<Props, State, {}> {
   };
 
   render() {
+    const showEndpoints =
+      this.props.login.userRole === roleAdmin ? "" : "hidden";
+    const gotoRoot = () => this.chdir(List(["/"]));
+    const endPoints = (
+      <div className={showEndpoints}>
+        <Container>
+          <h5 className="pane-title margin-r-m">{this.props.msg.pkg.get("endpoints")}</h5>
+          <div className="hr"></div>
+
+          <button onClick={gotoRoot} className="margin-r-m">
+            {this.props.msg.pkg.get("endpoints.root")}
+          </button>
+          <button onClick={this.goHome}>
+            {this.props.msg.pkg.get("endpoints.home")}
+          </button>
+        </Container>
+      </div>
+    );
     const shareModeClass =
       this.props.ui.control.controls.get(sharingCtrl) === ctrlOn
         ? "hidden"
@@ -771,7 +789,9 @@ export class FilesPanel extends React.Component<Props, State, {}> {
               }
               className="item clickable"
             >
-              <span className="content">{pathPart}</span>
+              <span className="content">
+                {pathPart === "/" ? "~" : pathPart}
+              </span>
             </a>
             <span className="item">
               <span className="content">{"/"}</span>
@@ -851,8 +871,11 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       this.props.ui.control.controls.get(filesViewCtrl) === "table"
         ? "cyan1-font"
         : "black-font";
+
     const itemListPane = (
       <div>
+        {endPoints}
+
         <div className={showOp}>
           <Container>{ops}</Container>
         </div>
