@@ -2,7 +2,7 @@ import { List, Set, Map } from "immutable";
 
 import { initMockWorker, makePromise } from "../../test/helpers";
 import { StateMgr } from "../state_mgr";
-import { User, UploadInfo } from "../../client";
+import { User, UploadInfo, visitorID, roleVisitor } from "../../client";
 import {
   NewMockFilesClient,
   resps as filesResps,
@@ -24,9 +24,9 @@ describe("State Manager", () => {
   initMockWorker();
   const emptyQuery = new URLSearchParams("");
   // stub alert
-  // window.alert = (message?: string): void => {
-  //   console.log(message);
-  // };
+  window.alert = (message?: string): void => {
+    console.log(message);
+  };
 
   test("initUpdater for admin", async () => {
     const usersCl = NewMockUsersClient("");
@@ -181,7 +181,6 @@ describe("State Manager", () => {
     await mgr.initUpdater(coreState, query);
 
     // browser
-    // TODO: mock query to get dir parm
     expect(coreState.filesInfo.dirPath.join("/")).toEqual(sharingPath);
     expect(coreState.filesInfo.isSharing).toEqual(true);
     expect(coreState.filesInfo.items).toEqual(
@@ -229,5 +228,101 @@ describe("State Manager", () => {
     expect(coreState.ui.bg).toEqual(
       settingsResps.getClientCfgMockResp.data.clientCfg.bg
     );
+  });
+
+  test("initUpdater for visitor", async () => {
+    const usersCl = NewMockUsersClient("");
+    const filesCl = NewMockFilesClient("");
+    const settingsCl = NewMockSettingsClient("");
+
+    usersCl.isAuthed = jest.fn().mockReturnValue(
+      makePromise({
+        status: 401,
+        statusText: "",
+        data: { error: "unauthorized" },
+      })
+    );
+    usersCl.self = jest.fn().mockReturnValue(
+      makePromise({
+        status: 401,
+        statusText: "",
+        data: { error: "malformed token" },
+      })
+    );
+    usersCl.getCaptchaID = jest.fn().mockReturnValue(
+      makePromise({
+        status: 400,
+        statusText: "",
+        data: { error: "empty captcha ID" },
+      })
+    );
+
+    const coreState = newState();
+
+    const mgr = new StateMgr({}); // it will call initUpdater
+    mgr.setUsersClient(usersCl);
+    mgr.setFilesClient(filesCl);
+    mgr.setSettingsClient(settingsCl);
+    // TODO: depress warning
+    mgr.update = (apply: (prevState: ICoreState) => ICoreState): void => {
+      // no op
+    };
+
+    const query = new URLSearchParams("");
+    await mgr.initUpdater(coreState, query);
+
+    // browser
+    expect(coreState.filesInfo.dirPath.join("/")).toEqual("");
+    expect(coreState.filesInfo.isSharing).toEqual(false);
+    expect(coreState.filesInfo.items).toEqual(List());
+    expect(coreState.sharingsInfo.sharings).toEqual(Map<string, string>());
+    expect(coreState.uploadingsInfo.uploadings).toEqual(List<UploadEntry>([]));
+
+    // // login
+    expect(coreState.login).toEqual({
+      userID: visitorID,
+      userName: "visitor",
+      userRole: roleVisitor,
+      quota: {
+        uploadSpeedLimit: 0,
+        downloadSpeedLimit: 0,
+        spaceLimit: "0",
+      },
+      extInfo: {
+        usedSpace: "0",
+      },
+      authed: false,
+      captchaID: "",
+      preferences: {
+        bg: {
+          url: "",
+          repeat: "",
+          position: "",
+          align: "",
+        },
+        cssURL: "",
+        lanPackURL: "",
+        lan: "en_US",
+      },
+    });
+
+    // admin
+    expect(coreState.admin).toEqual({
+      users: Map({}),
+      roles: Set<string>(),
+    });
+
+    // msg
+    // it is fallback to en_US because language pack url is not valid
+    expect(coreState.msg.lan).toEqual("en_US");
+    expect(coreState.msg.pkg).toEqual(MsgPackage.get("en_US"));
+
+    // ui
+    expect(coreState.ui.bg).toEqual({
+      url: "",
+      repeat: "",
+      position: "",
+      align: "",
+    });
   });
 });
