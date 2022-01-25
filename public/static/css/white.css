@@ -493,6 +493,7 @@
 .theme-default .pane-title {
   color: black;
   font-size: 1.6rem;
+  line-height: 1.6rem;
 }
 
 .theme-default #pane-settings {
