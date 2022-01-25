@@ -190,6 +190,7 @@ func TestFileHandlers(t *testing.T) {
 
 	t.Run("test files APIs: Create-UploadChunk-UploadStatus-Metadata-Delete", func(t *testing.T) {
 		for filePath, content := range map[string]string{
+			"qs/files/path1/empty":       "",
 			"qs/files/path1/f1.md":       "1111 1111 1111 1111",
 			"qs/files/path1/path2/f2.md": "1010 1010 1111 0000 0010",
 		} {
@@ -203,12 +204,15 @@ func TestFileHandlers(t *testing.T) {
 			}
 
 			// check uploading file
-			uploadFilePath := q.UploadPath(adminName, filePath)
-			info, err := fs.Stat(uploadFilePath)
-			if err != nil {
-				t.Fatal(err)
-			} else if info.Name() != filepath.Base(uploadFilePath) {
-				t.Fatal(info.Name(), filepath.Base(uploadFilePath))
+			// empty file is not created under the uploading folder
+			if fileSize != 0 {
+				uploadFilePath := q.UploadPath(adminName, filePath)
+				info, err := fs.Stat(uploadFilePath)
+				if err != nil {
+					t.Fatal(err)
+				} else if info.Name() != filepath.Base(uploadFilePath) {
+					t.Fatal(info.Name(), filepath.Base(uploadFilePath))
+				}
 			}
 
 			// upload a chunk
@@ -250,7 +254,7 @@ func TestFileHandlers(t *testing.T) {
 
 			// check uploaded file
 			// fsFilePath := filepath.Join("0", filePath)
-			info, err = fs.Stat(filePath)
+			info, err := fs.Stat(filePath)
 			if err != nil {
 				t.Fatal(err)
 			} else if info.Name() != filepath.Base(filePath) {
