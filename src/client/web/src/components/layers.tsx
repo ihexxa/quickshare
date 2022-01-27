@@ -57,6 +57,7 @@ export class Layers extends React.Component<Props, State, {}> {
           <div id="root-container">
             <AuthPane
               login={this.props.login}
+              ui={this.props.ui}
               update={this.props.update}
               msg={this.props.msg}
             />

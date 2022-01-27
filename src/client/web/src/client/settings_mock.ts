@@ -15,15 +15,13 @@ export const resps = {
     status: 200,
     statusText: "",
     data: {
-      clientCfg: {
-        siteName: "",
-        siteDesc: "",
-        bg: {
-          url: "clientCfg_bg_url",
-          repeat: "clientCfg_bg_repeat",
-          position: "clientCfg_bg_position",
-          align: "clientCfg_bg_align",
-        },
+      siteName: "",
+      siteDesc: "",
+      bg: {
+        url: "clientCfg_bg_url",
+        repeat: "clientCfg_bg_repeat",
+        position: "clientCfg_bg_position",
+        align: "clientCfg_bg_align",
       },
     },
   },
@@ -33,41 +31,6 @@ export const resps = {
     data: {},
   },
 };
-export class MockSettingsClient {
-  private url: string;
-  private resps: SettingsClientResps;
-
-  constructor(url: string) {
-    this.url = url;
-    this.resps = resps;
-  }
-
-  setMock = (resps: SettingsClientResps) => {
-    this.resps = resps;
-  };
-
-  wrapPromise = (resp: any): Promise<any> => {
-    return new Promise<any>((resolve) => {
-      resolve(resp);
-    });
-  };
-
-  health = (): Promise<Response> => {
-    return this.wrapPromise(this.resps.healthMockResp);
-  };
-
-  setClientCfg = (): Promise<Response> => {
-    return this.wrapPromise(this.resps.setClientCfgMockResp);
-  };
-
-  getClientCfg = (): Promise<Response> => {
-    return this.wrapPromise(this.resps.getClientCfgMockResp);
-  };
-
-  reportErrors = (): Promise<Response> => {
-    return this.wrapPromise(this.resps.reportErrorsMockResp);
-  };
-}
 
 export class JestSettingsClient {
   url: string = "";

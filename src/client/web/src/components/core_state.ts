@@ -28,6 +28,7 @@ export interface UIProps {
   isVertical: boolean;
   siteName: string;
   siteDesc: string;
+  captchaEnabled: boolean;
   bg: {
     url: string;
     repeat: string;
@@ -111,6 +112,7 @@ export function initState(): ICoreState {
         position: "",
         align: "",
       },
+      captchaEnabled: true,
       control: {
         controls: Map<string, string>({
           [panelTabs]: "filesPanel",

@@ -17,7 +17,7 @@ import {
   roleUser,
   roleAdmin,
   visitorID,
-  ClientConfig,
+  ClientConfigMsg,
   Preferences,
 } from "../client";
 import { FilesClient, shareIDQuery, shareDirQuery } from "../client/files";
@@ -780,12 +780,12 @@ export class Updater {
     return resp.status === 200 ? "" : errServer;
   };
 
-  setClientCfgRemote = async (cfg: ClientConfig): Promise<string> => {
+  setClientCfgRemote = async (cfg: ClientConfigMsg): Promise<string> => {
     const resp = await this.settingsClient.setClientCfg(cfg);
     return resp.status === 200 ? "" : errServer;
   };
 
-  setClientCfg = (cfg: ClientConfig) => {
+  setClientCfg = (cfg: ClientConfigMsg) => {
     this.props.ui = {
       ...this.props.ui,
       siteName: cfg.siteName,
@@ -810,10 +810,11 @@ export class Updater {
     if (resp.status !== 200) {
       return errServer;
     }
-    const clientCfg = resp.data.clientCfg as ClientConfig;
+    const clientCfg = resp.data as ClientConfigMsg;
     this.props.ui.siteName = clientCfg.siteName;
     this.props.ui.siteDesc = clientCfg.siteDesc;
     this.props.ui.bg = clientCfg.bg;
+    this.props.ui.captchaEnabled = clientCfg.captchaEnabled;
     return "";
   };
 
