@@ -24,12 +24,15 @@ users:
   captchaWidth: 256
   captchaHeight: 60
   captchaEnabled: true
-  uploadSpeedLimit: 1048576 # 1MB/limiterCyc
-  downloadSpeedLimit: 1048576 # 1MB/limiterCyc
+  uploadSpeedLimit: 524288 # 500k/limiterCyc
+  downloadSpeedLimit: 524288 # 500k/limiterCyc
   spaceLimit: 104857600 # 100MB
   limiterCapacity: 1000
   limiterCyc: 1000 # 1s
-  predefinedUsers: []
+  predefinedUsers:
+    - name: "demo"
+      pwd: "Quicksh@re"
+      role: "user"
 workers:
   queueSize: 1024
   sleepCyc: 1 # in second

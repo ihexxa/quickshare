@@ -8,18 +8,10 @@ server:
   debug: true
   host: "0.0.0.0"
   port: 8686
-  readTimeout: 5000
+  readTimeout: 2000
   writerTimeout: 86400000 # 1 day
   maxHeaderBytes: 512
   publicPath: "public"
-  captchaWidth: 256
-  captchaHeight: 60
-  captchaEnabled: true
-  uploadSpeedLimit: 409600 # 400KB/limiterCyc
-  downloadSpeedLimit: 409600 # 400KB/limiterCyc
-  spaceLimit: 104857600 # 100MB
-  limiterCapacity: 1000
-  limiterCyc: 1000 # 1s
 users:
   enableAuth: true
   defaultAdmin: ""
@@ -29,6 +21,14 @@ users:
   cookieHttpOnly: true
   minUserNameLen: 2
   minPwdLen: 4
+  captchaWidth: 256
+  captchaHeight: 60
+  captchaEnabled: true
+  uploadSpeedLimit: 524288 # 500KB/limiterCyc
+  downloadSpeedLimit: 524288 # 500KB/limiterCyc
+  spaceLimit: 104857600 # 100MB
+  limiterCapacity: 1000
+  limiterCyc: 1000 # 1s
 workers:
   queueSize: 1024
   sleepCyc: 1 # in second
