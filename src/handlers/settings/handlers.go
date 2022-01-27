@@ -30,7 +30,10 @@ func (h *SettingsSvc) Health(c *gin.Context) {
 }
 
 type ClientCfgMsg struct {
-	ClientCfg *sitestore.ClientConfig `json:"clientCfg"`
+	SiteName       string              `json:"siteName"`
+	SiteDesc       string              `json:"siteDesc"`
+	Bg             *sitestore.BgConfig `json:"bg"`
+	CaptchaEnabled bool                `json:"captchaEnabled"`
 }
 
 func (h *SettingsSvc) GetClientCfg(c *gin.Context) {
@@ -41,7 +44,12 @@ func (h *SettingsSvc) GetClientCfg(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, &ClientCfgMsg{ClientCfg: siteCfg.ClientCfg})
+	c.JSON(200, &ClientCfgMsg{
+		SiteName:       siteCfg.ClientCfg.SiteName,
+		SiteDesc:       siteCfg.ClientCfg.SiteDesc,
+		Bg:             siteCfg.ClientCfg.Bg,
+		CaptchaEnabled: h.cfg.BoolOr("Users.CaptchaEnabled", true),
+	})
 }
 
 func (h *SettingsSvc) SetClientCfg(c *gin.Context) {
@@ -52,7 +60,13 @@ func (h *SettingsSvc) SetClientCfg(c *gin.Context) {
 		return
 	}
 
-	if err = validateClientCfg(req.ClientCfg); err != nil {
+	clientCfg := &sitestore.ClientConfig{
+		SiteName: req.SiteName,
+		SiteDesc: req.SiteDesc,
+		Bg:       req.Bg,
+		// TODO: captchaEnabled is not persisted in db
+	}
+	if err = validateClientCfg(clientCfg); err != nil {
 		c.JSON(q.ErrResp(c, 400, err))
 		return
 	}
@@ -63,7 +77,7 @@ func (h *SettingsSvc) SetClientCfg(c *gin.Context) {
 		return
 	}
 
-	err = h.deps.SiteStore().SetClientCfg(req.ClientCfg)
+	err = h.deps.SiteStore().SetClientCfg(clientCfg)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
