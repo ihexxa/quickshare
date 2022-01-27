@@ -1,7 +1,7 @@
 import { List } from "immutable";
 
 import { BaseClient, Response, userIDParam, Quota } from ".";
-import { ClientConfig, ClientErrorReport } from "./";
+import { ClientConfigMsg, ClientErrorReport } from "./";
 
 export class SettingsClient extends BaseClient {
   constructor(url: string) {
@@ -22,13 +22,11 @@ export class SettingsClient extends BaseClient {
     });
   };
 
-  setClientCfg = (cfg: ClientConfig): Promise<Response> => {
+  setClientCfg = (cfg: ClientConfigMsg): Promise<Response> => {
     return this.do({
       method: "patch",
       url: `${this.url}/v1/settings/client`,
-      data: {
-        clientCfg: cfg,
-      },
+      data: cfg,
     });
   };
 

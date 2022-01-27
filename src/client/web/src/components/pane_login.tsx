@@ -1,7 +1,7 @@
 import * as React from "react";
 import { List } from "immutable";
 
-import { ICoreState, MsgProps } from "./core_state";
+import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { Flexbox } from "./layout/flexbox";
 import { updater } from "./state_updater";
 import { alertMsg } from "../common/env";
@@ -26,6 +26,7 @@ export interface LoginProps {
 export interface Props {
   login: LoginProps;
   msg: MsgProps;
+  ui: UIProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
@@ -106,6 +107,34 @@ export class AuthPane extends React.Component<Props, State, {}> {
   };
 
   render() {
+    const row3 = this.props.ui.captchaEnabled ? (
+      <Flexbox
+        children={List([
+          <div className="input-wrap">
+            <input
+              id="captcha-input"
+              type="text"
+              onChange={this.changeCaptcha}
+              value={this.state.captchaInput}
+              placeholder={this.props.msg.pkg.get("login.captcha")}
+            />
+          </div>,
+
+          <img
+            id="captcha"
+            src={`/v1/captchas/imgs?capid=${this.props.login.captchaID}`}
+            className={`captcha ${this.state.captchaLoaded ? "" : "hidden"}`}
+            onClick={this.refreshCaptcha}
+            onLoad={() => this.setState({ captchaLoaded: true })}
+          />,
+        ])}
+        childrenStyles={List([
+          { justifyContent: "flex-start" },
+          { justifyContent: "flex-end" },
+        ])}
+      />
+    ) : null;
+
     return (
       <div
         id="pane-login"
@@ -144,33 +173,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
             />
           </div>
 
-          <Flexbox
-            children={List([
-              <div className="input-wrap">
-                <input
-                  id="captcha-input"
-                  type="text"
-                  onChange={this.changeCaptcha}
-                  value={this.state.captchaInput}
-                  placeholder={this.props.msg.pkg.get("login.captcha")}
-                />
-              </div>,
-
-              <img
-                id="captcha"
-                src={`/v1/captchas/imgs?capid=${this.props.login.captchaID}`}
-                className={`captcha ${
-                  this.state.captchaLoaded ? "" : "hidden"
-                }`}
-                onClick={this.refreshCaptcha}
-                onLoad={() => this.setState({ captchaLoaded: true })}
-              />,
-            ])}
-            childrenStyles={List([
-              { justifyContent: "flex-start" },
-              { justifyContent: "flex-end" },
-            ])}
-          />
+          {row3}
 
           <button id="btn-login" onClick={this.login}>
             {this.props.msg.pkg.get("login.login")}

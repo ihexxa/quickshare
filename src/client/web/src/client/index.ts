@@ -89,12 +89,10 @@ export interface GetSharingDirResp {
 }
 
 export interface ClientConfigMsg {
-  clientCfg: ClientConfig;
-}
-export interface ClientConfig {
   siteName: string;
   siteDesc: string;
   bg: BgConfig;
+  captchaEnabled?: boolean;
 }
 
 export interface ClientErrorReport {
@@ -154,7 +152,7 @@ export interface IFilesClient {
 export interface ISettingsClient {
   health: () => Promise<Response>;
   getClientCfg: () => Promise<Response>;
-  setClientCfg: (cfg: ClientConfig) => Promise<Response>;
+  setClientCfg: (cfg: ClientConfigMsg) => Promise<Response>;
   reportErrors: (reports: List<ClientErrorReport>) => Promise<Response>;
 }
 

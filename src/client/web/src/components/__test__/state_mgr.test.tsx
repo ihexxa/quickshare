@@ -124,7 +124,7 @@ describe("State Manager", () => {
 
     // ui
     expect(coreState.ui.bg).toEqual(
-      settingsResps.getClientCfgMockResp.data.clientCfg.bg
+      settingsResps.getClientCfgMockResp.data.bg
     );
   });
 
@@ -226,7 +226,7 @@ describe("State Manager", () => {
 
     // ui
     expect(coreState.ui.bg).toEqual(
-      settingsResps.getClientCfgMockResp.data.clientCfg.bg
+      settingsResps.getClientCfgMockResp.data.bg
     );
   });
 

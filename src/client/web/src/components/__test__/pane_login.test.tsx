@@ -34,6 +34,7 @@ describe("Login", () => {
     const pane = new AuthPane({
       login: coreState.login,
       msg: coreState.msg,
+      ui: coreState.ui,
       update: (updater: (prevState: ICoreState) => ICoreState) => {},
     });
 
