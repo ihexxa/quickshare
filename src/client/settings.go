@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/ihexxa/quickshare/src/db/sitestore"
+	// "github.com/ihexxa/quickshare/src/db/sitestore"
 	"github.com/ihexxa/quickshare/src/handlers/settings"
 	"github.com/parnurzeal/gorequest"
 )
@@ -46,12 +46,10 @@ func (cl *SettingsClient) GetClientCfg(token *http.Cookie) (*http.Response, *set
 	return resp, mResp, nil
 }
 
-func (cl *SettingsClient) SetClientCfg(cfg *sitestore.ClientConfig, token *http.Cookie) (*http.Response, string, []error) {
+func (cl *SettingsClient) SetClientCfg(cfgMsg *settings.ClientCfgMsg, token *http.Cookie) (*http.Response, string, []error) {
 	return cl.r.Patch(cl.url("/v1/settings/client")).
 		AddCookie(token).
-		Send(&settings.ClientCfgMsg{
-			ClientCfg: cfg,
-		}).
+		Send(cfgMsg).
 		End()
 }
 

@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"github.com/ihexxa/quickshare/src/handlers/settings"
 	"io/ioutil"
 	"os"
 	"reflect"
@@ -13,6 +12,7 @@ import (
 	"github.com/ihexxa/quickshare/src/client"
 	"github.com/ihexxa/quickshare/src/db/sitestore"
 	q "github.com/ihexxa/quickshare/src/handlers"
+	"github.com/ihexxa/quickshare/src/handlers/settings"
 )
 
 func TestSettingsHandlers(t *testing.T) {
@@ -85,22 +85,33 @@ func TestSettingsHandlers(t *testing.T) {
 		}
 
 		for _, cfg := range cfgs {
-			resp, _, errs := settingsCl.SetClientCfg(cfg, adminToken)
+			clientCfgMsg := &settings.ClientCfgMsg{
+				SiteName: cfg.SiteName,
+				SiteDesc: cfg.SiteDesc,
+				Bg:       cfg.Bg,
+			}
+			resp, _, errs := settingsCl.SetClientCfg(clientCfgMsg, adminToken)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if resp.StatusCode != 200 {
 				t.Fatal(resp.StatusCode)
 			}
 
-			resp, clientCfgMsg, errs := settingsCl.GetClientCfg(adminToken)
+			resp, clientCfgMsgGot, errs := settingsCl.GetClientCfg(adminToken)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if resp.StatusCode != 200 {
 				t.Fatal(resp.StatusCode)
 			}
 
-			if !reflect.DeepEqual(cfg, clientCfgMsg.ClientCfg) {
-				t.Fatalf("client cfgs are not equal: got(%v) expected(%v)", clientCfgMsg.ClientCfg, cfg)
+			cfgEqual := func(cfg1, cfg2 *settings.ClientCfgMsg) bool {
+				return cfg1.SiteName == cfg2.SiteName &&
+					cfg1.SiteDesc == cfg2.SiteDesc &&
+					reflect.DeepEqual(cfg1.Bg, cfg2.Bg)
+			}
+
+			if !cfgEqual(clientCfgMsg, clientCfgMsgGot) {
+				t.Fatalf("client cfgs are not equal: got(%v) expected(%v)", clientCfgMsg, clientCfgMsgGot)
 			}
 
 			for userName := range users {
@@ -112,15 +123,15 @@ func TestSettingsHandlers(t *testing.T) {
 				}
 				userToken := client.GetCookie(resp.Cookies(), q.TokenCookie)
 
-				resp, clientCfgMsg, errs := settingsCl.GetClientCfg(userToken)
+				resp, clientCfgMsgGot, errs := settingsCl.GetClientCfg(userToken)
 				if len(errs) > 0 {
 					t.Fatal(errs)
 				} else if resp.StatusCode != 200 {
 					t.Fatal(resp.StatusCode)
 				}
 
-				if !reflect.DeepEqual(cfg, clientCfgMsg.ClientCfg) {
-					t.Fatalf("client cfgs are not equal for user: got(%v) expected(%v)", clientCfgMsg.ClientCfg, cfg)
+				if !cfgEqual(clientCfgMsg, clientCfgMsgGot) {
+					t.Fatalf("client cfgs are not equal: got(%v) expected(%v)", clientCfgMsg, clientCfgMsgGot)
 				}
 			}
 		}
