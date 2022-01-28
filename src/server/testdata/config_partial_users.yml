@@ -1,0 +1,21 @@
+users:
+  enableAuth: true
+  defaultAdmin: "5"
+  defaultAdminPwd: "5"
+  cookieTTL: 5
+  cookieSecure: true
+  cookieHttpOnly: true
+  minUserNameLen: 5
+  minPwdLen: 5
+  captchaWidth: 5
+  captchaHeight: 5
+  captchaEnabled: true
+  uploadSpeedLimit: 5
+  downloadSpeedLimit: 5
+  spaceLimit: 5
+  limiterCapacity: 5
+  limiterCyc: 5
+  predefinedUsers:
+    - name: "5"
+      pwd: "5"
+      role: "5"
