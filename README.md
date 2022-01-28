@@ -30,14 +30,14 @@ English | [简体中文](./docs/README_zh-cn.md)
 - File Management
   - Support uploading, downloading, creating, deleting and moving files and folders
   - Resumable uploading and downloading
-  - Only browser is needed
+  - Finish operations in browser
   - Share directories to others, including anonymous
   - Scan QR codes to visit sharing folders
   - Upload hundreds of files at once
   - Steaming uploading: make it work behind CDN or reverse proxy
   - Files can also be managed from OS
 - User Management
-  - Support multiple users 
+  - Support multiple users
   - Each user has a role (user/admin)
   - User home directory
   - Per-user download & upload speed limiting

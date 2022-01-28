@@ -10,7 +10,7 @@ require (
 	github.com/gin-gonic/gin v1.7.3
 	github.com/go-playground/validator/v10 v10.9.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/ihexxa/gocfg v0.0.0-20210914021417-6ba19520f0ff
+	github.com/ihexxa/gocfg v0.0.0-20220128082538-9e607ebed51b
 	github.com/ihexxa/multipart v0.0.0-20210916083128-8584a3f00d1d
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/json-iterator/go v1.1.11 // indirect

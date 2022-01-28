@@ -31,20 +31,20 @@ type ISiteStore interface {
 }
 
 type ClientConfig struct {
-	SiteName string    `json:"siteName"`
-	SiteDesc string    `json:"siteDesc"`
-	Bg       *BgConfig `json:"bg"`
+	SiteName string    `json:"siteName" yaml:"siteName"`
+	SiteDesc string    `json:"siteDesc" yaml:"siteDesc"`
+	Bg       *BgConfig `json:"bg" yaml:"bg"`
 }
 
 type BgConfig struct {
-	Url      string `json:"url"`
-	Repeat   string `json:"repeat"`
-	Position string `json:"position"`
-	Align    string `json:"align"`
+	Url      string `json:"url" yaml:"url"`
+	Repeat   string `json:"repeat" yaml:"repeat"`
+	Position string `json:"position" yaml:"position"`
+	Align    string `json:"align" yaml:"align"`
 }
 
 type SiteConfig struct {
-	ClientCfg *ClientConfig `json:"clientCfg"`
+	ClientCfg *ClientConfig `json:"clientCfg" yaml:"clientCfg"`
 }
 
 type SiteStore struct {

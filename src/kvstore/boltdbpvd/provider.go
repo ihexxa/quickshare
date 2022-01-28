@@ -16,6 +16,7 @@ import (
 
 var (
 	ErrBucketNotFound = errors.New("bucket not found")
+	DBName            = "quickshare.db"
 )
 
 type BoltPvd struct {
@@ -25,7 +26,7 @@ type BoltPvd struct {
 }
 
 func New(dbPath string, maxStrLen int) *BoltPvd {
-	boltPath := path.Join(path.Clean(dbPath), "quickshare.db")
+	boltPath := path.Join(path.Clean(dbPath), DBName)
 	db, err := bolt.Open(boltPath, 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		panic(err)
