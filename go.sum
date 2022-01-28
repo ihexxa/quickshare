@@ -50,6 +50,8 @@ github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1 h1:EGx4pi6eqNxGa
 github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1/go.mod h1:wJfORRmW1u3UXTncJ5qlYoELFm8eSnnEO6hX4iZ3EWY=
 github.com/ihexxa/gocfg v0.0.0-20210914021417-6ba19520f0ff h1:rsaVb8KIlg3gd7CEPTV/Qi5cf6i4C12EmbnsRMjGxkY=
 github.com/ihexxa/gocfg v0.0.0-20210914021417-6ba19520f0ff/go.mod h1:oqDTq1ywx4Qi9DdhFwwMHoPCYv6Txrfj2SY5WWcgiJs=
+github.com/ihexxa/gocfg v0.0.0-20220128082538-9e607ebed51b h1:pzx3BC3+v38POQg9sJWhfs/a4xFaJfC0Ar4RRVnFIMo=
+github.com/ihexxa/gocfg v0.0.0-20220128082538-9e607ebed51b/go.mod h1:oqDTq1ywx4Qi9DdhFwwMHoPCYv6Txrfj2SY5WWcgiJs=
 github.com/ihexxa/multipart v0.0.0-20210916083128-8584a3f00d1d h1:+v33khYHVDPEuuWO/JE1IzhoIu5uNvEcSs5GmXc5Sjw=
 github.com/ihexxa/multipart v0.0.0-20210916083128-8584a3f00d1d/go.mod h1:rhOAe/52S/J1fq1VnXvKX8FHuo65I+IcYUozW4M7+wE=
 github.com/jessevdk/go-flags v1.4.0 h1:4IU2WS7AumrZ/40jfhf4QVDMsQwqA7VEHozFRrGARJA=

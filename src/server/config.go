@@ -67,10 +67,15 @@ func NewConfig() *Config {
 }
 
 func DefaultConfig() (string, error) {
-	defaultCfg := &Config{
+	cfgBytes, err := json.Marshal(DefaultConfigStruct())
+	return string(cfgBytes), err
+}
+
+func DefaultConfigStruct() *Config {
+	return &Config{
 		Fs: &FSConfig{
 			Root:       "root",
-			OpensLimit: 128,
+			OpensLimit: 1024,
 			OpenTTL:    60, // 1 min
 		},
 		Users: &UsersCfg{
@@ -81,15 +86,16 @@ func DefaultConfig() (string, error) {
 			CookieSecure:       false,
 			CookieHttpOnly:     true,
 			MinUserNameLen:     4,
-			MinPwdLen:          6,
+			MinPwdLen:          8,
 			CaptchaWidth:       256,
 			CaptchaHeight:      60,
 			CaptchaEnabled:     true,
-			UploadSpeedLimit:   100 * 1024,        // B
-			DownloadSpeedLimit: 100 * 1024,        // B
+			UploadSpeedLimit:   1024 * 1024,       // B
+			DownloadSpeedLimit: 1024 * 1024,       // B
 			SpaceLimit:         1024 * 1024 * 100, // 100MB
 			LimiterCapacity:    1000,
 			LimiterCyc:         1000, // 1s
+			PredefinedUsers:    []*userstore.UserCfg{},
 		},
 		Secrets: &Secrets{
 			TokenSecret: "",
@@ -121,7 +127,4 @@ func DefaultConfig() (string, error) {
 			},
 		},
 	}
-
-	cfgBytes, err := json.Marshal(defaultCfg)
-	return string(cfgBytes), err
 }
