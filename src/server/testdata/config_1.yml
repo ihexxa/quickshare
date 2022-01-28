@@ -1,0 +1,48 @@
+fs:
+  root: "1"
+  opensLimit: 1
+  openTTL: 1
+secrets:
+  tokenSecret: "1"
+server:
+  debug: true
+  host: "1"
+  port: 1
+  readTimeout: 1
+  writeTimeout: 1
+  maxHeaderBytes: 1
+  publicPath: "1"
+users:
+  enableAuth: true
+  defaultAdmin: "1"
+  defaultAdminPwd: "1"
+  cookieTTL: 1
+  cookieSecure: true
+  cookieHttpOnly: true
+  minUserNameLen: 1
+  minPwdLen: 1
+  captchaWidth: 1
+  captchaHeight: 1
+  captchaEnabled: true
+  uploadSpeedLimit: 1
+  downloadSpeedLimit: 1
+  spaceLimit: 1
+  limiterCapacity: 1
+  limiterCyc: 1
+  predefinedUsers:
+    - name: "1"
+      pwd: "1"
+      role: "1"
+workers:
+  queueSize: 1
+  sleepCyc: 1
+  workerCount: 1
+site:
+  clientCfg:
+    siteName: "1"
+    siteDesc: "1"
+    bg:
+      url: "1"
+      repeat: "1"
+      position: "1"
+      align: "1"
