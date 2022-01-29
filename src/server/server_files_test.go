@@ -17,7 +17,7 @@ import (
 
 func TestFileHandlers(t *testing.T) {
 	addr := "http://127.0.0.1:8686"
-	rootPath := "testData"
+	rootPath := "tmpTestData"
 	config := `{
 		"users": {
 			"enableAuth": true,
@@ -42,7 +42,10 @@ func TestFileHandlers(t *testing.T) {
 			"host": "127.0.0.1"
 		},
 		"fs": {
-			"root": "testData"
+			"root": "tmpTestData"
+		},
+		"db": {
+			"dbPath": "tmpTestData/quickshare"
 		}
 	}`
 
