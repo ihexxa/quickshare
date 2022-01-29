@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/ihexxa/quickshare/src/kvstore"
@@ -225,7 +226,8 @@ func TestKVStoreProviders(t *testing.T) {
 		}
 		defer os.RemoveAll(rootPath)
 
-		store := boltdbpvd.New(rootPath, 1024)
+		dbPath := filepath.Join(rootPath, "quickshare.db")
+		store := boltdbpvd.New(dbPath, 1024)
 		defer store.Close()
 		kvstoreTest(store, t)
 	})
