@@ -132,11 +132,12 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	opensLimit := cfg.GrabInt("Fs.OpensLimit")
 	openTTL := cfg.GrabInt("Fs.OpenTTL")
 	readerTTL := cfg.GrabInt("Server.WriteTimeout") / 1000 // millisecond -> second
+	dbPath := cfg.GrabString("Db.DbPath")
 
 	ider := simpleidgen.New()
 	filesystem := local.NewLocalFS(rootPath, 0660, opensLimit, openTTL, readerTTL, ider)
 	jwtEncDec := jwt.NewJWTEncDec(secret)
-	kv := boltdbpvd.New(rootPath, 1024)
+	kv := boltdbpvd.New(dbPath, 1024)
 	users, err := userstore.NewKVUserStore(kv)
 	if err != nil {
 		panic(fmt.Sprintf("fail to init user store: %s", err))
