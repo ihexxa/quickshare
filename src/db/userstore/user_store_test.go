@@ -3,6 +3,7 @@ package userstore
 import (
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -276,7 +277,8 @@ func TestUserStores(t *testing.T) {
 		}
 		defer os.RemoveAll(rootPath)
 
-		kvstore := boltdbpvd.New(rootPath, 1024)
+		dbPath := filepath.Join(rootPath, "quickshare.db")
+		kvstore := boltdbpvd.New(dbPath, 1024)
 		defer kvstore.Close()
 
 		store, err := NewKVUserStore(kvstore)
