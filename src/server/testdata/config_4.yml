@@ -46,3 +46,5 @@ site:
       repeat: "4"
       position: "4"
       align: "4"
+db:
+  dbPath: "4"
