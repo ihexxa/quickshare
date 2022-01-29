@@ -6,13 +6,13 @@ import (
 	"testing"
 
 	"github.com/ihexxa/quickshare/src/client"
-	q "github.com/ihexxa/quickshare/src/handlers"
 	"github.com/ihexxa/quickshare/src/db/userstore"
+	q "github.com/ihexxa/quickshare/src/handlers"
 )
 
 func TestSpaceLimit(t *testing.T) {
 	addr := "http://127.0.0.1:8686"
-	rootPath := "testData"
+	rootPath := "tmpTestData"
 	spaceLimit := 1000000
 	fileSize := 100000
 	if spaceLimit%fileSize != 0 {
@@ -35,7 +35,10 @@ func TestSpaceLimit(t *testing.T) {
 			"host": "127.0.0.1"
 		},
 		"fs": {
-			"root": "testData"
+			"root": "tmpTestData"
+		},
+		"db": {
+			"dbPath": "tmpTestData/quickshare"
 		}
 	}`, spaceLimit)
 
