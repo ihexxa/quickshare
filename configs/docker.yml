@@ -43,3 +43,5 @@ site:
       repeat: "repeat"
       position: "center"
       align: "fixed"
+db:
+  dbPath: "/quickshare/root/quickshare.db"
