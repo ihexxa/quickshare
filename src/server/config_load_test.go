@@ -20,52 +20,49 @@ func TestLoadCfg(t *testing.T) {
 			DbPath:  "",
 			Configs: []string{},
 		},
-		// default config + db
+		// default config + config_1
 		&Opts{
 			Host:    "",
 			Port:    0,
-			DbPath:  "testdata",
-			Configs: []string{},
-		},
-		// default config + db + config_1
-		&Opts{
-			Host:    "",
-			Port:    0,
-			DbPath:  "testdata",
+			DbPath:  "",
 			Configs: []string{"testdata/config_1.yml"},
 		},
-		// default config + db + config_1 + config_2
+		// default config + config_1 + config_4
 		&Opts{
 			Host:    "",
 			Port:    0,
-			DbPath:  "testdata",
+			DbPath:  "",
 			Configs: []string{"testdata/config_1.yml", "testdata/config_4.yml"},
 		},
 		// config partial overwrite
 		&Opts{
 			Host:   "",
 			Port:   0,
-			DbPath: "testdata",
+			DbPath: "",
 			Configs: []string{
 				"testdata/config_1.yml",
 				"testdata/config_4.yml",
 				"testdata/config_partial_users.yml",
+				"testdata/config_partial_db.yml",
 			},
 		},
-		// arg overwrite
+		// default config + config_1 + config_4 + db_partial + args(db)
+		&Opts{
+			Host:   "",
+			Port:   0,
+			DbPath: "testdata/test_quickshare.db",
+			Configs: []string{
+				"testdata/config_1.yml",
+				"testdata/config_4.yml",
+				"testdata/config_partial_users.yml",
+				"testdata/config_partial_db.yml",
+			},
+		},
 	}
 
-	cfg1 := DefaultConfigStruct()
+	cfgDefault := DefaultConfigStruct()
 
-	cfg2 := DefaultConfigStruct()
-	cfg2.Site.ClientCfg.SiteName = "Quickshare"
-	cfg2.Site.ClientCfg.SiteDesc = "Quickshare"
-	cfg2.Site.ClientCfg.Bg.Url = "test.png"
-	cfg2.Site.ClientCfg.Bg.Repeat = "no-repeat"
-	cfg2.Site.ClientCfg.Bg.Position = "top"
-	cfg2.Site.ClientCfg.Bg.Align = "scroll"
-
-	cfg3 := &Config{
+	cfg1 := &Config{
 		Fs: &FSConfig{
 			Root:       "1",
 			OpensLimit: 1,
@@ -124,6 +121,9 @@ func TestLoadCfg(t *testing.T) {
 					Align:    "1",
 				},
 			},
+		},
+		Db: &DbConfig{
+			DbPath: "1",
 		},
 	}
 
@@ -187,6 +187,9 @@ func TestLoadCfg(t *testing.T) {
 				},
 			},
 		},
+		Db: &DbConfig{
+			DbPath: "4",
+		},
 	}
 
 	cfg5 := &Config{
@@ -249,14 +252,82 @@ func TestLoadCfg(t *testing.T) {
 				},
 			},
 		},
+		Db: &DbConfig{
+			DbPath: "5",
+		},
+	}
+
+	cfgWithDB := &Config{
+		Fs: &FSConfig{
+			Root:       "4",
+			OpensLimit: 4,
+			OpenTTL:    4,
+		},
+		Users: &UsersCfg{
+			EnableAuth:         true,
+			DefaultAdmin:       "5",
+			DefaultAdminPwd:    "5",
+			CookieTTL:          5,
+			CookieSecure:       true,
+			CookieHttpOnly:     true,
+			MinUserNameLen:     5,
+			MinPwdLen:          5,
+			CaptchaWidth:       5,
+			CaptchaHeight:      5,
+			CaptchaEnabled:     true,
+			UploadSpeedLimit:   5,
+			DownloadSpeedLimit: 5,
+			SpaceLimit:         5,
+			LimiterCapacity:    5,
+			LimiterCyc:         5,
+			PredefinedUsers: []*userstore.UserCfg{
+				&userstore.UserCfg{
+					Name: "5",
+					Pwd:  "5",
+					Role: "5",
+				},
+			},
+		},
+		Secrets: &Secrets{
+			TokenSecret: "4",
+		},
+		Server: &ServerCfg{
+			Debug:          false,
+			Host:           "4",
+			Port:           4,
+			ReadTimeout:    4,
+			WriteTimeout:   4,
+			MaxHeaderBytes: 4,
+			PublicPath:     "4",
+		},
+		Workers: &WorkerPoolCfg{
+			QueueSize:   4,
+			SleepCyc:    4,
+			WorkerCount: 4,
+		},
+		Site: &sitestore.SiteConfig{
+			ClientCfg: &sitestore.ClientConfig{
+				SiteName: "Quickshare",
+				SiteDesc: "Quickshare",
+				Bg: &sitestore.BgConfig{
+					Url:      "test.png",
+					Repeat:   "no-repeat",
+					Position: "top",
+					Align:    "scroll",
+				},
+			},
+		},
+		Db: &DbConfig{
+			DbPath: "testdata/test_quickshare.db",
+		},
 	}
 
 	expects := []*Config{
+		cfgDefault,
 		cfg1,
-		cfg2,
-		cfg3,
 		cfg4,
 		cfg5,
+		cfgWithDB,
 	}
 
 	testLoadCfg := func(t *testing.T) {

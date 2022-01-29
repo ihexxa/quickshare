@@ -30,25 +30,24 @@ func LoadCfg(opts *Opts) (*gocfg.Cfg, error) {
 		return nil, err
 	}
 
-	if opts.DbPath != "" {
-		cfg, err = mergeDbConfig(cfg, opts.DbPath)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		_, err := os.Stat(boltdbpvd.DBName)
-		if err == nil {
-			cfg, err = mergeDbConfig(cfg, boltdbpvd.DBName)
-		} else if err != nil {
-			if !os.IsNotExist(err) {
-				return nil, err
-			}
-		}
-	}
-
 	cfg, err = mergeConfigFiles(cfg, opts.Configs)
 	if err != nil {
 		return nil, err
+	}
+
+	dbPath := cfg.GrabString("Db.DbPath")
+	if opts.DbPath != "" {
+		dbPath = opts.DbPath
+		_, err := os.Stat(dbPath)
+		if err == nil {
+			cfg, err = mergeDbConfig(cfg, dbPath)
+		} else if err != nil {
+			if !os.IsNotExist(err) {
+				return nil, err
+			} else {
+				fmt.Printf("warning: Database does not exist in (%s), skipped", dbPath)
+			}
+		}
 	}
 
 	return mergeArgs(cfg, opts)
@@ -101,6 +100,9 @@ func mergeArgs(cfg *gocfg.Cfg, opts *Opts) (*gocfg.Cfg, error) {
 	}
 	if opts.Port != 0 {
 		cfg.SetInt("Server.Port", opts.Port)
+	}
+	if opts.DbPath != "" {
+		cfg.SetString("Db.DbPath", opts.DbPath)
 	}
 
 	return cfg, nil

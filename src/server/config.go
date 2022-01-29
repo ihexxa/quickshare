@@ -7,6 +7,10 @@ import (
 	"github.com/ihexxa/quickshare/src/db/userstore"
 )
 
+type DbConfig struct {
+	DbPath string `json:"dbPath" yaml:"dbPath"`
+}
+
 type FSConfig struct {
 	Root       string `json:"root" yaml:"root"`
 	OpensLimit int    `json:"opensLimit" yaml:"opensLimit"`
@@ -60,6 +64,7 @@ type Config struct {
 	Users   *UsersCfg             `json:"users" yaml:"users"`
 	Workers *WorkerPoolCfg        `json:"workers" yaml:"workers"`
 	Site    *sitestore.SiteConfig `json:"site" yaml:"site"`
+	Db      *DbConfig             `json:"db" yaml:"db"`
 }
 
 func NewConfig() *Config {
@@ -125,6 +130,9 @@ func DefaultConfigStruct() *Config {
 					Align:    "center",
 				},
 			},
+		},
+		Db: &DbConfig{
+			DbPath: "quickshare.db",
 		},
 	}
 }
