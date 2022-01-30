@@ -2,7 +2,7 @@ users:
   enableAuth: true
   defaultAdmin: "5"
   defaultAdminPwd: "5"
-  cookieTTL: 5
+  # cookieTTL: 5
   cookieSecure: true
   cookieHttpOnly: true
   minUserNameLen: 5
