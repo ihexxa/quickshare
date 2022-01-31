@@ -1,3 +1,8 @@
+# v0.5.4
+## Screenshots
+![screenshots 1](./imgs/v0.5.4/screens_2.jpg)
+![Screenshots 2](./imgs/v0.5.4/screens.jpg)
+
 # v0.5.1
 ## Login
 ![login](./imgs/v0.5.2/login.png)
