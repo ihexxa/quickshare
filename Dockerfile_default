@@ -14,8 +14,8 @@ RUN groupadd -g 8686 quickshare
 RUN useradd quickshare -u 8686 -g 8686 -m -s /bin/bash
 RUN usermod -a -G quickshare root
 COPY --from=build-fe /quickshare/dist/quickshare /quickshare
-ADD configs/demo.yml /quickshare
+ADD configs/docker.yml /quickshare
 RUN mkdir -p /quickshare/root
 RUN chgrp -R quickshare /quickshare
 RUN chmod -R 0770 /quickshare
-CMD ["/quickshare/start", "-c", "/quickshare/demo.yml"]
+CMD ["/quickshare/start", "-c", "/quickshare/docker.yml"]
