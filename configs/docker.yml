@@ -29,10 +29,7 @@ users:
   spaceLimit: 104857600 # 100MB
   limiterCapacity: 1000
   limiterCyc: 1000 # 1s
-  predefinedUsers:
-    - name: "demo"
-      pwd: "Quicksh@re"
-      role: "user"
+  predefinedUsers: []
 workers:
   queueSize: 1024
   sleepCyc: 1 # in second
