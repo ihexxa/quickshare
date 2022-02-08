@@ -137,6 +137,10 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	ider := simpleidgen.New()
 	filesystem := local.NewLocalFS(rootPath, 0660, opensLimit, openTTL, readerTTL, ider)
 	jwtEncDec := jwt.NewJWTEncDec(secret)
+
+	if err := filesystem.MkdirAll(dbPath); err != nil {
+		panic(fmt.Sprintf("fail to create path for db: %s", err))
+	}
 	kv := boltdbpvd.New(dbPath, 1024)
 	users, err := userstore.NewKVUserStore(kv)
 	if err != nil {
