@@ -9,15 +9,15 @@ import (
 	serverPkg "github.com/ihexxa/quickshare/src/server"
 )
 
-var opts = &serverPkg.Opts{}
+var args = &serverPkg.Args{}
 
 func main() {
-	_, err := goflags.Parse(opts)
+	_, err := goflags.Parse(args)
 	if err != nil {
 		panic(err)
 	}
 
-	cfg, err := serverPkg.LoadCfg(opts)
+	cfg, err := serverPkg.LoadCfg(args)
 	if err != nil {
 		fmt.Printf("failed to load config: %s", err)
 		os.Exit(1)

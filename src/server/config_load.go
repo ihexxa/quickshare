@@ -12,14 +12,14 @@ import (
 	"github.com/ihexxa/quickshare/src/kvstore/boltdbpvd"
 )
 
-type Opts struct {
+type Args struct {
 	Host    string   `short:"h" long:"host" description:"server hostname"`
 	Port    int      `short:"p" long:"port" description:"server port"`
 	DbPath  string   `short:"d" long:"db" description:"path of the quickshare.db"`
 	Configs []string `short:"c" long:"configs" description:"config path"`
 }
 
-func LoadCfg(opts *Opts) (*gocfg.Cfg, error) {
+func LoadCfg(args *Args) (*gocfg.Cfg, error) {
 	defaultCfg, err := DefaultConfig()
 	if err != nil {
 		return nil, err
@@ -30,14 +30,14 @@ func LoadCfg(opts *Opts) (*gocfg.Cfg, error) {
 		return nil, err
 	}
 
-	cfg, err = mergeConfigFiles(cfg, opts.Configs)
+	cfg, err = mergeConfigFiles(cfg, args.Configs)
 	if err != nil {
 		return nil, err
 	}
 
 	dbPath := cfg.GrabString("Db.DbPath")
-	if opts.DbPath != "" {
-		dbPath = opts.DbPath
+	if args.DbPath != "" {
+		dbPath = args.DbPath
 		_, err := os.Stat(dbPath)
 		if err == nil {
 			cfg, err = mergeDbConfig(cfg, dbPath)
@@ -50,7 +50,7 @@ func LoadCfg(opts *Opts) (*gocfg.Cfg, error) {
 		}
 	}
 
-	return mergeArgs(cfg, opts)
+	return mergeArgs(cfg, args)
 }
 
 func mergeDbConfig(cfg *gocfg.Cfg, dbPath string) (*gocfg.Cfg, error) {
@@ -94,15 +94,15 @@ func mergeConfigFiles(cfg *gocfg.Cfg, configPaths []string) (*gocfg.Cfg, error) 
 	return cfg, nil
 }
 
-func mergeArgs(cfg *gocfg.Cfg, opts *Opts) (*gocfg.Cfg, error) {
-	if opts.Host != "" {
-		cfg.SetString("Server.Host", opts.Host)
+func mergeArgs(cfg *gocfg.Cfg, args *Args) (*gocfg.Cfg, error) {
+	if args.Host != "" {
+		cfg.SetString("Server.Host", args.Host)
 	}
-	if opts.Port != 0 {
-		cfg.SetInt("Server.Port", opts.Port)
+	if args.Port != 0 {
+		cfg.SetInt("Server.Port", args.Port)
 	}
-	if opts.DbPath != "" {
-		cfg.SetString("Db.DbPath", opts.DbPath)
+	if args.DbPath != "" {
+		cfg.SetString("Db.DbPath", args.DbPath)
 	}
 
 	return cfg, nil
