@@ -12,30 +12,30 @@ import (
 )
 
 func TestLoadCfg(t *testing.T) {
-	argsList := []*Opts{
+	argsList := []*Args{
 		// default config
-		&Opts{
+		&Args{
 			Host:    "",
 			Port:    0,
 			DbPath:  "",
 			Configs: []string{},
 		},
 		// default config + config_1
-		&Opts{
+		&Args{
 			Host:    "",
 			Port:    0,
 			DbPath:  "",
 			Configs: []string{"testdata/config_1.yml"},
 		},
 		// default config + config_1 + config_4
-		&Opts{
+		&Args{
 			Host:    "",
 			Port:    0,
 			DbPath:  "",
 			Configs: []string{"testdata/config_1.yml", "testdata/config_4.yml"},
 		},
 		// config partial overwrite
-		&Opts{
+		&Args{
 			Host:   "",
 			Port:   0,
 			DbPath: "",
@@ -47,7 +47,7 @@ func TestLoadCfg(t *testing.T) {
 			},
 		},
 		// default config + config_1 + config_4 + db_partial + args(db)
-		&Opts{
+		&Args{
 			Host:   "",
 			Port:   0,
 			DbPath: "testdata/test_quickshare.db",
@@ -331,8 +331,8 @@ func TestLoadCfg(t *testing.T) {
 	}
 
 	testLoadCfg := func(t *testing.T) {
-		for i, opts := range argsList {
-			gotCfg, err := LoadCfg(opts)
+		for i, args := range argsList {
+			gotCfg, err := LoadCfg(args)
 			if err != nil {
 				t.Fatal(err)
 			}
