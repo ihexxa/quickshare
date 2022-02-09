@@ -60,7 +60,6 @@ Then you can open `http://127.0.0.1:8686` and log in with user name `qs` and pas
 docker run \
 --name quickshare \
 -d -p 8686:8686 \
--u 8686:8686 \
 -v `pwd`/quickshare/root:/quickshare/root \
 -e DEFAULTADMIN=qs \
 -e DEFAULTADMINPWD=1234 \
@@ -70,7 +69,7 @@ hexxa/quickshare
 - `DEFAULTADMIN` is the default user name
 - `DEFAULTADMINPWD` is the default user password
 - `/quickshare/root` is where the Quickshare stores files and directories.
-- `-u 8686:8686` is specifying the user(uid=8686) and the group(gid=8686) to start the Quickshare, which are predefined in the image
+- Please refer to [this doc](./docs/doc.md) if you want to manage files and folders from OS.
 
 ### Run from source code
 

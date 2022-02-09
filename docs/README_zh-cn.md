@@ -68,7 +68,7 @@ hexxa/quickshare
 - `DEFAULTADMIN` 是默认的用户名
 - `DEFAULTADMINPWD` 是默认的用户密码
 - `/quickshare/root` 是 Quickshare 保存文件和目录的地方
-- `-u 8686:8686` 指定了用户(uid=8686)和组(gid=8686)来启动Quickshare，它们已经在镜像中被预定义
+- 如果你想同时在操作系统管理文件和文件夹，请参考 [这个文档](./docs/doc.md)
 
 ### 运行源代码
 
