@@ -648,3 +648,11 @@
 .item-name-horizontal {
   width: 48rem;
 }
+
+.theme-default .badge {
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  font-size: 1.2rem;
+  padding: 0.8rem 1rem;
+}

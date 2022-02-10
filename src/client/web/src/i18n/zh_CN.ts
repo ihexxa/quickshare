@@ -133,4 +133,6 @@ export const msgs: Map<string, string> = Map({
   "endpoints": "端点",
   "endpoints.root": "根",
   "endpoints.home": "家",
+  "state.stopped": "已停止",
+  "state.error": "错误",
 });
