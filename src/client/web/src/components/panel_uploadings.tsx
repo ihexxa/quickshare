@@ -76,9 +76,12 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
     const uploadingRows = uploadings.map((uploading: UploadEntry) => {
       const pathParts = uploading.filePath.split("/");
       const fileName = pathParts[pathParts.length - 1];
-      const progress = Math.floor((uploading.uploaded / uploading.size) * 100);
+      const progress =
+        uploading.size === 0
+          ? 100
+          : Math.floor((uploading.uploaded / uploading.size) * 100);
 
-      const op = (
+      let rightCell = (
         <div className="item-op">
           <button
             onClick={() => this.stopUploading(uploading.filePath)}
@@ -94,6 +97,29 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
           </button>
         </div>
       );
+
+      switch (uploading.state) {
+        case UploadState.Error:
+          rightCell = (
+            <div className="item-op">
+              <span className="badge white-font red0-bg">
+                {this.props.msg.pkg.get("state.error")}
+              </span>
+            </div>
+          );
+          break;
+        case UploadState.Stopped:
+          rightCell = (
+            <div className="item-op">
+              <span className="badge yellow0-font black-bg">
+                {this.props.msg.pkg.get("state.stopped")}
+              </span>
+            </div>
+          );
+          break;
+        default:
+        // no op
+      }
 
       const progressBar = (
         <div className="progress-grey">
@@ -124,7 +150,7 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
             </span>
           </div>
 
-          <div className="op">{op}</div>
+          <div className="op">{rightCell}</div>
 
           {progressBar}
           {errorInfo}
