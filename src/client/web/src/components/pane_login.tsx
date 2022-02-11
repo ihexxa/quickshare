@@ -1,5 +1,5 @@
 import * as React from "react";
-import { List } from "immutable";
+import { List, Map } from "immutable";
 
 import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { Flexbox } from "./layout/flexbox";
@@ -8,6 +8,7 @@ import { alertMsg } from "../common/env";
 import { Quota, Preferences } from "../client";
 import { getErrMsg } from "../common/utils";
 import { ctrlOn, ctrlOff, loadingCtrl } from "../common/controls";
+import { HotkeyHandler } from "../common/hotkeys";
 
 export interface ExtInfo {
   usedSpace: string;
@@ -39,6 +40,8 @@ export interface State {
 
 export class AuthPane extends React.Component<Props, State, {}> {
   private update: (updater: (prevState: ICoreState) => ICoreState) => void;
+  private hotkeyHandler: HotkeyHandler;
+
   constructor(p: Props) {
     super(p);
     this.update = p.update;
@@ -48,6 +51,17 @@ export class AuthPane extends React.Component<Props, State, {}> {
       captchaInput: "",
       captchaLoaded: false,
     };
+  }
+
+  componentDidMount(): void {
+    this.hotkeyHandler = new HotkeyHandler();
+    this.hotkeyHandler.add({ key: "Enter" }, this.login);
+
+    document.addEventListener("keyup", this.hotkeyHandler.handle);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener("keyup", this.hotkeyHandler.handle);
   }
 
   changeUser = (ev: React.ChangeEvent<HTMLInputElement>) => {
