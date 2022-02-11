@@ -35,6 +35,7 @@ import {
   filesViewCtrl,
   loadingCtrl,
 } from "../common/controls";
+import { HotkeyHandler } from "../common/hotkeys";
 
 export interface Item {
   name: string;
@@ -77,6 +78,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
   private uploadInput: Element | Text;
   private assignInput: (input: Element) => void;
   private onClickUpload: () => void;
+  private hotkeyHandler: HotkeyHandler;
 
   constructor(p: Props) {
     super(p);
@@ -97,6 +99,18 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       const uploadInput = this.uploadInput as HTMLButtonElement;
       uploadInput.click();
     };
+  }
+
+  componentDidMount(): void {
+    this.hotkeyHandler = new HotkeyHandler();
+    this.hotkeyHandler.add({ key: "a", ctrl: true }, this.selectAll);
+    this.hotkeyHandler.add({ key: "q", ctrl: true }, this.onClickUpload);
+
+    document.addEventListener("keyup", this.hotkeyHandler.handle);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener("keyup", this.hotkeyHandler.handle);
   }
 
   setLoading = (state: boolean) => {
@@ -761,7 +775,9 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     const endPoints = (
       <div className={showEndpoints}>
         <Container>
-          <h5 className="pane-title margin-r-m">{this.props.msg.pkg.get("endpoints")}</h5>
+          <h5 className="pane-title margin-r-m">
+            {this.props.msg.pkg.get("endpoints")}
+          </h5>
           <div className="hr"></div>
 
           <button onClick={gotoRoot} className="margin-r-m">
