@@ -15,6 +15,7 @@ import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
 import { Rows, Row } from "./layout/rows";
 import { loadingCtrl, ctrlOn, ctrlOff } from "../common/controls";
+import { HotkeyHandler } from "../common/hotkeys";
 
 export interface UploadingsProps {
   uploadings: List<UploadEntry>;
@@ -31,9 +32,21 @@ export interface Props {
 export interface State {}
 
 export class UploadingsPanel extends React.Component<Props, State, {}> {
+  private hotkeyHandler: HotkeyHandler;
+
   constructor(p: Props) {
     super(p);
     this.state = {};
+  }
+
+  componentDidMount(): void {
+    this.hotkeyHandler = new HotkeyHandler();
+
+    document.addEventListener("keyup", this.hotkeyHandler.handle);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener("keyup", this.hotkeyHandler.handle);
   }
 
   setLoading = (state: boolean) => {

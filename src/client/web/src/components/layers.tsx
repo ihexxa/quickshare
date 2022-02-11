@@ -10,8 +10,16 @@ import { AuthPane, LoginProps } from "./pane_login";
 import { FilesProps } from "./panel_files";
 import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
-import { sharingCtrl, loadingCtrl, ctrlOn } from "../common/controls";
+import {
+  settingsDialogCtrl,
+  ctrlOff,
+  sharingCtrl,
+  loadingCtrl,
+  ctrlOn,
+  ctrlHidden,
+} from "../common/controls";
 import { LoadingIcon } from "./visual/loading";
+import { HotkeyHandler } from "../common/hotkeys";
 
 export interface Props {
   filesInfo: FilesProps;
@@ -24,8 +32,24 @@ export interface Props {
 
 export interface State {}
 export class Layers extends React.Component<Props, State, {}> {
+  private hotkeyHandler: HotkeyHandler;
   constructor(p: Props) {
     super(p);
+  }
+
+  componentDidMount(): void {
+    this.hotkeyHandler = new HotkeyHandler();
+
+    const closeHandler = () => {
+      this.setControlOption(settingsDialogCtrl, ctrlOff);
+    };
+    this.hotkeyHandler.add({ key: "Escape" }, closeHandler);
+
+    document.addEventListener("keyup", this.hotkeyHandler.handle);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener("keyup", this.hotkeyHandler.handle);
   }
 
   setControlOption = (targetControl: string, option: string) => {
@@ -41,11 +65,13 @@ export class Layers extends React.Component<Props, State, {}> {
         ? "hidden"
         : "";
     const showSettings =
-      this.props.ui.control.controls.get("settingsDialog") === ctrlOn
+      this.props.ui.control.controls.get(settingsDialogCtrl) === ctrlOn
         ? ""
         : "hidden";
     const showLoading =
-      this.props.ui.control.controls.get(loadingCtrl) == ctrlOn ? "" : "hidden";
+      this.props.ui.control.controls.get(loadingCtrl) == ctrlOn
+        ? ""
+        : ctrlHidden;
 
     return (
       <div id="layers">
@@ -72,7 +98,7 @@ export class Layers extends React.Component<Props, State, {}> {
                   <h4 id="title">{this.props.msg.pkg.get("pane.settings")}</h4>,
                   <button
                     onClick={() => {
-                      this.setControlOption("settingsDialog", "off");
+                      this.setControlOption(settingsDialogCtrl, ctrlOff);
                     }}
                   >
                     {this.props.msg.pkg.get("panes.close")}
