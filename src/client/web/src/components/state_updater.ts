@@ -237,6 +237,10 @@ export class Updater {
     return this.setItems(dirParts);
   };
 
+  refreshFiles = async (): Promise<string> => {
+    return await this.setItems(this.props.filesInfo.dirPath);
+  };
+
   setItems = async (dirParts: List<string>): Promise<string> => {
     const dirPath = dirParts.join("/");
     const listResp = await this.filesClient.list(dirPath);

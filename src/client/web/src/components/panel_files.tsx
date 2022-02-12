@@ -36,6 +36,7 @@ import {
   loadingCtrl,
 } from "../common/controls";
 import { HotkeyHandler } from "../common/hotkeys";
+import { CronTable } from "../common/cron";
 
 export interface Item {
   name: string;
@@ -102,6 +103,12 @@ export class FilesPanel extends React.Component<Props, State, {}> {
   }
 
   componentDidMount(): void {
+    CronTable().setInterval("refreshFileList", {
+      func: updater().refreshFiles,
+      args: [],
+      delay: 5000,
+    });
+
     this.hotkeyHandler = new HotkeyHandler();
     this.hotkeyHandler.add({ key: "a", ctrl: true }, this.selectAll);
     this.hotkeyHandler.add({ key: "q", ctrl: true }, this.onClickUpload);
@@ -110,6 +117,8 @@ export class FilesPanel extends React.Component<Props, State, {}> {
   }
 
   componentWillUnmount() {
+    CronTable().clearInterval("refreshFileList");
+
     document.removeEventListener("keyup", this.hotkeyHandler.handle);
   }
 

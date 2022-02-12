@@ -15,6 +15,7 @@ import { Container } from "./layout/container";
 import { Rows, Row } from "./layout/rows";
 import { shareIDQuery } from "../client/files";
 import { loadingCtrl, ctrlOn, ctrlOff } from "../common/controls";
+import { CronTable } from "../common/cron";
 
 export interface SharingsProps {
   sharings: Map<string, string>;
@@ -34,6 +35,18 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
   constructor(p: Props) {
     super(p);
     this.state = {};
+  }
+
+  componentDidMount(): void {
+    CronTable().setInterval("refreshUploadings", {
+      func: updater().refreshUploadings,
+      args: [],
+      delay: 5000,
+    });
+  }
+
+  componentWillUnmount() {
+    CronTable().clearInterval("refreshUploadings");
   }
 
   setLoading = (state: boolean) => {

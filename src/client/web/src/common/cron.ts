@@ -13,9 +13,9 @@ export class Cron {
     this.tasks = Map<string, CronTask>();
   }
 
-  add = (name: string, task: CronTask) => {
+  setInterval = (name: string, task: CronTask) => {
     if (this.tasks.has(name)) {
-      this.delete(name);
+      this.clearInterval(name);
     }
 
     const handler = window.setInterval(task.func, task.delay, ...task.args);
@@ -23,7 +23,7 @@ export class Cron {
     this.tasks = this.tasks.set(name, task);
   };
 
-  delete = (name: string) => {
+  clearInterval = (name: string) => {
     const preTask = this.tasks.get(name);
     window.clearInterval(preTask.handler);
     this.tasks = this.tasks.delete(name);
