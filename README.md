@@ -21,7 +21,7 @@ This is a [demo on Heroku](https://hexxa-quickshare.herokuapp.com/).
 
 (User is `demo`, password is `Quicksh@re`, uploading/downloading speed is limited to around 100KB.)
 
-![Quickshare on desktop](./docs/imgs/v0.5.4/screens_2.jpg)
+![Quickshare on desktop](./docs/imgs/v0.5.4/screens.jpg)
 
 English | [简体中文](./docs/README_zh-cn.md)
 
