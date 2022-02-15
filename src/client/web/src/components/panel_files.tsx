@@ -112,6 +112,8 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     this.hotkeyHandler = new HotkeyHandler();
     this.hotkeyHandler.add({ key: "a", ctrl: true }, this.selectAll);
     this.hotkeyHandler.add({ key: "q", ctrl: true }, this.onClickUpload);
+    this.hotkeyHandler.add({ key: "Delete" }, this.delete);
+    this.hotkeyHandler.add({ key: "v", ctrl: true }, this.moveHere);
 
     document.addEventListener("keyup", this.hotkeyHandler.handle);
   }
