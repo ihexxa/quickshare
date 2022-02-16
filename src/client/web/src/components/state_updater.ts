@@ -1,7 +1,7 @@
 import { List, Map, Set } from "immutable";
 
 import { ICoreState } from "./core_state";
-import { getItemPath } from "../common/utils";
+import { getItemPath, sortRows } from "../common/utils";
 import {
   User,
   ListUsersResp,
@@ -238,7 +238,16 @@ export class Updater {
   };
 
   refreshFiles = async (): Promise<string> => {
-    return await this.setItems(this.props.filesInfo.dirPath);
+    const status = await this.setItems(this.props.filesInfo.dirPath);
+    if (status !== "") {
+      return status;
+    };
+
+    // TODO: this part is duplicated in the panel_files.tsx
+    const sortKeys = List<string>([
+      this.props.msg.pkg.get("item.type"),
+      this.props.msg.pkg.get("item.name"),
+    ]);
   };
 
   setItems = async (dirParts: List<string>): Promise<string> => {
