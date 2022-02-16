@@ -171,3 +171,9 @@ func (cl *SingleUserClient) SetPreferences(prefers *userstore.Preferences, token
 		AddCookie(token).
 		End()
 }
+
+func (cl *SingleUserClient) IsAuthed(token *http.Cookie) (*http.Response, string, []error) {
+	return cl.r.Get(cl.url("/v1/users/isauthed")).
+		AddCookie(token).
+		End()
+}
