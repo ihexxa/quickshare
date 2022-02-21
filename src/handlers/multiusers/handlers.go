@@ -156,6 +156,9 @@ func (h *MultiUsersSvc) Init(adminName, adminPwd string) (string, error) {
 	spaceLimit := int64(h.cfg.IntOr("Users.SpaceLimit", 100*1024*1024))
 	uploadSpeedLimit := h.cfg.IntOr("Users.UploadSpeedLimit", 100*1024)
 	downloadSpeedLimit := h.cfg.IntOr("Users.DownloadSpeedLimit", 100*1024)
+	if downloadSpeedLimit < q.DownloadChunkSize {
+		return "", fmt.Errorf("download speed limit can not be lower than chunk size: %d", q.DownloadChunkSize)
+	}
 	if ok {
 		userCfgs, ok := usersInterface.([]*userstore.UserCfg)
 		if !ok {
@@ -166,7 +169,6 @@ func (h *MultiUsersSvc) Init(adminName, adminPwd string) (string, error) {
 			// TODO: check if the folders already exists
 			fsRootFolder := q.FsRootPath(userCfg.Name, "/")
 			if err = h.deps.FS().MkdirAll(fsRootFolder); err != nil {
-
 				return "", err
 			}
 			uploadFolder := q.UploadFolder(userCfg.Name)
@@ -276,7 +278,7 @@ func (h *MultiUsersSvc) IsAuthed(c *gin.Context) {
 	// token alreay verified in the authn middleware
 	role := c.MustGet(q.RoleParam).(string)
 	if role == userstore.VisitorRole {
-		c.JSON(q.ErrResp(c, 401, q.ErrUnauthorized))
+		c.JSON(q.ErrResp(c, 403, q.ErrUnauthorized))
 		return
 	}
 	c.JSON(q.Resp(200))
@@ -299,7 +301,7 @@ func (h *MultiUsersSvc) SetPwd(c *gin.Context) {
 
 	claims, err := h.getUserInfo(c)
 	if err != nil {
-		c.JSON(q.ErrResp(c, 401, err))
+		c.JSON(q.ErrResp(c, 403, err))
 		return
 	}
 
@@ -350,7 +352,7 @@ func (h *MultiUsersSvc) ForceSetPwd(c *gin.Context) {
 
 	claims, err := h.getUserInfo(c)
 	if err != nil {
-		c.JSON(q.ErrResp(c, 401, err))
+		c.JSON(q.ErrResp(c, 403, err))
 		return
 	}
 	if claims[q.RoleParam] != userstore.AdminRole {
@@ -472,7 +474,7 @@ func (h *MultiUsersSvc) DelUser(c *gin.Context) {
 
 	claims, err := h.getUserInfo(c)
 	if err != nil {
-		c.JSON(q.ErrResp(c, 401, err))
+		c.JSON(q.ErrResp(c, 403, err))
 		return
 	}
 	if claims[q.UserIDParam] == userIDStr {
@@ -645,7 +647,7 @@ type SelfResp struct {
 func (h *MultiUsersSvc) Self(c *gin.Context) {
 	claims, err := h.getUserInfo(c)
 	if err != nil {
-		c.JSON(q.ErrResp(c, 401, err))
+		c.JSON(q.ErrResp(c, 403, err))
 		return
 	}
 
@@ -676,6 +678,12 @@ func (h *MultiUsersSvc) SetUser(c *gin.Context) {
 	req := &SetUserReq{}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
+	role := c.MustGet(q.RoleParam).(string)
+	if role != userstore.AdminRole {
+		c.JSON(q.ErrResp(c, 403, errors.New("Forbidden")))
 		return
 	}
 

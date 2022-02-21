@@ -24,7 +24,7 @@ import (
 	"github.com/ihexxa/quickshare/src/worker/localworker"
 )
 
-var (
+const (
 	// queries
 	FilePathQuery = "fp"
 	ListDirQuery  = "dp"
@@ -104,7 +104,7 @@ func (h *FileHandlers) canAccess(userName, role, op, sharedPath string) bool {
 	parts := strings.Split(sharedPath, "/")
 	if len(parts) < 2 { // the path must be longer than <userName>/files
 		return false
-	} else if parts[0] == userName {
+	} else if parts[0] == userName && userName != "" && parts[1] != "" {
 		return true
 	}
 
@@ -143,6 +143,12 @@ func (h *FileHandlers) Create(c *gin.Context) {
 		return
 	}
 
+	fsFilePath, err := h.getFSFilePath(userID, req.Path)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
 	if req.FileSize == 0 {
 		err = h.deps.FS().MkdirAll(filepath.Dir(req.Path))
 		if err != nil {
@@ -151,12 +157,6 @@ func (h *FileHandlers) Create(c *gin.Context) {
 		}
 
 		// TODO: limit the number of files with 0 byte
-
-		fsFilePath, err := h.getFSFilePath(userID, req.Path)
-		if err != nil {
-			c.JSON(q.ErrResp(c, 500, err))
-			return
-		}
 
 		err = h.deps.FS().Create(fsFilePath)
 		if err != nil {
@@ -512,6 +512,7 @@ func (h *FileHandlers) getFSFilePath(userID, fsFilePath string) (string, error) 
 
 	// this file exists
 	maxDetect := 1024
+	fsFilePath = filepath.Clean(fsFilePath)
 	for i := 1; i < maxDetect; i++ {
 		dir := path.Dir(fsFilePath)
 		nameAndExt := path.Base(fsFilePath)
@@ -1041,11 +1042,10 @@ func (h *FileHandlers) GetSharingDir(c *gin.Context) {
 
 func (h *FileHandlers) GetStreamReader(userID uint64, fd io.Reader) (io.ReadCloser, error) {
 	pr, pw := io.Pipe()
-	chunkSize := 100 * 1024 // notice: it can not be greater than limiter's token count
 
 	go func() {
 		for {
-			ok, err := h.deps.Limiter().CanRead(userID, chunkSize)
+			ok, err := h.deps.Limiter().CanRead(userID, q.DownloadChunkSize)
 			if err != nil {
 				pw.CloseWithError(err)
 				break
@@ -1054,7 +1054,7 @@ func (h *FileHandlers) GetStreamReader(userID uint64, fd io.Reader) (io.ReadClos
 				continue
 			}
 
-			_, err = io.CopyN(pw, fd, int64(chunkSize))
+			_, err = io.CopyN(pw, fd, int64(q.DownloadChunkSize))
 			if err != nil {
 				if err != io.EOF {
 					pw.CloseWithError(err)

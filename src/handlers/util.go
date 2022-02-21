@@ -27,6 +27,10 @@ var (
 	TokenCookie    = "tk"
 	LastID         = "lid"
 
+	// DownloadChunkSize can not be greater than limiter's token count
+	// downloadSpeedLimit can not be lower than DownloadChunkSize
+	DownloadChunkSize = 100 * 1024
+
 	ErrAccessDenied = errors.New("access denied")
 	ErrUnauthorized = errors.New("unauthorized")
 )
