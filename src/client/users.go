@@ -53,6 +53,16 @@ func (cl *SingleUserClient) SetPwd(oldPwd, newPwd string, token *http.Cookie) (*
 		End()
 }
 
+func (cl *SingleUserClient) ForceSetPwd(userID, newPwd string, token *http.Cookie) (*http.Response, string, []error) {
+	return cl.r.Patch(cl.url("/v1/users/pwd/force-set")).
+		Send(multiusers.ForceSetPwdReq{
+			ID:     userID,
+			NewPwd: newPwd,
+		}).
+		AddCookie(token).
+		End()
+}
+
 func (cl *SingleUserClient) SetUser(ID uint64, role string, quota *userstore.Quota, token *http.Cookie) (*http.Response, string, []error) {
 	return cl.r.Patch(cl.url("/v1/users/")).
 		Send(multiusers.SetUserReq{
