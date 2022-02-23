@@ -992,6 +992,11 @@ func (h *FileHandlers) GenerateHash(c *gin.Context) {
 		return
 	}
 
+	if req.FilePath == "" {
+		c.JSON(q.ErrResp(c, 400, errors.New("invalid file path")))
+		return
+	}
+
 	role := c.MustGet(q.RoleParam).(string)
 	userName := c.MustGet(q.UserParam).(string)
 	if !h.canAccess(userName, role, "hash.gen", req.FilePath) {

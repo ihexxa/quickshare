@@ -73,7 +73,7 @@ func (h *SettingsSvc) SetClientCfg(c *gin.Context) {
 
 	role := c.MustGet(q.RoleParam).(string)
 	if role != userstore.AdminRole {
-		c.JSON(q.ErrResp(c, 401, q.ErrUnauthorized))
+		c.JSON(q.ErrResp(c, 403, q.ErrUnauthorized))
 		return
 	}
 
@@ -102,6 +102,12 @@ type ClientErrorReports struct {
 }
 
 func (h *SettingsSvc) ReportErrors(c *gin.Context) {
+	role := c.MustGet(q.RoleParam).(string)
+	if role == userstore.VisitorRole {
+		c.JSON(q.ErrResp(c, 403, q.ErrUnauthorized))
+		return
+	}
+
 	var err error
 	req := &ClientErrorReports{}
 	if err = c.ShouldBindJSON(&req); err != nil {
