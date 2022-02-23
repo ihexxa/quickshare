@@ -100,32 +100,35 @@ func TestPermissions(t *testing.T) {
 				UploadSpeedLimit:   int(8 * 1024 * 1024),
 				DownloadSpeedLimit: int(8 * 1024 * 1024),
 			}
-			tmpUser, tmpPwd, tmpRole := "tmpUser", "1234", "admin"
+			tmpUser, tmpPwd, tmpRole := "tmpUser", "1234", "user"
+			tmpAdmin, tmpAdminPwd := "tmpAdmin", "1234"
 			tmpNewRole := "tmpNewRole"
 
 			resp, _, errs := cl.SetPwd(pwd, newPwd, token)
-			assertResp(t, resp, errs, expectedCodes["SetPwd"], desc)
+			assertResp(t, resp, errs, expectedCodes["SetPwd"], fmt.Sprintf("%s-%s", desc, "SetPwd"))
 
 			// set back the password
 			resp, _, errs = cl.SetPwd(newPwd, pwd, token)
-			assertResp(t, resp, errs, expectedCodes["SetPwd"], desc)
+			assertResp(t, resp, errs, expectedCodes["SetPwd"], fmt.Sprintf("%s-%s", desc, "SetPwd"))
 
 			resp, selfResp, errs := cl.Self(token)
-			assertResp(t, resp, errs, expectedCodes["Self"], desc)
+			assertResp(t, resp, errs, expectedCodes["Self"], fmt.Sprintf("%s-%s", desc, "Self"))
 
 			prefer := selfResp.Preferences
 
 			resp, _, errs = cl.SetPreferences(prefer, token)
-			assertResp(t, resp, errs, expectedCodes["SetPreferences"], desc)
+			assertResp(t, resp, errs, expectedCodes["SetPreferences"], fmt.Sprintf("%s-%s", desc, "SetPreferences"))
 
 			resp, _, errs = cl.IsAuthed(token)
-			assertResp(t, resp, errs, expectedCodes["IsAuthed"], desc)
+			assertResp(t, resp, errs, expectedCodes["IsAuthed"], fmt.Sprintf("%s-%s", desc, "IsAuthed"))
 
 			resp, addUserResp, errs := cl.AddUser(tmpUser, tmpPwd, tmpRole, token)
-			assertResp(t, resp, errs, expectedCodes["AddUser"], desc)
+			assertResp(t, resp, errs, expectedCodes["AddUser"], fmt.Sprintf("%s-%s", desc, "AddUser"))
+			resp, addAdminResp, errs := cl.AddUser(tmpAdmin, tmpAdminPwd, userstore.AdminRole, token)
+			assertResp(t, resp, errs, expectedCodes["AddUser"], fmt.Sprintf("%s-%s", desc, "AddUser"))
 
 			resp, _, errs = cl.ListUsers(token)
-			assertResp(t, resp, errs, expectedCodes["ListUsers"], desc)
+			assertResp(t, resp, errs, expectedCodes["ListUsers"], fmt.Sprintf("%s-%s", desc, "ListUsers"))
 
 			// TODO: the id here should be uint64
 			tmpUserID := uint64(0)
@@ -144,78 +147,98 @@ func TestPermissions(t *testing.T) {
 				}
 			}
 
+			resp, _, errs = cl.ForceSetPwd(selfResp.ID, newPwd, token)
+			assertResp(t, resp, errs, expectedCodes["ForceSetPwd"], fmt.Sprintf("%s-%s", desc, "ForceSetPwd"))
+			resp, _, errs = cl.ForceSetPwd(selfResp.ID, pwd, token)
+
+			resp, _, errs = cl.ForceSetPwd(addUserResp.ID, newPwd, token)
+			assertResp(t, resp, errs, expectedCodes["ForceSetPwdOther"], fmt.Sprintf("%s-%s", desc, "ForceSetPwdOther"))
+			resp, _, errs = cl.ForceSetPwd(addUserResp.ID, pwd, token)
+
+			resp, _, errs = cl.ForceSetPwd(addAdminResp.ID, newPwd, token)
+			assertResp(t, resp, errs, expectedCodes["ForceSetPwdOtherAdmin"], fmt.Sprintf("%s-%s", desc, "ForceSetPwdOtherAdmin"))
+
 			// update self
 			resp, _, errs = cl.SetUser(userID, newRole, newQuota, token)
-			assertResp(t, resp, errs, expectedCodes["SetUserSelf"], desc)
+			assertResp(t, resp, errs, expectedCodes["SetUserSelf"], fmt.Sprintf("%s-%s", desc, "SetUserSelf"))
 			// update other users
 			resp, _, errs = cl.SetUser(tmpUserID, userstore.AdminRole, newQuota, token)
-			assertResp(t, resp, errs, expectedCodes["SetUserOthers"], desc)
+			assertResp(t, resp, errs, expectedCodes["SetUserOthers"], fmt.Sprintf("%s-%s", desc, "SetUserOthers"))
 			resp, _, errs = cl.SetUser(0, userstore.UserRole, newQuota, token)
-			assertResp(t, resp, errs, expectedCodes["SetUserOthers"], desc)
+			assertResp(t, resp, errs, expectedCodes["SetUserOthers"], fmt.Sprintf("%s-%s", desc, "SetUserOthers"))
 
 			resp, _, errs = cl.DelUser(addUserResp.ID, token)
-			assertResp(t, resp, errs, expectedCodes["DelUser"], desc)
+			assertResp(t, resp, errs, expectedCodes["DelUser"], fmt.Sprintf("%s-%s", desc, "DelUser"))
 
 			// test role operations
 			resp, _, errs = cl.AddRole(tmpNewRole, token)
-			assertResp(t, resp, errs, expectedCodes["AddRole"], desc)
+			assertResp(t, resp, errs, expectedCodes["AddRole"], fmt.Sprintf("%s-%s", desc, "AddRole"))
 
 			resp, _, errs = cl.ListRoles(token)
-			assertResp(t, resp, errs, expectedCodes["ListRoles"], desc)
+			assertResp(t, resp, errs, expectedCodes["ListRoles"], fmt.Sprintf("%s-%s", desc, "ListRoles"))
 
 			resp, _, errs = cl.DelRole(tmpNewRole, token)
-			assertResp(t, resp, errs, expectedCodes["DelRole"], desc)
+			assertResp(t, resp, errs, expectedCodes["DelRole"], fmt.Sprintf("%s-%s", desc, "DelRole"))
 
 			if requireAuth {
 				resp, _, errs := cl.Logout(token)
-				assertResp(t, resp, errs, 200, desc)
+				assertResp(t, resp, errs, 200, fmt.Sprintf("%s-%s", desc, "logout"))
 			}
 		}
 
 		testUsersAPIs("admin", "1234", true, map[string]int{
-			"SetPwd":         200,
-			"Self":           200,
-			"SetPreferences": 200,
-			"IsAuthed":       200,
-			"AddUser":        200,
-			"ListUsers":      200,
-			"SetUserSelf":    200,
-			"SetUserOthers":  200,
-			"SetOtherUser":   200,
-			"DelUser":        200,
-			"AddRole":        200,
-			"ListRoles":      200,
-			"DelRole":        200,
+			"SetPwd":                200,
+			"Self":                  200,
+			"SetPreferences":        200,
+			"IsAuthed":              200,
+			"AddUser":               200,
+			"ListUsers":             200,
+			"ForceSetPwd":           403, // can not set admin's password
+			"ForceSetPwdOther":      200,
+			"ForceSetPwdOtherAdmin": 403,
+			"SetUserSelf":           200,
+			"SetUserOthers":         200,
+			"SetOtherUser":          200,
+			"DelUser":               200,
+			"AddRole":               200,
+			"ListRoles":             200,
+			"DelRole":               200,
 		})
 
 		testUsersAPIs("user", "1234", true, map[string]int{
-			"SetPwd":         200,
-			"Self":           200,
-			"SetPreferences": 200,
-			"IsAuthed":       200,
-			"AddUser":        403,
-			"ListUsers":      403,
-			"SetUserSelf":    403,
-			"SetUserOthers":  403,
-			"DelUser":        403,
-			"AddRole":        403,
-			"ListRoles":      403,
-			"DelRole":        403,
+			"SetPwd":                200,
+			"Self":                  200,
+			"SetPreferences":        200,
+			"IsAuthed":              200,
+			"AddUser":               403,
+			"ListUsers":             403,
+			"ForceSetPwd":           403,
+			"ForceSetPwdOther":      403,
+			"ForceSetPwdOtherAdmin": 403,
+			"SetUserSelf":           403,
+			"SetUserOthers":         403,
+			"DelUser":               403,
+			"AddRole":               403,
+			"ListRoles":             403,
+			"DelRole":               403,
 		})
 
 		testUsersAPIs("visitor", "", false, map[string]int{
-			"SetPwd":         403,
-			"Self":           403,
-			"SetPreferences": 403,
-			"IsAuthed":       403,
-			"AddUser":        403,
-			"ListUsers":      403,
-			"SetUserSelf":    403,
-			"SetUserOthers":  403,
-			"DelUser":        403,
-			"AddRole":        403,
-			"ListRoles":      403,
-			"DelRole":        403,
+			"SetPwd":                403,
+			"Self":                  403,
+			"SetPreferences":        403,
+			"IsAuthed":              403,
+			"AddUser":               403,
+			"ListUsers":             403,
+			"ForceSetPwd":           403,
+			"ForceSetPwdOther":      403,
+			"ForceSetPwdOtherAdmin": 403,
+			"SetUserSelf":           403,
+			"SetUserOthers":         403,
+			"DelUser":               403,
+			"AddRole":               403,
+			"ListRoles":             403,
+			"DelRole":               403,
 		})
 	})
 
