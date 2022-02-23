@@ -212,3 +212,11 @@ func assertDownloadOK(t *testing.T, filePath, content, addr string, token *http.
 
 	return true
 }
+
+func assertResp(t *testing.T, resp *http.Response, errs []error, expectedCode int, desc string) {
+	if len(errs) > 0 {
+		t.Fatal(errs)
+	} else if resp.StatusCode != expectedCode {
+		t.Fatal(desc, resp.StatusCode, expectedCode)
+	}
+}

@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/base64"
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -11,6 +12,7 @@ import (
 	"github.com/ihexxa/quickshare/src/client"
 	"github.com/ihexxa/quickshare/src/db/userstore"
 	q "github.com/ihexxa/quickshare/src/handlers"
+	"github.com/ihexxa/quickshare/src/handlers/settings"
 )
 
 func TestPermissions(t *testing.T) {
@@ -81,76 +83,49 @@ func TestPermissions(t *testing.T) {
 	// tests only check the status code for checking permission
 	t.Run("Users API Permissions", func(t *testing.T) {
 		testUsersAPIs := func(user string, pwd string, requireAuth bool, expectedCodes map[string]int) {
+			desc := user
+
 			cl := client.NewSingleUserClient(addr)
 			token := &http.Cookie{}
 			if requireAuth {
 				resp, _, errs := cl.Login(user, pwd)
-				if len(errs) > 0 {
-					t.Fatal(errs)
-				} else if resp.StatusCode != 200 {
-					t.Fatal(resp.StatusCode)
-				}
+				assertResp(t, resp, errs, 200, desc)
 				token = client.GetCookie(resp.Cookies(), q.TokenCookie)
 			}
 
-			expectedCode := expectedCodes["SetPwd"]
 			newPwd := "12345"
-			resp, _, errs := cl.SetPwd(pwd, newPwd, token)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatal(resp.StatusCode)
+			newRole := userstore.AdminRole
+			newQuota := &userstore.Quota{
+				SpaceLimit:         int64(2046),
+				UploadSpeedLimit:   int(8 * 1024 * 1024),
+				DownloadSpeedLimit: int(8 * 1024 * 1024),
 			}
-			// set back the pwd
-			resp, _, errs = cl.SetPwd(newPwd, pwd, token)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatal(resp.StatusCode)
-			}
-
-			expectedCode = expectedCodes["Self"]
-			resp, selfResp, errs := cl.Self(token)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatal(resp.StatusCode)
-			}
-
-			expectedCode = expectedCodes["SetPreferences"]
-			prefer := selfResp.Preferences
-			resp, _, errs = cl.SetPreferences(prefer, token)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatal(resp.StatusCode)
-			}
-
-			expectedCode = expectedCodes["IsAuthed"]
-			resp, _, errs = cl.IsAuthed(token)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatalf("%s %d %d", user, expectedCode, resp.StatusCode)
-			}
-
-			// test user operations
-			expectedCode = expectedCodes["AddUser"]
 			tmpUser, tmpPwd, tmpRole := "tmpUser", "1234", "admin"
-			resp, addUserResp, errs := cl.AddUser(tmpUser, tmpPwd, tmpRole, token)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatalf("%s %d %d", user, expectedCode, resp.StatusCode)
-			}
+			tmpNewRole := "tmpNewRole"
 
-			expectedCode = expectedCodes["ListUsers"]
+			resp, _, errs := cl.SetPwd(pwd, newPwd, token)
+			assertResp(t, resp, errs, expectedCodes["SetPwd"], desc)
+
+			// set back the password
+			resp, _, errs = cl.SetPwd(newPwd, pwd, token)
+			assertResp(t, resp, errs, expectedCodes["SetPwd"], desc)
+
+			resp, selfResp, errs := cl.Self(token)
+			assertResp(t, resp, errs, expectedCodes["Self"], desc)
+
+			prefer := selfResp.Preferences
+
+			resp, _, errs = cl.SetPreferences(prefer, token)
+			assertResp(t, resp, errs, expectedCodes["SetPreferences"], desc)
+
+			resp, _, errs = cl.IsAuthed(token)
+			assertResp(t, resp, errs, expectedCodes["IsAuthed"], desc)
+
+			resp, addUserResp, errs := cl.AddUser(tmpUser, tmpPwd, tmpRole, token)
+			assertResp(t, resp, errs, expectedCodes["AddUser"], desc)
+
 			resp, _, errs = cl.ListUsers(token)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatalf("%s %d %d", user, expectedCode, resp.StatusCode)
-			}
+			assertResp(t, resp, errs, expectedCodes["ListUsers"], desc)
 
 			// TODO: the id here should be uint64
 			tmpUserID := uint64(0)
@@ -169,76 +144,31 @@ func TestPermissions(t *testing.T) {
 				}
 			}
 
-			newRole := userstore.AdminRole
-			newQuota := &userstore.Quota{
-				SpaceLimit:         int64(2046),
-				UploadSpeedLimit:   int(8 * 1024 * 1024),
-				DownloadSpeedLimit: int(8 * 1024 * 1024),
-			}
 			// update self
-			expectedCode = expectedCodes["SetUserSelf"]
 			resp, _, errs = cl.SetUser(userID, newRole, newQuota, token)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatalf("%s %d %d", user, expectedCode, resp.StatusCode)
-			}
+			assertResp(t, resp, errs, expectedCodes["SetUserSelf"], desc)
 			// update other users
-			expectedCode = expectedCodes["SetUserOthers"]
 			resp, _, errs = cl.SetUser(tmpUserID, userstore.AdminRole, newQuota, token)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatalf("%s %d %d", user, expectedCode, resp.StatusCode)
-			}
+			assertResp(t, resp, errs, expectedCodes["SetUserOthers"], desc)
 			resp, _, errs = cl.SetUser(0, userstore.UserRole, newQuota, token)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatalf("%s %d %d", user, expectedCode, resp.StatusCode)
-			}
+			assertResp(t, resp, errs, expectedCodes["SetUserOthers"], desc)
 
-			expectedCode = expectedCodes["DelUser"]
 			resp, _, errs = cl.DelUser(addUserResp.ID, token)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatalf("%s %d %d", user, expectedCode, resp.StatusCode)
-			}
+			assertResp(t, resp, errs, expectedCodes["DelUser"], desc)
 
 			// test role operations
-			expectedCode = expectedCodes["AddRole"]
-			tmpNewRole := "tmpNewRole"
 			resp, _, errs = cl.AddRole(tmpNewRole, token)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatalf("%s %d %d", user, expectedCode, resp.StatusCode)
-			}
+			assertResp(t, resp, errs, expectedCodes["AddRole"], desc)
 
-			expectedCode = expectedCodes["ListRoles"]
 			resp, _, errs = cl.ListRoles(token)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatalf("%s %d %d", user, expectedCode, resp.StatusCode)
-			}
+			assertResp(t, resp, errs, expectedCodes["ListRoles"], desc)
 
-			expectedCode = expectedCodes["DelRole"]
 			resp, _, errs = cl.DelRole(tmpNewRole, token)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatalf("%s %d %d", user, expectedCode, resp.StatusCode)
-			}
+			assertResp(t, resp, errs, expectedCodes["DelRole"], desc)
 
 			if requireAuth {
 				resp, _, errs := cl.Logout(token)
-				if len(errs) > 0 {
-					t.Fatal(errs)
-				} else if resp.StatusCode != 200 {
-					t.Fatal(resp.StatusCode)
-				}
+				assertResp(t, resp, errs, 200, desc)
 			}
 		}
 
@@ -290,68 +220,42 @@ func TestPermissions(t *testing.T) {
 	})
 
 	t.Run("Files operation API Permissions", func(t *testing.T) {
-		// ListUploadings(c *gin.Context) {
-		// DelUploading(c *gin.Context) {
-
-		// AddSharing(c *gin.Context) {
-		// DelSharing(c *gin.Context) {
-		// IsSharing(c *gin.Context) {
-		// ListSharings(c *gin.Context) {
-		// ListSharingIDs(c *gin.Context) {
-
-		// GenerateHash(c *gin.Context) {
-		// GetSharingDir(c *gin.Context) {
-
 		testFolderOpPermission := func(user string, pwd string, requireAuth bool, expectedCodes map[string]int) {
-			// List(c *gin.Context) {
-			// ListHome(c *gin.Context) {
-			// Mkdir(c *gin.Context) {
-			// Move(c *gin.Context) {
-
-			// Create(c *gin.Context) {
-			// UploadChunk(c *gin.Context) {
-			// UploadStatus(c *gin.Context) {
-			// Metadata(c *gin.Context) {
-			// Move(c *gin.Context) {
-			// Download(c *gin.Context) {
-			// GetStreamReader(userID uint64, fd io.Reader) (io.ReadCloser, error) {
-			// Delete(c *gin.Context) {
+			// List
+			// ListHome
+			// Mkdir
+			// Move
+			// Create
+			// UploadChunk
+			// UploadStatus
+			// Metadata
+			// Move
+			// Download
+			// Delete
 
 			cl := client.NewSingleUserClient(addr)
 			token := &http.Cookie{}
+			desc := user
+
 			if requireAuth {
 				resp, _, errs := cl.Login(user, pwd)
-				if len(errs) > 0 {
-					t.Fatal(errs)
-				} else if resp.StatusCode != 200 {
-					t.Fatal(resp.StatusCode)
-				}
+				assertResp(t, resp, errs, 200, desc)
 				token = client.GetCookie(resp.Cookies(), q.TokenCookie)
 			}
 
 			filesCl := client.NewFilesClient(addr, token)
 
-			expectedCode := expectedCodes["ListHome"]
 			resp, lhResp, errs := filesCl.ListHome()
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatal(user, resp.StatusCode, expectedCode)
-			}
+			assertResp(t, resp, errs, expectedCodes["ListHome"], desc)
 
-			expectedCode = expectedCodes["List"]
 			homePath := lhResp.Cwd
 			if !requireAuth {
 				homePath = "/"
 			}
-			resp, _, errs = filesCl.List(homePath)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatal(user, resp.StatusCode, expectedCode)
-			}
 
-			expectedCode = expectedCodes["ListPaths"]
+			resp, _, errs = filesCl.List(homePath)
+			assertResp(t, resp, errs, expectedCodes["List"], desc)
+
 			for _, itemPath := range []string{
 				"/",
 				"admin/",
@@ -360,38 +264,22 @@ func TestPermissions(t *testing.T) {
 				"user2/files",
 			} {
 				resp, _, errs = filesCl.List(itemPath)
-				if len(errs) > 0 {
-					t.Fatal(errs)
-				} else if resp.StatusCode != expectedCode {
-					t.Fatal(user, resp.StatusCode, expectedCode)
-				}
+				assertResp(t, resp, errs, expectedCodes["ListPaths"], desc)
 			}
 
-			expectedCode = expectedCodes["Mkdir"]
 			testPath := filepath.Join(lhResp.Cwd, "test")
-			resp, _, errs = filesCl.Mkdir(testPath)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatal(user, resp.StatusCode, expectedCode)
-			}
 
-			expectedCode = expectedCodes["Move"]
+			resp, _, errs = filesCl.Mkdir(testPath)
+			assertResp(t, resp, errs, expectedCodes["Mkdir"], desc)
+
 			newPath := filepath.Join(lhResp.Cwd, "test2")
+
 			resp, _, errs = filesCl.Move(testPath, newPath)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatal(user, resp.StatusCode, expectedCode)
-			}
+			assertResp(t, resp, errs, expectedCodes["Move"], desc)
 
 			if requireAuth {
 				resp, _, errs := cl.Logout(token)
-				if len(errs) > 0 {
-					t.Fatal(errs)
-				} else if resp.StatusCode != 200 {
-					t.Fatal(user, resp.StatusCode, expectedCode)
-				}
+				assertResp(t, resp, errs, 200, desc)
 			}
 		}
 
@@ -418,13 +306,18 @@ func TestPermissions(t *testing.T) {
 		})
 
 		testFileOpPermission := func(user string, pwd string, requireAuth bool, targetPath, targetFile string, expectedCodes map[string]int) {
-			// Create(c *gin.Context) {
-			// UploadChunk(c *gin.Context) {
-			// UploadStatus(c *gin.Context) {
-			// Metadata(c *gin.Context) {
-			// Move(c *gin.Context) {
-			// Download(c *gin.Context) {
-			// Delete(c *gin.Context) {
+			// Create
+			// UploadChunk
+			// UploadStatus
+			// Metadata
+			// Move
+			// Download
+			// Delete
+
+			// ListUploadings
+			// DelUploading
+
+			// GenerateHash
 
 			cl := client.NewSingleUserClient(addr)
 			token := &http.Cookie{}
@@ -438,158 +331,168 @@ func TestPermissions(t *testing.T) {
 				token = client.GetCookie(resp.Cookies(), q.TokenCookie)
 			}
 
-			expectedCode := expectedCodes["ListHome"]
-			filesCl := client.NewFilesClient(addr, token)
-			resp, _, errs := filesCl.ListHome()
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatal(user, resp.StatusCode, expectedCode)
-			}
-
+			desc := user
 			fileContent := []byte("01010")
 			filePath := filepath.Join(targetPath, "old")
 			fileSize := int64(len(fileContent))
-			expectedCode = expectedCodes["Create"]
-			resp, _, errs = filesCl.Create(filePath, fileSize)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatal(user, resp.StatusCode, expectedCode)
-			}
-
-			expectedCode = expectedCodes["UploadStatus"]
-			resp, _, errs = filesCl.UploadStatus(filePath)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatal(user, resp.StatusCode, expectedCode)
-			}
-
-			expectedCode = expectedCodes["UploadChunk"]
+			filesCl := client.NewFilesClient(addr, token)
 			base64Content := base64.StdEncoding.EncodeToString([]byte(fileContent))
+			newPath := filepath.Join(targetPath, "new")
+
+			resp, _, errs := filesCl.ListHome()
+			assertResp(t, resp, errs, expectedCodes["ListHome"], fmt.Sprintf("%s-%s", desc, "ListHome"))
+
+			resp, _, errs = filesCl.List(targetPath)
+			assertResp(t, resp, errs, expectedCodes["ListTarget"], fmt.Sprintf("%s-%s", desc, "ListTarget"))
+
+			resp, _, errs = filesCl.Create(filePath, fileSize)
+			assertResp(t, resp, errs, expectedCodes["Create"], fmt.Sprintf("%s-%s", desc, "Create"))
+
+			resp, _, errs = filesCl.ListUploadings()
+			assertResp(t, resp, errs, expectedCodes["ListUploadings"], fmt.Sprintf("%s-%s", desc, "ListUploadings"))
+
+			resp, _, errs = filesCl.DelUploading(filePath)
+			assertResp(t, resp, errs, expectedCodes["DelUploading"], fmt.Sprintf("%s-%s", desc, "DelUploading"))
+
+			// create again
+			resp, _, errs = filesCl.Create(filePath, fileSize)
+			assertResp(t, resp, errs, expectedCodes["Create"], fmt.Sprintf("%s-%s", desc, "Create"))
+
+			resp, _, errs = filesCl.UploadStatus(filePath)
+			assertResp(t, resp, errs, expectedCodes["UploadStatus"], fmt.Sprintf("%s-%s", desc, "UploadStatus"))
+
 			resp, _, errs = filesCl.UploadChunk(filePath, base64Content, 0)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatal(user, resp.StatusCode, expectedCode)
-			}
+			assertResp(t, resp, errs, expectedCodes["UploadChunk"], fmt.Sprintf("%s-%s", desc, "UploadChunk"))
 
-			expectedCode = expectedCodes["Metadata"]
 			resp, _, errs = filesCl.Metadata(filePath)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatal(user, resp.StatusCode, expectedCode)
-			}
+			assertResp(t, resp, errs, expectedCodes["Metadata"], fmt.Sprintf("%s-%s", desc, "Metadata"))
 
-			expectedCode = expectedCodes["MetadataTarget"]
 			resp, _, errs = filesCl.Metadata(targetPath)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatal(user, resp.StatusCode, expectedCode)
-			}
+			assertResp(t, resp, errs, expectedCodes["MetadataTarget"], fmt.Sprintf("%s-%s", desc, "MetadataTarget"))
 
-			expectedCode = expectedCodes["Download"]
+			resp, _, errs = filesCl.GenerateHash(filePath)
+			assertResp(t, resp, errs, expectedCodes["GenerateHash"], fmt.Sprintf("%s-%s", desc, "GenerateHash"))
+
+			resp, _, errs = filesCl.GenerateHash(targetFile)
+			assertResp(t, resp, errs, expectedCodes["GenerateHashTarget"], fmt.Sprintf("%s-%s", desc, "GenerateHashTarget"))
+
 			resp, _, errs = filesCl.Download(filePath, map[string]string{})
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatal(user, resp.StatusCode, expectedCode)
-			}
+			assertResp(t, resp, errs, expectedCodes["Download"], fmt.Sprintf("%s-%s", desc, "Download"))
 
 			if targetFile != "" {
-				expectedCode = expectedCodes["DownloadTarget"]
 				resp, _, errs = filesCl.Download(targetFile, map[string]string{})
-				if len(errs) > 0 {
-					t.Fatal(errs)
-				} else if resp.StatusCode != expectedCode {
-					t.Fatal(user, resp.StatusCode, expectedCode)
-				}
+				assertResp(t, resp, errs, expectedCodes["DownloadTarget"], fmt.Sprintf("%s-%s", desc, "DownloadTarget"))
 			}
 
-			expectedCode = expectedCodes["Move"]
-			newPath := filepath.Join(targetPath, "new")
 			resp, _, errs = filesCl.Move(filePath, newPath)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatal(user, resp.StatusCode, expectedCode)
-			}
+			assertResp(t, resp, errs, expectedCodes["Move"], fmt.Sprintf("%s-%s", desc, "Move"))
 
-			expectedCode = expectedCodes["Delete"]
 			resp, _, errs = filesCl.Delete(newPath)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != expectedCode {
-				t.Fatal(user, resp.StatusCode, expectedCode)
-			}
+			assertResp(t, resp, errs, expectedCodes["Delete"], fmt.Sprintf("%s-%s", desc, "Delete"))
 
 			if requireAuth {
 				resp, _, errs := cl.Logout(token)
-				if len(errs) > 0 {
-					t.Fatal(errs)
-				} else if resp.StatusCode != 200 {
-					t.Fatal(user, resp.StatusCode, expectedCode)
-				}
+				assertResp(t, resp, errs, 200, desc)
 			}
 		}
 
 		testFileOpPermission("admin", "1234", true, "admin/files", "", map[string]int{
-			"ListHome":       200,
-			"Create":         200,
-			"UploadChunk":    200,
-			"UploadStatus":   200,
-			"Metadata":       200,
-			"MetadataTarget": 200,
-			"Move":           200,
-			"Download":       200,
-			"Delete":         200,
+			"ListHome":           200,
+			"ListTarget":         200,
+			"Create":             200,
+			"ListUploadings":     200,
+			"DelUploading":       200,
+			"UploadChunk":        200,
+			"UploadStatus":       200,
+			"Metadata":           200,
+			"MetadataTarget":     200,
+			"GenerateHash":       200,
+			"GenerateHashTarget": 400,
+			"Move":               200,
+			"Download":           200,
+			"Delete":             200,
 		})
 		testFileOpPermission("user", "1234", true, "user/files", "", map[string]int{
-			"ListHome":       200,
-			"Create":         200,
-			"UploadChunk":    200,
-			"UploadStatus":   200,
-			"Metadata":       200,
-			"MetadataTarget": 200,
-			"Move":           200,
-			"Download":       200,
-			"Delete":         200,
+			"ListHome":           200,
+			"ListTarget":         200,
+			"Create":             200,
+			"ListUploadings":     200,
+			"DelUploading":       200,
+			"UploadChunk":        200,
+			"UploadStatus":       200,
+			"Metadata":           200,
+			"MetadataTarget":     200,
+			"GenerateHash":       200,
+			"GenerateHashTarget": 400,
+			"Move":               200,
+			"Download":           200,
+			"Delete":             200,
 		})
 		testFileOpPermission("visitor", "", false, "user/files", "", map[string]int{
-			"ListHome":       403,
-			"Create":         403,
-			"UploadChunk":    403,
-			"UploadStatus":   403,
-			"Metadata":       403,
-			"MetadataTarget": 403,
-			"Move":           403,
-			"Download":       403,
-			"Delete":         403,
+			"ListHome":           403,
+			"ListTarget":         403,
+			"Create":             403,
+			"ListUploadings":     403,
+			"DelUploading":       403,
+			"UploadChunk":        403,
+			"UploadStatus":       403,
+			"Metadata":           403,
+			"MetadataTarget":     403,
+			"GenerateHash":       403,
+			"GenerateHashTarget": 403,
+			"Move":               403,
+			"Download":           403,
+			"Delete":             403,
 		})
-		testFileOpPermission("admin", "1234", true, "user2/files", "", map[string]int{
-			"ListHome":       200,
-			"Create":         200,
-			"UploadChunk":    200,
-			"UploadStatus":   200,
-			"Metadata":       200,
-			"MetadataTarget": 200,
-			"Move":           200,
-			"Download":       200,
-			"Delete":         200,
+
+		uploadSample := func() {
+			cl := client.NewSingleUserClient(addr)
+			token := &http.Cookie{}
+
+			resp, _, errs := cl.Login("user2", "1234")
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if resp.StatusCode != 200 {
+				t.Fatal(resp.StatusCode)
+			}
+			token = client.GetCookie(resp.Cookies(), q.TokenCookie)
+			assertUploadOK(t, "user2/files/upload", "101", addr, token)
+		}
+		uploadSample()
+
+		testFileOpPermission("admin", "1234", true, "user2/files", "user2/files/upload", map[string]int{
+			"ListHome":           200,
+			"ListTarget":         200,
+			"Create":             200,
+			"ListUploadings":     200,
+			"DelUploading":       200,
+			"UploadChunk":        200,
+			"UploadStatus":       200,
+			"Metadata":           200,
+			"MetadataTarget":     200,
+			"GenerateHash":       200,
+			"GenerateHashTarget": 200,
+			"Move":               200,
+			"Download":           200,
+			"DownloadTarget":     200,
+			"Delete":             200,
 		})
-		testFileOpPermission("user", "1234", true, "user2/files", "", map[string]int{
-			"ListHome":       200,
-			"Create":         403,
-			"UploadChunk":    403,
-			"UploadStatus":   403,
-			"Metadata":       403,
-			"MetadataTarget": 403,
-			"Move":           403,
-			"Download":       403,
-			"Delete":         403,
+		testFileOpPermission("user", "1234", true, "user2/files", "user2/files/upload", map[string]int{
+			"ListHome":           200,
+			"ListTarget":         403,
+			"Create":             403,
+			"ListUploadings":     200,
+			"DelUploading":       500,
+			"UploadChunk":        403,
+			"UploadStatus":       403,
+			"Metadata":           403,
+			"MetadataTarget":     403,
+			"GenerateHash":       403, // target path is not user's home
+			"GenerateHashTarget": 403,
+			"Move":               403,
+			"Download":           403,
+			"DownloadTarget":     403,
+			"Delete":             403,
 		})
 
 		// test sharing permission
@@ -618,21 +521,186 @@ func TestPermissions(t *testing.T) {
 		enableSharing()
 
 		testFileOpPermission("user", "1234", true, "share/files", "share/files/share", map[string]int{
-			"ListHome":       200,
-			"Create":         403,
-			"UploadChunk":    403,
-			"UploadStatus":   403,
-			"Metadata":       403,
-			"MetadataTarget": 403,
-			"Move":           403,
-			"Download":       404,
-			"DownloadTarget": 200,
-			"Delete":         403,
-			// List is not tested
+			"ListHome":           200,
+			"ListTarget":         200,
+			"Create":             403,
+			"ListUploadings":     200,
+			"DelUploading":       500,
+			"UploadChunk":        403,
+			"UploadStatus":       403,
+			"Metadata":           403,
+			"MetadataTarget":     403,
+			"GenerateHash":       403, // target path is not user's home
+			"GenerateHashTarget": 403,
+			"Move":               403,
+			"Download":           404,
+			"DownloadTarget":     200,
+			"Delete":             403,
+		})
+
+		testShareOpPermission := func(user string, pwd string, requireAuth bool, targetPath string, expectedCodes map[string]int) {
+			// AddSharing
+			// DelSharing
+			// IsSharing
+			// ListSharings deprecated
+			// ListSharingIDs
+			// GetSharingDir
+
+			cl := client.NewSingleUserClient(addr)
+			token := &http.Cookie{}
+			homePath := "/"
+			desc := user
+
+			if requireAuth {
+				resp, _, errs := cl.Login(user, pwd)
+				assertResp(t, resp, errs, 200, desc)
+				token = client.GetCookie(resp.Cookies(), q.TokenCookie)
+			}
+
+			filesCl := client.NewFilesClient(addr, token)
+
+			if requireAuth {
+				resp, lhResp, errs := filesCl.ListHome()
+				assertResp(t, resp, errs, 200, desc)
+				homePath = lhResp.Cwd
+			}
+
+			resp, _, errs := filesCl.AddSharing(homePath)
+			assertResp(t, resp, errs, expectedCodes["AddSharing"], desc)
+
+			resp, _, errs = filesCl.AddSharing(targetPath)
+			assertResp(t, resp, errs, expectedCodes["AddSharingTarget"], desc)
+
+			resp, _, errs = filesCl.IsSharing(homePath)
+			assertResp(t, resp, errs, expectedCodes["IsSharing"], desc)
+
+			resp, _, errs = filesCl.IsSharing(targetPath)
+			assertResp(t, resp, errs, expectedCodes["IsSharingTarget"], desc)
+
+			resp, lsResp, errs := filesCl.ListSharingIDs()
+			assertResp(t, resp, errs, expectedCodes["ListSharingIDs"], desc)
+
+			shareID := ""
+			if len(lsResp.IDs) == 0 && requireAuth {
+				t.Fatalf("sharing is not added: %s", desc)
+			} else if len(lsResp.IDs) > 0 {
+				for _, id := range lsResp.IDs {
+					shareID = id
+					break
+				}
+			}
+
+			// TODO: visitor accessing is not tested
+			resp, _, errs = filesCl.GetSharingDir(shareID)
+			assertResp(t, resp, errs, expectedCodes["GetSharingDir"], desc)
+
+			resp, _, errs = filesCl.DelSharing(homePath)
+			assertResp(t, resp, errs, expectedCodes["DelSharing"], desc)
+
+			resp, _, errs = filesCl.DelSharing(targetPath)
+			assertResp(t, resp, errs, expectedCodes["DelSharingTarget"], desc)
+		}
+
+		testShareOpPermission("admin", "1234", true, "user2/files", map[string]int{
+			"AddSharing":       200,
+			"AddSharingTarget": 200,
+			"IsSharing":        200,
+			"IsSharingTarget":  200, // sharing is added by admin
+			"ListSharingIDs":   200,
+			"GetSharingDir":    200,
+			"DelSharing":       200,
+			"DelSharingTarget": 200, // it returns 200 even it is not in sharing
+		})
+
+		testShareOpPermission("user", "1234", true, "user2/files", map[string]int{
+			"AddSharing":       200,
+			"AddSharingTarget": 403,
+			"IsSharing":        200,
+			"IsSharingTarget":  404, // sharing is deleted by admin
+			"ListSharingIDs":   200,
+			"GetSharingDir":    200,
+			"DelSharing":       200,
+			"DelSharingTarget": 403,
+		})
+
+		testShareOpPermission("visitor", "", false, "user2/files", map[string]int{
+			"AddSharing":       403,
+			"AddSharingTarget": 403,
+			"IsSharing":        404,
+			"IsSharingTarget":  404,
+			"ListSharingIDs":   403,
+			"GetSharingDir":    400,
+			"DelSharing":       403,
+			"DelSharingTarget": 403,
 		})
 	})
 
 	t.Run("Settings API Permissions", func(t *testing.T) {
+		testSettingsOpPermission := func(user string, pwd string, requireAuth bool, expectedCodes map[string]int) {
+			// Health
+			// GetClientCfg
+			// SetClientCfg
+			// ReportErrors
 
+			cl := client.NewSingleUserClient(addr)
+			token := &http.Cookie{}
+			desc := user
+			errReports := &settings.ClientErrorReports{
+				Reports: []*settings.ClientErrorReport{
+					&settings.ClientErrorReport{
+						Report:  "report1",
+						Version: "v1",
+					},
+					&settings.ClientErrorReport{
+						Report:  "report2",
+						Version: "v2",
+					},
+				},
+			}
+
+			if requireAuth {
+				resp, _, errs := cl.Login(user, pwd)
+				assertResp(t, resp, errs, 200, desc)
+				token = client.GetCookie(resp.Cookies(), q.TokenCookie)
+			}
+
+			settingsCl := client.NewSettingsClient(addr)
+
+			resp, _, errs := settingsCl.Health()
+			assertResp(t, resp, errs, expectedCodes["Health"], fmt.Sprintf("%s-%s", desc, "Health"))
+
+			resp, gccResp, errs := settingsCl.GetClientCfg(token)
+			assertResp(t, resp, errs, expectedCodes["GetClientCfg"], fmt.Sprintf("%s-%s", desc, "GetClientCfg"))
+
+			clientCfg := gccResp
+			clientCfg.SiteName = "new site name"
+
+			resp, _, errs = settingsCl.SetClientCfg(clientCfg, token)
+			assertResp(t, resp, errs, expectedCodes["SetClientCfg"], fmt.Sprintf("%s-%s", desc, "SetClientCfg"))
+
+			resp, _, errs = settingsCl.ReportErrors(errReports, token)
+			assertResp(t, resp, errs, expectedCodes["ReportErrors"], fmt.Sprintf("%s-%s", desc, "ReportErrors"))
+		}
+
+		testSettingsOpPermission("admin", "1234", true, map[string]int{
+			"Health":       200,
+			"GetClientCfg": 200,
+			"SetClientCfg": 200,
+			"ReportErrors": 200,
+		})
+
+		testSettingsOpPermission("user", "1234", true, map[string]int{
+			"Health":       200,
+			"GetClientCfg": 200,
+			"SetClientCfg": 403,
+			"ReportErrors": 200,
+		})
+
+		testSettingsOpPermission("visitor", "", false, map[string]int{
+			"Health":       200,
+			"GetClientCfg": 200,
+			"SetClientCfg": 403,
+			"ReportErrors": 403,
+		})
 	})
 }
