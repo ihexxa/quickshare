@@ -7,7 +7,6 @@ import (
 	"github.com/ihexxa/gocfg"
 
 	"github.com/ihexxa/quickshare/src/db/sitestore"
-	"github.com/ihexxa/quickshare/src/db/userstore"
 	"github.com/ihexxa/quickshare/src/depidx"
 	q "github.com/ihexxa/quickshare/src/handlers"
 )
@@ -71,12 +70,6 @@ func (h *SettingsSvc) SetClientCfg(c *gin.Context) {
 		return
 	}
 
-	role := c.MustGet(q.RoleParam).(string)
-	if role != userstore.AdminRole {
-		c.JSON(q.ErrResp(c, 403, q.ErrUnauthorized))
-		return
-	}
-
 	err = h.deps.SiteStore().SetClientCfg(clientCfg)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
@@ -102,12 +95,6 @@ type ClientErrorReports struct {
 }
 
 func (h *SettingsSvc) ReportErrors(c *gin.Context) {
-	role := c.MustGet(q.RoleParam).(string)
-	if role == userstore.VisitorRole {
-		c.JSON(q.ErrResp(c, 403, q.ErrUnauthorized))
-		return
-	}
-
 	var err error
 	req := &ClientErrorReports{}
 	if err = c.ShouldBindJSON(&req); err != nil {

@@ -31,7 +31,9 @@ const (
 )
 
 var (
-	ErrReachedLimit    = errors.New("reached space limit")
+	ErrReachedLimit = errors.New("reached space limit")
+	ErrNotFound     = errors.New("not found")
+
 	DefaultPreferences = Preferences{
 		Bg: &sitestore.BgConfig{
 			Url:      "",
@@ -262,11 +264,11 @@ func (us *KVUserStore) GetUserByName(name string) (*User, error) {
 
 	userID, ok := us.store.GetStringIn(IDsNs, name)
 	if !ok {
-		return nil, fmt.Errorf("user id (%s) not found", name)
+		return nil, ErrNotFound
 	}
 	infoStr, ok := us.store.GetStringIn(UsersNs, userID)
 	if !ok {
-		return nil, fmt.Errorf("user name (%s) not found", userID)
+		return nil, ErrNotFound
 	}
 
 	user := &User{}

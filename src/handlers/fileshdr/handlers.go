@@ -829,13 +829,20 @@ func (h *FileHandlers) DelUploading(c *gin.Context) {
 	}
 
 	userID := c.MustGet(q.UserIDParam).(string)
+	role := c.MustGet(q.RoleParam).(string)
+	userName := c.MustGet(q.UserParam).(string)
+	// op is empty, because users must be admin, or the path belongs to this user
+	if !h.canAccess(userName, role, "", filePath) {
+		c.JSON(q.ErrResp(c, 403, errors.New("forbidden")))
+		return
+	}
+
 	userIDInt, err := strconv.ParseUint(userID, 10, 64)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
 
-	userName := c.MustGet(q.UserParam).(string)
 	tmpFilePath := q.UploadPath(userName, filePath)
 	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {

@@ -82,7 +82,6 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(userstore.UserRole, "POST", "/v1/users/logout"):       true,
 		apiRuleCname(userstore.UserRole, "GET", "/v1/users/isauthed"):      true,
 		apiRuleCname(userstore.UserRole, "PATCH", "/v1/users/pwd"):         true,
-		apiRuleCname(userstore.UserRole, "PATCH", "/v1/users/"):            true,
 		apiRuleCname(userstore.UserRole, "GET", "/v1/users/self"):          true,
 		apiRuleCname(userstore.UserRole, "PATCH", "/v1/users/preferences"): true,
 		apiRuleCname(userstore.UserRole, "POST", "/v1/fs/files"):           true,
@@ -114,13 +113,11 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(userstore.VisitorRole, "GET", "/"):                       true,
 		apiRuleCname(userstore.VisitorRole, "GET", publicPath):                true,
 		apiRuleCname(userstore.VisitorRole, "POST", "/v1/users/login"):        true,
-		apiRuleCname(userstore.VisitorRole, "GET", "/v1/users/isauthed"):      true,
 		apiRuleCname(userstore.VisitorRole, "GET", "/v1/users/self"):          true,
 		apiRuleCname(userstore.VisitorRole, "GET", "/v1/fs/files"):            true,
 		apiRuleCname(userstore.VisitorRole, "GET", "/v1/fs/dirs"):             true,
 		apiRuleCname(userstore.VisitorRole, "OPTIONS", "/v1/settings/health"): true,
 		apiRuleCname(userstore.VisitorRole, "GET", "/v1/settings/client"):     true,
-		apiRuleCname(userstore.VisitorRole, "POST", "/v1/settings/errors"):    true,
 		apiRuleCname(userstore.VisitorRole, "GET", "/v1/captchas/"):           true,
 		apiRuleCname(userstore.VisitorRole, "GET", "/v1/captchas/imgs"):       true,
 		apiRuleCname(userstore.VisitorRole, "GET", "/v1/fs/sharings/exist"):   true,
@@ -220,7 +217,7 @@ type LoginReq struct {
 func (h *MultiUsersSvc) Login(c *gin.Context) {
 	req := &LoginReq{}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(q.ErrResp(c, 500, err))
+		c.JSON(q.ErrResp(c, 400, err))
 		return
 	}
 
@@ -235,13 +232,17 @@ func (h *MultiUsersSvc) Login(c *gin.Context) {
 
 	user, err := h.deps.Users().GetUserByName(req.User)
 	if err != nil {
+		if errors.Is(err, userstore.ErrNotFound) {
+			c.JSON(q.ErrResp(c, 403, err))
+			return
+		}
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Pwd), []byte(req.Pwd))
 	if err != nil {
-		c.JSON(q.ErrResp(c, 500, err))
+		c.JSON(q.ErrResp(c, 403, err))
 		return
 	}
 
@@ -276,11 +277,6 @@ func (h *MultiUsersSvc) Logout(c *gin.Context) {
 
 func (h *MultiUsersSvc) IsAuthed(c *gin.Context) {
 	// token alreay verified in the authn middleware
-	role := c.MustGet(q.RoleParam).(string)
-	if role == userstore.VisitorRole {
-		c.JSON(q.ErrResp(c, 403, q.ErrUnauthorized))
-		return
-	}
 	c.JSON(q.Resp(200))
 }
 
@@ -350,15 +346,6 @@ func (h *MultiUsersSvc) ForceSetPwd(c *gin.Context) {
 		return
 	}
 
-	claims, err := h.getUserInfo(c)
-	if err != nil {
-		c.JSON(q.ErrResp(c, 403, err))
-		return
-	}
-	if claims[q.RoleParam] != userstore.AdminRole {
-		c.JSON(q.ErrResp(c, 403, errors.New("operation denied")))
-		return
-	}
 	targetUID, err := strconv.ParseUint(req.ID, 10, 64)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
@@ -681,12 +668,6 @@ func (h *MultiUsersSvc) SetUser(c *gin.Context) {
 		return
 	}
 
-	role := c.MustGet(q.RoleParam).(string)
-	if role != userstore.AdminRole {
-		c.JSON(q.ErrResp(c, 403, errors.New("Forbidden")))
-		return
-	}
-
 	err := h.deps.Users().SetInfo(req.ID, &userstore.User{
 		Role:  req.Role,
 		Quota: req.Quota,
@@ -710,21 +691,7 @@ func (h *MultiUsersSvc) SetPreferences(c *gin.Context) {
 		return
 	}
 
-	claims, err := h.getUserInfo(c)
-	if err != nil {
-		c.JSON(q.ErrResp(c, 401, err))
-		return
-	}
-	if claims[q.RoleParam] == userstore.VisitorRole {
-		c.JSON(q.ErrResp(c, 403, errors.New("operation denied")))
-		return
-	}
-
-	uidStr, ok := claims[q.UserIDParam]
-	if !ok {
-		c.JSON(q.ErrResp(c, 500, errors.New("user id not found")))
-		return
-	}
+	uidStr := c.MustGet(q.UserIDParam).(string)
 	uid, err := strconv.ParseUint(uidStr, 10, 64)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
