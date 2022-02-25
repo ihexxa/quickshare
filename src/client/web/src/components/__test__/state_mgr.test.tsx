@@ -123,9 +123,7 @@ describe("State Manager", () => {
     expect(coreState.msg.pkg).toEqual(MsgPackage.get("en_US"));
 
     // ui
-    expect(coreState.ui.bg).toEqual(
-      settingsResps.getClientCfgMockResp.data.bg
-    );
+    expect(coreState.ui.bg).toEqual(settingsResps.getClientCfgMockResp.data.bg);
   });
 
   test("initUpdater for visitor in sharing mode", async () => {
@@ -225,9 +223,7 @@ describe("State Manager", () => {
     expect(coreState.msg.pkg).toEqual(MsgPackage.get("en_US"));
 
     // ui
-    expect(coreState.ui.bg).toEqual(
-      settingsResps.getClientCfgMockResp.data.bg
-    );
+    expect(coreState.ui.bg).toEqual(settingsResps.getClientCfgMockResp.data.bg);
   });
 
   test("initUpdater for visitor", async () => {
@@ -251,9 +247,9 @@ describe("State Manager", () => {
     );
     usersCl.getCaptchaID = jest.fn().mockReturnValue(
       makePromise({
-        status: 400,
+        status: 200,
         statusText: "",
-        data: { error: "empty captcha ID" },
+        data: { id: "357124" },
       })
     );
 
@@ -292,7 +288,7 @@ describe("State Manager", () => {
         usedSpace: "0",
       },
       authed: false,
-      captchaID: "",
+      captchaID: "357124",
       preferences: {
         bg: {
           url: "",
@@ -319,10 +315,10 @@ describe("State Manager", () => {
 
     // ui
     expect(coreState.ui.bg).toEqual({
-      url: "",
-      repeat: "",
-      position: "",
-      align: "",
+      align: "clientCfg_bg_align",
+      position: "clientCfg_bg_position",
+      repeat: "clientCfg_bg_repeat",
+      url: "clientCfg_bg_url",
     });
   });
 });
