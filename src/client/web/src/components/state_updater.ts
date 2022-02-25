@@ -520,6 +520,11 @@ export class Updater {
   };
 
   initAuth = async (): Promise<string> => {
+    const getCapStatus = await this.getCaptchaID();
+    if (getCapStatus !== "") {
+      return getCapStatus;
+    }
+
     const isAuthedStatus = await this.syncIsAuthed();
     if (isAuthedStatus !== "") {
       return isAuthedStatus;
@@ -528,11 +533,6 @@ export class Updater {
     const selfStatuses = await this.self();
     if (selfStatuses !== "") {
       return selfStatuses;
-    }
-
-    const getCapStatus = await this.getCaptchaID();
-    if (getCapStatus !== "") {
-      return getCapStatus;
     }
 
     return "";
@@ -600,7 +600,6 @@ export class Updater {
       spaceLimit: "0",
     };
     this.props.login.authed = false;
-    this.props.login.captchaID = "";
     this.props.login.preferences = {
       bg: {
         url: "",
@@ -732,7 +731,7 @@ export class Updater {
   syncIsAuthed = async (): Promise<string> => {
     const resp = await this.usersClient.isAuthed();
     if (resp.status !== 200) {
-      this.props.login.authed = false;
+      this.resetUser();
       return resp.status === 401 ? "" : errServer;
     }
     this.props.login.authed = true;
