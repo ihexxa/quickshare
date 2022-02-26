@@ -55,18 +55,29 @@ export function newState(): ICoreState {
 }
 
 export function initState(): ICoreState {
+  const defaultLanPackage = MsgPackage.get("en_US")
+  const filesOrderBy = defaultLanPackage.get("item.name");
+  const uploadingsOrderBy = defaultLanPackage.get("item.path");
+  const sharingsOrderBy = defaultLanPackage.get("item.path");
+
   return {
     filesInfo: {
       dirPath: List<string>([]),
       items: List<MetadataResp>([]),
       isSharing: false,
+      orderBy: filesOrderBy,
+      order: true,
     },
     uploadingsInfo: {
       uploadings: List<UploadEntry>([]),
       uploadFiles: List<File>([]),
+      orderBy: uploadingsOrderBy,
+      order: true,
     },
     sharingsInfo: {
       sharings: Map<string, string>(),
+      orderBy: sharingsOrderBy,
+      order: true,
     },
     admin: {
       users: Map<string, User>(),
@@ -100,7 +111,7 @@ export function initState(): ICoreState {
     },
     msg: {
       lan: "en_US",
-      pkg: MsgPackage.get("en_US"),
+      pkg: defaultLanPackage,
     },
     ui: {
       isVertical: isVertical(),

@@ -5,6 +5,7 @@ import FileSize from "filesize";
 import { RiUploadCloudFill } from "@react-icons/all-files/ri/RiUploadCloudFill";
 import { RiCloudOffFill } from "@react-icons/all-files/ri/RiCloudOffFill";
 
+import { BtnList } from "./control/btn_list";
 import { alertMsg } from "../common/env";
 import { getErrMsg } from "../common/utils";
 import { updater } from "./state_updater";
@@ -20,6 +21,8 @@ import { HotkeyHandler } from "../common/hotkeys";
 export interface UploadingsProps {
   uploadings: List<UploadEntry>;
   uploadFiles: List<File>;
+  orderBy: string;
+  order: boolean;
 }
 export interface Props {
   uploadingsInfo: UploadingsProps;
@@ -85,8 +88,8 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
     this.props.update(updater().updateUploadingsInfo);
   };
 
-  makeRowsInputs = (uploadings: List<UploadEntry>): List<Row> => {
-    const uploadingRows = uploadings.map((uploading: UploadEntry) => {
+  makeRowsInputs = (uploadings: List<UploadEntry>): List<React.ReactNode> => {
+    return uploadings.map((uploading: UploadEntry) => {
       const pathParts = uploading.filePath.split("/");
       const fileName = pathParts[pathParts.length - 1];
       const progress =
@@ -171,15 +174,9 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
       );
 
       // file path
-      const sortVals = List<string>([uploading.filePath]);
-      return {
-        elem,
-        sortVals,
-        val: uploading,
-      };
+      // const sortVals = List<string>([uploading.filePath]);
+      return elem;
     });
-
-    return uploadingRows;
   };
 
   updateUploadings = (uploadings: Object) => {
@@ -188,16 +185,34 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
     this.props.update(updater().updateUploadingsInfo);
   };
 
+  orderBy = (columnName: string) => {
+    updater().sortUploadings(columnName);
+    this.props.update(updater().updateUploadingsInfo);
+  };
+
   render() {
+    const orderByCallbacks = List([
+      () => {
+        this.orderBy(this.props.msg.pkg.get("item.path"));
+      },
+    ]);
+    const orderByButtons = (
+      <BtnList
+        titleIcon="BiSortUp"
+        btnNames={List([this.props.msg.pkg.get("item.path")])}
+        btnCallbacks={orderByCallbacks}
+      />
+    );
+
     const uploadingRows = this.makeRowsInputs(
       this.props.uploadingsInfo.uploadings
     );
-    const sortKeys = List([this.props.msg.pkg.get("item.path")]);
+    // const sortKeys = List([this.props.msg.pkg.get("item.path")]);
     const view = (
       <Rows
-        sortKeys={sortKeys}
+        // sortKeys={sortKeys}
         rows={uploadingRows}
-        updateRows={this.updateUploadings}
+        // updateRows={this.updateUploadings}
       />
     );
 
@@ -254,6 +269,7 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
             ])}
           />
 
+          {orderByButtons}
           {view}
         </Container>
       );

@@ -52,8 +52,6 @@ export class SettingsDialog extends React.Component<Props, State, {}> {
                 color: "cyan1",
               },
             })}
-            login={this.props.login}
-            admin={this.props.admin}
             ui={this.props.ui}
             msg={this.props.msg}
             update={this.props.update}

@@ -1,7 +1,7 @@
 import { List, Map, Set } from "immutable";
 
 import { ICoreState } from "./core_state";
-import { getItemPath, sortRows } from "../common/utils";
+import { getItemPath, sortRows, Row } from "../common/utils";
 import {
   User,
   ListUsersResp,
@@ -241,7 +241,7 @@ export class Updater {
     const status = await this.setItems(this.props.filesInfo.dirPath);
     if (status !== "") {
       return status;
-    };
+    }
 
     // TODO: this part is duplicated in the panel_files.tsx
     const sortKeys = List<string>([
@@ -863,6 +863,100 @@ export class Updater {
     this.props.msg.lan = resp.data.lan;
     this.props.msg.pkg = Map<string, string>(resp.data);
     return "";
+  };
+
+  setFilesOrderBy = (orderBy: string, order: boolean) => {
+    this.props.filesInfo.orderBy = orderBy;
+    this.props.filesInfo.order = order;
+  };
+
+  setUploadingsOrderBy = (orderBy: string, order: boolean) => {
+    this.props.uploadingsInfo.orderBy = orderBy;
+    this.props.uploadingsInfo.order = order;
+  };
+
+  setSharingsOrderBy = (orderBy: string, order: boolean) => {
+    this.props.sharingsInfo.orderBy = orderBy;
+    this.props.sharingsInfo.order = order;
+  };
+
+  sortFiles = (columnName: string) => {
+    let orderByKey = 0;
+    switch (columnName) {
+      case this.props.msg.pkg.get("item.name"):
+        orderByKey = 0;
+        break;
+      case this.props.msg.pkg.get("item.type"):
+        orderByKey = 1;
+        break;
+      default:
+        orderByKey = 2;
+    }
+    const order =
+      this.props.filesInfo.orderBy === columnName
+        ? !this.props.filesInfo.order
+        : true;
+    const rows = this.props.filesInfo.items.map((item: MetadataResp): Row => {
+      return {
+        val: item,
+        sortVals: List([item.name, item.isDir ? "d" : "f", item.modTime]),
+      };
+    });
+
+    const sortedFiles = sortRows(rows, orderByKey, order).map(
+      (row): MetadataResp => {
+        return row.val as MetadataResp;
+      }
+    );
+
+    this.setFilesOrderBy(columnName, order);
+    this.updateItems(sortedFiles);
+  };
+
+  sortUploadings = (columnName: string) => {
+    const orderByKey = 0;
+    const order = !this.props.uploadingsInfo.order;
+    const rows = this.props.uploadingsInfo.uploadings.map(
+      (uploading: UploadEntry): Row => {
+        return {
+          val: uploading,
+          sortVals: List([uploading.filePath]),
+        };
+      }
+    );
+
+    const sorted = sortRows(rows, orderByKey, order).map((row) => {
+      return row.val as UploadEntry;
+    });
+
+    this.setUploadingsOrderBy(columnName, order);
+    this.updateUploadings(sorted);
+  };
+
+  sortSharings = (columnName: string) => {
+    const orderByKey = 0;
+    const order = !this.props.sharingsInfo.order;
+    const rows = this.props.sharingsInfo.sharings
+      .keySeq()
+      .map((sharingPath: string): Row => {
+        return {
+          val: sharingPath,
+          sortVals: List([sharingPath]),
+        };
+      })
+      .toList();
+
+    let sorted = Map<string, string>();
+    sortRows(rows, orderByKey, order).forEach((row) => {
+      const sharingPath = row.val as string;
+      sorted = sorted.set(
+        sharingPath,
+        this.props.sharingsInfo.sharings.get(sharingPath)
+      );
+    });
+
+    this.setSharingsOrderBy(columnName, order);
+    this.updateSharings(sorted);
   };
 
   updateAll = (prevState: ICoreState): ICoreState => {

@@ -168,8 +168,8 @@ export class PaneSettings extends React.Component<Props, State, {}> {
     }
   };
 
-  prepareErrorRows = (): List<Row> => {
-    let errRows = List<Row>();
+  prepareErrorRows = (): List<React.ReactNode> => {
+    let errRows = List<React.ReactNode>();
 
     ErrorLogger()
       .readErrs()
@@ -180,14 +180,10 @@ export class PaneSettings extends React.Component<Props, State, {}> {
             <div className="hr"></div>
           </div>
         );
-        const val = clientErr;
-        const sortVals = List<string>([]);
+        // const val = clientErr;
+        // const sortVals = List<string>([]);
 
-        errRows = errRows.push({
-          elem,
-          val,
-          sortVals,
-        });
+        errRows = errRows.push(elem);
       });
 
     return errRows;
@@ -218,7 +214,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
 
           <div className="hr"></div>
 
-          <Rows rows={errRows} sortKeys={List([])} />
+          <Rows rows={errRows}/>
         </Container>
       ) : null;
 

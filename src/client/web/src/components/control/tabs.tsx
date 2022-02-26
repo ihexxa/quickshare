@@ -1,14 +1,11 @@
 import * as React from "react";
-import { List, Map, update } from "immutable";
+import { List, Map } from "immutable";
 
 import { updater } from "../state_updater";
-import { getIcon } from "../visual/icons";
 import { Flexbox } from "../layout/flexbox";
 import { ICoreState, MsgProps, UIProps } from "../core_state";
-import { AdminProps } from "../pane_admin";
-import { LoginProps } from "../pane_login";
 import { alertMsg } from "../../common/env";
-import { IconProps } from "../visual/icons";
+import { IconProps, getIcon } from "../visual/icons";
 import { colorClass } from "../visual/colors";
 
 const defaultIconProps: IconProps = {
@@ -20,8 +17,7 @@ const defaultIconProps: IconProps = {
 export interface Props {
   targetControl: string;
   tabIcons: Map<string, IconProps>; // option name -> icon name
-  login: LoginProps;
-  admin: AdminProps;
+  titleIcon?: string;
   ui: UIProps;
   msg: MsgProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
@@ -45,6 +41,10 @@ export class Tabs extends React.Component<Props, State, {}> {
       this.props.targetControl
     );
 
+    const titleIcon =
+      this.props.titleIcon != null
+        ? getIcon(this.props.titleIcon, "2rem", "black")
+        : null;
     const options = this.props.ui.control.options.get(this.props.targetControl);
     const tabs = options.map((option: string) => {
       const iconProps = this.props.tabIcons.has(option)
@@ -66,6 +66,7 @@ export class Tabs extends React.Component<Props, State, {}> {
         >
           <Flexbox
             children={List([
+              <span>{titleIcon}</span>,
               <span className="margin-r-s">{icon}</span>,
               <span className={fontColor}>
                 {this.props.msg.pkg.get(

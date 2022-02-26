@@ -4,6 +4,7 @@ import { List, Map } from "immutable";
 import { RiShareBoxLine } from "@react-icons/all-files/ri/RiShareBoxLine";
 import { RiCloudOffFill } from "@react-icons/all-files/ri/RiCloudOffFill";
 
+import { BtnList } from "./control/btn_list";
 import { QRCodeIcon } from "./visual/qrcode";
 import { getErrMsg } from "../common/utils";
 import { alertMsg, confirmMsg } from "../common/env";
@@ -19,6 +20,8 @@ import { CronTable } from "../common/cron";
 
 export interface SharingsProps {
   sharings: Map<string, string>;
+  orderBy: string;
+  order: boolean;
 }
 
 export interface Props {
@@ -86,8 +89,8 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
     }
   };
 
-  makeRows = (sharings: Map<string, string>): List<Row> => {
-    const sharingRows = sharings.keySeq().map((dirPath: string) => {
+  makeRows = (sharings: Map<string, string>): List<React.ReactNode> => {
+    const sharingRows = sharings.keySeq().map((dirPath: string):React.ReactNode => {
       const shareID = sharings.get(dirPath);
       const sharingURL = `${
         document.location.href.split("?")[0]
@@ -130,11 +133,12 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
         </div>
       );
 
-      return {
-        elem,
-        sortVals: List([dirPath]),
-        val: dirPath,
-      };
+      return elem;
+      // return {
+      //   elem,
+      //   sortVals: List([dirPath]),
+      //   val: dirPath,
+      // };
     });
 
     return sharingRows.toList();
@@ -151,13 +155,31 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
     this.props.update(updater().updateSharingsInfo);
   };
 
+  orderBy = (columnName: string) => {
+    updater().sortSharings(columnName);
+    this.props.update(updater().updateSharingsInfo);
+  };
+
   render() {
+    const orderByCallbacks = List([
+      () => {
+        this.orderBy(this.props.msg.pkg.get("item.path"));
+      },
+    ]);
+    const orderByButtons = (
+      <BtnList
+        titleIcon="BiSortUp"
+        btnNames={List([this.props.msg.pkg.get("item.path")])}
+        btnCallbacks={orderByCallbacks}
+      />
+    );
+
     const sharingRows = this.makeRows(this.props.sharingsInfo.sharings);
     const view = (
       <Rows
         rows={sharingRows}
-        sortKeys={List([this.props.msg.pkg.get("item.path")])}
-        updateRows={this.updateSharings}
+        // sortKeys={List([this.props.msg.pkg.get("item.path")])}
+        // updateRows={this.updateSharings}
       />
     );
     const noSharingView = (
@@ -212,6 +234,7 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
             className="margin-b-l"
           />
 
+          {orderByButtons}
           {view}
         </Container>
       );

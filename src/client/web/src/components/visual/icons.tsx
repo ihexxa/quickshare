@@ -19,6 +19,7 @@ import { BiTable } from "@react-icons/all-files/bi/BiTable";
 import { BiListUl } from "@react-icons/all-files/bi/BiListUl";
 import { RiMore2Fill } from "@react-icons/all-files/ri/RiMore2Fill";
 import { RiCheckboxBlankLine } from "@react-icons/all-files/ri/RiCheckboxBlankLine";
+import { BiSortUp } from "@react-icons/all-files/bi/BiSortUp";
 
 import { colorClass } from "./colors";
 
@@ -46,6 +47,7 @@ const icons = Map<string, IconType>({
   BiListUl: BiListUl,
   RiMore2Fill: RiMore2Fill,
   RiCheckboxBlankLine: RiCheckboxBlankLine,
+  BiSortUp: BiSortUp,
 });
 
 export function getIconWithProps(

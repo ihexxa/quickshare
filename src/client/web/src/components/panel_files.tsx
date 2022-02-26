@@ -23,8 +23,9 @@ import { MetadataResp, roleVisitor, roleAdmin } from "../client";
 import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
 import { Table, Cell, Head } from "./layout/table";
+import { BtnList } from "./control/btn_list";
 import { Segments } from "./layout/segments";
-import { Rows, Row } from "./layout/rows";
+import { Rows } from "./layout/rows";
 import { Up } from "../worker/upload_mgr";
 import { UploadEntry, UploadState } from "../worker/interface";
 import { getIcon } from "./visual/icons";
@@ -51,6 +52,8 @@ export interface FilesProps {
   dirPath: List<string>;
   isSharing: boolean;
   items: List<MetadataResp>;
+  orderBy: string;
+  order: boolean;
 }
 
 export interface Props {
@@ -602,12 +605,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         ? "hidden"
         : "";
 
-    const sortKeys = List<string>([
-      this.props.msg.pkg.get("item.type"),
-      this.props.msg.pkg.get("item.name"),
-    ]);
-
-    const rows = sortedItems.map((item: MetadataResp): Row => {
+    const rows = sortedItems.map((item: MetadataResp): React.ReactNode => {
       const isSelected = this.state.selectedItems.has(item.name);
       const dirPath = this.props.filesInfo.dirPath.join("/");
       const itemPath = dirPath.endsWith("/")
@@ -753,21 +751,16 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         </div>
       );
 
-      const sortVals = List<string>([item.isDir ? "d" : "f", itemPath]);
-      return {
-        elem,
-        sortVals,
-        val: item,
-      };
+      // const sortVals = List<string>([item.isDir ? "d" : "f", itemPath]);
+      return elem;
+      // return {
+      //   elem,
+      //   sortVals,
+      //   val: item,
+      // };
     });
 
-    return (
-      <Rows
-        sortKeys={sortKeys}
-        rows={List(rows)}
-        updateRows={this.updateItems}
-      />
-    );
+    return <Rows rows={List(rows)} />;
   };
 
   setView = (opt: string) => {
@@ -777,6 +770,11 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     }
     updater().setControlOption(filesViewCtrl, opt);
     this.props.update(updater().updateUI);
+  };
+
+  orderBy = (columnName: string) => {
+    updater().sortFiles(columnName);
+    this.props.update(updater().updateFilesInfo);
   };
 
   render() {
@@ -867,6 +865,28 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       </div>
     );
 
+    const orderByCallbacks = List([
+      () => {
+        this.orderBy(this.props.msg.pkg.get("item.name"));
+      },
+      () => {
+        this.orderBy(this.props.msg.pkg.get("item.type"));
+      },
+      () => {
+        this.orderBy(this.props.msg.pkg.get("item.modTime"));
+      },
+    ]);
+    const orderByButtons = (
+      <BtnList
+        titleIcon="BiSortUp"
+        btnNames={List([
+          this.props.msg.pkg.get("item.name"),
+          this.props.msg.pkg.get("item.type"),
+          this.props.msg.pkg.get("item.modTime"),
+        ])}
+        btnCallbacks={orderByCallbacks}
+      />
+    );
     const viewType = this.props.ui.control.controls.get(filesViewCtrl);
     const view =
       viewType === "rows" ? (
@@ -1012,7 +1032,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
           />
 
           <div className="hr grey0-bg"></div>
-
+          {orderByButtons}
           {view}
         </Container>
       </div>
