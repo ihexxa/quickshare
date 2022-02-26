@@ -1,6 +1,11 @@
 import { List, Map } from "immutable";
 
-import { Row } from "../components/layout/rows";
+
+export interface Row {
+  // elem: React.ReactNode; // element to display
+  val: Object; // original object value
+  sortVals: List<string>; // sortable values in order
+}
 
 export function getItemPath(dirPath: string, itemName: string): string {
   return dirPath.endsWith("/")
