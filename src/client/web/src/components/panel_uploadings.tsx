@@ -67,7 +67,6 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
       }
 
       const statuses = await Promise.all([
-        updater().refreshUploadings(),
         updater().self(),
       ]);
       if (statuses.join("") !== "") {
