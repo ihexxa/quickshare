@@ -2,7 +2,6 @@ import { List, Map } from "immutable";
 
 
 export interface Row {
-  // elem: React.ReactNode; // element to display
   val: Object; // original object value
   sortVals: List<string>; // sortable values in order
 }
