@@ -29,19 +29,19 @@ describe("TopBar", () => {
 
     const isSharingMockResp = { status: 404, statusText: "", data: {} };
     const listSharingsMockResp = {
-      status: 401,
+      status: 403,
       statusText: "",
       data: {
         sharingDirs: new Array<string>(),
       },
     };
     const listUploadingsMockResp = {
-      status: 401,
+      status: 403,
       statusText: "",
       data: { uploadInfos: new Array<UploadInfo>() },
     };
     const listHomeMockResp = {
-      status: 401,
+      status: 403,
       statusText: "",
       data: { cwd: "", metadatas: new Array<MetadataResp>() },
     };
@@ -54,7 +54,7 @@ describe("TopBar", () => {
     };
 
     const selfMockResp = {
-      status: 401,
+      status: 403,
       statusText: "",
       data: {
         id: visitorID,
@@ -68,7 +68,7 @@ describe("TopBar", () => {
         },
       },
     };
-    const isAuthedMockResp = { status: 401, statusText: "", data: {} };
+    const isAuthedMockResp = { status: 403, statusText: "", data: {} };
     const mockUserResps = {
       ...usersResps,
       selfMockResp,
