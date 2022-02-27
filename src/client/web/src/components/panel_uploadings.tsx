@@ -118,18 +118,30 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
         case UploadState.Error:
           rightCell = (
             <div className="item-op">
-              <span className="badge white-font red0-bg">
+              <span className="badge white-font red0-bg margin-r-m">
                 {this.props.msg.pkg.get("state.error")}
               </span>
+              <button
+                onClick={() => this.deleteUpload(uploading.filePath)}
+                className="float-input"
+              >
+                {this.props.msg.pkg.get("browser.delete")}
+              </button>
             </div>
           );
           break;
         case UploadState.Stopped:
           rightCell = (
             <div className="item-op">
-              <span className="badge yellow0-font black-bg">
+              <span className="badge yellow0-font black-bg margin-r-m">
                 {this.props.msg.pkg.get("state.stopped")}
               </span>
+              <button
+                onClick={() => this.deleteUpload(uploading.filePath)}
+                className="float-input"
+              >
+                {this.props.msg.pkg.get("browser.delete")}
+              </button>
             </div>
           );
           break;

@@ -41,13 +41,12 @@ export class UploadMgr {
     }
 
     const infos = this.infos.valueSeq().toArray();
+
+    // create files at first to persist uploading info
     for (let i = 0; i < this.infos.size; i++) {
       const info = infos[i];
 
-      if (
-        info.state === UploadState.Ready ||
-        info.state === UploadState.Created
-      ) {
+      if (info.state === UploadState.Ready) {
         this.infos = this.infos.set(info.filePath, {
           ...info,
           state: UploadState.Uploading,
@@ -59,8 +58,32 @@ export class UploadMgr {
           filePath: info.filePath,
           size: info.size,
           uploaded: info.uploaded,
-          created: info.uploaded > 0 || info.state === UploadState.Created,
+          created: false,
         });
+
+        return;
+      }
+    }
+
+    // start uploading if all files are created
+    for (let i = 0; i < this.infos.size; i++) {
+      const info = infos[i];
+
+      if (info.state === UploadState.Created) {
+        this.infos = this.infos.set(info.filePath, {
+          ...info,
+          state: UploadState.Uploading,
+        });
+
+        this.worker.postMessage({
+          kind: syncReqKind,
+          file: info.file,
+          filePath: info.filePath,
+          size: info.size,
+          uploaded: info.uploaded,
+          created: true,
+        });
+
         break;
       }
     }
@@ -201,15 +224,16 @@ export class UploadMgr {
             this.infos = this.infos.delete(infoResp.filePath);
             this.statusCb(this.infos.toMap(), true);
           } else {
+            // this avoids overwriting Stopped/Error state
+            const state =
+              entry.state === UploadState.Stopped ||
+              entry.state === UploadState.Error
+                ? entry.state
+                : infoResp.state;
             this.infos = this.infos.set(infoResp.filePath, {
               ...entry,
               uploaded: infoResp.uploaded,
-              state:
-                // this avoids overwriting Stopped/Error state
-                entry.state === UploadState.Stopped ||
-                entry.state === UploadState.Error
-                  ? UploadState.Stopped
-                  : infoResp.state,
+              state: state,
             });
             this.statusCb(this.infos.toMap(), false);
           }
