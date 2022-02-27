@@ -129,6 +129,10 @@ export class Updater {
       return errServer;
     }
     this.props.sharingsInfo.sharings = Map<string, string>(resp.data.IDs);
+    this.sortSharings(
+      this.props.sharingsInfo.orderBy,
+      this.props.sharingsInfo.order
+    );
     return "";
   };
 
@@ -242,12 +246,11 @@ export class Updater {
     if (status !== "") {
       return status;
     }
-
     // TODO: this part is duplicated in the panel_files.tsx
-    const sortKeys = List<string>([
-      this.props.msg.pkg.get("item.type"),
-      this.props.msg.pkg.get("item.name"),
-    ]);
+    // const sortKeys = List<string>([
+    //   this.props.msg.pkg.get("item.type"),
+    //   this.props.msg.pkg.get("item.name"),
+    // ]);
   };
 
   setItems = async (dirParts: List<string>): Promise<string> => {
@@ -257,6 +260,7 @@ export class Updater {
     if (listResp.status === 200) {
       this.props.filesInfo.dirPath = dirParts;
       this.props.filesInfo.items = List<MetadataResp>(listResp.data.metadatas);
+      this.sortFiles(this.props.filesInfo.orderBy, this.props.filesInfo.order);
       return "";
     }
     this.props.filesInfo.dirPath = List<string>([]);
@@ -270,6 +274,7 @@ export class Updater {
     if (listResp.status === 200) {
       this.props.filesInfo.dirPath = List<string>(listResp.data.cwd.split("/"));
       this.props.filesInfo.items = List<MetadataResp>(listResp.data.metadatas);
+      this.sortFiles(this.props.filesInfo.orderBy, this.props.filesInfo.order);
       return "";
     }
     this.props.filesInfo.dirPath = List<string>([]);
@@ -880,7 +885,7 @@ export class Updater {
     this.props.sharingsInfo.order = order;
   };
 
-  sortFiles = (columnName: string) => {
+  sortFiles = (columnName: string, order: boolean) => {
     let orderByKey = 0;
     switch (columnName) {
       case this.props.msg.pkg.get("item.name"):
@@ -892,10 +897,6 @@ export class Updater {
       default:
         orderByKey = 2;
     }
-    const order =
-      this.props.filesInfo.orderBy === columnName
-        ? !this.props.filesInfo.order
-        : true;
     const rows = this.props.filesInfo.items.map((item: MetadataResp): Row => {
       return {
         val: item,
@@ -913,9 +914,8 @@ export class Updater {
     this.updateItems(sortedFiles);
   };
 
-  sortUploadings = (columnName: string) => {
+  sortUploadings = (columnName: string, order: boolean) => {
     const orderByKey = 0;
-    const order = !this.props.uploadingsInfo.order;
     const rows = this.props.uploadingsInfo.uploadings.map(
       (uploading: UploadEntry): Row => {
         return {
@@ -933,9 +933,8 @@ export class Updater {
     this.updateUploadings(sorted);
   };
 
-  sortSharings = (columnName: string) => {
+  sortSharings = (columnName: string, order: boolean) => {
     const orderByKey = 0;
-    const order = !this.props.sharingsInfo.order;
     const rows = this.props.sharingsInfo.sharings
       .keySeq()
       .map((sharingPath: string): Row => {

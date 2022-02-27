@@ -70,7 +70,22 @@ describe("State Manager", () => {
     );
 
     expect(coreState.filesInfo.items).toEqual(
-      List(filesResps.listHomeMockResp.data.metadatas)
+      List([
+        {
+          name: "mock_dir",
+          size: 0,
+          modTime: "0",
+          isDir: true,
+          sha1: "",
+        },
+        {
+          name: "mock_file",
+          size: 5,
+          modTime: "0",
+          isDir: false,
+          sha1: "mock_file_sha1",
+        },
+      ])
     );
 
     // login
@@ -182,7 +197,22 @@ describe("State Manager", () => {
     expect(coreState.filesInfo.dirPath.join("/")).toEqual(sharingPath);
     expect(coreState.filesInfo.isSharing).toEqual(true);
     expect(coreState.filesInfo.items).toEqual(
-      List(filesResps.listMockResp.data.metadatas)
+      List([
+        {
+          name: "mock_dir",
+          size: 0,
+          modTime: "0",
+          isDir: true,
+          sha1: "",
+        },
+        {
+          name: "mock_file",
+          size: 5,
+          modTime: "0",
+          isDir: false,
+          sha1: "mock_file_sha1",
+        },
+      ])
     );
     expect(coreState.sharingsInfo.sharings).toEqual(Map<string, string>());
     expect(coreState.uploadingsInfo.uploadings).toEqual(List<UploadEntry>([]));
