@@ -41,15 +41,15 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
   }
 
   componentDidMount(): void {
-    CronTable().setInterval("refreshUploadings", {
-      func: updater().refreshUploadings,
+    CronTable().setInterval("listSharings", {
+      func: updater().listSharings,
       args: [],
       delay: 5000,
     });
   }
 
   componentWillUnmount() {
-    CronTable().clearInterval("refreshUploadings");
+    CronTable().clearInterval("listSharings");
   }
 
   setLoading = (state: boolean) => {
@@ -153,7 +153,8 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
   };
 
   orderBy = (columnName: string) => {
-    updater().sortSharings(columnName);
+    const order = !this.props.sharingsInfo.order;
+    updater().sortSharings(columnName, order);
     this.props.update(updater().updateSharingsInfo);
   };
 

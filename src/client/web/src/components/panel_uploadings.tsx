@@ -184,7 +184,8 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
   };
 
   orderBy = (columnName: string) => {
-    updater().sortUploadings(columnName);
+    const order = !this.props.uploadingsInfo.order;
+    updater().sortUploadings(columnName, order);
     this.props.update(updater().updateUploadingsInfo);
   };
 

@@ -767,7 +767,12 @@ export class FilesPanel extends React.Component<Props, State, {}> {
   };
 
   orderBy = (columnName: string) => {
-    updater().sortFiles(columnName);
+    const order =
+      this.props.filesInfo.orderBy === columnName
+        ? !this.props.filesInfo.order
+        : true;
+
+    updater().sortFiles(columnName, order);
     this.props.update(updater().updateFilesInfo);
   };
 

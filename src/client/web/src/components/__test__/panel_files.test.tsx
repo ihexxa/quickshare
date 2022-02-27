@@ -53,7 +53,22 @@ describe("FilesPanel", () => {
     expect(updater().props.filesInfo.dirPath).toEqual(newCwd);
     expect(updater().props.filesInfo.isSharing).toEqual(true);
     expect(updater().props.filesInfo.items).toEqual(
-      List(filesResps.listHomeMockResp.data.metadatas)
+      List([
+        {
+          name: "mock_dir",
+          size: 0,
+          modTime: "0",
+          isDir: true,
+          sha1: "",
+        },
+        {
+          name: "mock_file",
+          size: 5,
+          modTime: "0",
+          isDir: false,
+          sha1: "mock_file_sha1",
+        },
+      ])
     );
   });
 
