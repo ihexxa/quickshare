@@ -71,6 +71,7 @@ export class Updater {
         this.props.filesInfo.dirPath.join("/"),
         file.name
       );
+
       const status = Up().add(file, filePath);
       if (status !== "") {
         return status;
@@ -86,6 +87,8 @@ export class Updater {
     if (status !== "") {
       return status;
     }
+
+    this.setUploads(Up().list());
 
     const resp = await this.filesClient.deleteUploading(filePath);
     return resp.status === 200 ? "" : errServer;
@@ -534,11 +537,6 @@ export class Updater {
   };
 
   initAuth = async (): Promise<string> => {
-    const getCapStatus = await this.getCaptchaID();
-    if (getCapStatus !== "") {
-      return getCapStatus;
-    }
-
     const isAuthedStatus = await this.syncIsAuthed();
     if (isAuthedStatus !== "") {
       return isAuthedStatus;
@@ -554,6 +552,11 @@ export class Updater {
 
   initAll = async (params: URLSearchParams): Promise<string> => {
     const paramMap = await this.initParams(params);
+    const getCapStatus = await this.getCaptchaID();
+    if (getCapStatus !== "") {
+      return getCapStatus;
+    }
+
     const authStatus = await this.initAuth();
     if (authStatus !== "") {
       return authStatus;
@@ -638,7 +641,7 @@ export class Updater {
       this.props.login.quota = resp.data.quota;
       this.props.login.preferences = resp.data.preferences;
       return "";
-    } else if (resp.status === 401) {
+    } else if (resp.status === 403) {
       this.resetUser();
       return "";
     }
@@ -746,7 +749,7 @@ export class Updater {
     const resp = await this.usersClient.isAuthed();
     if (resp.status !== 200) {
       this.resetUser();
-      return resp.status === 401 ? "" : errServer;
+      return resp.status === 403 ? "" : errServer;
     }
     this.props.login.authed = true;
     return "";
