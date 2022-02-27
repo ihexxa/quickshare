@@ -381,6 +381,9 @@ func (us *KVUserStore) SetUsed(id uint64, incr bool, capacity int64) error {
 		gotUser.UsedSpace = gotUser.UsedSpace + capacity
 	} else {
 		gotUser.UsedSpace = gotUser.UsedSpace - capacity
+		if gotUser.UsedSpace < 0 { // TODO: this is a work around
+			gotUser.UsedSpace = 0
+		}
 	}
 	infoBytes, err := json.Marshal(gotUser)
 	if err != nil {
