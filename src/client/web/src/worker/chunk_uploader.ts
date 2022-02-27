@@ -141,7 +141,7 @@ export class ChunkUploader {
         return {
           filePath,
           uploaded: uploadResp.data.uploaded,
-          state: UploadState.Ready,
+          state: UploadState.Created,
           err: "",
         };
       } else if (isFatalErr(uploadResp)) {
@@ -174,7 +174,7 @@ export class ChunkUploader {
         ? {
             filePath,
             uploaded: uploadStatusResp.data.uploaded,
-            state: UploadState.Ready,
+            state: UploadState.Created,
             err: `retrying, error: ${JSON.stringify(uploadResp.data)}`,
           }
         : {
