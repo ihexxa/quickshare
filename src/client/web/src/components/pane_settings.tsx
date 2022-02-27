@@ -180,8 +180,6 @@ export class PaneSettings extends React.Component<Props, State, {}> {
             <div className="hr"></div>
           </div>
         );
-        // const val = clientErr;
-        // const sortVals = List<string>([]);
 
         errRows = errRows.push(elem);
       });

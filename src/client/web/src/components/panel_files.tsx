@@ -751,13 +751,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         </div>
       );
 
-      // const sortVals = List<string>([item.isDir ? "d" : "f", itemPath]);
       return elem;
-      // return {
-      //   elem,
-      //   sortVals,
-      //   val: item,
-      // };
     });
 
     return <Rows rows={List(rows)} />;
