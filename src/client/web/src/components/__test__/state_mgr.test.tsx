@@ -61,7 +61,7 @@ describe("State Manager", () => {
               filePath: info.realFilePath,
               size: info.size,
               uploaded: info.uploaded,
-              state: UploadState.Ready,
+              state: UploadState.Stopped,
               err: "",
             };
           }

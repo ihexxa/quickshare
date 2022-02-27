@@ -97,6 +97,11 @@ export class Updater {
         return entry;
       })
     );
+
+    this.sortUploadings(
+      this.props.uploadingsInfo.orderBy,
+      this.props.uploadingsInfo.order
+    );
   };
 
   addSharing = async (): Promise<string> => {
@@ -163,7 +168,7 @@ export class Updater {
           filePath: remoteInfo.realFilePath,
           size: remoteInfo.size,
           uploaded: remoteInfo.uploaded,
-          state: UploadState.Ready,
+          state: UploadState.Stopped,
           err: "",
         });
       } else {
@@ -179,6 +184,10 @@ export class Updater {
     });
 
     this.props.uploadingsInfo.uploadings = updatedUploads;
+    this.sortUploadings(
+      this.props.uploadingsInfo.orderBy,
+      this.props.uploadingsInfo.order
+    );
     return "";
   };
 
