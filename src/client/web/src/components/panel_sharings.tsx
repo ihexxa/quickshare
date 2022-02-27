@@ -13,7 +13,7 @@ import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { LoginProps } from "./pane_login";
 import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
-import { Rows, Row } from "./layout/rows";
+import { Rows } from "./layout/rows";
 import { shareIDQuery } from "../client/files";
 import { loadingCtrl, ctrlOn, ctrlOff } from "../common/controls";
 import { CronTable } from "../common/cron";
@@ -90,56 +90,53 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
   };
 
   makeRows = (sharings: Map<string, string>): List<React.ReactNode> => {
-    const sharingRows = sharings.keySeq().map((dirPath: string):React.ReactNode => {
-      const shareID = sharings.get(dirPath);
-      const sharingURL = `${
-        document.location.href.split("?")[0]
-      }?${shareIDQuery}=${shareID}`;
+    const sharingRows = sharings
+      .keySeq()
+      .map((dirPath: string): React.ReactNode => {
+        const shareID = sharings.get(dirPath);
+        const sharingURL = `${
+          document.location.href.split("?")[0]
+        }?${shareIDQuery}=${shareID}`;
 
-      const row1 = (
-        <div>
-          <div className="info">{dirPath}</div>
+        const row1 = (
+          <div>
+            <div className="info">{dirPath}</div>
 
-          <div className="op">
-            <Flexbox
-              children={List([
-                <span className="margin-r-m">
-                  <QRCodeIcon value={sharingURL} size={128} pos={false} />
-                </span>,
+            <div className="op">
+              <Flexbox
+                children={List([
+                  <span className="margin-r-m">
+                    <QRCodeIcon value={sharingURL} size={128} pos={false} />
+                  </span>,
 
-                <button
-                  onClick={() => {
-                    this.deleteSharing(dirPath);
-                  }}
-                >
-                  {this.props.msg.pkg.get("op.cancel")}
-                </button>,
-              ])}
-              childrenStyles={List([
-                { flex: "0 0 auto" },
-                { flex: "0 0 auto" },
-              ])}
-              style={{ justifyContent: "flex-end" }}
-            />
+                  <button
+                    onClick={() => {
+                      this.deleteSharing(dirPath);
+                    }}
+                  >
+                    {this.props.msg.pkg.get("op.cancel")}
+                  </button>,
+                ])}
+                childrenStyles={List([
+                  { flex: "0 0 auto" },
+                  { flex: "0 0 auto" },
+                ])}
+                style={{ justifyContent: "flex-end" }}
+              />
+            </div>
           </div>
-        </div>
-      );
+        );
 
-      const elem = (
-        <div className="sharing-item" key={dirPath}>
-          {row1}
-          <div className="desc">{sharingURL}</div>
-          <div className="hr"></div>
-        </div>
-      );
+        const elem = (
+          <div className="sharing-item" key={dirPath}>
+            {row1}
+            <div className="desc">{sharingURL}</div>
+            <div className="hr"></div>
+          </div>
+        );
 
-      return elem;
-      // return {
-      //   elem,
-      //   sortVals: List([dirPath]),
-      //   val: dirPath,
-      // };
-    });
+        return elem;
+      });
 
     return sharingRows.toList();
   };
@@ -175,13 +172,7 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
     );
 
     const sharingRows = this.makeRows(this.props.sharingsInfo.sharings);
-    const view = (
-      <Rows
-        rows={sharingRows}
-        // sortKeys={List([this.props.msg.pkg.get("item.path")])}
-        // updateRows={this.updateSharings}
-      />
-    );
+    const view = <Rows rows={sharingRows} />;
     const noSharingView = (
       <Container>
         <Flexbox

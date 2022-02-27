@@ -14,7 +14,7 @@ import { LoginProps } from "./pane_login";
 import { UploadEntry, UploadState } from "../worker/interface";
 import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
-import { Rows, Row } from "./layout/rows";
+import { Rows } from "./layout/rows";
 import { loadingCtrl, ctrlOn, ctrlOff } from "../common/controls";
 import { HotkeyHandler } from "../common/hotkeys";
 
@@ -173,8 +173,6 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
         </div>
       );
 
-      // file path
-      // const sortVals = List<string>([uploading.filePath]);
       return elem;
     });
   };
@@ -207,14 +205,7 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
     const uploadingRows = this.makeRowsInputs(
       this.props.uploadingsInfo.uploadings
     );
-    // const sortKeys = List([this.props.msg.pkg.get("item.path")]);
-    const view = (
-      <Rows
-        // sortKeys={sortKeys}
-        rows={uploadingRows}
-        // updateRows={this.updateUploadings}
-      />
-    );
+    const view = <Rows rows={uploadingRows} />;
 
     const noUploadingView = (
       <Container>
