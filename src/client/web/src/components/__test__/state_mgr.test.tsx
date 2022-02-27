@@ -174,7 +174,7 @@ describe("State Manager", () => {
     };
     usersCl.isAuthed = jest
       .fn()
-      .mockReturnValue(makePromise({ status: 401, statusText: "", data: {} }));
+      .mockReturnValue(makePromise({ status: 403, statusText: "", data: {} }));
     usersCl.self = jest.fn().mockReturnValue(makePromise(mockSelfResp));
 
     const coreState = newState();
@@ -263,14 +263,14 @@ describe("State Manager", () => {
 
     usersCl.isAuthed = jest.fn().mockReturnValue(
       makePromise({
-        status: 401,
+        status: 403,
         statusText: "",
         data: { error: "unauthorized" },
       })
     );
     usersCl.self = jest.fn().mockReturnValue(
       makePromise({
-        status: 401,
+        status: 403,
         statusText: "",
         data: { error: "malformed token" },
       })
