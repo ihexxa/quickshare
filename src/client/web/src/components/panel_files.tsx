@@ -897,13 +897,21 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       );
 
     const usedSpace = FileSize(
-      parseInt(this.props.login.extInfo.usedSpace, 10),
+      // TODO: this a work around before transaction is introduced
+      Math.trunc(
+        parseInt(this.props.login.extInfo.usedSpace, 10) / (1024 * 1024)
+      ) *
+        (1024 * 1024),
       {
         round: 0,
       }
     );
     const spaceLimit = FileSize(
-      parseInt(this.props.login.quota.spaceLimit, 10),
+      // TODO: this a work around before transaction is introduced
+      Math.trunc(
+        parseInt(this.props.login.quota.spaceLimit, 10) / (1024 * 1024)
+      ) *
+        (1024 * 1024),
       {
         round: 0,
       }
