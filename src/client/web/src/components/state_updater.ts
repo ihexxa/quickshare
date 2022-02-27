@@ -258,11 +258,6 @@ export class Updater {
     if (status !== "") {
       return status;
     }
-    // TODO: this part is duplicated in the panel_files.tsx
-    // const sortKeys = List<string>([
-    //   this.props.msg.pkg.get("item.type"),
-    //   this.props.msg.pkg.get("item.name"),
-    // ]);
   };
 
   setItems = async (dirParts: List<string>): Promise<string> => {
