@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/ihexxa/quickshare/src/client"
+	"github.com/ihexxa/quickshare/src/db"
 	"github.com/ihexxa/quickshare/src/db/userstore"
 	q "github.com/ihexxa/quickshare/src/handlers"
 	"github.com/ihexxa/quickshare/src/handlers/settings"
@@ -105,7 +106,7 @@ func TestPermissions(t *testing.T) {
 		testUsersAPIs := func(desc, user string, pwd string, requireAuth bool, expectedCodes map[string]int) {
 			newPwd := "12345"
 			newRole := userstore.AdminRole
-			newQuota := &userstore.Quota{
+			newQuota := &db.Quota{
 				SpaceLimit:         int64(2046),
 				UploadSpeedLimit:   int(8 * 1024 * 1024),
 				DownloadSpeedLimit: int(8 * 1024 * 1024),

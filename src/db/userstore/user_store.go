@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ihexxa/quickshare/src/db"
 	"github.com/ihexxa/quickshare/src/db/sitestore"
 	"github.com/ihexxa/quickshare/src/kvstore"
 )
@@ -17,7 +18,6 @@ const (
 	VisitorRole = "visitor"
 	InitNs      = "usersInit"
 	IDsNs       = "ids"
-	UsersNs     = "users"
 	RoleListNs  = "roleList"
 	InitTimeKey = "initTime"
 	VisitorID   = uint64(1)
@@ -34,7 +34,7 @@ var (
 	ErrReachedLimit = errors.New("reached space limit")
 	ErrNotFound     = errors.New("not found")
 
-	DefaultPreferences = Preferences{
+	DefaultPreferences = db.Preferences{
 		Bg: &sitestore.BgConfig{
 			Url:      "",
 			Repeat:   "no-repeat",
@@ -51,48 +51,25 @@ func IsReachedLimitErr(err error) bool {
 	return err == ErrReachedLimit
 }
 
-type Quota struct {
-	SpaceLimit         int64 `json:"spaceLimit,string"`
-	UploadSpeedLimit   int   `json:"uploadSpeedLimit"`
-	DownloadSpeedLimit int   `json:"downloadSpeedLimit"`
-}
-
-type Preferences struct {
-	Bg         *sitestore.BgConfig `json:"bg"`
-	CSSURL     string              `json:"cssURL"`
-	LanPackURL string              `json:"lanPackURL"`
-	Lan        string              `json:"lan"`
-}
-
 type UserCfg struct {
 	Name string `json:"name"`
 	Role string `json:"role"`
 	Pwd  string `json:"pwd"`
 }
 
-type User struct {
-	ID          uint64       `json:"id,string"`
-	Name        string       `json:"name"`
-	Pwd         string       `json:"pwd"`
-	Role        string       `json:"role"`
-	UsedSpace   int64        `json:"usedSpace,string"`
-	Quota       *Quota       `json:"quota"`
-	Preferences *Preferences `json:"preferences"`
-}
-
 type IUserStore interface {
 	Init(rootName, rootPwd string) error
 	IsInited() bool
-	AddUser(user *User) error
+	AddUser(user *db.User) error
 	DelUser(id uint64) error
-	GetUser(id uint64) (*User, error)
-	GetUserByName(name string) (*User, error)
-	SetInfo(id uint64, user *User) error
+	GetUser(id uint64) (*db.User, error)
+	GetUserByName(name string) (*db.User, error)
+	SetInfo(id uint64, user *db.User) error
 	CanIncrUsed(id uint64, capacity int64) (bool, error)
 	SetUsed(id uint64, incr bool, capacity int64) error
 	SetPwd(id uint64, pwd string) error
-	SetPreferences(id uint64, settings *Preferences) error
-	ListUsers() ([]*User, error)
+	SetPreferences(id uint64, settings *db.Preferences) error
+	ListUsers() ([]*db.User, error)
 	ListUserIDs() (map[string]string, error)
 	AddRole(role string) error
 	DelRole(role string) error
@@ -110,7 +87,7 @@ func NewKVUserStore(store kvstore.IKVStore) (*KVUserStore, error) {
 		var err error
 		for _, nsName := range []string{
 			IDsNs,
-			UsersNs,
+			db.UsersNs,
 			InitNs,
 			RoleListNs,
 		} {
@@ -129,12 +106,12 @@ func NewKVUserStore(store kvstore.IKVStore) (*KVUserStore, error) {
 func (us *KVUserStore) Init(rootName, rootPwd string) error {
 	var err error
 	adminPreferences := DefaultPreferences
-	admin := &User{
+	admin := &db.User{
 		ID:   0,
 		Name: rootName,
 		Pwd:  rootPwd,
 		Role: AdminRole,
-		Quota: &Quota{
+		Quota: &db.Quota{
 			SpaceLimit:         defaultSpaceLimit,
 			UploadSpeedLimit:   defaultUploadSpeedLimit,
 			DownloadSpeedLimit: defaultDownloadSpeedLimit,
@@ -143,12 +120,12 @@ func (us *KVUserStore) Init(rootName, rootPwd string) error {
 	}
 
 	visitorPreferences := DefaultPreferences
-	visitor := &User{
+	visitor := &db.User{
 		ID:   VisitorID,
 		Name: VisitorName,
 		Pwd:  rootPwd,
 		Role: VisitorRole,
-		Quota: &Quota{
+		Quota: &db.Quota{
 			SpaceLimit:         0,
 			UploadSpeedLimit:   visitorUploadSpeedLimit,
 			DownloadSpeedLimit: visitorDownloadSpeedLimit,
@@ -156,7 +133,7 @@ func (us *KVUserStore) Init(rootName, rootPwd string) error {
 		Preferences: &visitorPreferences,
 	}
 
-	for _, user := range []*User{admin, visitor} {
+	for _, user := range []*db.User{admin, visitor} {
 		err = us.AddUser(user)
 		if err != nil {
 			return err
@@ -178,12 +155,12 @@ func (us *KVUserStore) IsInited() bool {
 	return ok
 }
 
-func (us *KVUserStore) AddUser(user *User) error {
+func (us *KVUserStore) AddUser(user *db.User) error {
 	us.mtx.Lock()
 	defer us.mtx.Unlock()
 
 	userID := fmt.Sprint(user.ID)
-	_, ok := us.store.GetStringIn(UsersNs, userID)
+	_, ok := us.store.GetStringIn(db.UsersNs, userID)
 	if ok {
 		return fmt.Errorf("userID (%d) exists", user.ID)
 	}
@@ -203,7 +180,7 @@ func (us *KVUserStore) AddUser(user *User) error {
 	if err != nil {
 		return err
 	}
-	return us.store.SetStringIn(UsersNs, userID, string(userBytes))
+	return us.store.SetStringIn(db.UsersNs, userID, string(userBytes))
 }
 
 func (us *KVUserStore) DelUser(id uint64) error {
@@ -211,11 +188,11 @@ func (us *KVUserStore) DelUser(id uint64) error {
 	defer us.mtx.Unlock()
 
 	userID := fmt.Sprint(id)
-	infoStr, ok := us.store.GetStringIn(UsersNs, userID)
+	infoStr, ok := us.store.GetStringIn(db.UsersNs, userID)
 	if !ok {
 		return fmt.Errorf("userID (%s) does not exist", userID)
 	}
-	user := &User{}
+	user := &db.User{}
 	err := json.Unmarshal([]byte(infoStr), user)
 	if err != nil {
 		return err
@@ -223,24 +200,24 @@ func (us *KVUserStore) DelUser(id uint64) error {
 
 	// TODO: add complement operations if part of the actions fails
 	err1 := us.store.DelStringIn(IDsNs, user.Name)
-	err2 := us.store.DelStringIn(UsersNs, userID)
+	err2 := us.store.DelStringIn(db.UsersNs, userID)
 	if err1 != nil || err2 != nil {
 		return fmt.Errorf("DelUser: err1(%s) err2(%s)", err1, err2)
 	}
 	return nil
 }
 
-func (us *KVUserStore) GetUser(id uint64) (*User, error) {
+func (us *KVUserStore) GetUser(id uint64) (*db.User, error) {
 	us.mtx.RLock()
 	defer us.mtx.RUnlock()
 
 	userID := fmt.Sprint(id)
 
-	infoStr, ok := us.store.GetStringIn(UsersNs, userID)
+	infoStr, ok := us.store.GetStringIn(db.UsersNs, userID)
 	if !ok {
 		return nil, fmt.Errorf("user (%s) not found", userID)
 	}
-	user := &User{}
+	user := &db.User{}
 	err := json.Unmarshal([]byte(infoStr), user)
 	if err != nil {
 		return nil, err
@@ -258,7 +235,7 @@ func (us *KVUserStore) GetUser(id uint64) (*User, error) {
 
 }
 
-func (us *KVUserStore) GetUserByName(name string) (*User, error) {
+func (us *KVUserStore) GetUserByName(name string) (*db.User, error) {
 	us.mtx.RLock()
 	defer us.mtx.RUnlock()
 
@@ -266,12 +243,12 @@ func (us *KVUserStore) GetUserByName(name string) (*User, error) {
 	if !ok {
 		return nil, ErrNotFound
 	}
-	infoStr, ok := us.store.GetStringIn(UsersNs, userID)
+	infoStr, ok := us.store.GetStringIn(db.UsersNs, userID)
 	if !ok {
 		return nil, ErrNotFound
 	}
 
-	user := &User{}
+	user := &db.User{}
 	err := json.Unmarshal([]byte(infoStr), user)
 	if err != nil {
 		return nil, err
@@ -290,11 +267,11 @@ func (us *KVUserStore) SetPwd(id uint64, pwd string) error {
 	defer us.mtx.Unlock()
 
 	userID := fmt.Sprint(id)
-	infoStr, ok := us.store.GetStringIn(UsersNs, userID)
+	infoStr, ok := us.store.GetStringIn(db.UsersNs, userID)
 	if !ok {
 		return fmt.Errorf("user (%d) does not exist", id)
 	}
-	gotUser := &User{}
+	gotUser := &db.User{}
 	err := json.Unmarshal([]byte(infoStr), gotUser)
 	if err != nil {
 		return err
@@ -307,19 +284,19 @@ func (us *KVUserStore) SetPwd(id uint64, pwd string) error {
 	if err != nil {
 		return err
 	}
-	return us.store.SetStringIn(UsersNs, userID, string(infoBytes))
+	return us.store.SetStringIn(db.UsersNs, userID, string(infoBytes))
 }
 
-func (us *KVUserStore) SetPreferences(id uint64, prefers *Preferences) error {
+func (us *KVUserStore) SetPreferences(id uint64, prefers *db.Preferences) error {
 	us.mtx.Lock()
 	defer us.mtx.Unlock()
 
 	userID := fmt.Sprint(id)
-	infoStr, ok := us.store.GetStringIn(UsersNs, userID)
+	infoStr, ok := us.store.GetStringIn(db.UsersNs, userID)
 	if !ok {
 		return fmt.Errorf("user (%d) does not exist", id)
 	}
-	gotUser := &User{}
+	gotUser := &db.User{}
 	err := json.Unmarshal([]byte(infoStr), gotUser)
 	if err != nil {
 		return err
@@ -332,19 +309,19 @@ func (us *KVUserStore) SetPreferences(id uint64, prefers *Preferences) error {
 	if err != nil {
 		return err
 	}
-	return us.store.SetStringIn(UsersNs, userID, string(infoBytes))
+	return us.store.SetStringIn(db.UsersNs, userID, string(infoBytes))
 }
 
 func (us *KVUserStore) CanIncrUsed(id uint64, capacity int64) (bool, error) {
 	us.mtx.Lock()
 	defer us.mtx.Unlock()
 	userID := fmt.Sprint(id)
-	infoStr, ok := us.store.GetStringIn(UsersNs, userID)
+	infoStr, ok := us.store.GetStringIn(db.UsersNs, userID)
 	if !ok {
 		return false, fmt.Errorf("user (%d) does not exist", id)
 	}
 
-	gotUser := &User{}
+	gotUser := &db.User{}
 	err := json.Unmarshal([]byte(infoStr), gotUser)
 	if err != nil {
 		return false, err
@@ -360,12 +337,12 @@ func (us *KVUserStore) SetUsed(id uint64, incr bool, capacity int64) error {
 	defer us.mtx.Unlock()
 
 	userID := fmt.Sprint(id)
-	infoStr, ok := us.store.GetStringIn(UsersNs, userID)
+	infoStr, ok := us.store.GetStringIn(db.UsersNs, userID)
 	if !ok {
 		return fmt.Errorf("user (%d) does not exist", id)
 	}
 
-	gotUser := &User{}
+	gotUser := &db.User{}
 	err := json.Unmarshal([]byte(infoStr), gotUser)
 	if err != nil {
 		return err
@@ -389,19 +366,19 @@ func (us *KVUserStore) SetUsed(id uint64, incr bool, capacity int64) error {
 	if err != nil {
 		return err
 	}
-	return us.store.SetStringIn(UsersNs, userID, string(infoBytes))
+	return us.store.SetStringIn(db.UsersNs, userID, string(infoBytes))
 }
 
-func (us *KVUserStore) SetInfo(id uint64, user *User) error {
+func (us *KVUserStore) SetInfo(id uint64, user *db.User) error {
 	us.mtx.Lock()
 	defer us.mtx.Unlock()
 
 	userID := fmt.Sprint(id)
-	infoStr, ok := us.store.GetStringIn(UsersNs, userID)
+	infoStr, ok := us.store.GetStringIn(db.UsersNs, userID)
 	if !ok {
 		return fmt.Errorf("user (%d) does not exist", id)
 	}
-	gotUser := &User{}
+	gotUser := &db.User{}
 	err := json.Unmarshal([]byte(infoStr), gotUser)
 	if err != nil {
 		return err
@@ -425,14 +402,14 @@ func (us *KVUserStore) SetInfo(id uint64, user *User) error {
 		return err
 	}
 
-	return us.store.SetStringIn(UsersNs, userID, string(infoBytes))
+	return us.store.SetStringIn(db.UsersNs, userID, string(infoBytes))
 }
 
-func (us *KVUserStore) ListUsers() ([]*User, error) {
+func (us *KVUserStore) ListUsers() ([]*db.User, error) {
 	us.mtx.RLock()
 	defer us.mtx.RUnlock()
 
-	idToInfo, err := us.store.ListStringsIn(UsersNs)
+	idToInfo, err := us.store.ListStringsIn(db.UsersNs)
 	if err != nil {
 		return nil, err
 	}
@@ -441,9 +418,9 @@ func (us *KVUserStore) ListUsers() ([]*User, error) {
 		return nil, err
 	}
 
-	users := []*User{}
+	users := []*db.User{}
 	for _, infoStr := range idToInfo {
-		user := &User{}
+		user := &db.User{}
 		err = json.Unmarshal([]byte(infoStr), user)
 		if err != nil {
 			return nil, err
@@ -459,7 +436,7 @@ func (us *KVUserStore) ListUsers() ([]*User, error) {
 			for _, user := range users {
 				_, ok := nameToID[user.Name]
 				if !ok {
-					err = us.store.DelStringIn(UsersNs, fmt.Sprint(user.ID))
+					err = us.store.DelStringIn(db.UsersNs, fmt.Sprint(user.ID))
 					if err != nil {
 						return nil, err
 					}

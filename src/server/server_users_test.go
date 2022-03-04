@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/ihexxa/quickshare/src/client"
+	"github.com/ihexxa/quickshare/src/db"
 	"github.com/ihexxa/quickshare/src/db/sitestore"
 	"github.com/ihexxa/quickshare/src/db/userstore"
 	q "github.com/ihexxa/quickshare/src/handlers"
@@ -120,14 +121,14 @@ func TestUsersHandlers(t *testing.T) {
 	})
 
 	t.Run("test users APIs: Login-Self-SetPwd-Logout-Login", func(t *testing.T) {
-		users := []*userstore.User{
+		users := []*db.User{
 			{
 				ID:        0,
 				Name:      adminName,
 				Pwd:       adminPwd,
 				Role:      userstore.AdminRole,
 				UsedSpace: 0,
-				Quota: &userstore.Quota{
+				Quota: &db.Quota{
 					UploadSpeedLimit:   50 * 1024 * 1024,
 					DownloadSpeedLimit: 50 * 1024 * 1024,
 					SpaceLimit:         1024 * 1024 * 1024,
@@ -139,7 +140,7 @@ func TestUsersHandlers(t *testing.T) {
 				Pwd:       "Quicksh@re",
 				Role:      userstore.UserRole,
 				UsedSpace: 0,
-				Quota: &userstore.Quota{
+				Quota: &db.Quota{
 					UploadSpeedLimit:   409600,
 					DownloadSpeedLimit: 409600,
 					SpaceLimit:         1024,
@@ -309,7 +310,7 @@ func TestUsersHandlers(t *testing.T) {
 			}
 		}
 
-		newRole, newQuota := userstore.AdminRole, &userstore.Quota{
+		newRole, newQuota := userstore.AdminRole, &db.Quota{
 			SpaceLimit:         3,
 			UploadSpeedLimit:   3,
 			DownloadSpeedLimit: 3,
@@ -445,8 +446,8 @@ func TestUsersHandlers(t *testing.T) {
 
 		token := client.GetCookie(resp.Cookies(), su.TokenCookie)
 
-		prefers := []*userstore.Preferences{
-			&userstore.Preferences{
+		prefers := []*db.Preferences{
+			&db.Preferences{
 				Bg: &sitestore.BgConfig{
 					Url:      "/bgurl",
 					Repeat:   "no-repeat",
@@ -456,7 +457,7 @@ func TestUsersHandlers(t *testing.T) {
 				CSSURL:     "/cssurl",
 				LanPackURL: "/lanpack",
 			},
-			&userstore.Preferences{
+			&db.Preferences{
 				Bg: &sitestore.BgConfig{
 					Url:      "/bgurl2",
 					Repeat:   "no-repeat2",

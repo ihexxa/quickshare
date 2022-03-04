@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/ihexxa/quickshare/src/client"
-	"github.com/ihexxa/quickshare/src/db/fileinfostore"
+	"github.com/ihexxa/quickshare/src/db"
 	q "github.com/ihexxa/quickshare/src/handlers"
 	"github.com/ihexxa/quickshare/src/handlers/fileshdr"
 )
@@ -631,7 +631,7 @@ func TestFileHandlers(t *testing.T) {
 			t.Fatal(res.StatusCode)
 		}
 
-		gotInfos := map[string]*fileinfostore.UploadInfo{}
+		gotInfos := map[string]*db.UploadInfo{}
 		for _, info := range lResp.UploadInfos {
 			gotInfos[info.RealFilePath] = info
 		}

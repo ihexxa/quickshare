@@ -18,7 +18,7 @@ import (
 	"github.com/ihexxa/gocfg"
 	"github.com/ihexxa/multipart"
 
-	"github.com/ihexxa/quickshare/src/db/fileinfostore"
+	"github.com/ihexxa/quickshare/src/db"
 	"github.com/ihexxa/quickshare/src/db/userstore"
 	"github.com/ihexxa/quickshare/src/depidx"
 	q "github.com/ihexxa/quickshare/src/handlers"
@@ -40,16 +40,14 @@ const (
 )
 
 type FileHandlers struct {
-	cfg       gocfg.ICfg
-	deps      *depidx.Deps
-	uploadMgr *UploadMgr
+	cfg  gocfg.ICfg
+	deps *depidx.Deps
 }
 
 func NewFileHandlers(cfg gocfg.ICfg, deps *depidx.Deps) (*FileHandlers, error) {
 	handlers := &FileHandlers{
-		cfg:       cfg,
-		deps:      deps,
-		uploadMgr: NewUploadMgr(deps.KV()),
+		cfg:  cfg,
+		deps: deps,
 	}
 	deps.Workers().AddHandler(MsgTypeSha1, handlers.genSha1)
 
@@ -149,15 +147,28 @@ func (h *FileHandlers) Create(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
+	tmpFilePath := q.UploadPath(userName, req.Path)
 
 	if req.FileSize == 0 {
-		err = h.deps.FS().MkdirAll(filepath.Dir(req.Path))
+		// TODO: limit the number of files with 0 byte
+		err = h.deps.BoltStore().AddUploadInfos(userIDInt, tmpFilePath, fsFilePath, &db.FileInfo{
+			Size: req.FileSize,
+		})
+		if err != nil {
+			c.JSON(q.ErrResp(c, 500, err))
+			return
+		}
+		err = h.deps.BoltStore().MoveUploadingInfos(userIDInt, tmpFilePath, fsFilePath)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
 		}
 
-		// TODO: limit the number of files with 0 byte
+		err = h.deps.FS().MkdirAll(filepath.Dir(req.Path))
+		if err != nil {
+			c.JSON(q.ErrResp(c, 500, err))
+			return
+		}
 
 		err = h.deps.FS().Create(fsFilePath)
 		if err != nil {
@@ -193,18 +204,36 @@ func (h *FileHandlers) Create(c *gin.Context) {
 		return
 	}
 
-	tmpFilePath := q.UploadPath(userName, req.Path)
+	err = h.deps.BoltStore().AddUploadInfos(userIDInt, tmpFilePath, fsFilePath, &db.FileInfo{
+		Size: req.FileSize,
+	})
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
 	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {
-		// TODO:
-		ok, err := h.deps.Users().CanIncrUsed(userIDInt, req.FileSize)
-		if err != nil {
-			c.JSON(q.ErrResp(c, 500, err))
-			return
-		} else if !ok {
-			c.JSON(q.ErrResp(c, 429, userstore.ErrReachedLimit))
-			return
-		}
+		// ok, err := h.deps.Users().CanIncrUsed(userIDInt, req.FileSize)
+		// if err != nil {
+		// 	c.JSON(q.ErrResp(c, 500, err))
+		// 	return
+		// } else if !ok {
+		// 	c.JSON(q.ErrResp(c, 429, userstore.ErrReachedLimit))
+		// 	return
+		// }
+
+		// err = h.deps.FileInfos().AddUploadInfo(userID, req.Path, tmpFilePath, req.FileSize)
+		// if err != nil {
+		// 	c.JSON(q.ErrResp(c, 500, err))
+		// 	return
+		// }
+
+		// err = h.deps.Users().SetUsed(userIDInt, true, req.FileSize)
+		// if err != nil {
+		// 	c.JSON(q.ErrResp(c, 500, err))
+		// 	return
+		// }
 
 		err = h.deps.FS().Create(tmpFilePath)
 		if err != nil {
@@ -215,19 +244,8 @@ func (h *FileHandlers) Create(c *gin.Context) {
 			}
 			return
 		}
-		err = h.uploadMgr.AddInfo(userID, req.Path, tmpFilePath, req.FileSize)
-		if err != nil {
-			c.JSON(q.ErrResp(c, 500, err))
-			return
-		}
 
 		err = h.deps.FS().MkdirAll(filepath.Dir(req.Path))
-		if err != nil {
-			c.JSON(q.ErrResp(c, 500, err))
-			return
-		}
-
-		err = h.deps.Users().SetUsed(userIDInt, true, req.FileSize)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
@@ -259,32 +277,37 @@ func (h *FileHandlers) Delete(c *gin.Context) {
 
 	locker := h.NewAutoLocker(c, lockName(filePath))
 	locker.Exec(func() {
-		info, err := h.deps.FileInfos().GetInfo(filePath)
-		if err != nil {
-			c.JSON(q.ErrResp(c, 500, err))
-			return
-		}
-
 		err = h.deps.FS().Remove(filePath)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
 		}
-
-		err = h.deps.Users().SetUsed(userIDInt, false, info.Size)
-		if err != nil {
-			c.JSON(q.ErrResp(c, 500, err))
-			return
-		}
-
-		err = h.deps.FileInfos().DelInfo(filePath)
-		if err != nil {
-			c.JSON(q.ErrResp(c, 500, err))
-			return
-		}
-
-		c.JSON(q.Resp(200))
 	})
+
+	// info, err := h.deps.FileInfos().GetInfo(filePath)
+	// if err != nil {
+	// 	c.JSON(q.ErrResp(c, 500, err))
+	// 	return
+	// }
+
+	// err = h.deps.Users().SetUsed(userIDInt, false, info.Size)
+	// if err != nil {
+	// 	c.JSON(q.ErrResp(c, 500, err))
+	// 	return
+	// }
+
+	// err = h.deps.FileInfos().DelInfo(filePath)
+	// if err != nil {
+	// 	c.JSON(q.ErrResp(c, 500, err))
+	// 	return
+	// }
+
+	err = h.deps.BoltStore().DelInfos(userIDInt, filePath)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+	c.JSON(q.Resp(200))
 }
 
 type MetadataResp struct {
@@ -364,13 +387,19 @@ func (h *FileHandlers) Move(c *gin.Context) {
 		return
 	}
 	role := c.MustGet(q.RoleParam).(string)
+	userID := c.MustGet(q.UserIDParam).(string)
 	userName := c.MustGet(q.UserParam).(string)
 	if !h.canAccess(userName, role, "move", req.OldPath) || !h.canAccess(userName, role, "move", req.NewPath) {
 		c.JSON(q.ErrResp(c, 403, q.ErrAccessDenied))
 		return
 	}
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
 
-	_, err := h.deps.FS().Stat(req.OldPath)
+	itemInfo, err := h.deps.FS().Stat(req.OldPath)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -382,6 +411,12 @@ func (h *FileHandlers) Move(c *gin.Context) {
 	} else if err == nil {
 		// err is nil because file exists
 		c.JSON(q.ErrResp(c, 400, os.ErrExist))
+		return
+	}
+
+	err = h.deps.BoltStore().MoveInfos(userIDInt, req.OldPath, req.NewPath, itemInfo.IsDir())
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
 
@@ -469,45 +504,52 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 				return
 			}
 
+			err = h.deps.BoltStore().MoveUploadingInfos(userIDInt, tmpFilePath, fsFilePath)
+			if err != nil {
+				c.JSON(q.ErrResp(c, 500, err))
+				return
+			}
+
 			err = h.deps.FS().Rename(tmpFilePath, fsFilePath)
 			if err != nil {
 				c.JSON(q.ErrResp(c, 500, fmt.Errorf("%s error: %w", req.Path, err)))
 				return
 			}
-			err = h.deps.FileInfos().DelUploadInfo(userID, tmpFilePath)
-			if err != nil {
-				c.JSON(q.ErrResp(c, 500, err))
-				return
-			}
 
-			fsInfo, err := h.deps.FS().Stat(fsFilePath)
-			if err != nil {
-				c.JSON(q.ErrResp(c, 500, err))
-				return
-			}
+			// err = h.deps.FileInfos().DelUploadInfo(userID, tmpFilePath)
+			// if err != nil {
+			// 	c.JSON(q.ErrResp(c, 500, err))
+			// 	return
+			// }
 
-			err = h.deps.FileInfos().SetInfo(fsFilePath, &fileinfostore.FileInfo{
-				IsDir:  false,
-				Shared: false,
-				Size:   fsInfo.Size(),
-			})
-			if err != nil {
-				c.JSON(q.ErrResp(c, 500, err))
-				return
-			}
+			// fsInfo, err := h.deps.FS().Stat(fsFilePath)
+			// if err != nil {
+			// 	c.JSON(q.ErrResp(c, 500, err))
+			// 	return
+			// }
+
+			// err = h.deps.FileInfos().SetInfo(fsFilePath, &db.FileInfo{
+			// 	IsDir:  false,
+			// 	Shared: false,
+			// 	Size:   fsInfo.Size(),
+			// })
+			// if err != nil {
+			// 	c.JSON(q.ErrResp(c, 500, err))
+			// 	return
+			// }
 
 			// TODO: check space quota?
-			if fsInfo.Size()-fileSize != 0 {
-				sizeDiff := fsInfo.Size() - fileSize
-				if sizeDiff < 0 {
-					sizeDiff = -sizeDiff
-				}
-				err = h.deps.Users().SetUsed(userIDInt, fsInfo.Size()-fileSize > 0, sizeDiff)
-				if err != nil {
-					c.JSON(q.ErrResp(c, 500, err))
-					return
-				}
-			}
+			// if fsInfo.Size()-fileSize != 0 {
+			// 	sizeDiff := fsInfo.Size() - fileSize
+			// 	if sizeDiff < 0 {
+			// 		sizeDiff = -sizeDiff
+			// 	}
+			// 	err = h.deps.Users().SetUsed(userIDInt, fsInfo.Size()-fileSize > 0, sizeDiff)
+			// 	if err != nil {
+			// 		c.JSON(q.ErrResp(c, 500, err))
+			// 		return
+			// 	}
+			// }
 
 			msg, err := json.Marshal(Sha1Params{
 				FilePath: fsFilePath,
@@ -842,7 +884,7 @@ func lockName(filePath string) string {
 }
 
 type ListUploadingsResp struct {
-	UploadInfos []*fileinfostore.UploadInfo `json:"uploadInfos"`
+	UploadInfos []*db.UploadInfo `json:"uploadInfos"`
 }
 
 func (h *FileHandlers) ListUploadings(c *gin.Context) {
@@ -854,7 +896,7 @@ func (h *FileHandlers) ListUploadings(c *gin.Context) {
 		return
 	}
 	if infos == nil {
-		infos = []*fileinfostore.UploadInfo{}
+		infos = []*db.UploadInfo{}
 	}
 	c.JSON(200, &ListUploadingsResp{UploadInfos: infos})
 }
@@ -884,11 +926,11 @@ func (h *FileHandlers) DelUploading(c *gin.Context) {
 	tmpFilePath := q.UploadPath(userName, filePath)
 	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {
-		_, size, _, err := h.deps.FileInfos().GetUploadInfo(userID, tmpFilePath)
-		if err != nil {
-			c.JSON(q.ErrResp(c, 500, err))
-			return
-		}
+		// _, size, _, err := h.deps.FileInfos().GetUploadInfo(userID, tmpFilePath)
+		// if err != nil {
+		// 	c.JSON(q.ErrResp(c, 500, err))
+		// 	return
+		// }
 
 		_, err = h.deps.FS().Stat(tmpFilePath)
 		if err != nil {
@@ -906,20 +948,26 @@ func (h *FileHandlers) DelUploading(c *gin.Context) {
 			}
 		}
 
-		err = h.deps.FileInfos().DelUploadInfo(userID, tmpFilePath)
-		if err != nil {
-			c.JSON(q.ErrResp(c, 500, err))
-			return
-		}
+		// err = h.deps.FileInfos().DelUploadInfo(userID, tmpFilePath)
+		// if err != nil {
+		// 	c.JSON(q.ErrResp(c, 500, err))
+		// 	return
+		// }
 
-		err = h.deps.Users().SetUsed(userIDInt, false, size)
-		if err != nil {
-			c.JSON(q.ErrResp(c, 500, err))
-			return
-		}
-
-		c.JSON(q.Resp(200))
+		// err = h.deps.Users().SetUsed(userIDInt, false, size)
+		// if err != nil {
+		// 	c.JSON(q.ErrResp(c, 500, err))
+		// 	return
+		// }
 	})
+
+	err = h.deps.BoltStore().DelUploadingInfos(userIDInt, tmpFilePath)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
+	c.JSON(q.Resp(200))
 }
 
 type SharingReq struct {
