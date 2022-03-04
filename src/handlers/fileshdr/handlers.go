@@ -434,7 +434,7 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 	locker.Exec(func() {
 		var err error
 
-		_, fileSize, uploaded, err := h.uploadMgr.GetInfo(userID, tmpFilePath)
+		_, fileSize, uploaded, err := h.deps.FileInfos().GetUploadInfo(userID, tmpFilePath)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
@@ -455,7 +455,7 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 			return
 		}
 
-		err = h.uploadMgr.SetInfo(userID, tmpFilePath, req.Offset+int64(wrote))
+		err = h.deps.FileInfos().SetUploadInfo(userID, tmpFilePath, req.Offset+int64(wrote))
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
@@ -474,7 +474,7 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 				c.JSON(q.ErrResp(c, 500, fmt.Errorf("%s error: %w", req.Path, err)))
 				return
 			}
-			err = h.uploadMgr.DelInfo(userID, tmpFilePath)
+			err = h.deps.FileInfos().DelUploadInfo(userID, tmpFilePath)
 			if err != nil {
 				c.JSON(q.ErrResp(c, 500, err))
 				return
@@ -594,7 +594,7 @@ func (h *FileHandlers) UploadStatus(c *gin.Context) {
 	tmpFilePath := q.UploadPath(userName, filePath)
 	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {
-		_, fileSize, uploaded, err := h.uploadMgr.GetInfo(userID, tmpFilePath)
+		_, fileSize, uploaded, err := h.deps.FileInfos().GetUploadInfo(userID, tmpFilePath)
 		if err != nil {
 			if os.IsNotExist(err) {
 				c.JSON(q.ErrResp(c, 404, err))
@@ -842,19 +842,19 @@ func lockName(filePath string) string {
 }
 
 type ListUploadingsResp struct {
-	UploadInfos []*UploadInfo `json:"uploadInfos"`
+	UploadInfos []*fileinfostore.UploadInfo `json:"uploadInfos"`
 }
 
 func (h *FileHandlers) ListUploadings(c *gin.Context) {
 	userID := c.MustGet(q.UserIDParam).(string)
 
-	infos, err := h.uploadMgr.ListInfo(userID)
+	infos, err := h.deps.FileInfos().ListUploadInfo(userID)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
 	if infos == nil {
-		infos = []*UploadInfo{}
+		infos = []*fileinfostore.UploadInfo{}
 	}
 	c.JSON(200, &ListUploadingsResp{UploadInfos: infos})
 }
@@ -884,7 +884,7 @@ func (h *FileHandlers) DelUploading(c *gin.Context) {
 	tmpFilePath := q.UploadPath(userName, filePath)
 	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {
-		_, size, _, err := h.uploadMgr.GetInfo(userID, tmpFilePath)
+		_, size, _, err := h.deps.FileInfos().GetUploadInfo(userID, tmpFilePath)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
@@ -906,7 +906,7 @@ func (h *FileHandlers) DelUploading(c *gin.Context) {
 			}
 		}
 
-		err = h.uploadMgr.DelInfo(userID, tmpFilePath)
+		err = h.deps.FileInfos().DelUploadInfo(userID, tmpFilePath)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return

@@ -54,6 +54,12 @@ type IFileInfoStore interface {
 	SetSha1(itemPath, sign string) error
 	GetInfos(itemPaths []string) (map[string]*FileInfo, error)
 	GetSharingDir(hashID string) (string, error)
+	// upload info
+	AddUploadInfo(user, filePath, tmpPath string, fileSize int64) error
+	SetUploadInfo(user, filePath string, newUploaded int64) error
+	GetUploadInfo(user, filePath string) (string, int64, int64, error)
+	DelUploadInfo(user, filePath string) error
+	ListUploadInfo(user string) ([]*UploadInfo, error)
 }
 
 type FileInfoStore struct {
