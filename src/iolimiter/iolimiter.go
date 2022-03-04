@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/ihexxa/quickshare/src/db"
 	"github.com/ihexxa/quickshare/src/db/userstore"
 	"github.com/ihexxa/quickshare/src/golimiter"
 )
@@ -20,7 +21,7 @@ type IOLimiter struct {
 	UploadLimiter   *golimiter.Limiter
 	DownloadLimiter *golimiter.Limiter
 	users           userstore.IUserStore
-	quotaCache      map[uint64]*userstore.Quota
+	quotaCache      map[uint64]*db.Quota
 }
 
 func NewIOLimiter(cap, cyc int, users userstore.IUserStore) *IOLimiter {
@@ -29,7 +30,7 @@ func NewIOLimiter(cap, cyc int, users userstore.IUserStore) *IOLimiter {
 		UploadLimiter:   golimiter.New(cap, cyc),
 		DownloadLimiter: golimiter.New(cap, cyc),
 		users:           users,
-		quotaCache:      map[uint64]*userstore.Quota{},
+		quotaCache:      map[uint64]*db.Quota{},
 	}
 }
 

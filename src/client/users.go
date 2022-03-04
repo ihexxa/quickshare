@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/ihexxa/quickshare/src/db/userstore"
+	"github.com/ihexxa/quickshare/src/db"
 	"github.com/ihexxa/quickshare/src/handlers"
 	"github.com/ihexxa/quickshare/src/handlers/multiusers"
 	"github.com/parnurzeal/gorequest"
@@ -63,7 +63,7 @@ func (cl *SingleUserClient) ForceSetPwd(userID, newPwd string, token *http.Cooki
 		End()
 }
 
-func (cl *SingleUserClient) SetUser(ID uint64, role string, quota *userstore.Quota, token *http.Cookie) (*http.Response, string, []error) {
+func (cl *SingleUserClient) SetUser(ID uint64, role string, quota *db.Quota, token *http.Cookie) (*http.Response, string, []error) {
 	return cl.r.Patch(cl.url("/v1/users/")).
 		Send(multiusers.SetUserReq{
 			ID:    ID,
@@ -173,7 +173,7 @@ func (cl *SingleUserClient) Self(token *http.Cookie) (*http.Response, *multiuser
 	return resp, selfResp, errs
 }
 
-func (cl *SingleUserClient) SetPreferences(prefers *userstore.Preferences, token *http.Cookie) (*http.Response, string, []error) {
+func (cl *SingleUserClient) SetPreferences(prefers *db.Preferences, token *http.Cookie) (*http.Response, string, []error) {
 	return cl.r.Patch(cl.url("/v1/users/preferences")).
 		Send(multiusers.SetPreferencesReq{
 			Preferences: prefers,

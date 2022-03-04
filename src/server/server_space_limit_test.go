@@ -125,8 +125,8 @@ func TestSpaceLimit(t *testing.T) {
 		res, _, errs := cl.Create(filePath, 1)
 		if len(errs) > 0 {
 			t.Fatal(errs)
-		} else if res.StatusCode != 429 {
-			t.Fatal("(space limit): this request should be rejected")
+		} else if res.StatusCode != 500 {
+			t.Fatalf("(space limit): this request should be rejected: %d", res.StatusCode)
 		}
 
 		for i := 0; i < spaceLimit/fileSize; i++ {

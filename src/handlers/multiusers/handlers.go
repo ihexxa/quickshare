@@ -12,6 +12,7 @@ import (
 	"github.com/ihexxa/gocfg"
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/ihexxa/quickshare/src/db"
 	"github.com/ihexxa/quickshare/src/db/userstore"
 	"github.com/ihexxa/quickshare/src/depidx"
 	q "github.com/ihexxa/quickshare/src/handlers"
@@ -179,12 +180,12 @@ func (h *MultiUsersSvc) Init(adminName, adminPwd string) (string, error) {
 			}
 
 			preferences := userstore.DefaultPreferences
-			user := &userstore.User{
+			user := &db.User{
 				ID:   h.deps.ID().Gen(),
 				Name: userCfg.Name,
 				Pwd:  string(pwdHash),
 				Role: userCfg.Role,
-				Quota: &userstore.Quota{
+				Quota: &db.Quota{
 					SpaceLimit:         spaceLimit,
 					UploadSpeedLimit:   uploadSpeedLimit,
 					DownloadSpeedLimit: downloadSpeedLimit,
@@ -424,12 +425,12 @@ func (h *MultiUsersSvc) AddUser(c *gin.Context) {
 	}
 
 	newPreferences := userstore.DefaultPreferences
-	err = h.deps.Users().AddUser(&userstore.User{
+	err = h.deps.Users().AddUser(&db.User{
 		ID:   uid,
 		Name: req.Name,
 		Pwd:  string(pwdHash),
 		Role: req.Role,
-		Quota: &userstore.Quota{
+		Quota: &db.Quota{
 			SpaceLimit:         int64(h.cfg.IntOr("Users.SpaceLimit", 100*1024*1024)), // TODO: support int64
 			UploadSpeedLimit:   h.cfg.IntOr("Users.UploadSpeedLimit", 100*1024),
 			DownloadSpeedLimit: h.cfg.IntOr("Users.DownloadSpeedLimit", 100*1024),
@@ -486,7 +487,7 @@ func (h *MultiUsersSvc) DelUser(c *gin.Context) {
 }
 
 type ListUsersResp struct {
-	Users []*userstore.User `json:"users"`
+	Users []*db.User `json:"users"`
 }
 
 func (h *MultiUsersSvc) ListUsers(c *gin.Context) {
@@ -623,12 +624,12 @@ func (h *MultiUsersSvc) isValidRole(role string) error {
 }
 
 type SelfResp struct {
-	ID          string                 `json:"id"`
-	Name        string                 `json:"name"`
-	Role        string                 `json:"role"`
-	Quota       *userstore.Quota       `json:"quota"`
-	UsedSpace   int64                  `json:"usedSpace,string"`
-	Preferences *userstore.Preferences `json:"preferences"`
+	ID          string          `json:"id"`
+	Name        string          `json:"name"`
+	Role        string          `json:"role"`
+	Quota       *db.Quota       `json:"quota"`
+	UsedSpace   int64           `json:"usedSpace,string"`
+	Preferences *db.Preferences `json:"preferences"`
 }
 
 func (h *MultiUsersSvc) Self(c *gin.Context) {
@@ -655,10 +656,10 @@ func (h *MultiUsersSvc) Self(c *gin.Context) {
 }
 
 type SetUserReq struct {
-	ID        uint64           `json:"id,string"`
-	Role      string           `json:"role"`
-	UsedSpace int64            `json:"usedSpace,string"`
-	Quota     *userstore.Quota `json:"quota"`
+	ID        uint64    `json:"id,string"`
+	Role      string    `json:"role"`
+	UsedSpace int64     `json:"usedSpace,string"`
+	Quota     *db.Quota `json:"quota"`
 }
 
 func (h *MultiUsersSvc) SetUser(c *gin.Context) {
@@ -668,7 +669,7 @@ func (h *MultiUsersSvc) SetUser(c *gin.Context) {
 		return
 	}
 
-	err := h.deps.Users().SetInfo(req.ID, &userstore.User{
+	err := h.deps.Users().SetInfo(req.ID, &db.User{
 		Role:  req.Role,
 		Quota: req.Quota,
 	})
@@ -681,7 +682,7 @@ func (h *MultiUsersSvc) SetUser(c *gin.Context) {
 }
 
 type SetPreferencesReq struct {
-	Preferences *userstore.Preferences `json:"preferences"`
+	Preferences *db.Preferences `json:"preferences"`
 }
 
 func (h *MultiUsersSvc) SetPreferences(c *gin.Context) {

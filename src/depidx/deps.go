@@ -5,6 +5,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/ihexxa/quickshare/src/cryptoutil"
+	"github.com/ihexxa/quickshare/src/db/boltstore"
 	"github.com/ihexxa/quickshare/src/db/fileinfostore"
 	"github.com/ihexxa/quickshare/src/db/sitestore"
 	"github.com/ihexxa/quickshare/src/db/userstore"
@@ -34,6 +35,7 @@ type Deps struct {
 	logger    *zap.SugaredLogger
 	limiter   iolimiter.ILimiter
 	workers   worker.IWorkerPool
+	boltStore *boltstore.BoltStore
 }
 
 func NewDeps(cfg gocfg.ICfg) *Deps {
@@ -118,4 +120,12 @@ func (deps *Deps) Workers() worker.IWorkerPool {
 
 func (deps *Deps) SetWorkers(workers worker.IWorkerPool) {
 	deps.workers = workers
+}
+
+func (deps *Deps) BoltStore() *boltstore.BoltStore {
+	return deps.boltStore
+}
+
+func (deps *Deps) SetBoltStore(boltStore *boltstore.BoltStore) {
+	deps.boltStore = boltStore
 }

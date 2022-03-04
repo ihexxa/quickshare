@@ -433,6 +433,6 @@ func (bp *BoltPvd) ListStringsByPrefixIn(prefix, ns string) (map[string]string, 
 	return results, err
 }
 
-func (bp *BoltPvd) StartUpdateTxBolt(op func(*bolt.Tx) error) error {
-	return bp.db.Update(op)
+func (bp *BoltPvd) Bolt() *bolt.DB {
+	return bp.db
 }

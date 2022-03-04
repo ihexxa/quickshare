@@ -23,6 +23,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/ihexxa/quickshare/src/cryptoutil/jwt"
+	"github.com/ihexxa/quickshare/src/db/boltstore"
 	"github.com/ihexxa/quickshare/src/db/fileinfostore"
 	"github.com/ihexxa/quickshare/src/db/sitestore"
 	"github.com/ihexxa/quickshare/src/db/userstore"
@@ -141,6 +142,7 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	if err := filesystem.MkdirAll(dbPath); err != nil {
 		panic(fmt.Sprintf("fail to create path for db: %s", err))
 	}
+
 	kv := boltdbpvd.New(dbPath, 1024)
 	users, err := userstore.NewKVUserStore(kv)
 	if err != nil {
@@ -152,7 +154,11 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	}
 	siteStore, err := sitestore.NewSiteStore(kv)
 	if err != nil {
-		panic(fmt.Sprintf("fail to new site config store: %s", err))
+		panic(fmt.Sprintf("fail to init site config store: %s", err))
+	}
+	boltDB, err := boltstore.NewBoltStore(kv.Bolt())
+	if err != nil {
+		panic(fmt.Sprintf("fail to init bolt store: %s", err))
 	}
 
 	err = siteStore.Init(&sitestore.SiteConfig{
@@ -182,6 +188,7 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	deps.SetUsers(users)
 	deps.SetFileInfos(fileInfos)
 	deps.SetSiteStore(siteStore)
+	deps.SetBoltStore(boltDB)
 	deps.SetID(ider)
 	deps.SetLog(logger)
 	deps.SetLimiter(limiter)

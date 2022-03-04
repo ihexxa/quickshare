@@ -11,12 +11,11 @@ import (
 
 	"github.com/ihexxa/quickshare/src/db"
 	"github.com/ihexxa/quickshare/src/kvstore"
+	"github.com/ihexxa/quickshare/src/kvstore/boltdbpvd"
 )
 
 const (
 	InitNs       = "Init"
-	InfoNs       = "sharing"
-	ShareIDNs    = "sharingKey"
 	InitTimeKey  = "initTime"
 	SchemaVerKey = "SchemaVersion"
 	SchemaV1     = "v1"
@@ -35,36 +34,29 @@ func IsNotFound(err error) bool {
 	return err == ErrNotFound
 }
 
-type FileInfo struct {
-	IsDir   bool   `json:"isDir"`
-	Shared  bool   `json:"shared"`
-	ShareID string `json:"shareID"` // for short url
-	Sha1    string `json:"sha1"`
-	Size    int64  `json:"size"`
-}
-
 type IFileInfoStore interface {
 	AddSharing(dirPath string) error
 	DelSharing(dirPath string) error
 	GetSharing(dirPath string) (bool, bool)
 	ListSharings(prefix string) (map[string]string, error)
-	GetInfo(itemPath string) (*FileInfo, error)
-	SetInfo(itemPath string, info *FileInfo) error
+	GetInfo(itemPath string) (*db.FileInfo, error)
+	SetInfo(itemPath string, info *db.FileInfo) error
 	DelInfo(itemPath string) error
 	SetSha1(itemPath, sign string) error
-	GetInfos(itemPaths []string) (map[string]*FileInfo, error)
+	GetInfos(itemPaths []string) (map[string]*db.FileInfo, error)
 	GetSharingDir(hashID string) (string, error)
 	// upload info
 	AddUploadInfo(user, filePath, tmpPath string, fileSize int64) error
 	SetUploadInfo(user, filePath string, newUploaded int64) error
 	GetUploadInfo(user, filePath string) (string, int64, int64, error)
 	DelUploadInfo(user, filePath string) error
-	ListUploadInfo(user string) ([]*UploadInfo, error)
+	ListUploadInfo(user string) ([]*db.UploadInfo, error)
 }
 
 type FileInfoStore struct {
-	mtx   *sync.RWMutex
-	store kvstore.IKVStore
+	mtx    *sync.RWMutex
+	store  kvstore.IKVStore
+	boltdb boltdbpvd.BoltProvider
 }
 
 func migrate(fi *FileInfoStore) error {
@@ -77,7 +69,7 @@ func migrate(fi *FileInfoStore) error {
 	switch ver {
 	case "v0":
 		// add ShareID to FileInfos
-		infoStrs, err := fi.store.ListStringsIn(InfoNs)
+		infoStrs, err := fi.store.ListStringsIn(db.InfoNs)
 		if err != nil {
 			return err
 		}
@@ -103,13 +95,13 @@ func migrate(fi *FileInfoStore) error {
 				}
 				shareID = dirShareID
 
-				err = fi.store.SetStringIn(ShareIDNs, shareID, itemPath)
+				err = fi.store.SetStringIn(db.ShareIDNs, shareID, itemPath)
 				if err != nil {
 					return err
 				}
 			}
 
-			newInfo := &FileInfo{
+			newInfo := &db.FileInfo{
 				IsDir:   infoV0.IsDir,
 				Shared:  infoV0.Shared,
 				ShareID: shareID,
@@ -126,7 +118,7 @@ func migrate(fi *FileInfoStore) error {
 		}
 	case "v1":
 		// add size to file info
-		infoStrs, err := fi.store.ListStringsIn(InfoNs)
+		infoStrs, err := fi.store.ListStringsIn(db.InfoNs)
 		if err != nil {
 			return err
 		}
@@ -145,7 +137,7 @@ func migrate(fi *FileInfoStore) error {
 				return fmt.Errorf("list sharing error: %w", err)
 			}
 
-			newInfo := &FileInfo{
+			newInfo := &db.FileInfo{
 				IsDir:   infoV1.IsDir,
 				Shared:  infoV1.Shared,
 				ShareID: infoV1.ShareID,
@@ -174,8 +166,8 @@ func NewFileInfoStore(store kvstore.IKVStore) (*FileInfoStore, error) {
 	var err error
 	for _, nsName := range []string{
 		InitNs,
-		InfoNs,
-		ShareIDNs,
+		db.InfoNs,
+		db.ShareIDNs,
 	} {
 		if !store.HasNamespace(nsName) {
 			if err = store.AddNamespace(nsName); err != nil {
@@ -184,9 +176,12 @@ func NewFileInfoStore(store kvstore.IKVStore) (*FileInfoStore, error) {
 		}
 	}
 
+	boltdb := store.(boltdbpvd.BoltProvider)
+
 	fi := &FileInfoStore{
-		store: store,
-		mtx:   &sync.RWMutex{},
+		store:  store,
+		boltdb: boltdb,
+		mtx:    &sync.RWMutex{},
 	}
 	if err = migrate(fi); err != nil {
 		return nil, err
@@ -203,7 +198,7 @@ func (fi *FileInfoStore) AddSharing(dirPath string) error {
 		if !IsNotFound(err) {
 			return err
 		}
-		info = &FileInfo{
+		info = &db.FileInfo{
 			IsDir: true,
 		}
 	}
@@ -213,7 +208,7 @@ func (fi *FileInfoStore) AddSharing(dirPath string) error {
 	if err != nil {
 		return err
 	}
-	err = fi.store.SetStringIn(ShareIDNs, shareID, dirPath)
+	err = fi.store.SetStringIn(db.ShareIDNs, shareID, dirPath)
 	if err != nil {
 		return err
 	}
@@ -238,14 +233,14 @@ func (fi *FileInfoStore) DelSharing(dirPath string) error {
 
 	// because before this version, shareIDs are not removed correctly
 	// so it iterates all shareIDs and cleans remaining entries
-	shareIDtoDir, err := fi.store.ListStringsIn(ShareIDNs)
+	shareIDtoDir, err := fi.store.ListStringsIn(db.ShareIDNs)
 	if err != nil {
 		return err
 	}
 
 	for shareID, shareDir := range shareIDtoDir {
 		if shareDir == dirPath {
-			err = fi.store.DelStringIn(ShareIDNs, shareID)
+			err = fi.store.DelStringIn(db.ShareIDNs, shareID)
 			if err != nil {
 				return err
 			}
@@ -270,12 +265,12 @@ func (fi *FileInfoStore) GetSharing(dirPath string) (bool, bool) {
 }
 
 func (fi *FileInfoStore) ListSharings(prefix string) (map[string]string, error) {
-	infoStrs, err := fi.store.ListStringsByPrefixIn(prefix, InfoNs)
+	infoStrs, err := fi.store.ListStringsByPrefixIn(prefix, db.InfoNs)
 	if err != nil {
 		return nil, err
 	}
 
-	info := &FileInfo{}
+	info := &db.FileInfo{}
 	sharings := map[string]string{}
 	for itemPath, infoStr := range infoStrs {
 		err = json.Unmarshal([]byte(infoStr), info)
@@ -291,13 +286,13 @@ func (fi *FileInfoStore) ListSharings(prefix string) (map[string]string, error) 
 	return sharings, nil
 }
 
-func (fi *FileInfoStore) GetInfo(itemPath string) (*FileInfo, error) {
-	infoStr, ok := fi.store.GetStringIn(InfoNs, itemPath)
+func (fi *FileInfoStore) GetInfo(itemPath string) (*db.FileInfo, error) {
+	infoStr, ok := fi.store.GetStringIn(db.InfoNs, itemPath)
 	if !ok {
 		return nil, ErrNotFound
 	}
 
-	info := &FileInfo{}
+	info := &db.FileInfo{}
 	err := json.Unmarshal([]byte(infoStr), info)
 	if err != nil {
 		return nil, fmt.Errorf("get file info: %w", err)
@@ -305,8 +300,8 @@ func (fi *FileInfoStore) GetInfo(itemPath string) (*FileInfo, error) {
 	return info, nil
 }
 
-func (fi *FileInfoStore) GetInfos(itemPaths []string) (map[string]*FileInfo, error) {
-	infos := map[string]*FileInfo{}
+func (fi *FileInfoStore) GetInfos(itemPaths []string) (map[string]*db.FileInfo, error) {
+	infos := map[string]*db.FileInfo{}
 	for _, itemPath := range itemPaths {
 		info, err := fi.GetInfo(itemPath)
 		if err != nil {
@@ -321,13 +316,13 @@ func (fi *FileInfoStore) GetInfos(itemPaths []string) (map[string]*FileInfo, err
 	return infos, nil
 }
 
-func (fi *FileInfoStore) SetInfo(itemPath string, info *FileInfo) error {
+func (fi *FileInfoStore) SetInfo(itemPath string, info *db.FileInfo) error {
 	infoStr, err := json.Marshal(info)
 	if err != nil {
 		return fmt.Errorf("set file info: %w", err)
 	}
 
-	err = fi.store.SetStringIn(InfoNs, itemPath, string(infoStr))
+	err = fi.store.SetStringIn(db.InfoNs, itemPath, string(infoStr))
 	if err != nil {
 		return fmt.Errorf("set file info: %w", err)
 	}
@@ -335,7 +330,7 @@ func (fi *FileInfoStore) SetInfo(itemPath string, info *FileInfo) error {
 }
 
 func (fi *FileInfoStore) DelInfo(itemPath string) error {
-	return fi.store.DelStringIn(InfoNs, itemPath)
+	return fi.store.DelStringIn(db.InfoNs, itemPath)
 }
 
 func (fi *FileInfoStore) SetSha1(itemPath, sign string) error {
@@ -347,7 +342,7 @@ func (fi *FileInfoStore) SetSha1(itemPath, sign string) error {
 		if !IsNotFound(err) {
 			return err
 		}
-		info = &FileInfo{
+		info = &db.FileInfo{
 			IsDir:  false,
 			Shared: false,
 		}
@@ -370,7 +365,7 @@ func (fi *FileInfoStore) getShareID(payload string) (string, error) {
 		}
 
 		shareID := fmt.Sprintf("%x", h.Sum(nil))[:7]
-		shareDir, ok := fi.store.GetStringIn(ShareIDNs, shareID)
+		shareDir, ok := fi.store.GetStringIn(db.ShareIDNs, shareID)
 		if !ok {
 			return shareID, nil
 		} else if ok && shareDir == payload {
@@ -382,7 +377,7 @@ func (fi *FileInfoStore) getShareID(payload string) (string, error) {
 }
 
 func (fi *FileInfoStore) GetSharingDir(hashID string) (string, error) {
-	dirPath, ok := fi.store.GetStringIn(ShareIDNs, hashID)
+	dirPath, ok := fi.store.GetStringIn(db.ShareIDNs, hashID)
 	if !ok {
 		return "", ErrSharingNotFound
 	}
