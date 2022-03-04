@@ -18,6 +18,7 @@ import (
 	"github.com/ihexxa/gocfg"
 	"github.com/ihexxa/multipart"
 
+	"github.com/ihexxa/quickshare/src/db/fileinfostore"
 	"github.com/ihexxa/quickshare/src/db/userstore"
 	"github.com/ihexxa/quickshare/src/depidx"
 	q "github.com/ihexxa/quickshare/src/handlers"
@@ -195,6 +196,7 @@ func (h *FileHandlers) Create(c *gin.Context) {
 	tmpFilePath := q.UploadPath(userName, req.Path)
 	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {
+		// TODO:
 		ok, err := h.deps.Users().CanIncrUsed(userIDInt, req.FileSize)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
@@ -257,7 +259,7 @@ func (h *FileHandlers) Delete(c *gin.Context) {
 
 	locker := h.NewAutoLocker(c, lockName(filePath))
 	locker.Exec(func() {
-		info, err := h.deps.FS().Stat(filePath)
+		info, err := h.deps.FileInfos().GetInfo(filePath)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
@@ -269,11 +271,18 @@ func (h *FileHandlers) Delete(c *gin.Context) {
 			return
 		}
 
-		err = h.deps.Users().SetUsed(userIDInt, false, info.Size())
+		err = h.deps.Users().SetUsed(userIDInt, false, info.Size)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
 		}
+
+		err = h.deps.FileInfos().DelInfo(filePath)
+		if err != nil {
+			c.JSON(q.ErrResp(c, 500, err))
+			return
+		}
+
 		c.JSON(q.Resp(200))
 	})
 }
@@ -469,6 +478,35 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 			if err != nil {
 				c.JSON(q.ErrResp(c, 500, err))
 				return
+			}
+
+			fsInfo, err := h.deps.FS().Stat(fsFilePath)
+			if err != nil {
+				c.JSON(q.ErrResp(c, 500, err))
+				return
+			}
+
+			err = h.deps.FileInfos().SetInfo(fsFilePath, &fileinfostore.FileInfo{
+				IsDir:  false,
+				Shared: false,
+				Size:   fsInfo.Size(),
+			})
+			if err != nil {
+				c.JSON(q.ErrResp(c, 500, err))
+				return
+			}
+
+			// TODO: check space quota?
+			if fsInfo.Size()-fileSize != 0 {
+				sizeDiff := fsInfo.Size() - fileSize
+				if sizeDiff < 0 {
+					sizeDiff = -sizeDiff
+				}
+				err = h.deps.Users().SetUsed(userIDInt, fsInfo.Size()-fileSize > 0, sizeDiff)
+				if err != nil {
+					c.JSON(q.ErrResp(c, 500, err))
+					return
+				}
 			}
 
 			msg, err := json.Marshal(Sha1Params{
