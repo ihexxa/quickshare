@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/ihexxa/quickshare/src/db"
 	"github.com/ihexxa/quickshare/src/kvstore"
 )
 
@@ -39,6 +40,7 @@ type FileInfo struct {
 	Shared  bool   `json:"shared"`
 	ShareID string `json:"shareID"` // for short url
 	Sha1    string `json:"sha1"`
+	Size    int64  `json:"size"`
 }
 
 type IFileInfoStore interface {
@@ -117,7 +119,44 @@ func migrate(fi *FileInfoStore) error {
 			return err
 		}
 	case "v1":
-		// no op
+		// add size to file info
+		infoStrs, err := fi.store.ListStringsIn(InfoNs)
+		if err != nil {
+			return err
+		}
+
+		type FileInfoV1 struct {
+			IsDir   bool   `json:"isDir"`
+			Shared  bool   `json:"shared"`
+			Sha1    string `json:"sha1"`
+			ShareID string `json:"shareID"` // for short url
+		}
+
+		infoV1 := &FileInfoV1{}
+		for itemPath, infoStr := range infoStrs {
+			err = json.Unmarshal([]byte(infoStr), infoV1)
+			if err != nil {
+				return fmt.Errorf("list sharing error: %w", err)
+			}
+
+			newInfo := &FileInfo{
+				IsDir:   infoV1.IsDir,
+				Shared:  infoV1.Shared,
+				ShareID: infoV1.ShareID,
+				Sha1:    infoV1.Sha1,
+				Size:    0, // need to run an async task to refresh this
+			}
+			if err = fi.SetInfo(itemPath, newInfo); err != nil {
+				return err
+			}
+		}
+
+		err = fi.store.SetStringIn(InitNs, SchemaVerKey, db.SchemaV2)
+		if err != nil {
+			return err
+		}
+	case db.SchemaV2:
+		// no need to migrate
 	default:
 		return fmt.Errorf("file info: unknown schema version (%s)", ver)
 	}
