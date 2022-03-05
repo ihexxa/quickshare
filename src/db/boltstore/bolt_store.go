@@ -100,11 +100,10 @@ func (bs *BoltStore) setUploadInfo(tx *bolt.Tx, userID uint64, uploadPath string
 		}
 	}
 
-	existingInfo := uploadInfoBucket.Get([]byte(uploadPath))
-	if existingInfo != nil && !overWrite {
-		return db.ErrCreateExisting
+	existingInfoBytes := uploadInfoBucket.Get([]byte(uploadPath))
+	if existingInfoBytes != nil {
+		return nil
 	}
-
 	uploadInfoBytes, err := json.Marshal(uploadInfo)
 	if err != nil {
 		return err
