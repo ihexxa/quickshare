@@ -778,6 +778,67 @@ func TestFileHandlers(t *testing.T) {
 		}
 	})
 
+	t.Run("test folder moving: Mkdir-Create-UploadChunk-AddSharing-Move-IsSharing-List", func(t *testing.T) {
+		srcDir := "qs/files/folder/move/src"
+		dstDir := "qs/files/folder/move/dst"
+
+		res, _, errs := cl.Mkdir(srcDir)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if res.StatusCode != 200 {
+			t.Fatal(res.StatusCode)
+		}
+
+		files := map[string]string{
+			"f1.md": "111",
+			"f2.md": "22222",
+		}
+
+		for fileName, content := range files {
+			oldPath := filepath.Join(srcDir, fileName)
+			assertUploadOK(t, oldPath, content, addr, token)
+		}
+
+		res, _, errs = cl.AddSharing(srcDir)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if res.StatusCode != 200 {
+			t.Fatal(res.StatusCode)
+		}
+
+		res, _, errs = cl.Move(srcDir, dstDir)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if res.StatusCode != 200 {
+			t.Fatal(res.StatusCode)
+		}
+
+		res, _, errs = cl.IsSharing(dstDir)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if res.StatusCode != 404 { // should not be in sharing
+			t.Fatal(res.StatusCode)
+		}
+
+		err = fs.Sync()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		_, lResp, errs := cl.List(dstDir)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		}
+		for _, metadata := range lResp.Metadatas {
+			content, ok := files[metadata.Name]
+			if !ok {
+				t.Fatalf("%s not found", metadata.Name)
+			} else if int64(len(content)) != metadata.Size {
+				t.Fatalf("size not match %d %d \n", len(content), metadata.Size)
+			}
+		}
+	})
+
 	resp, _, errs = usersCl.Logout(token)
 	if len(errs) > 0 {
 		t.Fatal(errs)

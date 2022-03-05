@@ -155,7 +155,11 @@ func (h *FileHandlers) Create(c *gin.Context) {
 			Size: req.FileSize,
 		})
 		if err != nil {
-			c.JSON(q.ErrResp(c, 500, err))
+			if errors.Is(err, db.ErrQuota) {
+				c.JSON(q.ErrResp(c, 403, err))
+			} else {
+				c.JSON(q.ErrResp(c, 500, err))
+			}
 			return
 		}
 		err = h.deps.BoltStore().MoveUploadingInfos(userIDInt, tmpFilePath, fsFilePath)
@@ -208,33 +212,15 @@ func (h *FileHandlers) Create(c *gin.Context) {
 		Size: req.FileSize,
 	})
 	if err != nil {
-		c.JSON(q.ErrResp(c, 500, err))
-		return
+		if errors.Is(err, db.ErrQuota) {
+			c.JSON(q.ErrResp(c, 403, err))
+		} else {
+			c.JSON(q.ErrResp(c, 500, err))
+		}
 	}
 
 	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {
-		// ok, err := h.deps.Users().CanIncrUsed(userIDInt, req.FileSize)
-		// if err != nil {
-		// 	c.JSON(q.ErrResp(c, 500, err))
-		// 	return
-		// } else if !ok {
-		// 	c.JSON(q.ErrResp(c, 429, userstore.ErrReachedLimit))
-		// 	return
-		// }
-
-		// err = h.deps.FileInfos().AddUploadInfo(userID, req.Path, tmpFilePath, req.FileSize)
-		// if err != nil {
-		// 	c.JSON(q.ErrResp(c, 500, err))
-		// 	return
-		// }
-
-		// err = h.deps.Users().SetUsed(userIDInt, true, req.FileSize)
-		// if err != nil {
-		// 	c.JSON(q.ErrResp(c, 500, err))
-		// 	return
-		// }
-
 		err = h.deps.FS().Create(tmpFilePath)
 		if err != nil {
 			if os.IsExist(err) {
@@ -515,41 +501,6 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 				c.JSON(q.ErrResp(c, 500, fmt.Errorf("%s error: %w", req.Path, err)))
 				return
 			}
-
-			// err = h.deps.FileInfos().DelUploadInfo(userID, tmpFilePath)
-			// if err != nil {
-			// 	c.JSON(q.ErrResp(c, 500, err))
-			// 	return
-			// }
-
-			// fsInfo, err := h.deps.FS().Stat(fsFilePath)
-			// if err != nil {
-			// 	c.JSON(q.ErrResp(c, 500, err))
-			// 	return
-			// }
-
-			// err = h.deps.FileInfos().SetInfo(fsFilePath, &db.FileInfo{
-			// 	IsDir:  false,
-			// 	Shared: false,
-			// 	Size:   fsInfo.Size(),
-			// })
-			// if err != nil {
-			// 	c.JSON(q.ErrResp(c, 500, err))
-			// 	return
-			// }
-
-			// TODO: check space quota?
-			// if fsInfo.Size()-fileSize != 0 {
-			// 	sizeDiff := fsInfo.Size() - fileSize
-			// 	if sizeDiff < 0 {
-			// 		sizeDiff = -sizeDiff
-			// 	}
-			// 	err = h.deps.Users().SetUsed(userIDInt, fsInfo.Size()-fileSize > 0, sizeDiff)
-			// 	if err != nil {
-			// 		c.JSON(q.ErrResp(c, 500, err))
-			// 		return
-			// 	}
-			// }
 
 			msg, err := json.Marshal(Sha1Params{
 				FilePath: fsFilePath,
@@ -926,12 +877,6 @@ func (h *FileHandlers) DelUploading(c *gin.Context) {
 	tmpFilePath := q.UploadPath(userName, filePath)
 	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {
-		// _, size, _, err := h.deps.FileInfos().GetUploadInfo(userID, tmpFilePath)
-		// if err != nil {
-		// 	c.JSON(q.ErrResp(c, 500, err))
-		// 	return
-		// }
-
 		_, err = h.deps.FS().Stat(tmpFilePath)
 		if err != nil {
 			if os.IsNotExist(err) {
@@ -947,18 +892,6 @@ func (h *FileHandlers) DelUploading(c *gin.Context) {
 				return
 			}
 		}
-
-		// err = h.deps.FileInfos().DelUploadInfo(userID, tmpFilePath)
-		// if err != nil {
-		// 	c.JSON(q.ErrResp(c, 500, err))
-		// 	return
-		// }
-
-		// err = h.deps.Users().SetUsed(userIDInt, false, size)
-		// if err != nil {
-		// 	c.JSON(q.ErrResp(c, 500, err))
-		// 	return
-		// }
 	})
 
 	err = h.deps.BoltStore().DelUploadingInfos(userIDInt, tmpFilePath)
