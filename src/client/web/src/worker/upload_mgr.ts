@@ -149,7 +149,7 @@ export class UploadMgr {
         this.infos = this.infos.set(filePath, {
           ...entry,
           file: file,
-          state: UploadState.Ready,
+          state: UploadState.Created,
         });
       } else {
         status = errUploadMgr;
