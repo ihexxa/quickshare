@@ -1,6 +1,7 @@
 package boltstore
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -289,48 +290,45 @@ func (bs *BoltStore) DelInfos(userID uint64, itemPath string, isDir bool) error 
 	return bs.boltdb.Update(func(tx *bolt.Tx) error {
 		var err error
 
-		// delete file info
 		fileInfoBucket := tx.Bucket([]byte(db.InfoNs))
 		if fileInfoBucket == nil {
 			return db.ErrBucketNotFound
 		}
 
-		fileInfoBytes := fileInfoBucket.Get([]byte(itemPath))
-		if fileInfoBytes == nil {
-			if !isDir {
-				return db.ErrKeyNotFound
-			}
-		} else {
+		// delete children
+		prefixBytes := []byte(itemPath)
+		cur := fileInfoBucket.Cursor()
+		usedSpaceDecr := int64(0)
+		for k, v := cur.Seek(prefixBytes); k != nil && bytes.HasPrefix(k, prefixBytes); k, v = cur.Next() {
 			fileInfo := &db.FileInfo{}
-			err = json.Unmarshal(fileInfoBytes, fileInfo)
+			err = json.Unmarshal(v, fileInfo)
 			if err != nil {
 				return err
 			}
 
-			err = fileInfoBucket.Delete([]byte(itemPath))
+			usedSpaceDecr += fileInfo.Size
+			childPath := string(k)
+			err = fileInfoBucket.Delete([]byte(childPath))
 			if err != nil {
 				return err
 			}
-
-			// decr used space
-			userInfo, err := bs.getUserInfo(tx, userID)
-			if err != nil {
-				return err
-			}
-
-			userInfo.UsedSpace -= fileInfo.Size
-			err = bs.setUserInfo(tx, userID, userInfo)
-			if err != nil {
-				return err
+			if fileInfo.IsDir {
+				err = bs.delShareID(tx, childPath)
+				if err != nil {
+					return err
+				}
 			}
 		}
 
-		// delete share id
-		if isDir {
-			err = bs.delShareID(tx, itemPath)
-			if err != nil {
-				return err
-			}
+		// decr used space
+		userInfo, err := bs.getUserInfo(tx, userID)
+		if err != nil {
+			return err
+		}
+		userInfo.UsedSpace -= usedSpaceDecr
+		err = bs.setUserInfo(tx, userID, userInfo)
+		if err != nil {
+			return err
 		}
 
 		return nil

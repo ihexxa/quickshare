@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/ihexxa/quickshare/src/client"
@@ -145,6 +146,77 @@ func TestSpaceLimit(t *testing.T) {
 			} else if selfResp.UsedSpace != int64(spaceLimit)-int64((i+1)*fileSize) {
 				t.Fatal("incorrect used space")
 			}
+		}
+	})
+
+	t.Run("usedSpace keeps correct in operations: Mkdir-Create-UploadChunk-AddSharing-Move-IsSharing-List", func(t *testing.T) {
+		srcDir := "qs/files/folder/move/src"
+		dstDir := "qs/files/folder/move/dst"
+		filesCl := client.NewFilesClient(addr, token)
+
+		getUsedSpace := func() int64 {
+			resp, selfResp, errs := usersCl.Self(token)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if resp.StatusCode != 200 {
+				t.Fatal("failed to get self")
+			}
+
+			return selfResp.UsedSpace
+		}
+
+		initUsedSpace := getUsedSpace()
+
+		for _, dirPath := range []string{srcDir, dstDir} {
+			res, _, errs := filesCl.Mkdir(dirPath)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if res.StatusCode != 200 {
+				t.Fatal(res.StatusCode)
+			}
+		}
+		if getUsedSpace() != initUsedSpace {
+			t.Fatal("incorrect used space")
+		}
+
+		expectedUsedSpace := initUsedSpace
+		files := map[string]string{
+			"f1.md": "111",
+			"f2.md": "22222",
+		}
+		for fileName, content := range files {
+			oldPath := filepath.Join(srcDir, fileName)
+			assertUploadOK(t, oldPath, content, addr, token)
+			expectedUsedSpace += int64(len(content))
+		}
+		if getUsedSpace() != expectedUsedSpace {
+			t.Fatal("used space incorrect")
+		}
+
+		for fileName := range files {
+			oldPath := filepath.Join(srcDir, fileName)
+			newPath := filepath.Join(dstDir, fileName)
+			res, _, errs := filesCl.Move(oldPath, newPath)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if res.StatusCode != 200 {
+				t.Fatal(res.StatusCode)
+			}
+
+			if getUsedSpace() != expectedUsedSpace {
+				t.Fatal("used space incorrect")
+			}
+		}
+
+		res, _, errs := filesCl.Delete(dstDir)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if res.StatusCode != 200 {
+			t.Fatal(res.StatusCode)
+		}
+
+		if getUsedSpace() != initUsedSpace {
+			t.Fatal("used space incorrect")
 		}
 	})
 
