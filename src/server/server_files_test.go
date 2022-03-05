@@ -377,6 +377,15 @@ func TestFileHandlers(t *testing.T) {
 				t.Fatalf("size not match %d %d \n", len(content), metadata.Size)
 			}
 		}
+
+		for _, dirPath := range []string{srcDir, dstDir} {
+			res, _, errs := cl.Delete(dirPath)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if res.StatusCode != 200 {
+				t.Fatal(res.StatusCode)
+			}
+		}
 	})
 
 	t.Run("test download APIs: Download(normal, ranges)", func(t *testing.T) {

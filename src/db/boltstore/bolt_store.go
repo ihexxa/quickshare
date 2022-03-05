@@ -286,7 +286,7 @@ func (bs *BoltStore) delShareID(tx *bolt.Tx, itemPath string) error {
 	return nil
 }
 
-func (bs *BoltStore) DelInfos(userID uint64, itemPath string) error {
+func (bs *BoltStore) DelInfos(userID uint64, itemPath string, isDir bool) error {
 	return bs.boltdb.Update(func(tx *bolt.Tx) error {
 		var err error
 
@@ -297,35 +297,37 @@ func (bs *BoltStore) DelInfos(userID uint64, itemPath string) error {
 		}
 
 		fileInfoBytes := fileInfoBucket.Get([]byte(itemPath))
-		if fileInfoBucket == nil {
-			return db.ErrKeyNotFound
-		}
+		if fileInfoBytes == nil {
+			if !isDir {
+				return db.ErrKeyNotFound
+			}
+		} else {
+			fileInfo := &db.FileInfo{}
+			err = json.Unmarshal(fileInfoBytes, fileInfo)
+			if err != nil {
+				return err
+			}
 
-		fileInfo := &db.FileInfo{}
-		err = json.Unmarshal(fileInfoBytes, fileInfo)
-		if err != nil {
-			return err
-		}
+			err = fileInfoBucket.Delete([]byte(itemPath))
+			if err != nil {
+				return err
+			}
 
-		err = fileInfoBucket.Delete([]byte(itemPath))
-		if err != nil {
-			return err
-		}
+			// decr used space
+			userInfo, err := bs.getUserInfo(tx, userID)
+			if err != nil {
+				return err
+			}
 
-		// decr used space
-		userInfo, err := bs.getUserInfo(tx, userID)
-		if err != nil {
-			return err
-		}
-
-		userInfo.UsedSpace -= fileInfo.Size
-		err = bs.setUserInfo(tx, userID, userInfo)
-		if err != nil {
-			return err
+			userInfo.UsedSpace -= fileInfo.Size
+			err = bs.setUserInfo(tx, userID, userInfo)
+			if err != nil {
+				return err
+			}
 		}
 
 		// delete share id
-		if fileInfo.IsDir {
+		if isDir {
 			err = bs.delShareID(tx, itemPath)
 			if err != nil {
 				return err

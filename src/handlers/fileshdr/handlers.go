@@ -261,36 +261,30 @@ func (h *FileHandlers) Delete(c *gin.Context) {
 		return
 	}
 
+	var txErr error
 	locker := h.NewAutoLocker(c, lockName(filePath))
 	locker.Exec(func() {
+		info, err := h.deps.FS().Stat(filePath)
+		if err != nil {
+			txErr = err
+			return
+		}
+
 		err = h.deps.FS().Remove(filePath)
 		if err != nil {
-			c.JSON(q.ErrResp(c, 500, err))
+			txErr = err
+			return
+		}
+
+		err = h.deps.BoltStore().DelInfos(userIDInt, filePath, info.IsDir())
+		if err != nil {
+			txErr = err
 			return
 		}
 	})
 
-	// info, err := h.deps.FileInfos().GetInfo(filePath)
-	// if err != nil {
-	// 	c.JSON(q.ErrResp(c, 500, err))
-	// 	return
-	// }
-
-	// err = h.deps.Users().SetUsed(userIDInt, false, info.Size)
-	// if err != nil {
-	// 	c.JSON(q.ErrResp(c, 500, err))
-	// 	return
-	// }
-
-	// err = h.deps.FileInfos().DelInfo(filePath)
-	// if err != nil {
-	// 	c.JSON(q.ErrResp(c, 500, err))
-	// 	return
-	// }
-
-	err = h.deps.BoltStore().DelInfos(userIDInt, filePath)
-	if err != nil {
-		c.JSON(q.ErrResp(c, 500, err))
+	if txErr != nil {
+		c.JSON(q.ErrResp(c, 500, txErr))
 		return
 	}
 	c.JSON(q.Resp(200))
@@ -450,6 +444,8 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 		return
 	}
 
+	var txErr error
+	var statusCode int
 	tmpFilePath := q.UploadPath(userName, req.Path)
 	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {
@@ -457,28 +453,28 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 
 		_, fileSize, uploaded, err := h.deps.FileInfos().GetUploadInfo(userID, tmpFilePath)
 		if err != nil {
-			c.JSON(q.ErrResp(c, 500, err))
+			txErr, statusCode = err, 500
 			return
 		} else if uploaded != req.Offset {
-			c.JSON(q.ErrResp(c, 500, errors.New("offset != uploaded")))
+			txErr, statusCode = errors.New("offset != uploaded"), 500
 			return
 		}
 
 		content, err := base64.StdEncoding.DecodeString(req.Content)
 		if err != nil {
-			c.JSON(q.ErrResp(c, 500, err))
+			txErr, statusCode = err, 500
 			return
 		}
 
 		wrote, err := h.deps.FS().WriteAt(tmpFilePath, []byte(content), req.Offset)
 		if err != nil {
-			c.JSON(q.ErrResp(c, 500, err))
+			txErr, statusCode = err, 500
 			return
 		}
 
 		err = h.deps.FileInfos().SetUploadInfo(userID, tmpFilePath, req.Offset+int64(wrote))
 		if err != nil {
-			c.JSON(q.ErrResp(c, 500, err))
+			txErr, statusCode = err, 500
 			return
 		}
 
@@ -486,19 +482,19 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 		if uploaded+int64(wrote) == fileSize {
 			fsFilePath, err := h.getFSFilePath(userID, req.Path)
 			if err != nil {
-				c.JSON(q.ErrResp(c, 500, err))
+				txErr, statusCode = err, 500
 				return
 			}
 
 			err = h.deps.BoltStore().MoveUploadingInfos(userIDInt, tmpFilePath, fsFilePath)
 			if err != nil {
-				c.JSON(q.ErrResp(c, 500, err))
+				txErr, statusCode = err, 500
 				return
 			}
 
 			err = h.deps.FS().Rename(tmpFilePath, fsFilePath)
 			if err != nil {
-				c.JSON(q.ErrResp(c, 500, fmt.Errorf("%s error: %w", req.Path, err)))
+				txErr, statusCode = fmt.Errorf("%s error: %w", req.Path, err), 500
 				return
 			}
 
@@ -506,7 +502,7 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 				FilePath: fsFilePath,
 			})
 			if err != nil {
-				c.JSON(q.ErrResp(c, 500, err))
+				txErr, statusCode = err, 500
 				return
 			}
 
@@ -518,11 +514,15 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 				),
 			)
 			if err != nil {
-				c.JSON(q.ErrResp(c, 500, err))
+				txErr, statusCode = err, 500
 				return
 			}
 		}
 
+		if txErr != nil {
+			c.JSON(q.ErrResp(c, statusCode, txErr))
+			return
+		}
 		c.JSON(200, &UploadStatusResp{
 			Path:     req.Path,
 			IsDir:    false,
@@ -874,6 +874,8 @@ func (h *FileHandlers) DelUploading(c *gin.Context) {
 		return
 	}
 
+	var txErr error
+	var statusCode int
 	tmpFilePath := q.UploadPath(userName, filePath)
 	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	locker.Exec(func() {
@@ -882,17 +884,21 @@ func (h *FileHandlers) DelUploading(c *gin.Context) {
 			if os.IsNotExist(err) {
 				// no op
 			} else {
-				c.JSON(q.ErrResp(c, 500, err))
+				txErr, statusCode = err, 500
 				return
 			}
 		} else {
 			err = h.deps.FS().Remove(tmpFilePath)
 			if err != nil {
-				c.JSON(q.ErrResp(c, 500, err))
+				txErr, statusCode = err, 500
 				return
 			}
 		}
 	})
+	if txErr != nil {
+		c.JSON(q.ErrResp(c, statusCode, txErr))
+		return
+	}
 
 	err = h.deps.BoltStore().DelUploadingInfos(userIDInt, tmpFilePath)
 	if err != nil {
