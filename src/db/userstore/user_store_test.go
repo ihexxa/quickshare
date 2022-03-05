@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/ihexxa/quickshare/src/db"
 	"github.com/ihexxa/quickshare/src/kvstore/boltdbpvd"
 )
 
@@ -66,12 +67,12 @@ func TestUserStores(t *testing.T) {
 		spaceLimit1, upLimit1, downLimit1 := int64(17), 5, 7
 		spaceLimit2, upLimit2, downLimit2 := int64(19), 13, 17
 
-		err = store.AddUser(&User{
+		err = store.AddUser(&db.User{
 			ID:   id,
 			Name: name1,
 			Pwd:  pwd1,
 			Role: role1,
-			Quota: &Quota{
+			Quota: &db.Quota{
 				SpaceLimit:         spaceLimit1,
 				UploadSpeedLimit:   upLimit1,
 				DownloadSpeedLimit: downLimit1,
@@ -128,10 +129,10 @@ func TestUserStores(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		store.SetInfo(id, &User{
+		store.SetInfo(id, &db.User{
 			ID:   id,
 			Role: role2,
-			Quota: &Quota{
+			Quota: &db.Quota{
 				SpaceLimit:         spaceLimit2,
 				UploadSpeedLimit:   upLimit2,
 				DownloadSpeedLimit: downLimit2,
