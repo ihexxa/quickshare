@@ -21,6 +21,7 @@ var (
 	ErrBucketNotFound = errors.New("bucket not found")
 	ErrKeyNotFound    = errors.New("key not found")
 	ErrCreateExisting = errors.New("create upload info which already exists")
+	ErrQuota          = errors.New("quota limit reached")
 )
 
 type FileInfo struct {

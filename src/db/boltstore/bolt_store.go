@@ -160,7 +160,7 @@ func (bs *BoltStore) AddUploadInfos(userID uint64, tmpPath, filePath string, inf
 		}
 
 		if userInfo.UsedSpace+info.Size > int64(userInfo.Quota.SpaceLimit) {
-			return errors.New("space limit is reached")
+			return db.ErrQuota
 		}
 
 		// update used space
@@ -370,7 +370,6 @@ func (bs *BoltStore) MoveInfos(userID uint64, oldPath, newPath string, isDir boo
 			return err
 		}
 
-		fmt.Println("\n\n\n4", err)
 		// add new info
 		return bs.setFileInfo(tx, userID, newPath, fileInfo)
 	})
