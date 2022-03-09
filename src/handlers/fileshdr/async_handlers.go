@@ -9,7 +9,9 @@ import (
 	"github.com/ihexxa/quickshare/src/worker"
 )
 
-const MsgTypeSha1 = "sha1"
+const (
+	MsgTypeSha1 = "sha1"
+)
 
 type Sha1Params struct {
 	FilePath string

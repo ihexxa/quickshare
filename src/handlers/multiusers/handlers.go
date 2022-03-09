@@ -1,6 +1,7 @@
 package multiusers
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"path/filepath"
@@ -16,6 +17,7 @@ import (
 	"github.com/ihexxa/quickshare/src/db/userstore"
 	"github.com/ihexxa/quickshare/src/depidx"
 	q "github.com/ihexxa/quickshare/src/handlers"
+	"github.com/ihexxa/quickshare/src/worker/localworker"
 )
 
 var (
@@ -48,6 +50,7 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(userstore.AdminRole, "GET", "/v1/users/list"):            true,
 		apiRuleCname(userstore.AdminRole, "GET", "/v1/users/self"):            true,
 		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/users/preferences"):   true,
+		apiRuleCname(userstore.AdminRole, "PUT", "/v1/users//used-space"):     true,
 		apiRuleCname(userstore.AdminRole, "POST", "/v1/roles/"):               true,
 		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/roles/"):             true,
 		apiRuleCname(userstore.AdminRole, "GET", "/v1/roles/list"):            true,
@@ -77,6 +80,7 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/sharings/dirs"):      true,
 		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/sharings/ids"):       true,
 		apiRuleCname(userstore.AdminRole, "POST", "/v1/fs/hashes/sha1"):       true,
+
 		// user rules
 		apiRuleCname(userstore.UserRole, "GET", "/"):                       true,
 		apiRuleCname(userstore.UserRole, "GET", publicPath):                true,
@@ -125,11 +129,14 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(userstore.VisitorRole, "GET", "/v1/fs/sharings/dirs"):    true,
 	}
 
-	return &MultiUsersSvc{
+	handlers := &MultiUsersSvc{
 		cfg:        cfg,
 		deps:       deps,
 		apiACRules: apiACRules,
-	}, nil
+	}
+	deps.Workers().AddHandler(MsgTypeResetUsedSpace, handlers.resetUsedSpace)
+
+	return handlers, nil
 }
 
 func (h *MultiUsersSvc) Init(adminName, adminPwd string) (string, error) {
@@ -705,5 +712,45 @@ func (h *MultiUsersSvc) SetPreferences(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
+	c.JSON(q.Resp(200))
+}
+
+type ResetUsedSpaceReq struct {
+	UserID uint64 `json:"userID,string"`
+}
+
+func (h *MultiUsersSvc) ResetUsedSpace(c *gin.Context) {
+	req := &ResetUsedSpaceReq{}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(q.ErrResp(c, 400, err))
+		return
+	}
+
+	userInfo, err := h.deps.Users().GetUser(req.UserID)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+	msg, err := json.Marshal(UsedSpaceParams{
+		UserID:       req.UserID,
+		UserHomePath: userInfo.Name,
+	})
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
+	err = h.deps.Workers().TryPut(
+		localworker.NewMsg(
+			h.deps.ID().Gen(),
+			map[string]string{localworker.MsgTypeKey: MsgTypeResetUsedSpace},
+			string(msg),
+		),
+	)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
 	c.JSON(q.Resp(200))
 }

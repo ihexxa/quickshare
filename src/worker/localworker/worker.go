@@ -10,6 +10,8 @@ import (
 	"github.com/ihexxa/quickshare/src/worker"
 )
 
+// TODO: support context
+
 const (
 	MsgTypeKey = "msg-type"
 )
@@ -42,6 +44,7 @@ func (m *Msg) Body() string {
 
 type WorkerPool struct {
 	on          bool
+	listening   bool
 	queue       chan worker.IMsg
 	sleep       int
 	workerCount int
@@ -54,6 +57,7 @@ type WorkerPool struct {
 func NewWorkerPool(queueSize, sleep, workerCount int, logger *zap.SugaredLogger) *WorkerPool {
 	return &WorkerPool{
 		on:          true,
+		listening:   true,
 		logger:      logger,
 		mtx:         &sync.RWMutex{},
 		sleep:       sleep,
@@ -68,6 +72,9 @@ func (wp *WorkerPool) TryPut(task worker.IMsg) error {
 	wp.mtx.Lock()
 	defer wp.mtx.Unlock()
 
+	if !wp.listening {
+		return worker.ErrClosed
+	}
 	if len(wp.queue) == cap(wp.queue) {
 		return worker.ErrFull
 	}
@@ -80,6 +87,7 @@ func (wp *WorkerPool) Start() {
 	defer wp.mtx.Unlock()
 
 	wp.on = true
+	wp.listening = true
 	for wp.started < wp.workerCount {
 		go wp.startWorker()
 		wp.started++
@@ -89,6 +97,8 @@ func (wp *WorkerPool) Start() {
 func (wp *WorkerPool) Stop() {
 	wp.mtx.Lock()
 	defer wp.mtx.Unlock()
+
+	wp.listening = false
 
 	// TODO: avoid sending and panic
 	for len(wp.queue) > 0 {
