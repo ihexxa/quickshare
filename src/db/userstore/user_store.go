@@ -67,6 +67,7 @@ type IUserStore interface {
 	SetInfo(id uint64, user *db.User) error
 	CanIncrUsed(id uint64, capacity int64) (bool, error)
 	SetUsed(id uint64, incr bool, capacity int64) error
+	ResetUsed(id uint64, used int64) error
 	SetPwd(id uint64, pwd string) error
 	SetPreferences(id uint64, settings *db.Preferences) error
 	ListUsers() ([]*db.User, error)
@@ -362,6 +363,32 @@ func (us *KVUserStore) SetUsed(id uint64, incr bool, capacity int64) error {
 			gotUser.UsedSpace = 0
 		}
 	}
+	infoBytes, err := json.Marshal(gotUser)
+	if err != nil {
+		return err
+	}
+	return us.store.SetStringIn(db.UsersNs, userID, string(infoBytes))
+}
+
+func (us *KVUserStore) ResetUsed(id uint64, used int64) error {
+	us.mtx.Lock()
+	defer us.mtx.Unlock()
+
+	userID := fmt.Sprint(id)
+	infoStr, ok := us.store.GetStringIn(db.UsersNs, userID)
+	if !ok {
+		return fmt.Errorf("user (%d) does not exist", id)
+	}
+
+	gotUser := &db.User{}
+	err := json.Unmarshal([]byte(infoStr), gotUser)
+	if err != nil {
+		return err
+	} else if gotUser.ID != id {
+		return fmt.Errorf("user id key(%d) info(%d) does match", id, gotUser.ID)
+	}
+
+	gotUser.UsedSpace = used
 	infoBytes, err := json.Marshal(gotUser)
 	if err != nil {
 		return err

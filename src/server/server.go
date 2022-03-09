@@ -275,6 +275,7 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 	usersAPI.GET("/self", userHdrs.Self)
 	usersAPI.PATCH("/", userHdrs.SetUser)
 	usersAPI.PATCH("/preferences", userHdrs.SetPreferences)
+	usersAPI.PUT("/used-space", userHdrs.ResetUsedSpace)
 
 	rolesAPI := v1.Group("/roles")
 	rolesAPI.POST("/", userHdrs.AddRole)

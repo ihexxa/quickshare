@@ -2,7 +2,10 @@ package worker
 
 import "errors"
 
-var ErrFull = errors.New("worker queue is full, make it larger in the config.")
+var (
+	ErrFull   = errors.New("worker queue is full, make it larger in the config")
+	ErrClosed = errors.New("async handlers are closed")
+)
 
 func IsErrFull(err error) bool {
 	return err == ErrFull
