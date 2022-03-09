@@ -174,3 +174,7 @@ func (wp *WorkerPool) AddHandler(msgType string, handler worker.MsgHandler) {
 func (wp *WorkerPool) DelHandler(msgType string) {
 	delete(wp.msgHandlers, msgType)
 }
+
+func (wp *WorkerPool) QueueLen() int {
+	return len(wp.queue)
+}

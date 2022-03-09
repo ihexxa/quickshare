@@ -319,6 +319,7 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 	settingsAPI.GET("/client", settingsSvc.GetClientCfg)
 	settingsAPI.PATCH("/client", settingsSvc.SetClientCfg)
 	settingsAPI.POST("/errors", settingsSvc.ReportErrors)
+	settingsAPI.GET("/workers/queue-len", settingsSvc.WorkerQueueLen)
 
 	return router, nil
 }

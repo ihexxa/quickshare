@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"testing"
+	"time"
 
 	"github.com/ihexxa/quickshare/src/client"
 	"github.com/ihexxa/quickshare/src/db/userstore"
@@ -29,7 +31,14 @@ func TestSpaceLimit(t *testing.T) {
 			"downloadSpeedLimit": 4096000,
 			"spaceLimit": %d,
 			"limiterCapacity": 1000,
-			"limiterCyc": 1000
+			"limiterCyc": 1000,
+			"predefinedUsers": [
+				{
+					"name": "test",
+					"pwd": "test",
+					"role": "admin"
+				}
+			]
 		},
 		"server": {
 			"debug": true,
@@ -217,6 +226,66 @@ func TestSpaceLimit(t *testing.T) {
 
 		if getUsedSpace() != initUsedSpace {
 			t.Fatal("used space incorrect")
+		}
+	})
+
+	t.Run("ResetUsedSpace", func(t *testing.T) {
+		usersCl := client.NewSingleUserClient(addr)
+		resp, _, errs := usersCl.Login("test", "test")
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+		token := client.GetCookie(resp.Cookies(), q.TokenCookie)
+
+		ok := assertUploadOK(t, "test/files/spacelimit/byte1", "0", addr, token)
+		if !ok {
+			t.Fatal("upload failed")
+		}
+
+		resp, selfResp, errs := usersCl.Self(token)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+		originalUsedSpace := selfResp.UsedSpace
+
+		uidInt, err := strconv.ParseUint(selfResp.ID, 10, 64)
+		if err != nil {
+			t.Fatal(err)
+		}
+		resp, _, errs = usersCl.ResetUsedSpace(uidInt, token)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+
+		settingsCl := client.NewSettingsClient(addr)
+		for i := 0; i < 20; i++ {
+			resp, wqlResp, errs := settingsCl.WorkerQueueLen(token)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if resp.StatusCode != 200 {
+				t.Fatal(resp.StatusCode)
+			}
+
+			if wqlResp.QueueLen == 0 {
+				break
+			}
+
+			time.Sleep(200)
+		}
+
+		resp, selfResp, errs = usersCl.Self(token)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		} else if selfResp.UsedSpace != originalUsedSpace {
+			t.Fatalf("used space not equal %d %d", selfResp.UsedSpace, originalUsedSpace)
 		}
 	})
 

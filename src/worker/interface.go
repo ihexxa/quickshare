@@ -25,4 +25,5 @@ type IWorkerPool interface {
 	Stop()
 	AddHandler(msgType string, handler MsgHandler)
 	DelHandler(msgType string)
+	QueueLen() int
 }

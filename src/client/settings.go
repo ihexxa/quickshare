@@ -59,3 +59,17 @@ func (cl *SettingsClient) ReportErrors(reports *settings.ClientErrorReports, tok
 		Send(reports).
 		End()
 }
+
+func (cl *SettingsClient) WorkerQueueLen(token *http.Cookie) (*http.Response, *settings.WorkerQueueLenResp, []error) {
+	resp, body, errs := cl.r.Get(cl.url("/v1/settings/workers/queue-len")).
+		AddCookie(token).
+		End()
+
+	mResp := &settings.WorkerQueueLenResp{}
+	err := json.Unmarshal([]byte(body), mResp)
+	if err != nil {
+		errs = append(errs, err)
+		return nil, nil, errs
+	}
+	return resp, mResp, nil
+}

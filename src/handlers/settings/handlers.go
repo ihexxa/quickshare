@@ -107,3 +107,13 @@ func (h *SettingsSvc) ReportErrors(c *gin.Context) {
 	}
 	c.JSON(q.Resp(200))
 }
+
+type WorkerQueueLenResp struct {
+	QueueLen int `json:"queueLen"`
+}
+
+func (h *SettingsSvc) WorkerQueueLen(c *gin.Context) {
+	c.JSON(200, &WorkerQueueLenResp{
+		QueueLen: h.deps.Workers().QueueLen(),
+	})
+}
