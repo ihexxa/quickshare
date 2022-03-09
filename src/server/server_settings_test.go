@@ -182,4 +182,15 @@ func TestSettingsHandlers(t *testing.T) {
 			t.Fatalf("log does not contain error: %s", content)
 		}
 	})
+
+	t.Run("WorkerQueueLen", func(t *testing.T) {
+		settingsCl := client.NewSettingsClient(addr)
+
+		reportResp, _, errs := settingsCl.WorkerQueueLen(adminToken)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if reportResp.StatusCode != 200 {
+			t.Fatal(reportResp.StatusCode)
+		}
+	})
 }

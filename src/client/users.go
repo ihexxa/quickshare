@@ -187,3 +187,12 @@ func (cl *SingleUserClient) IsAuthed(token *http.Cookie) (*http.Response, string
 		AddCookie(token).
 		End()
 }
+
+func (cl *SingleUserClient) ResetUsedSpace(userID uint64, token *http.Cookie) (*http.Response, string, []error) {
+	return cl.r.Put(cl.url("/v1/users/used-space")).
+		Send(multiusers.ResetUsedSpaceReq{
+			UserID: userID,
+		}).
+		AddCookie(token).
+		End()
+}
