@@ -151,4 +151,14 @@ export class UsersClient extends BaseClient {
       },
     });
   };
+
+  resetUsedSpace = (userID: string): Promise<Response> => {
+    return this.do({
+      method: "put",
+      url: `${this.url}/v1/users/used-space`,
+      data: {
+        userID,
+      },
+    });
+  };
 }

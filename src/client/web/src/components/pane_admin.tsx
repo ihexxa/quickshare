@@ -109,6 +109,17 @@ export class UserForm extends React.Component<
     this.props.update(updater().updateUI);
   };
 
+  resetUsedSpace = async (userID: string) => {
+    if (!confirmMsg(this.props.msg.pkg.get("confirm.resetUsedSpace"))) {
+      return;
+    }
+
+    const status = await updater().resetUsedSpace(userID);
+    if (status !== "") {
+      alertMsg(this.props.msg.pkg.get("resetUsedSpace"));
+    }
+  }
+
   setPwd = async () => {
     if (this.state.newPwd1 !== this.state.newPwd2) {
       alertMsg(this.props.msg.pkg.get("settings.pwd.notSame"));
@@ -190,6 +201,9 @@ export class UserForm extends React.Component<
   render() {
     const foldedClass = this.state.folded ? "hidden" : "";
     const foldIconColor = this.state.folded ? "black-font" : "cyan1-font";
+    const resetUsedSpace = () => {
+      this.resetUsedSpace(this.props.id);
+    }
 
     return (
       <div className="user-form">
@@ -295,9 +309,15 @@ export class UserForm extends React.Component<
                 </span>
               </div>,
 
-              <button onClick={this.setUser}>
-                {this.props.msg.pkg.get("update")}
-              </button>,
+              <div>
+                <button onClick={this.setUser}>
+                  {this.props.msg.pkg.get("update")}
+                </button>
+                <br />
+                <button onClick={resetUsedSpace}>
+                  {this.props.msg.pkg.get("resetUsedSpace")}
+                </button>
+              </div>,
             ])}
             childrenStyles={List([
               { alignItems: "flex-start", flexBasis: "70%" },
@@ -668,7 +688,7 @@ interface BgProps {
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
-interface BgState {}
+interface BgState { }
 export class BgCfg extends React.Component<BgProps, BgState, {}> {
   changeSiteName = (ev: React.ChangeEvent<HTMLInputElement>) => {
     updater().setClientCfg({ ...this.props.ui, siteName: ev.target.value });

@@ -28,6 +28,7 @@ export interface Preferences {
   lanPackURL: string;
   lan: string;
 }
+
 export interface User {
   id: string;
   name: string;
@@ -121,6 +122,7 @@ export interface IUsersClient {
   listRoles: () => Promise<Response>;
   getCaptchaID: () => Promise<Response>;
   setPreferences: (prefers: Preferences) => Promise<Response>;
+  resetUsedSpace: (userID: string) => Promise<Response>;
 }
 
 export interface IFilesClient {
