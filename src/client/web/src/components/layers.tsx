@@ -30,7 +30,7 @@ export interface Props {
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
-export interface State {}
+export interface State { }
 export class Layers extends React.Component<Props, State, {}> {
   private hotkeyHandler: HotkeyHandler;
   constructor(p: Props) {
@@ -39,11 +39,7 @@ export class Layers extends React.Component<Props, State, {}> {
 
   componentDidMount(): void {
     this.hotkeyHandler = new HotkeyHandler();
-
-    const closeHandler = () => {
-      this.setControlOption(settingsDialogCtrl, ctrlOff);
-    };
-    this.hotkeyHandler.add({ key: "Escape" }, closeHandler);
+    this.hotkeyHandler.add({ key: "Escape" }, this.closeHandler);
 
     document.addEventListener("keyup", this.hotkeyHandler.handle);
   }
@@ -52,18 +48,23 @@ export class Layers extends React.Component<Props, State, {}> {
     document.removeEventListener("keyup", this.hotkeyHandler.handle);
   }
 
+  closeHandler = () => {
+    if (this.props.ui.control.controls.get(settingsDialogCtrl) === ctrlOn) {
+      this.setControlOption(settingsDialogCtrl, ctrlOff);
+    }
+  };
+
   setControlOption = (targetControl: string, option: string) => {
     updater().setControlOption(targetControl, option);
     this.props.update(updater().updateUI);
   };
 
   render() {
-    const showLogin =
-      this.props.login.authed ||
+    const hideLogin = this.props.login.authed ||
       (this.props.ui.control.controls.get(sharingCtrl) === ctrlOn &&
-        this.props.filesInfo.isSharing)
-        ? "hidden"
-        : "";
+        this.props.filesInfo.isSharing);
+    const loginPaneClass = hideLogin ? "hidden" : "";
+
     const showSettings =
       this.props.ui.control.controls.get(settingsDialogCtrl) === ctrlOn
         ? ""
@@ -79,13 +80,14 @@ export class Layers extends React.Component<Props, State, {}> {
           <LoadingIcon />
         </div>
 
-        <div id="login-layer" className={`layer ${showLogin}`}>
+        <div id="login-layer" className={`layer ${loginPaneClass}`}>
           <div id="root-container">
             <AuthPane
               login={this.props.login}
               ui={this.props.ui}
               update={this.props.update}
               msg={this.props.msg}
+              enabled={!hideLogin}
             />
           </div>
         </div>

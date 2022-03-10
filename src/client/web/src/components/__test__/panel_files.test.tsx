@@ -33,7 +33,8 @@ describe("FilesPanel", () => {
       msg: coreState.msg,
       login: coreState.login,
       ui: coreState.ui,
-      update: (updater: (prevState: ICoreState) => ICoreState) => {},
+      enabled: true,
+      update: (updater: (prevState: ICoreState) => ICoreState) => { },
     });
 
     return {

@@ -61,6 +61,7 @@ export interface Props {
   msg: MsgProps;
   login: LoginProps;
   ui: UIProps;
+  enabled: boolean;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
@@ -100,6 +101,10 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       this.uploadInput = ReactDOM.findDOMNode(input);
     };
     this.onClickUpload = () => {
+      if (!this.props.enabled) {
+        return;
+      }
+
       const uploadInput = this.uploadInput as HTMLButtonElement;
       uploadInput.click();
     };
@@ -227,6 +232,10 @@ export class FilesPanel extends React.Component<Props, State, {}> {
   };
 
   delete = async () => {
+    if (!this.props.enabled) {
+      return;
+    }
+
     // TODO: selected should be cleaned after change the cwd
     if (this.props.filesInfo.dirPath.join("/") !== this.state.selectedSrc) {
       alertMsg(this.props.msg.pkg.get("browser.del.fail"));
@@ -239,8 +248,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       const filesToDel = this.state.selectedItems.keySeq().join(", ");
       if (
         !confirmMsg(
-          `${this.props.msg.pkg.get("op.confirm")} [${
-            this.state.selectedItems.size
+          `${this.props.msg.pkg.get("op.confirm")} [${this.state.selectedItems.size
           }]: ${filesToDel}`
         )
       ) {
@@ -284,6 +292,10 @@ export class FilesPanel extends React.Component<Props, State, {}> {
   };
 
   moveHere = async () => {
+    if (!this.props.enabled) {
+      return;
+    }
+
     const oldDir = this.state.selectedSrc;
     const newDir = this.props.filesInfo.dirPath.join("/");
     if (oldDir === newDir) {
@@ -377,6 +389,10 @@ export class FilesPanel extends React.Component<Props, State, {}> {
   };
 
   selectAll = () => {
+    if (!this.props.enabled) {
+      return;
+    }
+
     let newSelected = Map<string, boolean>();
     const someSelected = this.state.selectedItems.size === 0 ? true : false;
     if (someSelected) {
@@ -901,7 +917,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       Math.trunc(
         parseInt(this.props.login.extInfo.usedSpace, 10) / (1024 * 1024)
       ) *
-        (1024 * 1024),
+      (1024 * 1024),
       {
         round: 0,
       }
@@ -911,7 +927,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       Math.trunc(
         parseInt(this.props.login.quota.spaceLimit, 10) / (1024 * 1024)
       ) *
-        (1024 * 1024),
+      (1024 * 1024),
       {
         round: 0,
       }

@@ -35,7 +35,8 @@ describe("Login", () => {
       login: coreState.login,
       msg: coreState.msg,
       ui: coreState.ui,
-      update: (updater: (prevState: ICoreState) => ICoreState) => {},
+      enabled: true,
+      update: (updater: (prevState: ICoreState) => ICoreState) => { },
     });
 
     const usersCl = NewMockUsersClient("");
