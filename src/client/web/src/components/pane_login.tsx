@@ -28,6 +28,7 @@ export interface Props {
   login: LoginProps;
   msg: MsgProps;
   ui: UIProps;
+  enabled: boolean;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
@@ -57,11 +58,17 @@ export class AuthPane extends React.Component<Props, State, {}> {
     this.hotkeyHandler = new HotkeyHandler();
     this.hotkeyHandler.add({ key: "Enter" }, this.login);
 
-    document.addEventListener("keyup", this.hotkeyHandler.handle);
+    document.addEventListener("keyup", this.handleHotKey);
   }
 
   componentWillUnmount() {
-    document.removeEventListener("keyup", this.hotkeyHandler.handle);
+    document.removeEventListener("keyup", this.handleHotKey);
+  }
+
+  handleHotKey = (ev: KeyboardEvent) => {
+    if (this.props.enabled) {
+      this.hotkeyHandler.handle(ev);
+    }
   }
 
   changeUser = (ev: React.ChangeEvent<HTMLInputElement>) => {

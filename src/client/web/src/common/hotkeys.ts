@@ -37,6 +37,9 @@ export class HotkeyHandler {
   };
 
   handle = (ev: KeyboardEvent) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+
     const hotKey = {
       key: ev.key,
       ctrl: ev.ctrlKey,

@@ -25,7 +25,7 @@ export interface Props {
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
-export interface State {}
+export interface State { }
 export class RootFrame extends React.Component<Props, State, {}> {
   constructor(p: Props) {
     super(p);
@@ -114,6 +114,7 @@ export class RootFrame extends React.Component<Props, State, {}> {
                 msg={this.props.msg}
                 login={this.props.login}
                 ui={this.props.ui}
+                enabled={displaying === "filesPanel"}
                 update={this.props.update}
               />
             </span>
