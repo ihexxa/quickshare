@@ -965,6 +965,11 @@ export class Updater {
     this.updateSharings(sorted);
   };
 
+  resetUsedSpace = async (userID: string): Promise<string> => {
+    const resp = await this.usersClient.resetUsedSpace(userID);
+    return resp.status == 200 ? "" : errServer;
+  };
+
   updateAll = (prevState: ICoreState): ICoreState => {
     return {
       filesInfo: { ...prevState.filesInfo, ...this.props.filesInfo },

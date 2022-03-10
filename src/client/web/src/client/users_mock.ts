@@ -17,6 +17,7 @@ export interface UsersClientResps {
   selfMockResp?: Response;
   getCaptchaIDMockResp?: Response;
   setPreferencesMockResp?: Response;
+  resetUsedSpaceMockResp?: Response;
 }
 
 export const resps = {
@@ -107,6 +108,11 @@ export const resps = {
     statusText: "",
     data: {},
   },
+  resetUsedSpaceMockResp: {
+    status: 200,
+    statusText: "",
+    data: {}
+  }
 };
 export class MockUsersClient {
   private url: string;
@@ -186,6 +192,10 @@ export class MockUsersClient {
   setPreferences = (prefers: Preferences): Promise<Response> => {
     return this.wrapPromise(this.resps.setPreferencesMockResp);
   };
+
+  resetUsedSpace = (userID: string): Promise<Response> => {
+    return this.wrapPromise(this.resps.resetUsedSpaceMockResp);
+  }
 }
 
 export class JestUsersClient {
@@ -215,6 +225,9 @@ export class JestUsersClient {
   setPreferences = jest
     .fn()
     .mockReturnValue(makePromise(resps.setPreferencesMockResp));
+  resetUsedSpace = jest
+    .fn()
+    .mockReturnValue(makePromise(resps.resetUsedSpaceMockResp));
 }
 
 export const NewMockUsersClient = (url: string): IUsersClient => {
