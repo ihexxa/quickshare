@@ -138,8 +138,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
   };
 
   updateProgress = async (
-    infos: Map<string, UploadEntry>,
-    refresh: boolean
+    infos: Map<string, UploadEntry>
   ) => {
     updater().setUploads(infos);
     let errCount = 0;
@@ -157,16 +156,6 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       this.props.update(updater().updateLogin);
       this.props.update(updater().updateUploadingsInfo);
     }
-
-    if (refresh) {
-      const status = await updater().setItems(this.props.filesInfo.dirPath);
-      if (status !== "") {
-        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
-        return;
-      }
-    }
-    this.props.update(updater().updateFilesInfo);
-    this.props.update(updater().updateUploadingsInfo);
   };
 
   addUploads = (event: React.ChangeEvent<HTMLInputElement>) => {

@@ -26,9 +26,8 @@ export class UploadMgr {
   private worker: IWorker;
   private infos = OrderedMap<string, UploadEntry>();
   private statusCb = (
-    infos: Map<string, UploadEntry>,
-    refresh: boolean
-  ): void => {};
+    infos: Map<string, UploadEntry>
+  ): void => { };
 
   constructor(worker: IWorker) {
     this.worker = worker;
@@ -104,7 +103,7 @@ export class UploadMgr {
   // TODO: change it to observer pattern
   // so that it can be observed by multiple components
   setStatusCb = (
-    cb: (infos: Map<string, UploadEntry>, refresh: boolean) => void
+    cb: (infos: Map<string, UploadEntry>) => void
   ) => {
     this.statusCb = cb;
   };
@@ -156,7 +155,7 @@ export class UploadMgr {
       }
     }
 
-    this.statusCb(this.infos.toMap(), false);
+    this.statusCb(this.infos.toMap());
     return status;
   };
 
@@ -173,7 +172,7 @@ export class UploadMgr {
       status = errUploadMgr;
     }
 
-    this.statusCb(this.infos.toMap(), false);
+    this.statusCb(this.infos.toMap());
     return status;
   };
 
@@ -184,7 +183,7 @@ export class UploadMgr {
     }
 
     this.infos = this.infos.delete(filePath);
-    this.statusCb(this.infos.toMap(), false);
+    this.statusCb(this.infos.toMap());
     return "";
   };
 
@@ -213,7 +212,7 @@ export class UploadMgr {
           ErrorLogger().error(`respHandler: entry not found ${errResp.err}`);
         }
 
-        this.statusCb(this.infos.toMap(), false);
+        this.statusCb(this.infos.toMap());
         break;
       case uploadInfoKind:
         const infoResp = resp as UploadInfoResp;
@@ -222,12 +221,12 @@ export class UploadMgr {
         if (entry != null) {
           if (infoResp.uploaded === entry.size) {
             this.infos = this.infos.delete(infoResp.filePath);
-            this.statusCb(this.infos.toMap(), true);
+            this.statusCb(this.infos.toMap());
           } else {
             // this avoids overwriting Stopped/Error state
             const state =
               entry.state === UploadState.Stopped ||
-              entry.state === UploadState.Error
+                entry.state === UploadState.Error
                 ? entry.state
                 : infoResp.state;
             this.infos = this.infos.set(infoResp.filePath, {
@@ -235,7 +234,7 @@ export class UploadMgr {
               uploaded: infoResp.uploaded,
               state: state,
             });
-            this.statusCb(this.infos.toMap(), false);
+            this.statusCb(this.infos.toMap());
           }
         } else {
           ErrorLogger().error(
