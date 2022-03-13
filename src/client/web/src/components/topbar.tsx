@@ -32,49 +32,30 @@ export class TopBar extends React.Component<Props, State, {}> {
       return;
     }
 
-    return updater()
-      .logout()
-      .then((status: string) => {
-        if (status === "") {
-          const params = new URLSearchParams(
-            document.location.search.substring(1)
-          );
-          return updater().initAll(params);
-        } else {
-          alertMsg(this.props.msg.pkg.get("login.logout.fail"));
-        }
-      })
-      .then(() => {
-        return this.refreshCaptcha();
-      })
-      .then(() => {
-        this.props.update(updater().updateFilesInfo);
-        this.props.update(updater().updateUploadingsInfo);
-        this.props.update(updater().updateSharingsInfo);
-        this.props.update(updater().updateLogin);
-        this.props.update(updater().updateAdmin);
-        this.props.update(updater().updateUI);
-        this.props.update(updater().updateMsg);
-      });
-  };
+    const status = await updater().logout();
+    if (status !== "") {
+      alertMsg(this.props.msg.pkg.get("login.logout.fail"));
+      return;
+    }
 
-  refreshCaptcha = async () => {
-    return updater()
-      .getCaptchaID()
-      .then(() => {
-        this.props.update(updater().updateLogin);
-      });
+    const params = new URLSearchParams(document.location.search.substring(1));
+    const initStatus = await updater().initAll(params);
+    if (initStatus !== "") {
+      alertMsg(this.props.msg.pkg.get("op.fail"));
+      return;
+    }
+    this.props.update(updater().updateAll);
   };
 
   render() {
-    const showLogin = this.props.login.authed ? "" : "hidden";
-    const showSettings =
+    const loginPanelClass = this.props.login.authed ? "" : "hidden";
+    const settingsPanelClass =
       this.props.ui.control.controls.get(settingsDialogCtrl) === ctrlHidden
         ? "hidden"
         : "";
 
     return (
-      <div id="top-bar">
+      <div id="top-bar" className="highlight-font light-bg">
         <Flexbox
           children={List([
             <a
@@ -96,17 +77,19 @@ export class TopBar extends React.Component<Props, State, {}> {
               children={List([
                 <button
                   onClick={this.openSettings}
-                  className={`margin-r-m ${showSettings}`}
+                  className={`margin-r-m ${settingsPanelClass}`}
                 >
                   {this.props.msg.pkg.get("settings")}
-                  {/* {getIcon("RiSettings4Line", "1.8rem", "cyan1")} */}
                 </button>,
 
-                <button onClick={this.logout} className={`${showLogin}`}>
+                <button onClick={this.logout} className={`${loginPanelClass}`}>
                   {this.props.msg.pkg.get("login.logout")}
                 </button>,
               ])}
-              childrenStyles={List([{}, {}, {}, {}])}
+              childrenStyles={List([
+                { flex: "0 0 auto" },
+                { flex: "0 0 auto" },
+              ])}
             />,
           ])}
           childrenStyles={List([
