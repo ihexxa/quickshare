@@ -74,7 +74,7 @@ export class Tabs extends React.Component<Props, State, {}> {
                 )}
               </span>,
             ])}
-            childrenStyles={List([{ flex: "30%" }, { flex: "70%" }])}
+            childrenStyles={List([{}, {}, {}])}
           />
         </button>
       );

@@ -1,3 +1,52 @@
+.dark-font {
+  color: #34495e;
+}
+.light-font {
+  color: #95a5a6;
+}
+.normal-font {
+  color: #697384;
+}
+.highlight-font {
+  color: #16a085;
+}
+.error-font {
+  color: #f1c40f;
+}
+
+.light-bg {
+  background-color: white;
+}
+.normal-bg {
+  background-color: #ecf0f6;
+}
+.highlight-bg {
+  color: #16a085;
+}
+.dark-bg {
+  background-color: #2c3e50;
+}
+button {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+::placeholder {
+  color: #95a5a6;
+}
+a {
+  color: #16a085;
+}
+a:hover {
+  color: cc#2ecc71;
+}
+input {
+  background-color: rgba(0, 0, 0, 0.15);
+}
+input:focus {
+  opacity: 0.8;
+  box-shadow: 0 0.1rem 1rem rgba(22, 160, 133, 0.1);
+}
+
+
 #root-frame {
   position: fixed;
   left: 0;
@@ -17,22 +66,11 @@
 }
 
 .theme-default #top-bar {
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(9.5px);
-  color: #16a085;
   padding: 1rem 2rem 1rem 2rem;
-  -webkit-backdrop-filter: blur(9.5px);
   position: relative;
   z-index: 2;
-}
-
-.theme-default #topbar-user-info {
-  color: #697384;
-  margin-right: 1rem;
-}
-
-.theme-default #top-bar button {
-  min-width: 7rem;
+  backdrop-filter: blur(9.5px);
+  -webkit-backdrop-filter: blur(9.5px);
 }
 
 .theme-default #top-menu {

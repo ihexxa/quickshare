@@ -27,7 +27,7 @@ import { UploadEntry, UploadState } from "../worker/interface";
 import { Up } from "../worker/upload_mgr";
 import { alertMsg } from "../common/env";
 import { controlName as panelTabs } from "./root_frame";
-import { errUpdater, errServer } from "../common/errors";
+import { errServer } from "../common/errors";
 import { ErrorLogger } from "../common/log_error";
 import {
   settingsTabsCtrl,

@@ -3,6 +3,7 @@ import { Set } from "immutable";
 export const colors = Set<string>([
   "blue0",
   "blue1",
+  "blue2",
   "cyan0",
   "cyan1",
   "purple0",
@@ -12,6 +13,7 @@ export const colors = Set<string>([
   "yellow0",
   "yellow1",
   "yellow2",
+  "yellow3",
   "yellow3",
   "green0",
   "green1",
@@ -26,6 +28,11 @@ export const colors = Set<string>([
   "black",
   "black0",
   "black1",
+  "dark",
+  "light",
+  "normal",
+  "highlight",
+  "error",
 ]);
 
 export function colorClass(name: string): string {

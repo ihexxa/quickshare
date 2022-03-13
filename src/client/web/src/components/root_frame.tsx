@@ -11,7 +11,6 @@ import { LoginProps } from "./pane_login";
 import { Layers } from "./layers";
 import { AdminProps } from "./pane_admin";
 import { TopBar } from "./topbar";
-import { roleVisitor } from "../client";
 
 export const controlName = "panelTabs";
 export interface Props {
@@ -25,7 +24,7 @@ export interface Props {
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
-export interface State { }
+export interface State {}
 export class RootFrame extends React.Component<Props, State, {}> {
   constructor(p: Props) {
     super(p);
@@ -88,17 +87,17 @@ export class RootFrame extends React.Component<Props, State, {}> {
                 filesPanel: {
                   name: "RiFolder2Fill",
                   size: "1.6rem",
-                  color: "cyan1",
+                  color: "highlight",
                 },
                 uploadingsPanel: {
                   name: "RiUploadCloudFill",
                   size: "1.6rem",
-                  color: "cyan1",
+                  color: "highlight",
                 },
                 sharingsPanel: {
                   name: "RiShareBoxLine",
                   size: "1.6rem",
-                  color: "cyan1",
+                  color: "highlight",
                 },
               })}
               ui={this.props.ui}

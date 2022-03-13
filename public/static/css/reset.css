@@ -44,30 +44,18 @@ img {
   user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
 }
 a {
-  color: #16a085;
   opacity: 100%;
   text-decoration: none;
-  transition: color 1s 1 linear;
-}
-a:hover {
-  color: #2ecc71;
-}
-a:active {
+  transition: color 300ms;
 }
 a::selection {
   background: transparent;
 }
 
-button {
-  background-color: transparent;
-  border: none;
-  outline: none;
-}
-button:active {
-  /* animation: fade 0.1s 1 linear; */
-}
-button:hover {
-  /* animation: fade 0.1s 1 linear; */
+span,
+div,
+svg {
+  transition: color 300ms, background-color 300ms;
 }
 
 img {
@@ -88,31 +76,30 @@ input {
   padding: 0.8rem 1rem;
   width: 10rem;
 
-  background-color: rgba(0, 0, 0, 0.15);
   border-radius: 0.5rem;
+
+  transition: opacity 300ms, box-shadow 300ms;
 }
 
 input:focus {
   opacity: 0.8;
-  box-shadow: 0 0.1rem 1rem rgba(0, 0, 0, 0.1);
-}
-
-::placeholder {
-  color: #95a5a6;
 }
 
 button {
   cursor: pointer;
   border: none;
   border-radius: 0.5rem;
+  outline: none;
   padding: 0.8rem 1rem;
-
-  background-color: rgba(0, 0, 0, 0.3);
 
   font-weight: bold;
   border-radius: 0.5rem;
-}
 
+  transition: opacity 300ms;
+}
 button:hover {
-  opacity: 0.9;
+  opacity: 0.8;
+}
+button:active {
+  opacity: 1;
 }
