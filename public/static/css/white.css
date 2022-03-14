@@ -14,8 +14,11 @@
   color: #f1c40f;
 }
 
-.light-bg {
+.lightest-bg {
   background-color: white;
+}
+.light-bg {
+  background-color: #f6f6f6;
 }
 .normal-bg {
   background-color: #ecf0f6;
@@ -276,7 +279,7 @@ input:focus {
   font-size: 1.8rem;
   line-height: 2rem;
   display: block;
-  margin: 2rem 0;
+  /* margin: 2rem 0; */
   word-break: break-all;
 }
 
@@ -286,6 +289,9 @@ input:focus {
   line-height: 2rem;
   display: block;
   word-break: break-all;
+  padding: 2rem;
+  margin-top: 1rem;
+  border-radius: 0.8rem;
 }
 
 .theme-default #item-rows .hr {
@@ -503,10 +509,10 @@ input:focus {
   margin: auto 1rem auto auto;
 }
 
-.theme-default .float-l {
+/* .theme-default .float-l {
   display: inline-block;
   margin: auto 1rem auto auto;
-}
+} */
 
 .theme-default .float-r {
   display: inline-block;
@@ -569,7 +575,6 @@ input:focus {
 
 .theme-default .card {
   padding: 1rem;
-  /* background-color: #e8e8e8; */
   text-align: center;
   border-radius: 0.8rem;
 }

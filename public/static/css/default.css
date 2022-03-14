@@ -461,11 +461,18 @@
 
 .title-m {
   font-size: 1.4rem;
-  /* font-weight: bold; */
   line-height: 2rem;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  overflow-wrap: break-word;
+  display: block;
+}
+
+.title-m-wrap {
+  font-size: 1.4rem;
+  line-height: 2rem;
+  overflow: hidden;
   overflow-wrap: break-word;
   display: block;
 }
@@ -489,6 +496,13 @@
   flex: 0 0 auto;
   align-items: center;
   justify-content: flex-start;
+}
+
+.v-mid-r {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .full-width {
@@ -567,4 +581,16 @@
   100% {
     transform: rotate(360deg);
   }
+}
+
+.float-l {
+  float: left;
+}
+
+.txt-align-l {
+  text-align: left;
+}
+
+.txt-align-r {
+  text-align: right;
 }
