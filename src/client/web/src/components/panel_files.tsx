@@ -26,6 +26,7 @@ import { Table, Cell, Head } from "./layout/table";
 import { BtnList } from "./control/btn_list";
 import { Segments } from "./layout/segments";
 import { Rows } from "./layout/rows";
+import { Columns } from "./layout/columns";
 import { Up } from "../worker/upload_mgr";
 import { UploadEntry, UploadState } from "../worker/interface";
 import { getIcon } from "./visual/icons";
@@ -104,7 +105,6 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       if (!this.props.enabled) {
         return;
       }
-
       const uploadInput = this.uploadInput as HTMLButtonElement;
       uploadInput.click();
     };
@@ -132,14 +132,16 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     document.removeEventListener("keyup", this.hotkeyHandler.handle);
   }
 
+  onNewFolderNameChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ newFolderName: ev.target.value });
+  };
+
   setLoading = (state: boolean) => {
     updater().setControlOption(loadingCtrl, state ? ctrlOn : ctrlOff);
     this.props.update(updater().updateUI);
   };
 
-  updateProgress = async (
-    infos: Map<string, UploadEntry>
-  ) => {
+  updateProgress = async (infos: Map<string, UploadEntry>) => {
     updater().setUploads(infos);
     let errCount = 0;
     infos.valueSeq().forEach((entry: UploadEntry) => {
@@ -159,7 +161,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
   };
 
   addUploads = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files.length > 1000) {
+    if (event.target.files.length > 200) {
       alertMsg(this.props.msg.pkg.get("err.tooManyUploads"));
       return;
     }
@@ -176,11 +178,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     this.props.update(updater().updateUploadingsInfo);
   };
 
-  onNewFolderNameChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ newFolderName: ev.target.value });
-  };
-
-  onMkDir = async () => {
+  mkDir = async () => {
     if (this.state.newFolderName === "") {
       alertMsg(this.props.msg.pkg.get("browser.folder.add.fail"));
       return;
@@ -237,7 +235,8 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       const filesToDel = this.state.selectedItems.keySeq().join(", ");
       if (
         !confirmMsg(
-          `${this.props.msg.pkg.get("op.confirm")} [${this.state.selectedItems.size
+          `${this.props.msg.pkg.get("op.confirm")} [${
+            this.state.selectedItems.size
           }]: ${filesToDel}`
         )
       ) {
@@ -474,134 +473,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     this.props.update(updater().updateFilesInfo);
   };
 
-  prepareTable = (
-    sortedItems: List<MetadataResp>,
-    showOp: string
-  ): React.ReactNode => {
-    const items = sortedItems.map((item: MetadataResp) => {
-      const isSelected = this.state.selectedItems.has(item.name);
-      const dirPath = this.props.filesInfo.dirPath.join("/");
-      const itemPath = dirPath.endsWith("/")
-        ? `${dirPath}${item.name}`
-        : `${dirPath}/${item.name}`;
-
-      const icon = item.isDir ? (
-        <div className="v-mid item-cell">
-          <RiFolder2Fill size="3rem" className="yellow0-font" />
-        </div>
-      ) : (
-        <div className="v-mid item-cell">
-          <RiFile2Fill size="3rem" className="cyan1-font" />
-        </div>
-      );
-
-      const modTimeTitle = this.props.msg.pkg.get("item.modTime");
-      const sizeTitle = this.props.msg.pkg.get("item.size");
-      const itemSize = FileSize(item.size, { round: 0 });
-
-      const content = item.isDir ? (
-        <div className={`v-mid item-cell`}>
-          <div className="full-width">
-            <div
-              className="title-m clickable"
-              onClick={() => this.gotoChild(item.name)}
-            >
-              {item.name}
-            </div>
-            <div className="desc-m grey0-font">
-              <span>
-                <span className="grey3-font">{`${modTimeTitle}: `}</span>
-                <span>{`${item.modTime}`}</span>
-              </span>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div>
-          <div className={`v-mid item-cell`}>
-            <div className="full-width">
-              <a
-                className="title-m clickable"
-                href={`/v1/fs/files?fp=${itemPath}`}
-                target="_blank"
-              >
-                {item.name}
-              </a>
-              <div className="desc-m grey0-font">
-                <span className="grey3-font">{`${sizeTitle}: `}</span>
-                <span>{`${itemSize} | `}</span>
-                <span className="grey3-font">{`SHA1: `}</span>
-                <span>{item.sha1}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-
-      const op = item.isDir ? (
-        <div className={`v-mid item-cell item-op ${showOp}`}>
-          <span onClick={() => this.select(item.name)} className="float-l">
-            {isSelected
-              ? getIcon("RiCheckboxFill", "1.8rem", "cyan1")
-              : getIcon("RiCheckboxBlankLine", "1.8rem", "black1")}
-          </span>
-        </div>
-      ) : (
-        <div className={`v-mid item-cell item-op ${showOp}`}>
-          <span onClick={() => this.select(item.name)} className="float-l">
-            {isSelected
-              ? getIcon("RiCheckboxFill", "1.8rem", "cyan1")
-              : getIcon("RiCheckboxBlankLine", "1.8rem", "black1")}
-          </span>
-        </div>
-      );
-
-      return {
-        val: item,
-        cells: List<Cell>([
-          { elem: icon, val: item.isDir ? "d" : "f" },
-          { elem: content, val: itemPath },
-          { elem: op, val: "" },
-        ]),
-      };
-    });
-
-    const tableTitles = List<Head>([
-      {
-        elem: (
-          <div className="font-s grey0-font">
-            <RiFileList2Fill size="3rem" className="black-font" />
-          </div>
-        ),
-        sortable: true,
-      },
-      {
-        elem: <div className="font-s grey0-font">Name</div>,
-        sortable: true,
-      },
-      {
-        elem: <div className="font-s grey0-font">Action</div>,
-        sortable: false,
-      },
-    ]);
-
-    return (
-      <Table
-        colStyles={List([
-          { width: "3rem", paddingRight: "1rem" },
-          { width: "calc(100% - 12rem)", textAlign: "left" },
-          { width: "8rem", textAlign: "right" },
-        ])}
-        id="item-table"
-        head={tableTitles}
-        foot={List()}
-        rows={items}
-        updateRows={this.updateItems}
-      />
-    );
-  };
-
-  prepareRows = (
+  prepareColumns = (
     sortedItems: List<MetadataResp>,
     showOp: string
   ): React.ReactNode => {
@@ -617,55 +489,60 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         ? `${dirPath}${item.name}`
         : `${dirPath}/${item.name}`;
 
-      const selectedIconColor = isSelected ? "cyan1-font" : "black1-font";
-
+      const selectedIconColor = isSelected ? "highlight-font" : "dark-font";
       const descIconColor = this.state.showDetail.has(item.name)
-        ? "cyan1-font"
-        : "grey0-font";
+        ? "highlight-font"
+        : "light-font";
       const icon = item.isDir ? (
-        <RiFolder2Fill size="1.8rem" className="yellow0-font" />
+        <RiFolder2Fill size="2rem" className="yellow0-font margin-r-m" />
       ) : (
-        <RiFile2Fill size="1.8rem" className="cyan1-font" />
+        <RiFile2Fill size="2rem" className="cyan1-font margin-r-m" />
       );
-      const fileType = item.isDir
-        ? this.props.msg.pkg.get("item.type.folder")
-        : this.props.msg.pkg.get("item.type.file");
 
+      const modTimeDate = new Date(item.modTime);
+      const modTimeFormatted = `${modTimeDate.getFullYear()}-${
+        modTimeDate.getMonth() + 1
+      }-${modTimeDate.getDate()}`;
       const downloadPath = `/v1/fs/files?fp=${itemPath}`;
       const name = item.isDir ? (
-        <span className="clickable" onClick={() => this.gotoChild(item.name)}>
-          {item.name}
+        <span className="title-m-wrap">
+          <span className="clickable" onClick={() => this.gotoChild(item.name)}>
+            {item.name}
+          </span>
+          <span className="light-font">{` - ${modTimeFormatted}`}</span>
         </span>
       ) : (
-        <a className="title-m clickable" href={downloadPath} target="_blank">
-          {item.name}
-        </a>
+        <span className="title-m-wrap">
+          <a className="clickable" href={downloadPath} target="_blank">
+            {item.name}
+          </a>
+          <span className="light-font">{` - ${modTimeFormatted}`}</span>
+        </span>
       );
 
       const checkIcon = isSelected ? (
         <RiCheckboxFill
-          size="1.8rem"
+          size="2rem"
           className={`${selectedIconColor} ${shareModeClass}`}
           onClick={() => this.select(item.name)}
         />
       ) : (
         <RiCheckboxBlankLine
-          size="1.8rem"
+          size="2rem"
           className={`${selectedIconColor} ${shareModeClass}`}
           onClick={() => this.select(item.name)}
         />
       );
 
       const op = item.isDir ? (
-        <div className={`v-mid item-op ${showOp}`}>{checkIcon}</div>
+        <div className={`item-op ${showOp}`}>{checkIcon}</div>
       ) : (
-        <div className={`v-mid item-op ${showOp}`}>
+        <div className={`item-op ${showOp}`}>
           <RiMore2Fill
             size="1.8rem"
             className={`${descIconColor} margin-r-m`}
             onClick={() => this.toggleDetail(item.name)}
           />
-
           {checkIcon}
         </div>
       );
@@ -674,42 +551,23 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       const pathTitle = this.props.msg.pkg.get("item.downloadURL");
       const modTimeTitle = this.props.msg.pkg.get("item.modTime");
       const sizeTitle = this.props.msg.pkg.get("item.size");
-      const fileTypeTitle = this.props.msg.pkg.get("item.type");
       const itemSize = FileSize(item.size, { round: 0 });
-
-      const compact = item.isDir ? (
-        <span>
-          <span className="grey3-font">{`${modTimeTitle}: `}</span>
-          <span>{item.modTime}</span>
-        </span>
-      ) : (
-        <span>
-          <span className="grey3-font">{`${pathTitle}: `}</span>
-          <span>{`${absDownloadURL} | `}</span>
-          <span className="grey3-font">{`${modTimeTitle}: `}</span>
-          <span>{`${item.modTime} | `}</span>
-          <span className="grey3-font">{`${sizeTitle}: `}</span>
-          <span>{`${itemSize} | `}</span>
-          <span className="grey3-font">{`SHA1: `}</span>
-          <span>{item.sha1}</span>
-        </span>
-      );
       const details = (
-        <div>
+        <div className="desc light-bg">
           <div className="column">
             <div className="card">
-              <span className="title-m black-font">{pathTitle}</span>
+              <span className="title-m dark-font">{pathTitle}</span>
               <span>{absDownloadURL}</span>
             </div>
           </div>
 
           <div className="column">
             <div className="card margin-l-m">
-              <span className="title-m black-font">{modTimeTitle}</span>
-              <span>{item.modTime}</span>
+              <span className="title-m dark-font">{modTimeTitle}</span>
+              <span>{modTimeFormatted}</span>
             </div>
             <div className="card margin-l-m">
-              <span className="title-m black-font">{sizeTitle}</span>
+              <span className="title-m dark-font">{sizeTitle}</span>
               <span>{itemSize}</span>
             </div>
           </div>
@@ -718,11 +576,11 @@ export class FilesPanel extends React.Component<Props, State, {}> {
             <div className="card">
               <Flexbox
                 children={List([
-                  <span className="title-m black-font">SHA1</span>,
+                  <span className="title-m dark-font">SHA1</span>,
                   <RiRestartFill
                     onClick={() => this.generateHash(itemPath)}
                     size={"2rem"}
-                    className={`grey3-font ${shareModeClass}`}
+                    className={`dark-font ${shareModeClass}`}
                   />,
                 ])}
                 childrenStyles={List([{}, { justifyContent: "flex-end" }])}
@@ -732,34 +590,33 @@ export class FilesPanel extends React.Component<Props, State, {}> {
           </div>
         </div>
       );
-      const desc = this.state.showDetail.has(item.name) ? details : compact;
+      const desc = this.state.showDetail.has(item.name) ? details : null;
 
-      const elem = (
+      const cells = List<React.ReactNode>([
+        icon,
+        <div>{name}</div>,
+        <div className="title-m light-font">{itemSize}</div>,
+        <div className="txt-align-r">{op}</div>,
+      ]);
+
+      const tableCols = (
+        <Columns
+          rows={List([cells])}
+          widths={List(["3rem", "calc(100% - 13rem)", "5rem", "5rem"])}
+          childrenClassNames={List(["", "", "", ""])}
+        />
+      );
+
+      return (
         <div>
-          <Flexbox
-            children={List([
-              <div>
-                <div className="v-mid">
-                  {icon}
-                  <span className="margin-l-m desc-l">{`${fileTypeTitle}`}</span>
-                  &nbsp;
-                  <span className="desc-l grey0-font">{`- ${fileType}`}</span>
-                </div>
-              </div>,
-              <div>{op}</div>,
-            ])}
-            childrenStyles={List([{}, { justifyContent: "flex-end" }])}
-          />
-          <div className="name">{name}</div>
-          <div className="desc">{desc}</div>
+          {tableCols}
+          {desc}
           <div className="hr"></div>
         </div>
       );
-
-      return elem;
     });
 
-    return <Rows rows={List(rows)} />;
+    return <div>{rows}</div>;
   };
 
   setView = (opt: string) => {
@@ -835,7 +692,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         <Flexbox
           children={List([
             <div>
-              <button onClick={this.onMkDir} className="float cyan-btn">
+              <button onClick={this.mkDir} className="float cyan-btn">
                 {this.props.msg.pkg.get("browser.folder.add")}
               </button>
               <input
@@ -892,21 +749,18 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       />
     );
     const viewType = this.props.ui.control.controls.get(filesViewCtrl);
-    const view =
-      viewType === "rows" ? (
-        <div id="item-rows">
-          {this.prepareRows(this.props.filesInfo.items, showOp)}
-        </div>
-      ) : (
-        this.prepareTable(this.props.filesInfo.items, showOp)
-      );
+    const view = (
+      <div id="item-rows">
+        {this.prepareColumns(this.props.filesInfo.items, showOp)}
+      </div>
+    ); // TODO: support better views in the future
 
     const usedSpace = FileSize(
       // TODO: this a work around before transaction is introduced
       Math.trunc(
         parseInt(this.props.login.extInfo.usedSpace, 10) / (1024 * 1024)
       ) *
-      (1024 * 1024),
+        (1024 * 1024),
       {
         round: 0,
       }
@@ -916,7 +770,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       Math.trunc(
         parseInt(this.props.login.quota.spaceLimit, 10) / (1024 * 1024)
       ) *
-      (1024 * 1024),
+        (1024 * 1024),
       {
         round: 0,
       }
@@ -987,20 +841,20 @@ export class FilesPanel extends React.Component<Props, State, {}> {
 
                 <Flexbox
                   children={List([
-                    <BiListUl
-                      size="2rem"
-                      className={`${rowsViewColorClass} margin-r-s`}
-                      onClick={() => {
-                        this.setView("rows");
-                      }}
-                    />,
-                    <BiTable
-                      size="2rem"
-                      className={`${tableViewColorClass} margin-r-s`}
-                      onClick={() => {
-                        this.setView("table");
-                      }}
-                    />,
+                    // <BiListUl
+                    //   size="2rem"
+                    //   className={`${rowsViewColorClass} margin-r-s`}
+                    //   onClick={() => {
+                    //     this.setView("rows");
+                    //   }}
+                    // />,
+                    // <BiTable
+                    //   size="2rem"
+                    //   className={`${tableViewColorClass} margin-r-s`}
+                    //   onClick={() => {
+                    //     this.setView("table");
+                    //   }}
+                    // />,
 
                     <span className={`${showOp}`}>
                       <button

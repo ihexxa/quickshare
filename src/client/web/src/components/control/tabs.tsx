@@ -81,7 +81,10 @@ export class Tabs extends React.Component<Props, State, {}> {
     });
 
     return (
-      <div className={`tabs control-${this.props.targetControl}`}>{tabs}</div>
+      <div className={`tabs control-${this.props.targetControl}`}>
+        {tabs}
+        <div className="fix"></div>
+      </div>
     );
   }
 }
