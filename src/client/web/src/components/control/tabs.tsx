@@ -62,7 +62,7 @@ export class Tabs extends React.Component<Props, State, {}> {
           onClick={() => {
             this.setTab(this.props.targetControl, option);
           }}
-          className="float-l"
+          className="float-l margin-r-m"
         >
           <Flexbox
             children={List([

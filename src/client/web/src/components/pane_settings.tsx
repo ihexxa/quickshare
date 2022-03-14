@@ -212,7 +212,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
 
           <div className="hr"></div>
 
-          <Rows rows={errRows}/>
+          <Rows rows={errRows} />
         </Container>
       ) : null;
 
@@ -256,6 +256,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
                   round: 0,
                 })}`}
               />
+              <div className="fix"></div>
             </div>
           </div>
         </Container>

@@ -509,11 +509,6 @@ input:focus {
   margin: auto 1rem auto auto;
 }
 
-/* .theme-default .float-l {
-  display: inline-block;
-  margin: auto 1rem auto auto;
-} */
-
 .theme-default .float-r {
   display: inline-block;
   margin: auto auto 1rem 1rem;
