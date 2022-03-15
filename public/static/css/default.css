@@ -594,3 +594,7 @@
 .txt-align-r {
   text-align: right;
 }
+
+.work-break-all {
+  word-break: break-all;
+}
