@@ -1,0 +1,68 @@
+.theme-default .card {
+  padding: 1rem;
+  border-radius: 0.8rem;
+}
+
+.theme-default #item-rows .column {
+  width: 50%;
+  max-width: 100%;
+  float: left;
+}
+
+.theme-default #browser .info {
+  border: dashed 1px #95a5a6;
+  font-size: 1.4rem;
+  padding: 1rem;
+  color: #697384;
+  margin: 1rem 0 0 0;
+  background-color: #ecf0f1;
+  white-space: nowrap;
+  overflow: auto;
+}
+
+.theme-default .pane-title {
+  color: black;
+  font-size: 1.6rem;
+  line-height: 1.6rem;
+}
+
+.theme-default #breadcrumb {
+  width: 100%;
+}
+
+.theme-default #breadcrumb .location-item {
+  margin: 0 0.5rem 0 0;
+  display: inline-block;
+  line-height: 3rem;
+}
+
+.theme-default #breadcrumb .item {
+  margin: 0 0.5rem 0 0;
+  max-width: 6rem;
+  display: inline-block;
+  line-height: 3rem;
+}
+
+.theme-default #breadcrumb .content {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-wrap: break-word;
+  display: block;
+}
+
+.theme-default .inline-blocks {
+  display: inline-block;
+  margin: auto 1rem auto auto;
+}
+
+.theme-default .select-btn {
+  width: 8rem;
+  display: inline-block;
+}
+
+.theme-default #space-used {
+  text-align: right;
+  line-height: 3rem;
+  font-size: 1.4rem;
+}

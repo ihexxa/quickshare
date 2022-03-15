@@ -5,11 +5,8 @@ import FileSize from "filesize";
 
 import { RiFolder2Fill } from "@react-icons/all-files/ri/RiFolder2Fill";
 import { RiFile2Fill } from "@react-icons/all-files/ri/RiFile2Fill";
-import { RiFileList2Fill } from "@react-icons/all-files/ri/RiFileList2Fill";
 import { RiCheckboxFill } from "@react-icons/all-files/ri/RiCheckboxFill";
 import { RiMore2Fill } from "@react-icons/all-files/ri/RiMore2Fill";
-import { BiTable } from "@react-icons/all-files/bi/BiTable";
-import { BiListUl } from "@react-icons/all-files/bi/BiListUl";
 import { RiRestartFill } from "@react-icons/all-files/ri/RiRestartFill";
 import { RiCheckboxBlankLine } from "@react-icons/all-files/ri/RiCheckboxBlankLine";
 
@@ -22,14 +19,11 @@ import { LoginProps } from "./pane_login";
 import { MetadataResp, roleVisitor, roleAdmin } from "../client";
 import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
-import { Table, Cell, Head } from "./layout/table";
 import { BtnList } from "./control/btn_list";
 import { Segments } from "./layout/segments";
-import { Rows } from "./layout/rows";
 import { Columns } from "./layout/columns";
 import { Up } from "../worker/upload_mgr";
 import { UploadEntry, UploadState } from "../worker/interface";
-import { getIcon } from "./visual/icons";
 import {
   ctrlOff,
   ctrlOn,
@@ -535,9 +529,9 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       );
 
       const op = item.isDir ? (
-        <div className={`item-op ${showOp}`}>{checkIcon}</div>
+        <div className={`txt-align-r ${showOp}`}>{checkIcon}</div>
       ) : (
-        <div className={`item-op ${showOp}`}>
+        <div className={`txt-align-r ${showOp}`}>
           <RiMore2Fill
             size="1.8rem"
             className={`${descIconColor} margin-r-m`}
@@ -553,22 +547,22 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       const sizeTitle = this.props.msg.pkg.get("item.size");
       const itemSize = FileSize(item.size, { round: 0 });
       const details = (
-        <div className="desc light-bg">
+        <div className="desc light-font light-bg">
           <div className="column">
             <div className="card">
               <span className="title-m dark-font">{pathTitle}</span>
-              <span>{absDownloadURL}</span>
+              <span className="font-s work-break-all">{absDownloadURL}</span>
             </div>
           </div>
 
           <div className="column">
             <div className="card margin-l-m">
               <span className="title-m dark-font">{modTimeTitle}</span>
-              <span>{modTimeFormatted}</span>
+              <span className="font-s work-break-all">{modTimeFormatted}</span>
             </div>
             <div className="card margin-l-m">
               <span className="title-m dark-font">{sizeTitle}</span>
-              <span>{itemSize}</span>
+              <span className="font-s work-break-all">{itemSize}</span>
             </div>
           </div>
 
@@ -650,10 +644,10 @@ export class FilesPanel extends React.Component<Props, State, {}> {
           </h5>
           <div className="hr"></div>
 
-          <button onClick={gotoRoot} className="margin-r-m">
+          <button onClick={gotoRoot} className="button-default margin-r-m">
             {this.props.msg.pkg.get("endpoints.root")}
           </button>
-          <button onClick={this.goHome}>
+          <button onClick={this.goHome} className="button-default">
             {this.props.msg.pkg.get("endpoints.home")}
           </button>
         </Container>
@@ -688,11 +682,14 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     );
 
     const ops = (
-      <div id="upload-op">
+      <div>
         <Flexbox
           children={List([
             <div>
-              <button onClick={this.mkDir} className="float cyan-btn">
+              <button
+                onClick={this.mkDir}
+                className="inline-blocks cyan1-bg white-font"
+              >
                 {this.props.msg.pkg.get("browser.folder.add")}
               </button>
               <input
@@ -700,12 +697,15 @@ export class FilesPanel extends React.Component<Props, State, {}> {
                 onChange={this.onNewFolderNameChange}
                 value={this.state.newFolderName}
                 placeholder={this.props.msg.pkg.get("browser.folder.name")}
-                className="float"
+                className="inline-blocks"
               />
             </div>,
 
             <div>
-              <button onClick={this.onClickUpload} className="cyan-btn">
+              <button
+                onClick={this.onClickUpload}
+                className="cyan1-bg white-font"
+              >
                 {this.props.msg.pkg.get("browser.upload")}
               </button>
               <input
@@ -778,11 +778,11 @@ export class FilesPanel extends React.Component<Props, State, {}> {
 
     const rowsViewColorClass =
       this.props.ui.control.controls.get(filesViewCtrl) === "rows"
-        ? "cyan1-font"
+        ? "highlight-font"
         : "black-font";
     const tableViewColorClass =
       this.props.ui.control.controls.get(filesViewCtrl) === "table"
-        ? "cyan1-font"
+        ? "highlight-font"
         : "black-font";
 
     const itemListPane = (
@@ -806,7 +806,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
                           this.props.filesInfo.dirPath.join("/")
                         );
                       }}
-                      className="red-btn left"
+                      className="red-btn margin-r-m"
                     >
                       {this.props.msg.pkg.get("browser.share.del")}
                     </button>
@@ -814,7 +814,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
                     <button
                       type="button"
                       onClick={this.addSharing}
-                      className="cyan-btn left"
+                      className="highlight-bg white-font margin-r-m"
                     >
                       {this.props.msg.pkg.get("browser.share.add")}
                     </button>
@@ -827,12 +827,16 @@ export class FilesPanel extends React.Component<Props, State, {}> {
                       <button
                         type="button"
                         onClick={() => this.delete()}
-                        className="red-btn left"
+                        className="red-btn margin-r-m"
                       >
                         {this.props.msg.pkg.get("browser.delete")}
                       </button>
 
-                      <button type="button" onClick={() => this.moveHere()}>
+                      <button
+                        type="button"
+                        className="button-default"
+                        onClick={() => this.moveHere()}
+                      >
                         {this.props.msg.pkg.get("browser.paste")}
                       </button>
                     </span>
@@ -859,7 +863,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
                     <span className={`${showOp}`}>
                       <button
                         onClick={() => this.selectAll()}
-                        className="select-btn"
+                        className="select-btn button-default"
                       >
                         {this.props.msg.pkg.get("browser.selectAll")}
                       </button>
