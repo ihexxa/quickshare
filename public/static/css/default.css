@@ -607,3 +607,23 @@
 .work-break-all {
   word-break: break-all;
 }
+
+.icon-s {
+  height: 2rem;
+  padding: 0.6rem 0;
+}
+
+.icon-m {
+  height: 2.4rem;
+  padding: 0.4rem 0;
+}
+
+.icon-l {
+  height: 3.2rem;
+  padding: 0;
+}
+
+.no-height {
+  height: 0;
+  overflow: hidden;
+}
