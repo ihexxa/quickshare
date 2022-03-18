@@ -6,7 +6,7 @@ import FileSize from "filesize";
 import { RiFolder2Fill } from "@react-icons/all-files/ri/RiFolder2Fill";
 import { RiFile2Fill } from "@react-icons/all-files/ri/RiFile2Fill";
 import { RiCheckboxFill } from "@react-icons/all-files/ri/RiCheckboxFill";
-import { RiMore2Fill } from "@react-icons/all-files/ri/RiMore2Fill";
+import { RiMenuUnfoldFill } from "@react-icons/all-files/ri/RiMenuUnfoldFill";
 import { RiRestartFill } from "@react-icons/all-files/ri/RiRestartFill";
 import { RiCheckboxBlankLine } from "@react-icons/all-files/ri/RiCheckboxBlankLine";
 
@@ -529,11 +529,11 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       );
 
       const op = item.isDir ? (
-        <div className={`txt-align-r ${showOp}`}>{checkIcon}</div>
+        <div className={`txt-align-r icon-s ${showOp}`}>{checkIcon}</div>
       ) : (
-        <div className={`txt-align-r ${showOp}`}>
-          <RiMore2Fill
-            size="1.8rem"
+        <div className={`txt-align-r icon-s ${showOp}`}>
+          <RiMenuUnfoldFill
+            size="2rem"
             className={`${descIconColor} margin-r-m`}
             onClick={() => this.toggleDetail(item.name)}
           />
@@ -546,8 +546,12 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       const modTimeTitle = this.props.msg.pkg.get("item.modTime");
       const sizeTitle = this.props.msg.pkg.get("item.size");
       const itemSize = FileSize(item.size, { round: 0 });
-      const details = (
-        <div className="desc light-font light-bg">
+
+      const descStateClass = this.state.showDetail.has(item.name)
+        ? "margin-t-m padding-m"
+        : "no-height";
+      const desc = (
+        <div className={`${descStateClass} desc light-font light-bg`}>
           <div className="column">
             <div className="card">
               <span className="title-m dark-font">{pathTitle}</span>
@@ -584,19 +588,18 @@ export class FilesPanel extends React.Component<Props, State, {}> {
           </div>
         </div>
       );
-      const desc = this.state.showDetail.has(item.name) ? details : null;
 
       const cells = List<React.ReactNode>([
-        icon,
+        <div className="icon-s">{icon}</div>,
         <div>{name}</div>,
-        <div className="title-m light-font">{itemSize}</div>,
+        <div className="title-m light-font padding-l-s">{itemSize}</div>,
         <div className="txt-align-r">{op}</div>,
       ]);
 
       const tableCols = (
         <Columns
           rows={List([cells])}
-          widths={List(["3rem", "calc(100% - 13rem)", "5rem", "5rem"])}
+          widths={List(["3rem", "calc(100% - 16rem)", "8rem", "5rem"])}
           childrenClassNames={List(["", "", "", ""])}
         />
       );

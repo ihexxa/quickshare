@@ -111,3 +111,9 @@
   line-height: 3.2rem;
   overflow-wrap: break-word;
 }
+
+.theme-default #item-rows .desc {
+  display: block;
+  word-break: break-all;
+  border-radius: 0.8rem;
+}

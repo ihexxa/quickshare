@@ -24,11 +24,12 @@
   background-color: #ecf0f6;
 }
 .highlight-bg {
-  color: #16a085;
+  background-color: #16a085;
 }
 .dark-bg {
   background-color: #2c3e50;
 }
+
 button {
   background-color: rgba(0, 0, 0, 0.3);
 }
@@ -248,14 +249,6 @@ input:focus {
   display: block;
   word-break: break-all;
 } */
-
-.theme-default #item-rows .desc {
-  display: block;
-  word-break: break-all;
-  padding: 2rem;
-  margin-top: 1rem;
-  border-radius: 0.8rem;
-}
 
 .theme-default #item-rows .hr {
   height: 1px;
