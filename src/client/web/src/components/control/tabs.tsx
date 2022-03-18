@@ -54,7 +54,7 @@ export class Tabs extends React.Component<Props, State, {}> {
       const iconColor = displaying === option ? iconProps.color : "black0";
       const icon = getIcon(iconProps.name, iconProps.size, iconColor);
       const fontColor =
-        displaying === option ? `${colorClass(iconColor)}-font` : "";
+        displaying === option ? `${colorClass(iconColor)}-font` : "black0-font";
 
       return (
         <button
@@ -62,7 +62,7 @@ export class Tabs extends React.Component<Props, State, {}> {
           onClick={() => {
             this.setTab(this.props.targetControl, option);
           }}
-          className="float-l margin-r-m"
+          className="float-l margin-r-m normal-bg"
         >
           <Flexbox
             children={List([

@@ -2,7 +2,7 @@ import * as React from "react";
 import { List, Map, Set } from "immutable";
 import FileSize from "filesize";
 
-import { RiMore2Fill } from "@react-icons/all-files/ri/RiMore2Fill";
+import { RiMenuUnfoldFill } from "@react-icons/all-files/ri/RiMenuUnfoldFill";
 
 import { alertMsg, confirmMsg } from "../common/env";
 import { ICoreState, MsgProps, UIProps } from "./core_state";
@@ -11,6 +11,7 @@ import { updater } from "./state_updater";
 import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
 import { loadingCtrl, ctrlOn, ctrlOff } from "../common/controls";
+// import { getItemPath } from "./panel_files";
 
 export interface AdminProps {
   users: Map<string, User>;
@@ -30,6 +31,7 @@ export interface UserFormProps {
   name: string;
   role: string;
   quota: Quota;
+  usedSpace: string;
   roles: Set<string>;
   msg: MsgProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
@@ -43,6 +45,7 @@ export interface UserFormState {
   role: string;
   quota: Quota;
   folded: boolean;
+  usedSpace: string;
 }
 
 export class UserForm extends React.Component<
@@ -64,6 +67,7 @@ export class UserForm extends React.Component<
         downloadSpeedLimit: p.quota.downloadSpeedLimit,
       },
       folded: true,
+      usedSpace: p.usedSpace,
     };
   }
 
@@ -118,7 +122,7 @@ export class UserForm extends React.Component<
     if (status !== "") {
       alertMsg(this.props.msg.pkg.get("resetUsedSpace"));
     }
-  }
+  };
 
   setPwd = async () => {
     if (this.state.newPwd1 !== this.state.newPwd2) {
@@ -203,7 +207,7 @@ export class UserForm extends React.Component<
     const foldIconColor = this.state.folded ? "black-font" : "cyan1-font";
     const resetUsedSpace = () => {
       this.resetUsedSpace(this.props.id);
-    }
+    };
 
     return (
       <div className="user-form">
@@ -221,13 +225,13 @@ export class UserForm extends React.Component<
             </div>,
 
             <span>
-              <RiMore2Fill
+              <RiMenuUnfoldFill
                 size="1.2rem"
                 className={`margin-r-m ${foldIconColor}`}
                 onClick={this.toggle}
               />
 
-              <button onClick={this.delUser}>
+              <button className="button-default" onClick={this.delUser}>
                 {this.props.msg.pkg.get("delete")}
               </button>
             </span>,
@@ -241,6 +245,25 @@ export class UserForm extends React.Component<
         />
 
         <div className={foldedClass}>
+          <div className="hr"></div>
+
+          <div>
+            <Flexbox
+              children={List([
+                <span>
+                  {`${this.props.msg.pkg.get("usedSpace")}: ${FileSize(
+                    parseInt(this.state.usedSpace, 10),
+                    { round: 0 }
+                  )}`}
+                </span>,
+                <button className="button-default" onClick={resetUsedSpace}>
+                  {this.props.msg.pkg.get("resetUsedSpace")}
+                </button>,
+              ])}
+              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+            />
+          </div>
+
           <div className="hr"></div>
 
           <Flexbox
@@ -310,12 +333,8 @@ export class UserForm extends React.Component<
               </div>,
 
               <div>
-                <button onClick={this.setUser}>
+                <button className="button-default" onClick={this.setUser}>
                   {this.props.msg.pkg.get("update")}
-                </button>
-                <br />
-                <button onClick={resetUsedSpace}>
-                  {this.props.msg.pkg.get("resetUsedSpace")}
                 </button>
               </div>,
             ])}
@@ -362,7 +381,7 @@ export class UserForm extends React.Component<
                 </div>
               </div>,
 
-              <button onClick={this.setPwd}>
+              <button className="button-default" onClick={this.setPwd}>
                 {this.props.msg.pkg.get("update")}
               </button>,
             ])}
@@ -520,6 +539,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
             name={user.name}
             role={user.role}
             quota={user.quota}
+            usedSpace={user.usedSpace}
             roles={this.props.admin.roles}
             msg={this.props.msg}
             update={this.props.update}
@@ -538,6 +558,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
                 onClick={() => {
                   this.delRole(role);
                 }}
+                className="button-default"
               >
                 {this.props.msg.pkg.get("delete")}
               </button>,
@@ -564,7 +585,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
               <h5 className="pane-title">
                 {this.props.msg.pkg.get("user.add")}
               </h5>,
-              <button onClick={this.addUser}>
+              <button onClick={this.addUser} className="button-default">
                 {this.props.msg.pkg.get("add")}
               </button>,
             ])}
@@ -654,7 +675,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
                   value={this.state.newRole}
                   placeholder={this.props.msg.pkg.get("role.name")}
                 />,
-                <button onClick={this.addRole}>
+                <button className="button-default" onClick={this.addRole}>
                   {this.props.msg.pkg.get("add")}
                 </button>,
               ])}
@@ -688,7 +709,7 @@ interface BgProps {
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
-interface BgState { }
+interface BgState {}
 export class BgCfg extends React.Component<BgProps, BgState, {}> {
   changeSiteName = (ev: React.ChangeEvent<HTMLInputElement>) => {
     updater().setClientCfg({ ...this.props.ui, siteName: ev.target.value });
@@ -821,10 +842,13 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
             <h5 className="pane-title">{this.props.msg.pkg.get("cfg.bg")}</h5>,
 
             <span>
-              <button onClick={this.resetClientCfg} className="margin-r-m">
+              <button
+                onClick={this.resetClientCfg}
+                className="margin-r-m button-default"
+              >
                 {this.props.msg.pkg.get("reset")}
               </button>
-              <button onClick={this.setClientCfg}>
+              <button className="button-default" onClick={this.setClientCfg}>
                 {this.props.msg.pkg.get("update")}
               </button>
             </span>,

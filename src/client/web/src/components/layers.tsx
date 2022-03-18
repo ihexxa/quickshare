@@ -30,7 +30,7 @@ export interface Props {
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
-export interface State { }
+export interface State {}
 export class Layers extends React.Component<Props, State, {}> {
   private hotkeyHandler: HotkeyHandler;
   constructor(p: Props) {
@@ -60,7 +60,8 @@ export class Layers extends React.Component<Props, State, {}> {
   };
 
   render() {
-    const hideLogin = this.props.login.authed ||
+    const hideLogin =
+      this.props.login.authed ||
       (this.props.ui.control.controls.get(sharingCtrl) === ctrlOn &&
         this.props.filesInfo.isSharing);
     const loginPaneClass = hideLogin ? "hidden" : "";
@@ -99,6 +100,7 @@ export class Layers extends React.Component<Props, State, {}> {
                 children={List([
                   <h4 id="title">{this.props.msg.pkg.get("pane.settings")}</h4>,
                   <button
+                    className="button-default"
                     onClick={() => {
                       this.setControlOption(settingsDialogCtrl, ctrlOff);
                     }}

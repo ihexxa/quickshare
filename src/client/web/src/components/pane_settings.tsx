@@ -199,10 +199,16 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               </h5>,
 
               <span>
-                <button className="margin-r-m" onClick={this.reportErrors}>
+                <button
+                  className="button-default margin-r-m"
+                  onClick={this.reportErrors}
+                >
                   {this.props.msg.pkg.get("op.submit")}
                 </button>
-                <button onClick={this.truncateErrors}>
+                <button
+                  className="button-default"
+                  onClick={this.truncateErrors}
+                >
                   {this.props.msg.pkg.get("op.truncate")}
                 </button>
               </span>,
@@ -267,7 +273,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               <h5 className="pane-title">
                 {this.props.msg.pkg.get("settings.pwd.update")}
               </h5>,
-              <button onClick={this.setPwd}>
+              <button className="button-default" onClick={this.setPwd}>
                 {this.props.msg.pkg.get("update")}
               </button>,
             ])}
@@ -333,7 +339,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               onClick={() => {
                 this.setLan("en_US");
               }}
-              className="float-input"
+              className="button-default float-input"
             >
               {this.props.msg.pkg.get("enUS")}
             </button>
@@ -341,7 +347,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               onClick={() => {
                 this.setLan("zh_CN");
               }}
-              className="float-input"
+              className="button-default float-input"
             >
               {this.props.msg.pkg.get("zhCN")}
             </button>
@@ -356,7 +362,10 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               </h5>,
 
               <span>
-                <button onClick={this.syncPreferences}>
+                <button
+                  className="button-default"
+                  onClick={this.syncPreferences}
+                >
                   {this.props.msg.pkg.get("update")}
                 </button>
               </span>,
@@ -388,7 +397,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
                 {this.props.msg.pkg.get("cfg.bg")}
               </h5>,
 
-              <button onClick={this.syncPreferences}>
+              <button className="button-default" onClick={this.syncPreferences}>
                 {this.props.msg.pkg.get("update")}
               </button>,
             ])}
@@ -463,7 +472,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
                 </span>,
 
                 <span>
-                  <button onClick={this.syncPreferences}>
+                  <button className="button-default" onClick={this.syncPreferences}>
                     {this.props.msg.pkg.get("update")}
                   </button>
                 </span>,
