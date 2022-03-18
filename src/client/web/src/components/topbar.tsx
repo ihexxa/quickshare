@@ -77,12 +77,15 @@ export class TopBar extends React.Component<Props, State, {}> {
               children={List([
                 <button
                   onClick={this.openSettings}
-                  className={`margin-r-m ${settingsPanelClass}`}
+                  className={`button-default margin-r-m ${settingsPanelClass}`}
                 >
                   {this.props.msg.pkg.get("settings")}
                 </button>,
 
-                <button onClick={this.logout} className={`${loginPanelClass}`}>
+                <button
+                  onClick={this.logout}
+                  className={`button-default ${loginPanelClass}`}
+                >
                   {this.props.msg.pkg.get("login.logout")}
                 </button>,
               ])}

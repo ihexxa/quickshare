@@ -138,6 +138,7 @@ export const msgs: Map<string, string> = Map({
   "endpoints.home": "Home",
   "state.stopped": "Stopped",
   "state.error": "Error",
+  "usedSpace": "Used Space",
   "resetUsedSpace": "Reset Used Space",
   "confirm.resetUsedSpace": "The operation may take some time, do you confirm?"
 });
