@@ -1,19 +1,18 @@
 import * as React from "react";
 import { List, Map } from "immutable";
 
-import { RiShareBoxLine } from "@react-icons/all-files/ri/RiShareBoxLine";
-import { RiCloudOffFill } from "@react-icons/all-files/ri/RiCloudOffFill";
-
 import { BtnList } from "./control/btn_list";
 import { QRCodeIcon } from "./visual/qrcode";
 import { getErrMsg } from "../common/utils";
-import { alertMsg, confirmMsg } from "../common/env";
+import { alertMsg } from "../common/env";
 import { updater } from "./state_updater";
 import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { LoginProps } from "./pane_login";
 import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
 import { Rows } from "./layout/rows";
+import { NotFoundBanner } from "./visual/banner_notfound";
+import { Title } from "./visual/title";
 import { shareIDQuery } from "../client/files";
 import { loadingCtrl, ctrlOn, ctrlOff } from "../common/controls";
 import { CronTable } from "../common/cron";
@@ -100,7 +99,9 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
 
         const row1 = (
           <div>
-            <div className="info">{dirPath}</div>
+            <div className="info">
+              <span className="title-m-wrap dark-font">{dirPath}</span>
+            </div>
 
             <div className="op">
               <Flexbox
@@ -113,6 +114,7 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
                     onClick={() => {
                       this.deleteSharing(dirPath);
                     }}
+                    className="button-default"
                   >
                     {this.props.msg.pkg.get("op.cancel")}
                   </button>,
@@ -124,6 +126,7 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
                 style={{ justifyContent: "flex-end" }}
               />
             </div>
+            <div className="fix"></div>
           </div>
         );
 
@@ -159,6 +162,14 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
   };
 
   render() {
+    const title = (
+      <Title
+        title={this.props.msg.pkg.get("browser.share.title")}
+        iconName="RiShareBoxLine"
+        iconColor="black"
+      />
+    );
+
     const orderByCallbacks = List([
       () => {
         this.orderBy(this.props.msg.pkg.get("item.path"));
@@ -173,64 +184,24 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
     );
 
     const sharingRows = this.makeRows(this.props.sharingsInfo.sharings);
-    const view = <Rows rows={sharingRows} />;
-    const noSharingView = (
-      <Container>
-        <Flexbox
-          children={List([
-            <RiCloudOffFill size="4rem" className="margin-r-m red0-font" />,
-            <span>
-              <h3 className="title-l">
-                {this.props.msg.pkg.get("share.404.title")}
-              </h3>
-              <span className="desc-l grey0-font">
-                {this.props.msg.pkg.get("share.404.desc")}
-              </span>
-            </span>,
-          ])}
-          childrenStyles={List([
-            { flex: "auto", justifyContent: "flex-end" },
-            { flex: "auto" },
-          ])}
-        />
-      </Container>
-    );
-
-    const list =
-      this.props.sharingsInfo.sharings.size === 0 ? (
-        noSharingView
-      ) : (
-        <Container>
-          <Flexbox
-            children={List([
-              <Flexbox
-                children={List([
-                  <RiShareBoxLine
-                    size="3rem"
-                    className="margin-r-m black-font"
-                  />,
-
-                  <span>
-                    <span className="title-m bold">
-                      {this.props.msg.pkg.get("browser.share.title")}
-                    </span>
-                    <span className="desc-m grey0-font">
-                      {this.props.msg.pkg.get("browser.share.desc")}
-                    </span>
-                  </span>,
-                ])}
-              />,
-
-              <span></span>,
-            ])}
-            className="margin-b-l"
-          />
-
+    const view =
+      this.props.sharingsInfo.sharings.size > 0 ? (
+        <div>
           {orderByButtons}
-          {view}
-        </Container>
+          <Rows rows={sharingRows} />
+        </div>
+      ) : (
+        <NotFoundBanner title={this.props.msg.pkg.get("share.404.title")} />
       );
 
-    return <div id="sharing-list">{list}</div>;
+    return (
+      <div id="sharing-list">
+        <Container>
+          {title}
+          <div className="hr"></div>
+          {view}
+        </Container>
+      </div>
+    );
   }
 }

@@ -2,9 +2,6 @@ import * as React from "react";
 import { List } from "immutable";
 import FileSize from "filesize";
 
-import { RiUploadCloudFill } from "@react-icons/all-files/ri/RiUploadCloudFill";
-import { RiCloudOffFill } from "@react-icons/all-files/ri/RiCloudOffFill";
-
 import { BtnList } from "./control/btn_list";
 import { alertMsg } from "../common/env";
 import { getErrMsg } from "../common/utils";
@@ -12,10 +9,10 @@ import { updater } from "./state_updater";
 import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { LoginProps } from "./pane_login";
 import { UploadEntry, UploadState } from "../worker/interface";
-import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
 import { Rows } from "./layout/rows";
-import { NotFoundBanner } from "./visual/notfound";
+import { NotFoundBanner } from "./visual/banner_notfound";
+import { Title } from "./visual/title";
 import { loadingCtrl, ctrlOn, ctrlOff } from "../common/controls";
 import { HotkeyHandler } from "../common/hotkeys";
 
@@ -193,23 +190,10 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
 
   render() {
     const title = (
-      <Flexbox
-        children={List([
-          <Flexbox
-            children={List([
-              <RiUploadCloudFill
-                size="3.2rem"
-                className="margin-r-m black-font"
-              />,
-
-              <span className="title-m bold">
-                {this.props.msg.pkg.get("browser.upload.title")}
-              </span>,
-            ])}
-          />,
-
-          <span></span>,
-        ])}
+      <Title
+        title={this.props.msg.pkg.get("browser.upload.title")}
+        iconName="RiUploadCloudFill"
+        iconColor="black"
       />
     );
 
