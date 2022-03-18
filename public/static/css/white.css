@@ -180,11 +180,7 @@ input:focus {
   height: 4rem;
 }
 
-.theme-default #space-used {
-  text-align: right;
-  line-height: 3rem;
-  font-size: 1.4rem;
-}
+
 
 .container {
   width: 100%;
@@ -203,10 +199,7 @@ input:focus {
   margin-right: 0;
 } */
 
-.theme-default .select-btn {
-  width: 8rem;
-  display: inline-block;
-}
+
 
 .theme-default #op-bar {
 }
@@ -338,40 +331,6 @@ input:focus {
   color: white;
   margin: 1rem;
   padding: 0 1rem;
-}
-
-.theme-default #upload-list .info {
-  display: inline-block;
-  width: 70%;
-}
-
-.theme-default #upload-list .op {
-  display: inline-block;
-  width: 30%;
-  text-align: right;
-}
-
-.theme-default #upload-list .title {
-  font-size: 1.4rem;
-  line-height: 4rem;
-  overflow-wrap: break-word;
-}
-
-.theme-default #upload-list .desc {
-  font-size: 1.2rem;
-  line-height: 4rem;
-  overflow-wrap: break-word;
-}
-
-.theme-default #upload-list .progress-grey {
-  background-color: #ecf0f6;
-  width: 100%;
-  height: 0.3rem;
-}
-
-.theme-default #upload-list .progress-green {
-  background-color: #1abc9c;
-  height: 100%;
 }
 
 .theme-default .upload-item {
@@ -566,7 +525,6 @@ input:focus {
   color: #34495e;
   background-color: #ecf0f6;
   border: solid 1px #95a5a6;
-  /* margin: 0.5rem 0 1rem 0; */
 }
 
 .theme-default .h1,
@@ -610,10 +568,6 @@ input:focus {
   line-height: 3rem;
 }
 
-.theme-default button {
-  font-size: 1.2rem;
-}
-
 .theme-default .button-default {
   color: #697384;
   background-color: #ecf0f6;
@@ -627,10 +581,3 @@ input:focus {
   width: 48rem;
 }
 
-.theme-default .badge {
-  border: none;
-  border-radius: 0.5rem;
-  font-weight: bold;
-  font-size: 1.2rem;
-  padding: 0.8rem 1rem;
-}

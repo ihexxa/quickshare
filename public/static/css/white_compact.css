@@ -66,3 +66,48 @@
   line-height: 3rem;
   font-size: 1.4rem;
 }
+
+.theme-default .badge {
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  font-size: 1.2rem;
+  padding: 1rem 1rem;
+  line-height: 1.2rem;
+  display: inline-block;
+}
+
+.theme-default #upload-list .progress-grey {
+  background-color: #ecf0f6;
+  width: 100%;
+  height: 0.3rem;
+}
+
+.theme-default #upload-list .progress-green {
+  background-color: #1abc9c;
+  height: 100%;
+  transition: width 300ms;
+}
+
+.theme-default #upload-list .info {
+  display: inline-block;
+  width: 70%;
+}
+
+.theme-default #upload-list .op {
+  display: inline-block;
+  width: 30%;
+  text-align: right;
+}
+
+.theme-default #upload-list .title {
+  font-size: 1.4rem;
+  line-height: 3.2rem;
+  overflow-wrap: break-word;
+}
+
+.theme-default #upload-list .desc {
+  font-size: 1.2rem;
+  line-height: 3.2rem;
+  overflow-wrap: break-word;
+}
