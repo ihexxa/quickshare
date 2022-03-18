@@ -441,7 +441,7 @@
 .title-l {
   font-size: 1.8rem;
   font-weight: bold;
-  line-height: 2.5rem;
+  line-height: 3.2rem;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -451,7 +451,7 @@
 
 .desc-l {
   font-size: 1.2rem;
-  line-height: 2rem;
+  line-height: 3.2rem;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -461,7 +461,7 @@
 
 .title-m {
   font-size: 1.4rem;
-  line-height: 2rem;
+  line-height: 3.2rem;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -471,7 +471,7 @@
 
 .title-m-wrap {
   font-size: 1.4rem;
-  line-height: 2rem;
+  line-height: 3.2rem;
   overflow: hidden;
   overflow-wrap: break-word;
   display: block;
@@ -479,7 +479,7 @@
 
 .desc-m {
   font-size: 1.2rem;
-  line-height: 2rem;
+  line-height: 3.2rem;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;

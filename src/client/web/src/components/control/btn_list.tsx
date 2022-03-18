@@ -25,7 +25,7 @@ export const BtnList = (props: Props) => {
   const btns = props.btnNames.map((btnName: string, i: number) => {
     const cb = props.btnCallbacks.get(i);
     return (
-      <button key={`rows-${i}`} className="float" onClick={cb}>
+      <button key={`rows-${i}`} className="float button-default" onClick={cb}>
         {btnName}
       </button>
     );

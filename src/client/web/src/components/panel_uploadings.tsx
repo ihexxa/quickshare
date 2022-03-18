@@ -15,6 +15,7 @@ import { UploadEntry, UploadState } from "../worker/interface";
 import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
 import { Rows } from "./layout/rows";
+import { NotFoundBanner } from "./visual/notfound";
 import { loadingCtrl, ctrlOn, ctrlOff } from "../common/controls";
 import { HotkeyHandler } from "../common/hotkeys";
 
@@ -66,9 +67,7 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
         throw deleteStatus;
       }
 
-      const statuses = await Promise.all([
-        updater().self(),
-      ]);
+      const statuses = await Promise.all([updater().self()]);
       if (statuses.join("") !== "") {
         throw statuses.join(";");
       }
@@ -96,60 +95,52 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
           ? 100
           : Math.floor((uploading.uploaded / uploading.size) * 100);
 
-      let rightCell = (
-        <div className="item-op">
-          <button
-            onClick={() => this.stopUploading(uploading.filePath)}
-            className="float-input"
-          >
-            {this.props.msg.pkg.get("browser.stop")}
-          </button>
-          <button
-            onClick={() => this.deleteUpload(uploading.filePath)}
-            className="float-input"
-          >
-            {this.props.msg.pkg.get("browser.delete")}
-          </button>
-        </div>
-      );
-
+      let uploadState = <span></span>;
       switch (uploading.state) {
         case UploadState.Error:
-          rightCell = (
-            <div className="item-op">
-              <span className="badge white-font red0-bg margin-r-m">
-                {this.props.msg.pkg.get("state.error")}
-              </span>
-              <button
-                onClick={() => this.deleteUpload(uploading.filePath)}
-                className="float-input"
-              >
-                {this.props.msg.pkg.get("browser.delete")}
-              </button>
-            </div>
+          uploadState = (
+            <span className="badge white-font red0-bg margin-r-m">
+              {this.props.msg.pkg.get("state.error")}
+            </span>
           );
           break;
         case UploadState.Stopped:
-          rightCell = (
-            <div className="item-op">
-              <span className="badge yellow0-font black-bg margin-r-m">
-                {this.props.msg.pkg.get("state.stopped")}
-              </span>
-              <button
-                onClick={() => this.deleteUpload(uploading.filePath)}
-                className="float-input"
-              >
-                {this.props.msg.pkg.get("browser.delete")}
-              </button>
-            </div>
+          uploadState = (
+            <span className="badge yellow0-font black-bg margin-r-m">
+              {this.props.msg.pkg.get("state.stopped")}
+            </span>
           );
           break;
         default:
         // no op
       }
 
+      const stopButton =
+        uploading.state !== UploadState.Error &&
+        uploading.state !== UploadState.Stopped ? (
+          <button
+            onClick={() => this.stopUploading(uploading.filePath)}
+            className="inline-block margin-r-m margin-b-m"
+          >
+            {this.props.msg.pkg.get("browser.stop")}
+          </button>
+        ) : null;
+
+      const operations = (
+        <div>
+          {uploadState}
+          {stopButton}
+          <button
+            onClick={() => this.deleteUpload(uploading.filePath)}
+            className="inline-block"
+          >
+            {this.props.msg.pkg.get("browser.delete")}
+          </button>
+        </div>
+      );
+
       const progressBar = (
-        <div className="progress-grey">
+        <div className="progress-grey margin-t-s">
           <div
             className="progress-green"
             style={{ width: `${progress}%` }}
@@ -177,7 +168,7 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
             </span>
           </div>
 
-          <div className="op">{rightCell}</div>
+          <div className="op">{operations}</div>
 
           {progressBar}
           {errorInfo}
@@ -201,6 +192,27 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
   };
 
   render() {
+    const title = (
+      <Flexbox
+        children={List([
+          <Flexbox
+            children={List([
+              <RiUploadCloudFill
+                size="3.2rem"
+                className="margin-r-m black-font"
+              />,
+
+              <span className="title-m bold">
+                {this.props.msg.pkg.get("browser.upload.title")}
+              </span>,
+            ])}
+          />,
+
+          <span></span>,
+        ])}
+      />
+    );
+
     const orderByCallbacks = List([
       () => {
         this.orderBy(this.props.msg.pkg.get("item.path"));
@@ -217,66 +229,24 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
     const uploadingRows = this.makeRowsInputs(
       this.props.uploadingsInfo.uploadings
     );
-    const view = <Rows rows={uploadingRows} />;
-
-    const noUploadingView = (
-      <Container>
-        <Flexbox
-          children={List([
-            <RiCloudOffFill size="4rem" className="margin-r-m red0-font" />,
-            <span>
-              <h3 className="title-l">
-                {this.props.msg.pkg.get("upload.404.title")}
-              </h3>
-              <span className="desc-l grey0-font">
-                {this.props.msg.pkg.get("upload.404.desc")}
-              </span>
-            </span>,
-          ])}
-          childrenStyles={List([
-            { flex: "auto", justifyContent: "flex-end" },
-            { flex: "auto" },
-          ])}
-        />
-      </Container>
-    );
-
-    const list =
-      this.props.uploadingsInfo.uploadings.size === 0 ? (
-        noUploadingView
-      ) : (
-        <Container>
-          <Flexbox
-            children={List([
-              <span className="margin-b-l">
-                <Flexbox
-                  children={List([
-                    <RiUploadCloudFill
-                      size="3rem"
-                      className="margin-r-m black-font"
-                    />,
-
-                    <span>
-                      <span className="title-m bold">
-                        {this.props.msg.pkg.get("browser.upload.title")}
-                      </span>
-                      <span className="desc-m grey0-font">
-                        {this.props.msg.pkg.get("browser.upload.desc")}
-                      </span>
-                    </span>,
-                  ])}
-                />
-              </span>,
-
-              <span></span>,
-            ])}
-          />
-
+    const view =
+      this.props.uploadingsInfo.uploadings.size > 0 ? (
+        <div>
           {orderByButtons}
-          {view}
-        </Container>
+          <Rows rows={uploadingRows} />
+        </div>
+      ) : (
+        <NotFoundBanner title={this.props.msg.pkg.get("upload.404.title")} />
       );
 
-    return <div id="upload-list">{list}</div>;
+    return (
+      <div id="upload-list">
+        <Container>
+          {title}
+          <div className="hr"></div>
+          {view}
+        </Container>
+      </div>
+    );
   }
 }
