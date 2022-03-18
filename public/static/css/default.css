@@ -449,6 +449,15 @@
   display: block;
 }
 
+.title-l-wrap {
+  font-size: 1.8rem;
+  font-weight: bold;
+  line-height: 3.2rem;
+  overflow: hidden;
+  overflow-wrap: break-word;
+  display: block;
+}
+
 .desc-l {
   font-size: 1.2rem;
   line-height: 3.2rem;

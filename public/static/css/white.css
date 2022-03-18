@@ -357,13 +357,13 @@ input:focus {
 }
 
 .theme-default #sharing-list .info {
-  display: inline-block;
+  float: left;
   width: 70%;
   overflow-wrap: break-word;
 }
 
 .theme-default #sharing-list .op {
-  display: inline-block;
+  float: right;
   width: 30%;
   text-align: right;
 }
