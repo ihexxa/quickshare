@@ -622,6 +622,7 @@ export class Updater {
       cssURL: "",
       lanPackURL: "",
       lan: "en_US",
+      theme: "light",
     };
   };
 
@@ -779,6 +780,10 @@ export class Updater {
       default:
         alertMsg("language package not found");
     }
+  };
+
+  setTheme = (theme: string) => {
+    this.props.login.preferences.theme = theme;
   };
 
   setControlOption = (controlName: string, option: string): boolean => {
