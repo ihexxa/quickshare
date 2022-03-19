@@ -113,6 +113,7 @@ describe("State Manager", () => {
         cssURL: "cssURL",
         lanPackURL: "lanPackURL",
         lan: "en_US",
+        theme: "light",
       },
     });
 
@@ -329,6 +330,7 @@ describe("State Manager", () => {
         cssURL: "",
         lanPackURL: "",
         lan: "en_US",
+        theme: "light",
       },
     });
 

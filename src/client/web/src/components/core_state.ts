@@ -55,7 +55,7 @@ export function newState(): ICoreState {
 }
 
 export function initState(): ICoreState {
-  const defaultLanPackage = MsgPackage.get("en_US")
+  const defaultLanPackage = MsgPackage.get("en_US");
   const filesOrderBy = defaultLanPackage.get("item.name");
   const uploadingsOrderBy = defaultLanPackage.get("item.path");
   const sharingsOrderBy = defaultLanPackage.get("item.path");
@@ -107,6 +107,7 @@ export function initState(): ICoreState {
         cssURL: "",
         lanPackURL: "",
         lan: "en_US",
+        theme: "light",
       },
     },
     msg: {

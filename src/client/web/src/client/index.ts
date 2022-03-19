@@ -27,6 +27,7 @@ export interface Preferences {
   cssURL: string;
   lanPackURL: string;
   lan: string;
+  theme: string;
 }
 
 export interface User {

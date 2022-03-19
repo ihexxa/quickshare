@@ -156,6 +156,19 @@ export class PaneSettings extends React.Component<Props, State, {}> {
     }
   };
 
+  setTheme = async (theme: string) => {
+    updater().setTheme(theme);
+    try {
+      const status = await updater().syncPreferences();
+      if (status !== "") {
+        alertMsg(this.props.msg.pkg.get("update.fail"));
+      }
+    } finally {
+      alertMsg(this.props.msg.pkg.get("update.ok"));
+      this.props.update(updater().updateUI);
+    }
+  };
+
   truncateErrors = () => {
     if (confirmMsg(this.props.msg.pkg.get("op.confirm"))) {
       ErrorLogger().truncate();
@@ -350,6 +363,38 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               className="button-default inline-block margin-r-m"
             >
               {this.props.msg.pkg.get("zhCN")}
+            </button>
+          </div>
+        </Container>
+
+        <Container>
+          <Flexbox
+            children={List([
+              <h5 className="title-m">
+                {this.props.msg.pkg.get("theme")}
+              </h5>,
+            ])}
+            childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+          />
+
+          <div className="hr"></div>
+
+          <div>
+            <button
+              onClick={() => {
+                this.setTheme("light");
+              }}
+              className="button-default inline-block margin-r-m"
+            >
+              {this.props.msg.pkg.get("theme.light")}
+            </button>
+            <button
+              onClick={() => {
+                this.setTheme("dark");
+              }}
+              className="button-default inline-block margin-r-m"
+            >
+              {this.props.msg.pkg.get("theme.dark")}
             </button>
           </div>
         </Container>

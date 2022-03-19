@@ -143,6 +143,7 @@ describe("TopBar", () => {
         cssURL: "",
         lanPackURL: "",
         lan: "en_US",
+        theme: "light",
       },
     });
 
