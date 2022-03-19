@@ -99,11 +99,11 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
 
         const row1 = (
           <div>
-            <div className="info">
+            <div className="col-l">
               <span className="title-m-wrap dark-font">{dirPath}</span>
             </div>
 
-            <div className="op">
+            <div className="col-r">
               <Flexbox
                 children={List([
                   <span className="margin-r-m">

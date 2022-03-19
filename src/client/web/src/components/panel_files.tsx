@@ -491,7 +491,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       const icon = item.isDir ? (
         <RiFolder2Fill size="2rem" className="yellow0-font margin-r-m" />
       ) : (
-        <RiFile2Fill size="2rem" className="cyan1-font margin-r-m" />
+        <RiFile2Fill size="2rem" className="highlight-font margin-r-m" />
       );
 
       const modTimeDate = new Date(item.modTime);
@@ -643,7 +643,6 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     const endPoints = (
       <div className={showEndpoints}>
         <Container>
-          <h5 className="title-m"></h5>
           <Title
             title={this.props.msg.pkg.get("endpoints")}
             iconColor="black"
@@ -695,7 +694,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
             <div>
               <button
                 onClick={this.mkDir}
-                className="inline-block cyan1-bg white-font margin-r-m"
+                className="inline-block highlight-bg white-font margin-r-m"
               >
                 {this.props.msg.pkg.get("browser.folder.add")}
               </button>
@@ -711,7 +710,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
             <div>
               <button
                 onClick={this.onClickUpload}
-                className="cyan1-bg white-font"
+                className="highlight-bg white-font"
               >
                 {this.props.msg.pkg.get("browser.upload")}
               </button>
