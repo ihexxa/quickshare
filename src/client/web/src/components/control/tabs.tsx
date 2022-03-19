@@ -65,7 +65,7 @@ export class Tabs extends React.Component<Props, State, {}> {
           className="float-l margin-r-m minor-bg"
         >
           <div className="float-l icon-s margin-r-s">{icon}</div>
-          <div className={`float-l font-s ${fontColor}`}>
+          <div className={`float-l font-xs ${fontColor}`}>
             {this.props.msg.pkg.get(
               `control.${this.props.targetControl}.${option}`
             )}
