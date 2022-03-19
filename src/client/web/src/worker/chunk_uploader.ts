@@ -13,9 +13,9 @@ const defaultChunkLen = 1024 * 1024 * 1;
 const speedDownRatio = 0.5;
 const speedUpRatio = 1.1;
 const chunkLimit = 1024 * 1024 * 50; // 50MB
-const createRetryLimit = 1024;
-const uploadRetryLimit = 1024;
-const readRetryLimit = 8;
+const createRetryLimit = 16;
+const uploadRetryLimit = 16;
+const readRetryLimit = 16;
 const backoffMax = 5000;
 
 export interface ReaderResult {
