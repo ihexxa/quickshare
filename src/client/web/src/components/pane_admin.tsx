@@ -205,7 +205,7 @@ export class UserForm extends React.Component<
 
   render() {
     const foldedClass = this.state.folded ? "hidden" : "";
-    const foldIconColor = this.state.folded ? "black-font" : "highlight-font";
+    const foldIconColor = this.state.folded ? "major-font" : "focus-font";
     const resetUsedSpace = () => {
       this.resetUsedSpace(this.props.id);
     };

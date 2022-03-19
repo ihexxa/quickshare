@@ -52,8 +52,8 @@ export class RootFrame extends React.Component<Props, State, {}> {
 
   render() {
     const bgStyle = this.makeBgStyle();
-    const themeBlack = "theme-black";
-    const theme = themeBlack;
+    const themeDark = "theme-dark";
+    const theme = themeDark;
     const fontSizeClass = "font-m";
 
     const displaying = this.props.ui.control.controls.get(controlName);
@@ -64,7 +64,7 @@ export class RootFrame extends React.Component<Props, State, {}> {
 
     return (
       <div id="root-frame" className={`${theme} ${fontSizeClass}`}>
-        <div id="bg" style={bgStyle}>
+        <div id="bg" style={{}}>
           <Layers
             login={this.props.login}
             admin={this.props.admin}
@@ -88,17 +88,17 @@ export class RootFrame extends React.Component<Props, State, {}> {
                 filesPanel: {
                   name: "RiFolder2Fill",
                   size: "1.6rem",
-                  color: "highlight",
+                  color: "focus",
                 },
                 uploadingsPanel: {
                   name: "RiUploadCloudFill",
                   size: "1.6rem",
-                  color: "highlight",
+                  color: "focus",
                 },
                 sharingsPanel: {
                   name: "RiShareBoxLine",
                   size: "1.6rem",
-                  color: "highlight",
+                  color: "focus",
                 },
               })}
               ui={this.props.ui}

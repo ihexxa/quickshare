@@ -484,14 +484,14 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         ? `${dirPath}${item.name}`
         : `${dirPath}/${item.name}`;
 
-      const selectedIconColor = isSelected ? "highlight-font" : "dark-font";
+      const selectedIconColor = isSelected ? "focus-font" : "minor-font";
       const descIconColor = this.state.showDetail.has(item.name)
-        ? "highlight-font"
-        : "light-font";
+        ? "focus-font"
+        : "major-font";
       const icon = item.isDir ? (
         <RiFolder2Fill size="2rem" className="yellow0-font margin-r-m" />
       ) : (
-        <RiFile2Fill size="2rem" className="highlight-font margin-r-m" />
+        <RiFile2Fill size="2rem" className="focus-font margin-r-m" />
       );
 
       const modTimeDate = new Date(item.modTime);
@@ -504,14 +504,14 @@ export class FilesPanel extends React.Component<Props, State, {}> {
           <span className="clickable" onClick={() => this.gotoChild(item.name)}>
             {item.name}
           </span>
-          <span className="light-font">{` - ${modTimeFormatted}`}</span>
+          <span className="major-font">{` - ${modTimeFormatted}`}</span>
         </span>
       ) : (
         <span className="title-m-wrap">
           <a className="clickable" href={downloadPath} target="_blank">
             {item.name}
           </a>
-          <span className="light-font">{` - ${modTimeFormatted}`}</span>
+          <span className="major-font">{` - ${modTimeFormatted}`}</span>
         </span>
       );
 
@@ -552,21 +552,21 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         ? "margin-t-m padding-m"
         : "no-height";
       const desc = (
-        <div className={`${descStateClass} desc light-font light-bg`}>
+        <div className={`${descStateClass} desc major-font minor-bg`}>
           <div className="column">
             <div className="card">
-              <span className="title-m dark-font">{pathTitle}</span>
+              <span className="title-m minor-font">{pathTitle}</span>
               <span className="font-s work-break-all">{absDownloadURL}</span>
             </div>
           </div>
 
           <div className="column">
             <div className="card">
-              <span className="title-m dark-font">{modTimeTitle}</span>
+              <span className="title-m minor-font">{modTimeTitle}</span>
               <span className="font-s work-break-all">{modTimeFormatted}</span>
             </div>
             <div className="card">
-              <span className="title-m dark-font">{sizeTitle}</span>
+              <span className="title-m minor-font">{sizeTitle}</span>
               <span className="font-s work-break-all">{itemSize}</span>
             </div>
           </div>
@@ -575,11 +575,11 @@ export class FilesPanel extends React.Component<Props, State, {}> {
             <div className="card">
               <Flexbox
                 children={List([
-                  <span className="title-m dark-font">SHA1</span>,
+                  <span className="title-m minor-font">SHA1</span>,
                   <RiRestartFill
                     onClick={() => this.generateHash(itemPath)}
                     size={"2rem"}
-                    className={`dark-font ${shareModeClass}`}
+                    className={`minor-font ${shareModeClass}`}
                   />,
                 ])}
                 childrenStyles={List([{}, { justifyContent: "flex-end" }])}
@@ -593,7 +593,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       const cells = List<React.ReactNode>([
         <div className="icon-s">{icon}</div>,
         <div>{name}</div>,
-        <div className="title-m light-font padding-l-s">{itemSize}</div>,
+        <div className="title-m major-font padding-l-s">{itemSize}</div>,
         <div className="txt-align-r">{op}</div>,
       ]);
 
@@ -645,7 +645,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         <Container>
           <Title
             title={this.props.msg.pkg.get("endpoints")}
-            iconColor="black"
+            iconColor="major"
             iconName="RiGridFill"
           />
           <div className="hr"></div>
@@ -694,7 +694,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
             <div>
               <button
                 onClick={this.mkDir}
-                className="inline-block highlight-bg white-font margin-r-m"
+                className="inline-block focus-bg white-font margin-r-m"
               >
                 {this.props.msg.pkg.get("browser.folder.add")}
               </button>
@@ -710,7 +710,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
             <div>
               <button
                 onClick={this.onClickUpload}
-                className="highlight-bg white-font"
+                className="focus-bg white-font"
               >
                 {this.props.msg.pkg.get("browser.upload")}
               </button>
@@ -784,12 +784,12 @@ export class FilesPanel extends React.Component<Props, State, {}> {
 
     const rowsViewColorClass =
       this.props.ui.control.controls.get(filesViewCtrl) === "rows"
-        ? "highlight-font"
-        : "black-font";
+        ? "focus-font"
+        : "major-font";
     const tableViewColorClass =
       this.props.ui.control.controls.get(filesViewCtrl) === "table"
-        ? "highlight-font"
-        : "black-font";
+        ? "focus-font"
+        : "major-font";
 
     const itemListPane = (
       <div>
@@ -820,7 +820,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
                     <button
                       type="button"
                       onClick={this.addSharing}
-                      className="highlight-bg white-font margin-r-m"
+                      className="focus-bg white-font margin-r-m"
                     >
                       {this.props.msg.pkg.get("browser.share.add")}
                     </button>

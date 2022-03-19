@@ -193,7 +193,7 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
       <Title
         title={this.props.msg.pkg.get("browser.upload.title")}
         iconName="RiUploadCloudFill"
-        iconColor="black"
+        iconColor="major"
       />
     );
 

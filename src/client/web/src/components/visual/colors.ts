@@ -30,8 +30,11 @@ export const colors = Set<string>([
   "black1",
   "dark",
   "light",
+  "major",
+  "minor",
+  "focus",
   "normal",
-  "highlight",
+  "focus",
   "error",
 ]);
 

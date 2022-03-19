@@ -100,7 +100,7 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
         const row1 = (
           <div>
             <div className="col-l">
-              <span className="title-m-wrap dark-font">{dirPath}</span>
+              <span className="title-m-wrap minor-font">{dirPath}</span>
             </div>
 
             <div className="col-r">
@@ -133,7 +133,7 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
         const elem = (
           <div className="margin-t-m margin-b-m" key={dirPath}>
             {row1}
-            <div className="desc">{sharingURL}</div>
+            <div className="desc minor-bg major-font">{sharingURL}</div>
             <div className="hr"></div>
           </div>
         );
@@ -166,7 +166,7 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
       <Title
         title={this.props.msg.pkg.get("browser.share.title")}
         iconName="RiShareBoxLine"
-        iconColor="black"
+        iconColor="major"
       />
     );
 
