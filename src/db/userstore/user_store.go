@@ -44,6 +44,7 @@ var (
 		CSSURL:     "",
 		LanPackURL: "",
 		Lan:        "en_US",
+		Theme:      "light",
 	}
 )
 
