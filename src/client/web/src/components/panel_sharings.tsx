@@ -131,7 +131,7 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
         );
 
         const elem = (
-          <div className="sharing-item" key={dirPath}>
+          <div className="margin-t-m margin-b-m" key={dirPath}>
             {row1}
             <div className="desc">{sharingURL}</div>
             <div className="hr"></div>

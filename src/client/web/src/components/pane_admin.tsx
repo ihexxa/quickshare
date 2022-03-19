@@ -211,7 +211,7 @@ export class UserForm extends React.Component<
     };
 
     return (
-      <div className="user-form">
+      <div className="padding-t-m padding-b-m">
         <Columns
           rows={List([
             List([
@@ -394,6 +394,8 @@ export class UserForm extends React.Component<
             ])}
           />
         </div>
+
+        <div className="hr"></div>
       </div>
     );
   }
@@ -551,7 +553,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
 
     const roleList = this.props.admin.roles.valueSeq().map((role: string) => {
       return (
-        <div key={role} className="role-list-item">
+        <div key={role} className="margin-b-m">
           <Flexbox
             children={List([
               <span>{role}</span>,

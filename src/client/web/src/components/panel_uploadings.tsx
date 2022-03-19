@@ -151,10 +151,10 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
         );
 
       const elem = (
-        <div key={uploading.filePath} className="upload-item">
-          <div className={`font-s l-col`}>
-            <span className="title">{fileName}&nbsp;</span>
-            <span className="desc grey0-font">
+        <div key={uploading.filePath} className="margin-t-m margin-b-m">
+          <div className={`font-s col-l`}>
+            <span className="font-s work-break-all">{`${fileName} - `}</span>
+            <span className="font-s work-break-all grey0-font">
               {FileSize(uploading.uploaded, { round: 0 })}
               &nbsp;/&nbsp;
               {FileSize(uploading.size, {
@@ -165,8 +165,8 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
             </span>
           </div>
 
-          <div className="r-col">{operations}</div>
-
+          <div className="col-r">{operations}</div>
+          <div className="fix"></div>
           {progressBar}
           {errorInfo}
         </div>

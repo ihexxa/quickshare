@@ -52,7 +52,8 @@ export class RootFrame extends React.Component<Props, State, {}> {
 
   render() {
     const bgStyle = this.makeBgStyle();
-    const theme = "theme-default";
+    const themeBlack = "theme-black";
+    const theme = themeBlack;
     const fontSizeClass = "font-m";
 
     const displaying = this.props.ui.control.controls.get(controlName);
