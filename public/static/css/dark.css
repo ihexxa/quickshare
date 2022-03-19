@@ -72,8 +72,7 @@
 }
 
 .theme-dark #top-menu {
-  background: #242424;
-  opacity: 0.8;
+  background: rgba(36, 36, 36, 0.9);
   box-shadow: 0 5px 30px 0 rgba(31, 38, 135, 0.1);
   backdrop-filter: blur(9.5px);
   color: #16a085;
