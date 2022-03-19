@@ -16,7 +16,7 @@ export const BtnList = (props: Props) => {
     props.titleIcon != null ? (
       getIconWithProps(props.titleIcon, {
         size: "3rem",
-        className: "black-font margin-r-m",
+        className: "major-font margin-r-m",
       })
     ) : (
       <span></span>

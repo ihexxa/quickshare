@@ -384,7 +384,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               type="text"
               onChange={this.changeLanPackURL}
               value={this.props.login.preferences.lanPackURL}
-              className="dark-font"
+              className="minor-font"
               style={{ width: "20rem" }}
               placeholder={this.props.msg.pkg.get("settings.lanPackURL")}
             />

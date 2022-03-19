@@ -43,7 +43,7 @@ export class Tabs extends React.Component<Props, State, {}> {
 
     const titleIcon =
       this.props.titleIcon != null
-        ? getIcon(this.props.titleIcon, "2rem", "black")
+        ? getIcon(this.props.titleIcon, "2rem", "major")
         : null;
     const options = this.props.ui.control.options.get(this.props.targetControl);
     const tabs = options.map((option: string) => {
@@ -51,10 +51,10 @@ export class Tabs extends React.Component<Props, State, {}> {
         ? this.props.tabIcons.get(option)
         : defaultIconProps;
 
-      const iconColor = displaying === option ? iconProps.color : "black0";
+      const iconColor = displaying === option ? iconProps.color : "major";
       const icon = getIcon(iconProps.name, iconProps.size, iconColor);
       const fontColor =
-        displaying === option ? `${colorClass(iconColor)}-font` : "black0-font";
+        displaying === option ? `${colorClass(iconColor)}-font` : "major-font";
 
       return (
         <button
@@ -62,7 +62,7 @@ export class Tabs extends React.Component<Props, State, {}> {
           onClick={() => {
             this.setTab(this.props.targetControl, option);
           }}
-          className="float-l margin-r-m normal-bg"
+          className="float-l margin-r-m minor-bg"
         >
           <Flexbox
             children={List([
