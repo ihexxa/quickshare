@@ -241,6 +241,10 @@
   margin: 3rem auto 8rem auto;
 }
 
+.theme-default .tabs button {
+  padding: 0.5rem 1rem;
+}
+
 /* +composition */
 
 .theme-default .container {
