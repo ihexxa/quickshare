@@ -561,11 +561,11 @@ export class FilesPanel extends React.Component<Props, State, {}> {
           </div>
 
           <div className="column">
-            <div className="card margin-l-m">
+            <div className="card">
               <span className="title-m dark-font">{modTimeTitle}</span>
               <span className="font-s work-break-all">{modTimeFormatted}</span>
             </div>
-            <div className="card margin-l-m">
+            <div className="card">
               <span className="title-m dark-font">{sizeTitle}</span>
               <span className="font-s work-break-all">{itemSize}</span>
             </div>
@@ -756,7 +756,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     );
     const viewType = this.props.ui.control.controls.get(filesViewCtrl);
     const view = (
-      <div id="item-rows">
+      <div className="margin-t-l">
         {this.prepareColumns(this.props.filesInfo.items, showOp)}
       </div>
     ); // TODO: support better views in the future
@@ -800,7 +800,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         </div>
 
         <Container>
-          <div id="browser-op" className={`${showOp}`}>
+          <div className={`${showOp} margin-b-m`}>
             <Flexbox
               children={List([
                 <span>
@@ -812,7 +812,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
                           this.props.filesInfo.dirPath.join("/")
                         );
                       }}
-                      className="red-btn margin-r-m"
+                      className="red0-bg white-font margin-r-m"
                     >
                       {this.props.msg.pkg.get("browser.share.del")}
                     </button>
@@ -833,7 +833,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
                       <button
                         type="button"
                         onClick={() => this.delete()}
-                        className="red-btn margin-r-m"
+                        className="red0-bg white-font margin-r-m"
                       >
                         {this.props.msg.pkg.get("browser.delete")}
                       </button>
@@ -869,7 +869,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
                     <span className={`${showOp}`}>
                       <button
                         onClick={() => this.selectAll()}
-                        className="select-btn button-default"
+                        className="inline-block button-default"
                       >
                         {this.props.msg.pkg.get("browser.selectAll")}
                       </button>
