@@ -126,7 +126,9 @@
   right: 0;
   top: 0;
   bottom: 0;
-  background: url("/static/img/textured_paper.png") repeat fixed center;
+  background-color: rgba(20, 20, 20, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   overflow: scroll;
   z-index: 100;
 }
