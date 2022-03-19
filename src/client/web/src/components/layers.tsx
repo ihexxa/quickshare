@@ -101,7 +101,7 @@ export class Layers extends React.Component<Props, State, {}> {
                 children={List([
                   <Title
                     title={this.props.msg.pkg.get("pane.settings")}
-                    iconColor="black"
+                    iconColor="major"
                     iconName="RiListSettingsFill"
                   />,
                   <button

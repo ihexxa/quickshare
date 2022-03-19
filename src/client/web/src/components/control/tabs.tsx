@@ -43,7 +43,7 @@ export class Tabs extends React.Component<Props, State, {}> {
 
     const titleIcon =
       this.props.titleIcon != null
-        ? getIcon(this.props.titleIcon, "2rem", "major")
+        ? getIcon(this.props.titleIcon, "2rem", "normal")
         : null;
     const options = this.props.ui.control.options.get(this.props.targetControl);
     const tabs = options.map((option: string) => {
@@ -51,10 +51,10 @@ export class Tabs extends React.Component<Props, State, {}> {
         ? this.props.tabIcons.get(option)
         : defaultIconProps;
 
-      const iconColor = displaying === option ? iconProps.color : "major";
+      const iconColor = displaying === option ? iconProps.color : "normal";
       const icon = getIcon(iconProps.name, iconProps.size, iconColor);
       const fontColor =
-        displaying === option ? `${colorClass(iconColor)}-font` : "major-font";
+        displaying === option ? `${colorClass(iconColor)}-font` : "normal-font";
 
       return (
         <button
