@@ -19,6 +19,7 @@ import {
   ctrlHidden,
 } from "../common/controls";
 import { LoadingIcon } from "./visual/loading";
+import { Title } from "./visual/title";
 import { HotkeyHandler } from "../common/hotkeys";
 
 export interface Props {
@@ -98,7 +99,11 @@ export class Layers extends React.Component<Props, State, {}> {
             <Container>
               <Flexbox
                 children={List([
-                  <h4 id="title">{this.props.msg.pkg.get("pane.settings")}</h4>,
+                  <Title
+                    title={this.props.msg.pkg.get("pane.settings")}
+                    iconColor="black"
+                    iconName="RiListSettingsFill"
+                  />,
                   <button
                     className="button-default"
                     onClick={() => {

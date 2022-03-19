@@ -9,21 +9,15 @@
   float: left;
 }
 
-.theme-default #browser .info {
+.theme-default .info {
   border: dashed 1px #95a5a6;
   font-size: 1.4rem;
   padding: 1rem;
   color: #697384;
   margin: 1rem 0 0 0;
-  background-color: #ecf0f1;
+  background-color: #f6f6f6;
   white-space: nowrap;
   overflow: auto;
-}
-
-.theme-default .pane-title {
-  color: black;
-  font-size: 1.6rem;
-  line-height: 1.6rem;
 }
 
 .theme-default #breadcrumb {
@@ -51,9 +45,8 @@
   display: block;
 }
 
-.theme-default .inline-blocks {
+.theme-default .inline-block {
   display: inline-block;
-  margin: auto 1rem auto auto;
 }
 
 .theme-default .select-btn {
@@ -89,12 +82,12 @@
   transition: width 300ms;
 }
 
-.theme-default #upload-list .info {
+.theme-default .l-col {
   display: inline-block;
   width: 70%;
 }
 
-.theme-default #upload-list .op {
+.theme-default .r-col {
   display: inline-block;
   width: 30%;
   text-align: right;
@@ -115,5 +108,21 @@
 .theme-default #item-rows .desc {
   display: block;
   word-break: break-all;
-  border-radius: 0.8rem;
+}
+
+.theme-default .error-inline {
+  font-size: 1.4rem;
+  padding: 1rem;
+  color: #f1c40f;
+  margin: 1rem 0 0 0;
+  background-color: #2c3e50;
+  white-space: nowrap;
+  overflow: auto;
+}
+
+.theme-default .label {
+  font-size: 1.2rem;
+  line-height: 1.8rem;
+  color: #7f8c8d;
+  padding-left: 0.5rem;
 }

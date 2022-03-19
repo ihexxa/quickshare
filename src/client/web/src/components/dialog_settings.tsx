@@ -12,6 +12,7 @@ import { Container } from "./layout/container";
 import { LoginProps } from "./pane_login";
 import { roleAdmin } from "../client";
 import { settingsTabsCtrl } from "../common/controls";
+import { Title } from "./visual/title";
 
 export interface Props {
   admin: AdminProps;

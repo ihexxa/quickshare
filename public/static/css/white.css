@@ -339,16 +339,6 @@ input:focus {
   overflow-wrap: break-word;
 }
 
-.theme-default .error-inline {
-  font-size: 1.4rem;
-  padding: 1rem;
-  color: #f1c40f;
-  margin: 1rem 0 0 0;
-  background-color: #2c3e50;
-  white-space: nowrap;
-  overflow: auto;
-}
-
 .theme-default #sharing-list .info {
   float: left;
   width: 70%;
@@ -432,10 +422,6 @@ input:focus {
 
 .theme-default #pane-settings {
   /* padding: 2rem; */
-}
-
-.theme-default #pane-settings #profile .desc-m {
-  color: #95a5a6;
 }
 
 .theme-default .user-form {
