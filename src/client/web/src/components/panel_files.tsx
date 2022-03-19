@@ -552,7 +552,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         ? "margin-t-m padding-m"
         : "no-height";
       const desc = (
-        <div className={`${descStateClass} desc major-font minor-bg`}>
+        <div className={`${descStateClass} major-font major-bg`}>
           <div className="column">
             <div className="card">
               <span className="title-m minor-font">{pathTitle}</span>
@@ -584,7 +584,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
                 ])}
                 childrenStyles={List([{}, { justifyContent: "flex-end" }])}
               />
-              <div className="info">{item.sha1}</div>
+              <div className="info minor-bg">{item.sha1}</div>
             </div>
           </div>
         </div>
@@ -645,7 +645,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         <Container>
           <Title
             title={this.props.msg.pkg.get("endpoints")}
-            iconColor="major"
+            iconColor="normal"
             iconName="RiGridFill"
           />
           <div className="hr"></div>

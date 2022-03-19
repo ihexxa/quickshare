@@ -247,7 +247,7 @@ export class UserForm extends React.Component<
 
         <div></div>
 
-        <div className={`info ${foldedClass}`}>
+        <div className={`info major-bg ${foldedClass}`}>
           <div>
             <Flexbox
               children={List([

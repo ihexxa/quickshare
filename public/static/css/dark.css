@@ -164,7 +164,7 @@
 .theme-dark input {
   font-size: 1.2rem;
   color: #999;
-  background-color: rgb(64 64 64);
+  background-color: #404040;
   border: solid 1px #95a5a6;
 }
 
@@ -348,10 +348,10 @@
   color: #f1c40f;
 }
 .theme-dark .major-bg {
-  background-color: #242424;
+  background-color: #404040;
 }
 .theme-dark .normal-bg {
-  background-color: #697384;
+  background-color: #242424;
 }
 .theme-dark .focus-bg {
   background-color: #16a085;
@@ -374,5 +374,5 @@
 }
 .theme-dark .button-default {
   color: #999;
-  background-color: rgb(64 64 64);
+  background-color: #404040;
 }

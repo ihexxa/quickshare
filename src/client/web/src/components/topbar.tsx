@@ -55,7 +55,7 @@ export class TopBar extends React.Component<Props, State, {}> {
         : "";
 
     return (
-      <div id="top-bar" className="focus-font major-bg">
+      <div id="top-bar" className="focus-font normal-bg">
         <Flexbox
           children={List([
             <a
