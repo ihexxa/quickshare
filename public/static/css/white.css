@@ -339,28 +339,6 @@ input:focus {
   overflow-wrap: break-word;
 }
 
-.theme-default #sharing-list .info {
-  float: left;
-  width: 70%;
-  overflow-wrap: break-word;
-}
-
-.theme-default #sharing-list .op {
-  float: right;
-  width: 30%;
-  text-align: right;
-}
-
-.theme-default #sharing-list .desc {
-  background-color: #ecf0f1;
-  font-size: 1.2rem;
-  margin: 1rem 0;
-  color: #697384;
-  padding: 1rem;
-  border: dashed 1px #95a5a6;
-  overflow-wrap: break-word;
-}
-
 .theme-default .sharing-item {
   margin: 2rem 0 2rem 0;
 }
