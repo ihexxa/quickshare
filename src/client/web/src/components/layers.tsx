@@ -97,24 +97,24 @@ export class Layers extends React.Component<Props, State, {}> {
         <div id="settings-layer" className={`layer ${showSettings}`}>
           <div id="root-container">
             <Container>
-              <Flexbox
-                children={List([
-                  <Title
-                    title={this.props.msg.pkg.get("pane.settings")}
-                    iconColor="major"
-                    iconName="RiListSettingsFill"
-                  />,
-                  <button
-                    className="button-default"
-                    onClick={() => {
-                      this.setControlOption(settingsDialogCtrl, ctrlOff);
-                    }}
-                  >
-                    {this.props.msg.pkg.get("panes.close")}
-                  </button>,
-                ])}
-                childrenStyles={List([{}, { justifyContent: "flex-end" }])}
-              />
+              <div className="col-l">
+                <Title
+                  title={this.props.msg.pkg.get("pane.settings")}
+                  iconColor="major"
+                  iconName="RiListSettingsFill"
+                />
+              </div>
+              <div className="col-r">
+                <button
+                  className="button-default"
+                  onClick={() => {
+                    this.setControlOption(settingsDialogCtrl, ctrlOff);
+                  }}
+                >
+                  {this.props.msg.pkg.get("panes.close")}
+                </button>
+              </div>
+              <div className="fix"></div>
             </Container>
 
             <SettingsDialog

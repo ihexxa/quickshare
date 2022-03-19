@@ -5,7 +5,7 @@ import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { FilesPanel, FilesProps } from "./panel_files";
 import { UploadingsPanel, UploadingsProps } from "./panel_uploadings";
 import { SharingsPanel, SharingsProps } from "./panel_sharings";
-import { IconProps } from "./visual/icons";
+import { IconProps, iconSize } from "./visual/icons";
 import { Tabs } from "./control/tabs";
 import { LoginProps } from "./pane_login";
 import { Layers } from "./layers";
@@ -76,7 +76,7 @@ export class RootFrame extends React.Component<Props, State, {}> {
             update={this.props.update}
           />
 
-          <TopBar
+        <TopBar
             login={this.props.login}
             msg={this.props.msg}
             ui={this.props.ui}
@@ -89,17 +89,17 @@ export class RootFrame extends React.Component<Props, State, {}> {
               tabIcons={Map<string, IconProps>({
                 filesPanel: {
                   name: "RiFolder2Fill",
-                  size: "1.6rem",
+                  size: iconSize("s"),
                   color: "focus",
                 },
                 uploadingsPanel: {
                   name: "RiUploadCloudFill",
-                  size: "1.6rem",
+                  size: iconSize("s"),
                   color: "focus",
                 },
                 sharingsPanel: {
                   name: "RiShareBoxLine",
-                  size: "1.6rem",
+                  size: iconSize("s"),
                   color: "focus",
                 },
               })}

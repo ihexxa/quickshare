@@ -64,18 +64,13 @@ export class Tabs extends React.Component<Props, State, {}> {
           }}
           className="float-l margin-r-m minor-bg"
         >
-          <Flexbox
-            children={List([
-              <span>{titleIcon}</span>,
-              <span className="margin-r-s">{icon}</span>,
-              <span className={fontColor}>
-                {this.props.msg.pkg.get(
-                  `control.${this.props.targetControl}.${option}`
-                )}
-              </span>,
-            ])}
-            childrenStyles={List([{}, {}, {}])}
-          />
+          <div className="float-l icon-s margin-r-s">{icon}</div>
+          <div className={`float-l font-s ${fontColor}`}>
+            {this.props.msg.pkg.get(
+              `control.${this.props.targetControl}.${option}`
+            )}
+          </div>
+          <div className="fix"></div>
         </button>
       );
     });
