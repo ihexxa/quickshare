@@ -31,6 +31,13 @@ export class RootFrame extends React.Component<Props, State, {}> {
   }
 
   makeBgStyle = (): Object => {
+    if (
+      this.props.login.preferences.bg.url === "" &&
+      this.props.ui.bg.url === ""
+    ) {
+      return {};
+    }
+
     let bgStyle = undefined;
     if (
       this.props.login.preferences != null &&
@@ -66,7 +73,7 @@ export class RootFrame extends React.Component<Props, State, {}> {
 
     return (
       <div id="root-frame" className={`${theme} ${fontSizeClass}`}>
-        <div id="bg" style={{}}>
+        <div id="bg" style={bgStyle}>
           <Layers
             login={this.props.login}
             admin={this.props.admin}
@@ -76,7 +83,7 @@ export class RootFrame extends React.Component<Props, State, {}> {
             update={this.props.update}
           />
 
-        <TopBar
+          <TopBar
             login={this.props.login}
             msg={this.props.msg}
             ui={this.props.ui}

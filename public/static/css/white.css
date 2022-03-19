@@ -52,7 +52,7 @@
 }
 
 .theme-default #bg {
-  background: url("/static/img/textured_paper.png") repeat fixed center;
+  /* background: url("/static/img/textured_paper.png") repeat fixed center; */
   position: fixed;
   left: 0;
   right: 0;
@@ -123,7 +123,9 @@
   right: 0;
   top: 0;
   bottom: 0;
-  background: url("/static/img/textured_paper.png") repeat fixed center;
+  background-color: rgba(200, 200, 200, 0.5);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(9.5px);
   overflow: scroll;
   z-index: 100;
 }

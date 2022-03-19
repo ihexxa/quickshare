@@ -2,7 +2,7 @@ import * as React from "react";
 import { Map } from "immutable";
 
 import { ICoreState, MsgProps, UIProps } from "./core_state";
-import { IconProps } from "./visual/icons";
+import { IconProps, iconSize } from "./visual/icons";
 
 import { PaneSettings } from "./pane_settings";
 import { AdminPane, AdminProps } from "./pane_admin";
@@ -43,13 +43,13 @@ export class SettingsDialog extends React.Component<Props, State, {}> {
             tabIcons={Map<string, IconProps>({
               preferencePane: {
                 name: "RiSettings3Fill",
-                size: "1.6rem",
-                color: "cyan1",
+                size: iconSize("s"),
+                color: "focus",
               },
               managementPane: {
                 name: "RiWindowFill",
-                size: "1.6rem",
-                color: "cyan1",
+                size: iconSize("s"),
+                color: "focus",
               },
             })}
             ui={this.props.ui}

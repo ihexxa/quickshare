@@ -765,7 +765,7 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
 
   setClientCfg = async () => {
     const bgURL = this.props.ui.bg.url;
-    if (bgURL.length === 0 || bgURL.length >= 4096) {
+    if (bgURL.length >= 4096) {
       alertMsg(this.props.msg.pkg.get("bg.url.alert"));
       return;
     }
