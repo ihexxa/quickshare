@@ -43,6 +43,7 @@ type Preferences struct {
 	CSSURL     string              `json:"cssURL"`
 	LanPackURL string              `json:"lanPackURL"`
 	Lan        string              `json:"lan"`
+	Theme      string              `json:"theme"`
 }
 
 type User struct {
