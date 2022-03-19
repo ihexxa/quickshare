@@ -33,6 +33,7 @@ import {
 } from "../common/controls";
 import { HotkeyHandler } from "../common/hotkeys";
 import { CronTable } from "../common/cron";
+import { Title } from "./visual/title";
 
 export interface Item {
   name: string;
@@ -599,7 +600,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       const tableCols = (
         <Columns
           rows={List([cells])}
-          widths={List(["3rem", "calc(100% - 16rem)", "8rem", "5rem"])}
+          widths={List(["3rem", "calc(100% - 18rem)", "8rem", "7rem"])}
           childrenClassNames={List(["", "", "", ""])}
         />
       );
@@ -642,9 +643,12 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     const endPoints = (
       <div className={showEndpoints}>
         <Container>
-          <h5 className="pane-title margin-r-m">
-            {this.props.msg.pkg.get("endpoints")}
-          </h5>
+          <h5 className="title-m"></h5>
+          <Title
+            title={this.props.msg.pkg.get("endpoints")}
+            iconColor="black"
+            iconName="RiGridFill"
+          />
           <div className="hr"></div>
 
           <button onClick={gotoRoot} className="button-default margin-r-m">
@@ -691,7 +695,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
             <div>
               <button
                 onClick={this.mkDir}
-                className="inline-blocks cyan1-bg white-font"
+                className="inline-block cyan1-bg white-font margin-r-m"
               >
                 {this.props.msg.pkg.get("browser.folder.add")}
               </button>
@@ -700,7 +704,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
                 onChange={this.onNewFolderNameChange}
                 value={this.state.newFolderName}
                 placeholder={this.props.msg.pkg.get("browser.folder.name")}
-                className="inline-blocks"
+                className="inline-block"
               />
             </div>,
 

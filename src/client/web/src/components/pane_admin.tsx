@@ -11,7 +11,8 @@ import { updater } from "./state_updater";
 import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
 import { loadingCtrl, ctrlOn, ctrlOff } from "../common/controls";
-// import { getItemPath } from "./panel_files";
+import { iconSize } from "./visual/icons";
+import { Columns } from "./layout/columns";
 
 export interface AdminProps {
   users: Map<string, User>;
@@ -204,49 +205,49 @@ export class UserForm extends React.Component<
 
   render() {
     const foldedClass = this.state.folded ? "hidden" : "";
-    const foldIconColor = this.state.folded ? "black-font" : "cyan1-font";
+    const foldIconColor = this.state.folded ? "black-font" : "highlight-font";
     const resetUsedSpace = () => {
       this.resetUsedSpace(this.props.id);
     };
 
     return (
       <div className="user-form">
-        <Flexbox
-          children={List([
-            <div>
-              <span className="bold">{`${this.props.msg.pkg.get(
-                "user.name"
-              )}: `}</span>
-              <span className="margin-r-m">{this.props.name}</span>
-              <span className="bold">{`${this.props.msg.pkg.get(
-                "user.id"
-              )}: `}</span>
-              <span>{this.props.id}</span>
-            </div>,
+        <Columns
+          rows={List([
+            List([
+              <div className="title-m-wrap">
+                <span className="bold">{`${this.props.msg.pkg.get(
+                  "user.name"
+                )}: `}</span>
+                <span className="margin-r-m">{this.props.name}</span>
+                <span className="bold">{`${this.props.msg.pkg.get(
+                  "user.id"
+                )}: `}</span>
+                <span>{this.props.id}</span>
+              </div>,
 
-            <span>
-              <RiMenuUnfoldFill
-                size="1.2rem"
-                className={`margin-r-m ${foldIconColor}`}
-                onClick={this.toggle}
-              />
+              <div className="txt-align-r">
+                <div className="icon-s inline-block">
+                  <RiMenuUnfoldFill
+                    size={iconSize("s")}
+                    className={`margin-r-m ${foldIconColor}`}
+                    onClick={this.toggle}
+                  />
+                </div>
+              </div>,
 
               <button className="button-default" onClick={this.delUser}>
                 {this.props.msg.pkg.get("delete")}
-              </button>
-            </span>,
+              </button>,
+            ]),
           ])}
-          childrenStyles={List([
-            { alignItems: "flex-start", flexBasis: "70%" },
-            {
-              justifyContent: "flex-end",
-            },
-          ])}
+          widths={List(["calc(100% - 10rem)", "3rem", "7rem"])}
+          childrenClassNames={List(["", "txt-align-r", "txt-align-r"])}
         />
 
-        <div className={foldedClass}>
-          <div className="hr"></div>
+        <div></div>
 
+        <div className={`info ${foldedClass}`}>
           <div>
             <Flexbox
               children={List([
@@ -270,7 +271,7 @@ export class UserForm extends React.Component<
             className="margin-t-m"
             children={List([
               <div>
-                <span className="float-input">
+                <span className="inline-block margin-r-m">
                   <div className="label">
                     {this.props.msg.pkg.get("user.role")}
                   </div>
@@ -283,7 +284,7 @@ export class UserForm extends React.Component<
                   />
                 </span>
 
-                <span className="float-input">
+                <span className="inline-block margin-r-m">
                   <div className="label">
                     {`${this.props.msg.pkg.get("spaceLimit")} (${FileSize(
                       parseInt(this.state.quota.spaceLimit, 10),
@@ -299,7 +300,7 @@ export class UserForm extends React.Component<
                   />
                 </span>
 
-                <span className="float-input">
+                <span className="inline-block margin-r-m">
                   <div className="label">
                     {`${this.props.msg.pkg.get("uploadLimit")} (${FileSize(
                       this.state.quota.uploadSpeedLimit,
@@ -315,7 +316,7 @@ export class UserForm extends React.Component<
                   />
                 </span>
 
-                <span className="float-input">
+                <span className="inline-block margin-r-m">
                   <div className="label">
                     {`${this.props.msg.pkg.get("downloadLimit")} (${FileSize(
                       this.state.quota.downloadSpeedLimit,
@@ -353,7 +354,7 @@ export class UserForm extends React.Component<
             className="margin-t-m"
             children={List([
               <div>
-                <div className="float-input">
+                <div className="inline-block margin-r-m">
                   <div className="label">
                     {this.props.msg.pkg.get("settings.pwd.new1")}
                   </div>
@@ -367,7 +368,7 @@ export class UserForm extends React.Component<
                   />
                 </div>
 
-                <div className="float-input">
+                <div className="inline-block">
                   <div className="label">
                     {this.props.msg.pkg.get("settings.pwd.new2")}
                   </div>
@@ -582,9 +583,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
         <Container>
           <Flexbox
             children={List([
-              <h5 className="pane-title">
-                {this.props.msg.pkg.get("user.add")}
-              </h5>,
+              <h5 className="title-m">{this.props.msg.pkg.get("user.add")}</h5>,
               <button onClick={this.addUser} className="button-default">
                 {this.props.msg.pkg.get("add")}
               </button>,
@@ -594,7 +593,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
 
           <div className="hr"></div>
 
-          <span className="float-input">
+          <span className="inline-block margin-r-m">
             <div className="label">{this.props.msg.pkg.get("user.name")}</div>
             <input
               type="text"
@@ -604,7 +603,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
             />
           </span>
 
-          <span className="float-input">
+          <span className="inline-block margin-r-m">
             <div className="label">{this.props.msg.pkg.get("user.role")}</div>
             <input
               type="text"
@@ -614,7 +613,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
             />
           </span>
 
-          <span className="float-input">
+          <span className="inline-block margin-r-m">
             <div className="label">
               {this.props.msg.pkg.get("settings.pwd.new1")}
             </div>
@@ -626,7 +625,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
             />
           </span>
 
-          <span className="float-input">
+          <span className="inline-block margin-r-m">
             <div className="label">
               {this.props.msg.pkg.get("settings.pwd.new2")}
             </div>
@@ -642,7 +641,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
         <Container>
           <Flexbox
             children={List([
-              <h5 className="pane-title">
+              <h5 className="title-m">
                 {this.props.msg.pkg.get("admin.users")}
               </h5>,
               <span></span>,
@@ -658,7 +657,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
           <div>
             <Flexbox
               children={List([
-                <h5 className="pane-title">
+                <h5 className="title-m">
                   {this.props.msg.pkg.get("role.add")}
                 </h5>,
                 <span></span>,
@@ -687,7 +686,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
         <Container>
           <Flexbox
             children={List([
-              <h5 className="pane-title">
+              <h5 className="title-m">
                 {this.props.msg.pkg.get("admin.roles")}
               </h5>,
               <span></span>,
@@ -839,16 +838,19 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
       <div>
         <Flexbox
           children={List([
-            <h5 className="pane-title">{this.props.msg.pkg.get("cfg.bg")}</h5>,
+            <h5 className="title-m">{this.props.msg.pkg.get("cfg.bg")}</h5>,
 
             <span>
               <button
                 onClick={this.resetClientCfg}
-                className="margin-r-m button-default"
+                className="inline-block margin-r-m button-default"
               >
                 {this.props.msg.pkg.get("reset")}
               </button>
-              <button className="button-default" onClick={this.setClientCfg}>
+              <button
+                className="inline-block button-default"
+                onClick={this.setClientCfg}
+              >
                 {this.props.msg.pkg.get("update")}
               </button>
             </span>,
@@ -859,7 +861,7 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
         <div className="hr"></div>
 
         <div>
-          <div className="float-input">
+          <div className="inline-block margin-r-m">
             <div className="label">{this.props.msg.pkg.get("cfg.bg.url")}</div>
             <input
               name="bg_url"
@@ -871,7 +873,7 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
             />
           </div>
 
-          <div className="float-input">
+          <div className="inline-block margin-r-m">
             <div className="label">
               {this.props.msg.pkg.get("cfg.bg.repeat")}
             </div>
@@ -884,7 +886,7 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
             />
           </div>
 
-          <div className="float-input">
+          <div className="inline-block margin-r-m">
             <div className="label">{this.props.msg.pkg.get("cfg.bg.pos")}</div>
             <input
               name="bg_pos"
@@ -895,7 +897,7 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
             />
           </div>
 
-          <div className="float-input">
+          <div className="inline-block">
             <div className="label">
               {this.props.msg.pkg.get("cfg.bg.align")}
             </div>

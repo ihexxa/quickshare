@@ -20,6 +20,9 @@ import { BiListUl } from "@react-icons/all-files/bi/BiListUl";
 import { RiMore2Fill } from "@react-icons/all-files/ri/RiMore2Fill";
 import { RiCheckboxBlankLine } from "@react-icons/all-files/ri/RiCheckboxBlankLine";
 import { BiSortUp } from "@react-icons/all-files/bi/BiSortUp";
+import { RiListSettingsFill } from "@react-icons/all-files/ri/RiListSettingsFill";
+import { RiHardDriveFill } from "@react-icons/all-files/ri/RiHardDriveFill";
+import { RiGridFill } from "@react-icons/all-files/ri/RiGridFill";
 
 import { colorClass } from "./colors";
 
@@ -48,6 +51,9 @@ const icons = Map<string, IconType>({
   RiMore2Fill: RiMore2Fill,
   RiCheckboxBlankLine: RiCheckboxBlankLine,
   BiSortUp: BiSortUp,
+  RiListSettingsFill: RiListSettingsFill,
+  RiHardDriveFill: RiHardDriveFill,
+  RiGridFill: RiGridFill,
 });
 
 export function getIconWithProps(
@@ -77,4 +83,17 @@ export function getIcon(
     { size, className: `${colorClass(color)}-font` },
     null
   );
+}
+
+export function iconSize(size: string): string {
+  switch (size) {
+    case "s":
+      return "2rem";
+    case "m":
+      return "2.4rem";
+    case "l":
+      return "3.2rem";
+    default:
+      throw Error(`icons size(${size}) not found`);
+  }
 }

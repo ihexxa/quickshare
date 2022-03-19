@@ -9,7 +9,7 @@ import { updater } from "./state_updater";
 import { alertMsg, confirmMsg } from "../common/env";
 import { Container } from "./layout/container";
 import { Card } from "./layout/card";
-import { Rows, Row } from "./layout/rows";
+import { Rows } from "./layout/rows";
 import { ClientErrorV001, ErrorLogger } from "../common/log_error";
 import { loadingCtrl, ctrlOn, ctrlOff } from "../common/controls";
 export interface Props {
@@ -194,7 +194,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
         <Container>
           <Flexbox
             children={List([
-              <h5 className="pane-title">
+              <h5 className="title-m">
                 {this.props.msg.pkg.get("error.report.title")}
               </h5>,
 
@@ -226,7 +226,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
       <div id="pane-settings">
         <Container>
           <div id="profile">
-            <h5 className="pane-title">
+            <h5 className="title-m">
               {this.props.msg.pkg.get("user.profile")}
             </h5>
 
@@ -270,7 +270,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
         <Container>
           <Flexbox
             children={List([
-              <h5 className="pane-title">
+              <h5 className="title-m">
                 {this.props.msg.pkg.get("settings.pwd.update")}
               </h5>,
               <button className="button-default" onClick={this.setPwd}>
@@ -282,7 +282,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
 
           <div className="hr"></div>
 
-          <span className="float-input">
+          <span className="inline-block margin-r-m">
             <div className="label">
               {this.props.msg.pkg.get("settings.pwd.old")}
             </div>
@@ -295,7 +295,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
             />
           </span>
 
-          <span className="float-input">
+          <span className="inline-block margin-r-m">
             <div className="label">
               {this.props.msg.pkg.get("settings.pwd.new1")}
             </div>
@@ -308,7 +308,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
             />
           </span>
 
-          <span className="float-input">
+          <span className="inline-block margin-r-m">
             <div className="label">
               {this.props.msg.pkg.get("settings.pwd.new2")}
             </div>
@@ -325,7 +325,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
         <Container>
           <Flexbox
             children={List([
-              <h5 className="pane-title">
+              <h5 className="title-m">
                 {this.props.msg.pkg.get("settings.chooseLan")}
               </h5>,
             ])}
@@ -339,7 +339,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               onClick={() => {
                 this.setLan("en_US");
               }}
-              className="button-default float-input"
+              className="button-default inline-block margin-r-m"
             >
               {this.props.msg.pkg.get("enUS")}
             </button>
@@ -347,17 +347,18 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               onClick={() => {
                 this.setLan("zh_CN");
               }}
-              className="button-default float-input"
+              className="button-default inline-block margin-r-m"
             >
               {this.props.msg.pkg.get("zhCN")}
             </button>
           </div>
         </Container>
 
-        <Container>
+        {/* disabled */}
+        {/* <Container>
           <Flexbox
             children={List([
-              <h5 className="pane-title">
+              <h5 className="title-m">
                 {this.props.msg.pkg.get("settings.customLan")}
               </h5>,
 
@@ -375,7 +376,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
 
           <div className="hr"></div>
 
-          <div className="float-input">
+          <div className="inline-block margin-r-m">
             <div className="label">
               {this.props.msg.pkg.get("settings.lanPackURL")}
             </div>
@@ -383,19 +384,17 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               type="text"
               onChange={this.changeLanPackURL}
               value={this.props.login.preferences.lanPackURL}
-              className="black0-font"
+              className="dark-font"
               style={{ width: "20rem" }}
               placeholder={this.props.msg.pkg.get("settings.lanPackURL")}
             />
           </div>
-        </Container>
+        </Container> */}
 
         <Container>
           <Flexbox
             children={List([
-              <h5 className="pane-title">
-                {this.props.msg.pkg.get("cfg.bg")}
-              </h5>,
+              <h5 className="title-m">{this.props.msg.pkg.get("cfg.bg")}</h5>,
 
               <button className="button-default" onClick={this.syncPreferences}>
                 {this.props.msg.pkg.get("update")}
@@ -407,7 +406,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
           <div className="hr"></div>
 
           <div>
-            <div className="float-input">
+            <div className="inline-block margin-r-m">
               <div className="label">
                 {this.props.msg.pkg.get("cfg.bg.url")}
               </div>
@@ -420,7 +419,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               />
             </div>
 
-            <div className="float-input">
+            <div className="inline-block margin-r-m">
               <div className="label">
                 {this.props.msg.pkg.get("cfg.bg.repeat")}
               </div>
@@ -433,7 +432,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               />
             </div>
 
-            <div className="float-input">
+            <div className="inline-block margin-r-m">
               <div className="label">
                 {this.props.msg.pkg.get("cfg.bg.pos")}
               </div>
@@ -446,7 +445,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               />
             </div>
 
-            <div className="float-input">
+            <div className="inline-block margin-r-m">
               <div className="label">
                 {this.props.msg.pkg.get("cfg.bg.align")}
               </div>

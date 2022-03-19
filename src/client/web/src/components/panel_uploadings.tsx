@@ -117,7 +117,7 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
         uploading.state !== UploadState.Stopped ? (
           <button
             onClick={() => this.stopUploading(uploading.filePath)}
-            className="inline-block margin-r-m margin-b-m"
+            className="inline-block button-default margin-r-m margin-b-m"
           >
             {this.props.msg.pkg.get("browser.stop")}
           </button>
@@ -129,7 +129,7 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
           {stopButton}
           <button
             onClick={() => this.deleteUpload(uploading.filePath)}
-            className="inline-block"
+            className="inline-block button-default"
           >
             {this.props.msg.pkg.get("browser.delete")}
           </button>
@@ -152,7 +152,7 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
 
       const elem = (
         <div key={uploading.filePath} className="upload-item">
-          <div className={`font-s info`}>
+          <div className={`font-s l-col`}>
             <span className="title">{fileName}&nbsp;</span>
             <span className="desc grey0-font">
               {FileSize(uploading.uploaded, { round: 0 })}
@@ -165,7 +165,7 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
             </span>
           </div>
 
-          <div className="op">{operations}</div>
+          <div className="r-col">{operations}</div>
 
           {progressBar}
           {errorInfo}
