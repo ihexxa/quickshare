@@ -929,7 +929,21 @@ func (h *FileHandlers) AddSharing(c *gin.Context) {
 		return
 	}
 
-	err := h.deps.FileInfos().AddSharing(req.SharingPath)
+	if req.SharingPath == "" || req.SharingPath == "/" {
+		c.JSON(q.ErrResp(c, 403, errors.New("forbidden")))
+		return
+	}
+
+	info, err := h.deps.FS().Stat(req.SharingPath)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	} else if !info.IsDir() {
+		c.JSON(q.ErrResp(c, 400, errors.New("can not sharing a file")))
+		return
+	}
+
+	err = h.deps.FileInfos().AddSharing(req.SharingPath)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
