@@ -80,9 +80,6 @@ func NewFileInfoStore(store kvstore.IKVStore) (*FileInfoStore, error) {
 		boltdb: boltdb,
 		mtx:    &sync.RWMutex{},
 	}
-	if err = migrate(fi); err != nil {
-		return nil, err
-	}
 	return fi, nil
 }
 

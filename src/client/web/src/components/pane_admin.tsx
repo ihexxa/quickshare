@@ -830,6 +830,7 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
         repeat: "repeat",
         position: "center",
         align: "fixed",
+        bgColor: "",
       },
     });
     this.props.update(updater().updateUI);

@@ -109,11 +109,14 @@ describe("State Manager", () => {
           repeat: "bgRepeat",
           position: "bgPosition",
           align: "bgAlign",
+          bgColor: "bgColor",
         },
         cssURL: "cssURL",
         lanPackURL: "lanPackURL",
         lan: "en_US",
         theme: "light",
+        avatar: "avatar",
+        email: "email",
       },
     });
 
@@ -326,11 +329,14 @@ describe("State Manager", () => {
           repeat: "",
           position: "",
           align: "",
+          bgColor: "",
         },
         cssURL: "",
         lanPackURL: "",
         lan: "en_US",
         theme: "light",
+        avatar: "",
+        email: "",
       },
     });
 
@@ -351,6 +357,7 @@ describe("State Manager", () => {
       position: "clientCfg_bg_position",
       repeat: "clientCfg_bg_repeat",
       url: "clientCfg_bg_url",
+      bgColor: "clientCfg_bg_bg_Color",
     });
   });
 });

@@ -17,11 +17,13 @@ export const resps = {
     data: {
       siteName: "",
       siteDesc: "",
+      captchaEnabled: true,
       bg: {
         url: "clientCfg_bg_url",
         repeat: "clientCfg_bg_repeat",
         position: "clientCfg_bg_position",
         align: "clientCfg_bg_align",
+        bgColor: "clientCfg_bg_bg_Color"
       },
     },
   },
