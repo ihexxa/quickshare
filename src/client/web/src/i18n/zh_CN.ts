@@ -92,6 +92,7 @@ export const msgs: Map<string, string> = Map({
   "cfg.bg.repeat": "重复",
   "cfg.bg.pos": "位置",
   "cfg.bg.align": "对齐",
+  "cfg.bg.bgColor": "背景色",
   reset: "重置",
   "bg.url.alert": "图片链接太短或太长",
   "bg.pos.alert": "Position目前仅支持top, bottom, left, right, center",

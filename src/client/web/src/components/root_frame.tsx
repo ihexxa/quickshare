@@ -32,29 +32,34 @@ export class RootFrame extends React.Component<Props, State, {}> {
 
   makeBgStyle = (): Object => {
     if (
-      this.props.login.preferences.bg.url === "" &&
-      this.props.ui.bg.url === ""
-    ) {
-      return {};
-    }
-
-    let bgStyle = undefined;
-    if (
       this.props.login.preferences != null &&
       this.props.login.preferences.bg.url !== ""
     ) {
-      bgStyle = {
-        background: `url("${this.props.login.preferences.bg.url}") ${this.props.login.preferences.bg.repeat} ${this.props.login.preferences.bg.position} ${this.props.login.preferences.bg.align}`,
+      const bgConfig = this.props.login.preferences.bg;
+      return {
+        background: `url("${bgConfig.url}") ${bgConfig.repeat} ${bgConfig.position} ${bgConfig.align}`,
       };
-    } else if (this.props.ui.bg.url !== "") {
-      bgStyle = {
-        background: `url("${this.props.ui.bg.url}") ${this.props.ui.bg.repeat} ${this.props.ui.bg.position} ${this.props.ui.bg.align}`,
-      };
-    } else {
-      bgStyle = {};
     }
 
-    return bgStyle;
+    if (this.props.login.preferences.bg.bgColor !== "") {
+      return {
+        backgroundColor: this.props.login.preferences.bg.bgColor,
+      };
+    }
+
+    if (this.props.ui.bg.url !== "") {
+      return {
+        background: `url("${this.props.ui.bg.url}") ${this.props.ui.bg.repeat} ${this.props.ui.bg.position} ${this.props.ui.bg.align}`,
+      };
+    }
+
+    if (this.props.ui.bg.bgColor !== "") {
+      return {
+        backgroundColor: this.props.ui.bg.bgColor,
+      };
+    }
+
+    return {};
   };
 
   render() {

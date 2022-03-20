@@ -62,6 +62,13 @@ export class PaneSettings extends React.Component<Props, State, {}> {
     });
     this.props.update(updater().updateLogin);
   };
+  changeBgBgColor = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    updater().setPreferences({
+      ...this.props.login.preferences,
+      bg: { ...this.props.login.preferences.bg, bgColor: ev.target.value },
+    });
+    this.props.update(updater().updateLogin);
+  };
   changeCSSURL = (ev: React.ChangeEvent<HTMLInputElement>) => {
     updater().setPreferences({
       ...this.props.login.preferences,
@@ -370,9 +377,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
         <Container>
           <Flexbox
             children={List([
-              <h5 className="title-m">
-                {this.props.msg.pkg.get("theme")}
-              </h5>,
+              <h5 className="title-m">{this.props.msg.pkg.get("theme")}</h5>,
             ])}
             childrenStyles={List([{}, { justifyContent: "flex-end" }])}
           />
@@ -500,6 +505,19 @@ export class PaneSettings extends React.Component<Props, State, {}> {
                 onChange={this.changeBgAlign}
                 value={this.props.login.preferences.bg.align}
                 placeholder={this.props.msg.pkg.get("cfg.bg.align")}
+              />
+            </div>
+
+            <div className="inline-block margin-r-m">
+              <div className="label">
+                {this.props.msg.pkg.get("cfg.bg.bgColor")}
+              </div>
+              <input
+                name="bg_bgColor"
+                type="text"
+                onChange={this.changeBgBgColor}
+                value={this.props.login.preferences.bg.bgColor}
+                placeholder={this.props.msg.pkg.get("cfg.bg.bgColor")}
               />
             </div>
           </div>

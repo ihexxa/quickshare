@@ -753,6 +753,13 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
     });
     this.props.update(updater().updateUI);
   };
+  changeBgBgColor = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    updater().setClientCfg({
+      ...this.props.ui,
+      bg: { ...this.props.ui.bg, bgColor: ev.target.value },
+    });
+    this.props.update(updater().updateUI);
+  };
 
   constructor(p: BgProps) {
     super(p);
@@ -900,7 +907,7 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
             />
           </div>
 
-          <div className="inline-block">
+          <div className="inline-block margin-r-m">
             <div className="label">
               {this.props.msg.pkg.get("cfg.bg.align")}
             </div>
@@ -910,6 +917,19 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
               onChange={this.changeBgAlign}
               value={this.props.ui.bg.align}
               placeholder={this.props.msg.pkg.get("cfg.bg.align")}
+            />
+          </div>
+
+          <div className="inline-block">
+            <div className="label">
+              {this.props.msg.pkg.get("cfg.bg.bgColor")}
+            </div>
+            <input
+              name="bg_bgColor"
+              type="text"
+              onChange={this.changeBgBgColor}
+              value={this.props.ui.bg.bgColor}
+              placeholder={this.props.msg.pkg.get("cfg.bg.bgColor")}
             />
           </div>
         </div>
