@@ -41,6 +41,7 @@ type BgConfig struct {
 	Repeat   string `json:"repeat" yaml:"repeat"`
 	Position string `json:"position" yaml:"position"`
 	Align    string `json:"align" yaml:"align"`
+	BgColor  string `json:"bgColor" yaml:"bgColor"`
 }
 
 type SiteConfig struct {

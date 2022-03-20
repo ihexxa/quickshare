@@ -170,6 +170,7 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 				Repeat:   cfg.StringOr("Site.ClientCfg.Bg.Repeat", "repeat"),
 				Position: cfg.StringOr("Site.ClientCfg.Bg.Position", "fixed"),
 				Align:    cfg.StringOr("Site.ClientCfg.Bg.Align", "center"),
+				BgColor:  cfg.StringOr("Site.ClientCfg.Bg.BgColor", "#ccc"),
 			},
 		},
 	})
