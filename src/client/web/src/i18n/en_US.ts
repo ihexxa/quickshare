@@ -94,6 +94,7 @@ export const msgs: Map<string, string> = Map({
   "cfg.bg.repeat": "Repeat",
   "cfg.bg.pos": "Position",
   "cfg.bg.align": "Align",
+  "cfg.bg.bgColor": "Background Color",
   reset: "Reset",
   "bg.url.alert": "Image URL is too short or too long",
   "bg.pos.alert": "Position only supports: top, bottom, left, right, center",
