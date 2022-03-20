@@ -20,6 +20,7 @@ export interface BgConfig {
   repeat: string;
   position: string;
   align: string;
+  bgColor: string;
 }
 
 export interface Preferences {
@@ -28,6 +29,8 @@ export interface Preferences {
   lanPackURL: string;
   lan: string;
   theme: string;
+  avatar: string;
+  email: string;
 }
 
 export interface User {

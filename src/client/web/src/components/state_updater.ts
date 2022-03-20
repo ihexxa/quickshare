@@ -618,11 +618,14 @@ export class Updater {
         repeat: "",
         position: "",
         align: "",
+        bgColor: "",
       },
       cssURL: "",
       lanPackURL: "",
       lan: "en_US",
       theme: "light",
+      avatar: "",
+      email: "",
     };
   };
 

@@ -457,6 +457,8 @@ func TestUsersHandlers(t *testing.T) {
 				},
 				CSSURL:     "/cssurl",
 				LanPackURL: "/lanpack",
+				Avatar:     "a1",
+				Email:      "email1",
 			},
 			&db.Preferences{
 				Bg: &sitestore.BgConfig{
@@ -468,6 +470,8 @@ func TestUsersHandlers(t *testing.T) {
 				},
 				CSSURL:     "/cssurl2",
 				LanPackURL: "/lanpack2",
+				Avatar:     "a2",
+				Email:      "email2",
 			},
 		}
 		for _, prefer := range prefers {

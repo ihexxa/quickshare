@@ -93,11 +93,14 @@ describe("Login", () => {
           repeat: "bgRepeat",
           position: "bgPosition",
           align: "bgAlign",
+          bgColor: "bgColor",
         },
         cssURL: "cssURL",
         lanPackURL: "lanPackURL",
         lan: "en_US",
         theme: "light",
+        avatar: "avatar",
+        email: "email",
       },
     });
 
@@ -122,11 +125,13 @@ describe("Login", () => {
       isVertical: false,
       siteName: "",
       siteDesc: "",
+      captchaEnabled: true,
       bg: {
         url: "clientCfg_bg_url",
         repeat: "clientCfg_bg_repeat",
         position: "clientCfg_bg_position",
         align: "clientCfg_bg_align",
+        bgColor: "clientCfg_bg_bg_Color",
       },
       control: {
         controls: Map<string, string>({

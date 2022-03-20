@@ -34,6 +34,7 @@ export interface UIProps {
     repeat: string;
     position: string;
     align: string;
+    bgColor: string;
   };
   control: {
     controls: Map<string, string>;
@@ -103,11 +104,14 @@ export function initState(): ICoreState {
           repeat: "",
           position: "",
           align: "",
+          bgColor: "",
         },
         cssURL: "",
         lanPackURL: "",
         lan: "en_US",
         theme: "light",
+        avatar: "",
+        email: "",
       },
     },
     msg: {
@@ -123,6 +127,7 @@ export function initState(): ICoreState {
         repeat: "",
         position: "",
         align: "",
+        bgColor: "",
       },
       captchaEnabled: true,
       control: {
