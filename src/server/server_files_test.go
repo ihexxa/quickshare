@@ -441,6 +441,21 @@ func TestFileHandlers(t *testing.T) {
 				} else if res.StatusCode != 200 {
 					t.Fatal(res.StatusCode)
 				}
+
+				res, _, errs = cl.AddSharing(filePath)
+				if res.StatusCode != 400 {
+					t.Fatal(res.StatusCode)
+				}
+
+				res, _, errs = cl.AddSharing(filepath.Join(filePath, "not_exist"))
+				if res.StatusCode != 500 {
+					t.Fatal(res.StatusCode)
+				}
+			}
+
+			res, _, errs := cl.AddSharing("/")
+			if res.StatusCode != 403 {
+				t.Fatal(res.StatusCode)
 			}
 
 			// check listSharings
