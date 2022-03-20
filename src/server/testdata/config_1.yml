@@ -46,6 +46,7 @@ site:
       repeat: "1"
       position: "1"
       align: "1"
+      bgColor: "1"
 db:
   dbPath: "1"
 

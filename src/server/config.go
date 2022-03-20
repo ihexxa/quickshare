@@ -128,6 +128,7 @@ func DefaultConfigStruct() *Config {
 					Repeat:   "repeat",
 					Position: "fixed",
 					Align:    "center",
+					BgColor:  "#ccc",
 				},
 			},
 		},

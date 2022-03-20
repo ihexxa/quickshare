@@ -119,6 +119,7 @@ func TestLoadCfg(t *testing.T) {
 					Repeat:   "1",
 					Position: "1",
 					Align:    "1",
+					BgColor:  "1",
 				},
 			},
 		},
@@ -184,6 +185,7 @@ func TestLoadCfg(t *testing.T) {
 					Repeat:   "4",
 					Position: "4",
 					Align:    "4",
+					BgColor:  "4",
 				},
 			},
 		},
@@ -249,6 +251,7 @@ func TestLoadCfg(t *testing.T) {
 					Repeat:   "4",
 					Position: "4",
 					Align:    "4",
+					BgColor:  "4",
 				},
 			},
 		},
@@ -314,6 +317,7 @@ func TestLoadCfg(t *testing.T) {
 					Repeat:   "no-repeat",
 					Position: "top",
 					Align:    "scroll",
+					BgColor:  "", // the schema of the config from db is old
 				},
 			},
 		},
@@ -349,7 +353,7 @@ func TestLoadCfg(t *testing.T) {
 			}
 
 			if !Equal(gotCfg, expectCfg) {
-				t.Fatal("cfgs are not identical")
+				t.Fatalf("%d, cfgs are not identical", i)
 			}
 		}
 	}

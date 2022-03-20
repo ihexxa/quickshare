@@ -22,6 +22,7 @@ func TestSiteStore(t *testing.T) {
 					Repeat:   "no-repeat",
 					Position: "fixed",
 					Align:    "center",
+					BgColor:  "#ccc",
 				},
 			},
 		}
@@ -62,6 +63,7 @@ func TestSiteStore(t *testing.T) {
 					Repeat:   "",
 					Position: "",
 					Align:    "",
+					BgColor:  "",
 				},
 			},
 		})

@@ -40,11 +40,14 @@ var (
 			Repeat:   "no-repeat",
 			Position: "center",
 			Align:    "fixed",
+			BgColor:  "#ccc",
 		},
 		CSSURL:     "",
 		LanPackURL: "",
 		Lan:        "en_US",
 		Theme:      "light",
+		Avatar:     "",
+		Email:      "",
 	}
 )
 
@@ -99,10 +102,12 @@ func NewKVUserStore(store kvstore.IKVStore) (*KVUserStore, error) {
 		}
 	}
 
-	return &KVUserStore{
+	usStore := &KVUserStore{
 		store: store,
 		mtx:   &sync.RWMutex{},
-	}, nil
+	}
+
+	return usStore, nil
 }
 
 func (us *KVUserStore) Init(rootName, rootPwd string) error {

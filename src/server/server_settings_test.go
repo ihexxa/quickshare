@@ -79,10 +79,11 @@ func TestSettingsHandlers(t *testing.T) {
 				SiteName: "quickshare",
 				SiteDesc: "quickshare",
 				Bg: &sitestore.BgConfig{
-					Url:      "",
-					Repeat:   "",
-					Position: "",
-					Align:    "",
+					Url:      "url",
+					Repeat:   "repeat",
+					Position: "center",
+					Align:    "fixed",
+					BgColor:  "#ccc",
 				},
 			},
 		}

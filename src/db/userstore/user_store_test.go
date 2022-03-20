@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/ihexxa/quickshare/src/db"
+	"github.com/ihexxa/quickshare/src/db/sitestore"
 	"github.com/ihexxa/quickshare/src/kvstore/boltdbpvd"
 )
 
@@ -37,6 +38,9 @@ func TestUserStores(t *testing.T) {
 		if root.Quota.DownloadSpeedLimit != defaultDownloadSpeedLimit {
 			t.Fatalf("incorrect root DownloadSpeedLimit")
 		}
+		if !db.ComparePreferences(root.Preferences, &DefaultPreferences) {
+			t.Fatalf("incorrect preference %v %v", root.Preferences, DefaultPreferences)
+		}
 
 		visitor, err := store.GetUser(1)
 		if err != nil {
@@ -59,6 +63,9 @@ func TestUserStores(t *testing.T) {
 		}
 		if visitor.Quota.DownloadSpeedLimit != visitorDownloadSpeedLimit {
 			t.Fatalf("incorrect visitor DownloadSpeedLimit")
+		}
+		if !db.ComparePreferences(visitor.Preferences, &DefaultPreferences) {
+			t.Fatalf("incorrect preference")
 		}
 
 		id, name1 := uint64(2), "test_user1"
@@ -178,6 +185,26 @@ func TestUserStores(t *testing.T) {
 			t.Fatalf("used space not matched %d %d", user.UsedSpace, usedIncr-usedDecr)
 		}
 
+		newPrefer := &db.Preferences{
+			Bg: &sitestore.BgConfig{
+				Url:      "/url",
+				Repeat:   "repeat",
+				Position: "pos",
+				Align:    "fixed",
+				BgColor:  "#333",
+			},
+			CSSURL:     "/cssurl",
+			LanPackURL: "lanPackURL",
+			Lan:        "zhCN",
+			Theme:      "dark",
+			Avatar:     "/avatar",
+			Email:      "foo@gmail.com",
+		}
+		err = store.SetPreferences(id, newPrefer)
+		if err != nil {
+			t.Fatal(err)
+		}
+
 		user, err = store.GetUserByName(name1)
 		if err != nil {
 			t.Fatal(err)
@@ -199,6 +226,9 @@ func TestUserStores(t *testing.T) {
 		}
 		if user.Quota.DownloadSpeedLimit != downLimit2 {
 			t.Fatalf("down limit not matched %d %d", downLimit2, user.Quota.DownloadSpeedLimit)
+		}
+		if !db.ComparePreferences(user.Preferences, newPrefer) {
+			t.Fatalf("preferences not matched %v %v", user.Preferences, newPrefer)
 		}
 
 		err = store.DelUser(id)

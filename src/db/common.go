@@ -3,6 +3,7 @@ package db
 import (
 	"errors"
 	"fmt"
+	"reflect"
 
 	"github.com/ihexxa/quickshare/src/db/sitestore"
 )
@@ -44,6 +45,18 @@ type Preferences struct {
 	LanPackURL string              `json:"lanPackURL"`
 	Lan        string              `json:"lan"`
 	Theme      string              `json:"theme"`
+	Avatar     string              `json:"avatar"`
+	Email      string              `json:"email"`
+}
+
+func ComparePreferences(p1, p2 *Preferences) bool {
+	return p1.CSSURL == p2.CSSURL &&
+		p1.LanPackURL == p2.LanPackURL &&
+		p1.Lan == p2.Lan &&
+		p1.Theme == p2.Theme &&
+		p1.Avatar == p2.Avatar &&
+		p1.Email == p2.Email &&
+		reflect.DeepEqual(p1.Bg, p2.Bg)
 }
 
 type User struct {
