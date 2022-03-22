@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/ihexxa/quickshare/src/db"
-	"github.com/ihexxa/quickshare/src/db/sitestore"
 	"github.com/ihexxa/quickshare/src/kvstore"
 )
 
@@ -35,7 +34,7 @@ var (
 	ErrNotFound     = errors.New("not found")
 
 	DefaultPreferences = db.Preferences{
-		Bg: &sitestore.BgConfig{
+		Bg: &db.BgConfig{
 			Url:      "",
 			Repeat:   "no-repeat",
 			Position: "center",
@@ -51,14 +50,10 @@ var (
 	}
 )
 
-func IsReachedLimitErr(err error) bool {
-	return err == ErrReachedLimit
-}
-
 type UserCfg struct {
-	Name string `json:"name"`
-	Role string `json:"role"`
-	Pwd  string `json:"pwd"`
+	Name string `json:"name" yaml:"name"`
+	Role string `json:"role" yaml:"role"`
+	Pwd  string `json:"pwd" yaml:"pwd"`
 }
 
 type IUserStore interface {

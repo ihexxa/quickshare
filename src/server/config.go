@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 
+	"github.com/ihexxa/quickshare/src/db"
 	"github.com/ihexxa/quickshare/src/db/sitestore"
 	"github.com/ihexxa/quickshare/src/db/userstore"
 )
@@ -120,10 +121,10 @@ func DefaultConfigStruct() *Config {
 			WorkerCount: 2,
 		},
 		Site: &sitestore.SiteConfig{
-			ClientCfg: &sitestore.ClientConfig{
+			ClientCfg: &db.ClientConfig{
 				SiteName: "Quickshare",
 				SiteDesc: "quick and simple file sharing",
-				Bg: &sitestore.BgConfig{
+				Bg: &db.BgConfig{
 					Url:      "/static/img/textured_paper.png",
 					Repeat:   "repeat",
 					Position: "fixed",

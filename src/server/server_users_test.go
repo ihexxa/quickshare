@@ -9,7 +9,6 @@ import (
 
 	"github.com/ihexxa/quickshare/src/client"
 	"github.com/ihexxa/quickshare/src/db"
-	"github.com/ihexxa/quickshare/src/db/sitestore"
 	"github.com/ihexxa/quickshare/src/db/userstore"
 	q "github.com/ihexxa/quickshare/src/handlers"
 	su "github.com/ihexxa/quickshare/src/handlers/singleuserhdr"
@@ -448,7 +447,7 @@ func TestUsersHandlers(t *testing.T) {
 
 		prefers := []*db.Preferences{
 			&db.Preferences{
-				Bg: &sitestore.BgConfig{
+				Bg: &db.BgConfig{
 					Url:      "/bgurl",
 					Repeat:   "no-repeat",
 					Position: "center",
@@ -461,7 +460,7 @@ func TestUsersHandlers(t *testing.T) {
 				Email:      "email1",
 			},
 			&db.Preferences{
-				Bg: &sitestore.BgConfig{
+				Bg: &db.BgConfig{
 					Url:      "/bgurl2",
 					Repeat:   "no-repeat2",
 					Position: "center2",

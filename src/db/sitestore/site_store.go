@@ -3,49 +3,28 @@ package sitestore
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"sync"
-	"time"
 
+	"github.com/ihexxa/quickshare/src/db"
 	"github.com/ihexxa/quickshare/src/kvstore"
 )
 
 const (
-	InitNs      = "SiteInit"
-	SiteNs      = "Site"
-	InitTimeKey = "initTime"
-	SiteCfgKey  = "siteCfg"
+	NsSite     = "NsSite"
+	KeySiteCfg = "KeySiteCfg"
 )
 
 var (
 	ErrNotFound = errors.New("site config not found")
 )
 
-func IsNotFound(err error) bool {
-	return err == ErrNotFound
-}
-
 type ISiteStore interface {
-	SetClientCfg(cfg *ClientConfig) error
+	SetClientCfg(cfg *db.ClientConfig) error
 	GetCfg() (*SiteConfig, error)
 }
 
-type ClientConfig struct {
-	SiteName string    `json:"siteName" yaml:"siteName"`
-	SiteDesc string    `json:"siteDesc" yaml:"siteDesc"`
-	Bg       *BgConfig `json:"bg" yaml:"bg"`
-}
-
-type BgConfig struct {
-	Url      string `json:"url" yaml:"url"`
-	Repeat   string `json:"repeat" yaml:"repeat"`
-	Position string `json:"position" yaml:"position"`
-	Align    string `json:"align" yaml:"align"`
-	BgColor  string `json:"bgColor" yaml:"bgColor"`
-}
-
 type SiteConfig struct {
-	ClientCfg *ClientConfig `json:"clientCfg" yaml:"clientCfg"`
+	ClientCfg *db.ClientConfig `json:"clientCfg" yaml:"clientCfg"`
 }
 
 type SiteStore struct {
@@ -61,65 +40,59 @@ func NewSiteStore(store kvstore.IKVStore) (*SiteStore, error) {
 }
 
 func (st *SiteStore) Init(cfg *SiteConfig) error {
-	_, ok := st.store.GetStringIn(InitNs, InitTimeKey)
+	_, ok := st.store.GetStringIn(NsSite, KeySiteCfg)
 	if !ok {
 		var err error
-		for _, nsName := range []string{
-			InitNs,
-			SiteNs,
-		} {
-			if err = st.store.AddNamespace(nsName); err != nil {
-				return err
-			}
-		}
-
-		// TODO: replace following with setConfig
-		err = st.SetClientCfg(cfg.ClientCfg)
-		if err != nil {
+		if err = st.store.AddNamespace(NsSite); err != nil {
 			return err
 		}
-		err = st.store.SetStringIn(InitNs, InitTimeKey, fmt.Sprintf("%d", time.Now().Unix()))
+
+		err = st.setCfg(cfg)
 		if err != nil {
 			return err
 		}
 	}
-
 	return nil
 }
 
-func (st *SiteStore) SetClientCfg(cfg *ClientConfig) error {
-	st.mtx.Lock()
-	defer st.mtx.Unlock()
-
-	siteCfg := &SiteConfig{}
-	cfgStr, ok := st.store.GetStringIn(SiteNs, SiteCfgKey)
-	if ok {
-		err := json.Unmarshal([]byte(cfgStr), siteCfg)
-		if err != nil {
-			return err
-		}
+func (st *SiteStore) getCfg() (*SiteConfig, error) {
+	cfgStr, ok := st.store.GetStringIn(NsSite, KeySiteCfg)
+	if !ok {
+		return nil, ErrNotFound
 	}
-	siteCfg.ClientCfg = cfg
 
-	cfgBytes, err := json.Marshal(siteCfg)
+	cfg := &SiteConfig{}
+	err := json.Unmarshal([]byte(cfgStr), cfg)
+	if err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (st *SiteStore) setCfg(cfg *SiteConfig) error {
+	cfgBytes, err := json.Marshal(cfg)
 	if err != nil {
 		return err
 	}
-	return st.store.SetStringIn(SiteNs, SiteCfgKey, string(cfgBytes))
+	return st.store.SetStringIn(NsSite, KeySiteCfg, string(cfgBytes))
+}
+
+func (st *SiteStore) SetClientCfg(cfg *db.ClientConfig) error {
+	st.mtx.Lock()
+	defer st.mtx.Unlock()
+
+	siteCfg, err := st.getCfg()
+	if err != nil {
+		return err
+	}
+	siteCfg.ClientCfg = cfg
+
+	return st.setCfg(siteCfg)
 }
 
 func (st *SiteStore) GetCfg() (*SiteConfig, error) {
 	st.mtx.RLock()
 	defer st.mtx.RUnlock()
 
-	cfgStr, ok := st.store.GetStringIn(SiteNs, SiteCfgKey)
-	if !ok {
-		return nil, ErrNotFound
-	}
-	siteCfg := &SiteConfig{}
-	err := json.Unmarshal([]byte(cfgStr), siteCfg)
-	if err != nil {
-		return nil, err
-	}
-	return siteCfg, nil
+	return st.getCfg()
 }

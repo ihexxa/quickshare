@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -41,6 +42,9 @@ func LoadCfg(args *Args) (*gocfg.Cfg, error) {
 		_, err := os.Stat(dbPath)
 		if err == nil {
 			cfg, err = mergeDbConfig(cfg, dbPath)
+			if err != nil {
+				return nil, err
+			}
 		} else if err != nil {
 			if !os.IsNotExist(err) {
 				return nil, err
@@ -64,8 +68,12 @@ func mergeDbConfig(cfg *gocfg.Cfg, dbPath string) (*gocfg.Cfg, error) {
 
 	clientCfg, err := siteStore.GetCfg()
 	if err != nil {
+		if errors.Is(err, sitestore.ErrNotFound) {
+			return cfg, nil
+		}
 		return nil, err
 	}
+
 	clientCfgBytes, err := json.Marshal(clientCfg)
 	if err != nil {
 		return nil, err

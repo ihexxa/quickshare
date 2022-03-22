@@ -23,6 +23,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/ihexxa/quickshare/src/cryptoutil/jwt"
+	"github.com/ihexxa/quickshare/src/db"
 	"github.com/ihexxa/quickshare/src/db/boltstore"
 	"github.com/ihexxa/quickshare/src/db/fileinfostore"
 	"github.com/ihexxa/quickshare/src/db/sitestore"
@@ -162,10 +163,10 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	}
 
 	err = siteStore.Init(&sitestore.SiteConfig{
-		ClientCfg: &sitestore.ClientConfig{
+		ClientCfg: &db.ClientConfig{
 			SiteName: cfg.StringOr("Site.ClientCfg.SiteName", "Quickshare"),
 			SiteDesc: cfg.StringOr("Site.ClientCfg.SiteDesc", "quick and simple file sharing"),
-			Bg: &sitestore.BgConfig{
+			Bg: &db.BgConfig{
 				Url:      cfg.StringOr("Site.ClientCfg.Bg.Url", "/static/img/textured_paper.png"),
 				Repeat:   cfg.StringOr("Site.ClientCfg.Bg.Repeat", "repeat"),
 				Position: cfg.StringOr("Site.ClientCfg.Bg.Position", "fixed"),

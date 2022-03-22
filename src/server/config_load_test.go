@@ -7,6 +7,7 @@ import (
 
 	"github.com/ihexxa/gocfg"
 
+	"github.com/ihexxa/quickshare/src/db"
 	"github.com/ihexxa/quickshare/src/db/sitestore"
 	"github.com/ihexxa/quickshare/src/db/userstore"
 )
@@ -111,10 +112,10 @@ func TestLoadCfg(t *testing.T) {
 			WorkerCount: 1,
 		},
 		Site: &sitestore.SiteConfig{
-			ClientCfg: &sitestore.ClientConfig{
+			ClientCfg: &db.ClientConfig{
 				SiteName: "1",
 				SiteDesc: "1",
-				Bg: &sitestore.BgConfig{
+				Bg: &db.BgConfig{
 					Url:      "1",
 					Repeat:   "1",
 					Position: "1",
@@ -177,10 +178,10 @@ func TestLoadCfg(t *testing.T) {
 			WorkerCount: 4,
 		},
 		Site: &sitestore.SiteConfig{
-			ClientCfg: &sitestore.ClientConfig{
+			ClientCfg: &db.ClientConfig{
 				SiteName: "4",
 				SiteDesc: "4",
-				Bg: &sitestore.BgConfig{
+				Bg: &db.BgConfig{
 					Url:      "4",
 					Repeat:   "4",
 					Position: "4",
@@ -243,10 +244,10 @@ func TestLoadCfg(t *testing.T) {
 			WorkerCount: 4,
 		},
 		Site: &sitestore.SiteConfig{
-			ClientCfg: &sitestore.ClientConfig{
+			ClientCfg: &db.ClientConfig{
 				SiteName: "4",
 				SiteDesc: "4",
-				Bg: &sitestore.BgConfig{
+				Bg: &db.BgConfig{
 					Url:      "4",
 					Repeat:   "4",
 					Position: "4",
@@ -309,15 +310,15 @@ func TestLoadCfg(t *testing.T) {
 			WorkerCount: 4,
 		},
 		Site: &sitestore.SiteConfig{
-			ClientCfg: &sitestore.ClientConfig{
-				SiteName: "Quickshare",
-				SiteDesc: "Quickshare",
-				Bg: &sitestore.BgConfig{
-					Url:      "test.png",
-					Repeat:   "no-repeat",
-					Position: "top",
-					Align:    "scroll",
-					BgColor:  "", // the schema of the config from db is old
+			ClientCfg: &db.ClientConfig{
+				SiteName: "4",
+				SiteDesc: "4",
+				Bg: &db.BgConfig{
+					Url:      "4",
+					Repeat:   "4",
+					Position: "4",
+					Align:    "4",
+					BgColor:  "4",
 				},
 			},
 		},

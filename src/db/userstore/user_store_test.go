@@ -186,7 +186,7 @@ func TestUserStores(t *testing.T) {
 		}
 
 		newPrefer := &db.Preferences{
-			Bg: &sitestore.BgConfig{
+			Bg: &db.BgConfig{
 				Url:      "/url",
 				Repeat:   "repeat",
 				Position: "pos",

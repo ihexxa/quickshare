@@ -4,8 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-
-	"github.com/ihexxa/quickshare/src/db/sitestore"
 )
 
 const (
@@ -16,6 +14,8 @@ const (
 	ShareIDNs = "sharingKey"
 
 	uploadsPrefix = "uploads"
+
+	KeyInitTime = "keyInitTime"
 )
 
 var (
@@ -40,13 +40,27 @@ type Quota struct {
 }
 
 type Preferences struct {
-	Bg         *sitestore.BgConfig `json:"bg"`
-	CSSURL     string              `json:"cssURL"`
-	LanPackURL string              `json:"lanPackURL"`
-	Lan        string              `json:"lan"`
-	Theme      string              `json:"theme"`
-	Avatar     string              `json:"avatar"`
-	Email      string              `json:"email"`
+	Bg         *BgConfig `json:"bg"`
+	CSSURL     string    `json:"cssURL"`
+	LanPackURL string    `json:"lanPackURL"`
+	Lan        string    `json:"lan"`
+	Theme      string    `json:"theme"`
+	Avatar     string    `json:"avatar"`
+	Email      string    `json:"email"`
+}
+
+type ClientConfig struct {
+	SiteName string    `json:"siteName" yaml:"siteName"`
+	SiteDesc string    `json:"siteDesc" yaml:"siteDesc"`
+	Bg       *BgConfig `json:"bg" yaml:"bg"`
+}
+
+type BgConfig struct {
+	Url      string `json:"url" yaml:"url"`
+	Repeat   string `json:"repeat" yaml:"repeat"`
+	Position string `json:"position" yaml:"position"`
+	Align    string `json:"align" yaml:"align"`
+	BgColor  string `json:"bgColor" yaml:"bgColor"`
 }
 
 func ComparePreferences(p1, p2 *Preferences) bool {
