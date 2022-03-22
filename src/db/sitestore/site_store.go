@@ -15,6 +15,17 @@ const (
 )
 
 var (
+	DefaultSiteName = "Quickshare"
+	DefaultSiteDesc = "Quickshare"
+	DefaultBgConfig = &db.BgConfig{
+		Repeat:   "repeated",
+		Position: "top",
+		Align:    "fixed",
+		BgColor:  "#ccc",
+	}
+)
+
+var (
 	ErrNotFound = errors.New("site config not found")
 )
 
@@ -47,10 +58,7 @@ func (st *SiteStore) Init(cfg *SiteConfig) error {
 			return err
 		}
 
-		err = st.setCfg(cfg)
-		if err != nil {
-			return err
-		}
+		return st.setCfg(cfg)
 	}
 	return nil
 }
@@ -66,10 +74,18 @@ func (st *SiteStore) getCfg() (*SiteConfig, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if err = CheckCfg(cfg, true); err != nil {
+		return nil, err
+	}
 	return cfg, nil
 }
 
 func (st *SiteStore) setCfg(cfg *SiteConfig) error {
+	if err := CheckCfg(cfg, false); err != nil {
+		return err
+	}
+
 	cfgBytes, err := json.Marshal(cfg)
 	if err != nil {
 		return err
@@ -95,4 +111,59 @@ func (st *SiteStore) GetCfg() (*SiteConfig, error) {
 	defer st.mtx.RUnlock()
 
 	return st.getCfg()
+}
+
+func CheckCfg(cfg *SiteConfig, autoFill bool) error {
+	if cfg.ClientCfg == nil {
+		if !autoFill {
+			return errors.New("cfg.ClientCfg not defined")
+		}
+		cfg.ClientCfg = &db.ClientConfig{
+			SiteName: DefaultSiteName,
+			SiteDesc: DefaultSiteDesc,
+			Bg: &db.BgConfig{
+				Url:      DefaultBgConfig.Url,
+				Repeat:   DefaultBgConfig.Repeat,
+				Position: DefaultBgConfig.Position,
+				Align:    DefaultBgConfig.Align,
+				BgColor:  DefaultBgConfig.BgColor,
+			},
+		}
+
+		return nil
+	}
+
+	if cfg.ClientCfg.SiteName == "" {
+		cfg.ClientCfg.SiteName = DefaultSiteName
+	}
+	if cfg.ClientCfg.SiteDesc == "" {
+		cfg.ClientCfg.SiteDesc = DefaultSiteDesc
+	}
+
+	if cfg.ClientCfg.Bg == nil {
+		if !autoFill {
+			return errors.New("cfg.ClientCfg.Bg not defined")
+		}
+		cfg.ClientCfg.Bg = DefaultBgConfig
+	}
+	if cfg.ClientCfg.Bg.Url == "" && cfg.ClientCfg.Bg.BgColor == "" {
+		if !autoFill {
+			return errors.New("one of Bg.Url or Bg.BgColor must be defined")
+		}
+		cfg.ClientCfg.Bg.BgColor = DefaultBgConfig.BgColor
+	}
+	if cfg.ClientCfg.Bg.Repeat == "" {
+		cfg.ClientCfg.Bg.Repeat = DefaultBgConfig.Repeat
+	}
+	if cfg.ClientCfg.Bg.Position == "" {
+		cfg.ClientCfg.Bg.Position = DefaultBgConfig.Position
+	}
+	if cfg.ClientCfg.Bg.Align == "" {
+		cfg.ClientCfg.Bg.Align = DefaultBgConfig.Align
+	}
+	if cfg.ClientCfg.Bg.BgColor == "" {
+		cfg.ClientCfg.Bg.BgColor = DefaultBgConfig.BgColor
+	}
+
+	return nil
 }

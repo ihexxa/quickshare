@@ -64,10 +64,13 @@ func TestSiteStore(t *testing.T) {
 					Repeat:   "",
 					Position: "",
 					Align:    "",
-					BgColor:  "",
+					BgColor:  "#ccc",
 				},
 			},
 		})
+		if err != nil {
+			panic(err)
+		}
 
 		testSiteMethods(t, store)
 	})
