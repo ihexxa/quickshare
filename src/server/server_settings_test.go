@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/ihexxa/quickshare/src/client"
-	"github.com/ihexxa/quickshare/src/db/sitestore"
+	"github.com/ihexxa/quickshare/src/db"
 	q "github.com/ihexxa/quickshare/src/handlers"
 	"github.com/ihexxa/quickshare/src/handlers/settings"
 )
@@ -74,11 +74,11 @@ func TestSettingsHandlers(t *testing.T) {
 
 	t.Run("get/set client config", func(t *testing.T) {
 		settingsCl := client.NewSettingsClient(addr)
-		cfgs := []*sitestore.ClientConfig{
-			&sitestore.ClientConfig{
+		cfgs := []*db.ClientConfig{
+			&db.ClientConfig{
 				SiteName: "quickshare",
 				SiteDesc: "quickshare",
-				Bg: &sitestore.BgConfig{
+				Bg: &db.BgConfig{
 					Url:      "url",
 					Repeat:   "repeat",
 					Position: "center",

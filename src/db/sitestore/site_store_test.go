@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/ihexxa/quickshare/src/db"
 	"github.com/ihexxa/quickshare/src/kvstore/boltdbpvd"
 )
 
@@ -14,10 +15,10 @@ func TestSiteStore(t *testing.T) {
 
 	testSiteMethods := func(t *testing.T, store ISiteStore) {
 		siteCfg := &SiteConfig{
-			ClientCfg: &ClientConfig{
+			ClientCfg: &db.ClientConfig{
 				SiteName: "quickshare",
 				SiteDesc: "simpel file sharing",
-				Bg: &BgConfig{
+				Bg: &db.BgConfig{
 					Url:      "/imgs/bg.jpg",
 					Repeat:   "no-repeat",
 					Position: "fixed",
@@ -55,10 +56,10 @@ func TestSiteStore(t *testing.T) {
 			t.Fatal("fail to new kvstore", err)
 		}
 		err = store.Init(&SiteConfig{
-			ClientCfg: &ClientConfig{
+			ClientCfg: &db.ClientConfig{
 				SiteName: "",
 				SiteDesc: "",
-				Bg: &BgConfig{
+				Bg: &db.BgConfig{
 					Url:      "",
 					Repeat:   "",
 					Position: "",

@@ -30,10 +30,6 @@ var (
 	maxHashingTime     = 10
 )
 
-func IsNotFound(err error) bool {
-	return err == ErrNotFound
-}
-
 type IFileInfoStore interface {
 	AddSharing(dirPath string) error
 	DelSharing(dirPath string) error
@@ -89,7 +85,7 @@ func (fi *FileInfoStore) AddSharing(dirPath string) error {
 
 	info, err := fi.GetInfo(dirPath)
 	if err != nil {
-		if !IsNotFound(err) {
+		if !errors.Is(err, ErrNotFound) {
 			return err
 		}
 		info = &db.FileInfo{
@@ -199,7 +195,7 @@ func (fi *FileInfoStore) GetInfos(itemPaths []string) (map[string]*db.FileInfo, 
 	for _, itemPath := range itemPaths {
 		info, err := fi.GetInfo(itemPath)
 		if err != nil {
-			if !IsNotFound(err) {
+			if !errors.Is(err, ErrNotFound) {
 				return nil, err
 			}
 			continue
@@ -233,7 +229,7 @@ func (fi *FileInfoStore) SetSha1(itemPath, sign string) error {
 
 	info, err := fi.GetInfo(itemPath)
 	if err != nil {
-		if !IsNotFound(err) {
+		if !errors.Is(err, ErrNotFound) {
 			return err
 		}
 		info = &db.FileInfo{

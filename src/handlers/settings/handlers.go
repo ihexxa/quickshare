@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/ihexxa/gocfg"
 
-	"github.com/ihexxa/quickshare/src/db/sitestore"
+	"github.com/ihexxa/quickshare/src/db"
 	"github.com/ihexxa/quickshare/src/depidx"
 	q "github.com/ihexxa/quickshare/src/handlers"
 )
@@ -29,10 +29,10 @@ func (h *SettingsSvc) Health(c *gin.Context) {
 }
 
 type ClientCfgMsg struct {
-	SiteName       string              `json:"siteName"`
-	SiteDesc       string              `json:"siteDesc"`
-	Bg             *sitestore.BgConfig `json:"bg"`
-	CaptchaEnabled bool                `json:"captchaEnabled"`
+	SiteName       string       `json:"siteName"`
+	SiteDesc       string       `json:"siteDesc"`
+	Bg             *db.BgConfig `json:"bg"`
+	CaptchaEnabled bool         `json:"captchaEnabled"`
 }
 
 func (h *SettingsSvc) GetClientCfg(c *gin.Context) {
@@ -59,7 +59,7 @@ func (h *SettingsSvc) SetClientCfg(c *gin.Context) {
 		return
 	}
 
-	clientCfg := &sitestore.ClientConfig{
+	clientCfg := &db.ClientConfig{
 		SiteName: req.SiteName,
 		SiteDesc: req.SiteDesc,
 		Bg:       req.Bg,
@@ -78,7 +78,7 @@ func (h *SettingsSvc) SetClientCfg(c *gin.Context) {
 	c.JSON(q.Resp(200))
 }
 
-func validateClientCfg(cfg *sitestore.ClientConfig) error {
+func validateClientCfg(cfg *db.ClientConfig) error {
 	if cfg.SiteName == "" {
 		return errors.New("site name is empty")
 	}
