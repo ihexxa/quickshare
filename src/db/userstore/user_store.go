@@ -32,7 +32,6 @@ type IUserStore interface {
 	GetUser(id uint64) (*db.User, error)
 	GetUserByName(name string) (*db.User, error)
 	SetInfo(id uint64, user *db.User) error
-	// CanIncrUsed(id uint64, capacity int64) (bool, error)
 	SetUsed(id uint64, incr bool, capacity int64) error
 	ResetUsed(id uint64, used int64) error
 	SetPwd(id uint64, pwd string) error
@@ -322,6 +321,9 @@ func (us *KVUserStore) ListUsers() ([]*db.User, error) {
 		}
 		user.Pwd = ""
 
+		if err = db.CheckUser(user, true); err != nil {
+			return nil, err
+		}
 		users = append(users, user)
 	}
 

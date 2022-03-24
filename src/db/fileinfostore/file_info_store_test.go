@@ -1,6 +1,7 @@
 package fileinfostore
 
 import (
+	"errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -140,7 +141,7 @@ func TestUserStores(t *testing.T) {
 		// get infos
 		for itemPath := range pathInfos {
 			_, err := store.GetInfo(itemPath)
-			if !IsNotFound(err) {
+			if !errors.Is(err, ErrNotFound) {
 				t.Fatal(err)
 			}
 		}

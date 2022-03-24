@@ -10,10 +10,11 @@ const (
 	SchemaV2 = "v2" // add size to file info
 
 	UserSchemaNs = "UserSchemaNs"
+	FileSchemaNs = "FileSchemaNs"
 	UserIDsNs    = "UserIDsNs"
 	UsersNs      = "UsersNs"
 	RolesNs      = "RolesNs"
-	InfoNs       = "InfoNs"
+	FileInfoNs   = "FileInfoNs"
 	ShareIDNs    = "ShareIDNs"
 
 	uploadsPrefix = "uploads"
@@ -290,17 +291,17 @@ func CheckBgConfig(cfg *BgConfig, fillDefault bool) error {
 
 func CheckUser(user *User, fillDefault bool) error {
 	if user.ID == 0 && user.Role != AdminRole {
-		return ErrInvalidUser
+		return fmt.Errorf("invalid ID: (%w)", ErrInvalidUser)
 	}
 	// TODO: add length check
-	if user.Name == "" || user.Pwd == "" || user.Role == "" {
-		return ErrInvalidUser
+	if user.Name == "" || user.Role == "" {
+		return fmt.Errorf("invalid Name/pwd/role: (%w)", ErrInvalidUser)
 	}
 	if user.UsedSpace < 0 {
-		return ErrInvalidUser
+		return fmt.Errorf("invalid UsedSpace: (%w)", ErrInvalidUser)
 	}
 	if user.Quota == nil || user.Preferences == nil {
-		return ErrInvalidUser
+		return fmt.Errorf("invalid Quota: (%w)", ErrInvalidUser)
 	}
 
 	var err error

@@ -116,7 +116,7 @@ func (bs *BoltStore) setUploadInfo(tx *bolt.Tx, userID uint64, uploadPath string
 func (bs *BoltStore) getFileInfo(tx *bolt.Tx, userID uint64, itemPath string) (*db.FileInfo, error) {
 	var err error
 
-	fileInfoBucket := tx.Bucket([]byte(db.InfoNs))
+	fileInfoBucket := tx.Bucket([]byte(db.FileInfoNs))
 	if fileInfoBucket == nil {
 		return nil, db.ErrBucketNotFound
 	}
@@ -137,7 +137,7 @@ func (bs *BoltStore) getFileInfo(tx *bolt.Tx, userID uint64, itemPath string) (*
 func (bs *BoltStore) setFileInfo(tx *bolt.Tx, userID uint64, itemPath string, fileInfo *db.FileInfo) error {
 	var err error
 
-	fileInfoBucket := tx.Bucket([]byte(db.InfoNs))
+	fileInfoBucket := tx.Bucket([]byte(db.FileInfoNs))
 	if fileInfoBucket == nil {
 		return db.ErrBucketNotFound
 	}
@@ -290,7 +290,7 @@ func (bs *BoltStore) DelInfos(userID uint64, itemPath string, isDir bool) error 
 	return bs.boltdb.Update(func(tx *bolt.Tx) error {
 		var err error
 
-		fileInfoBucket := tx.Bucket([]byte(db.InfoNs))
+		fileInfoBucket := tx.Bucket([]byte(db.FileInfoNs))
 		if fileInfoBucket == nil {
 			return db.ErrBucketNotFound
 		}
@@ -339,7 +339,7 @@ func (bs *BoltStore) MoveInfos(userID uint64, oldPath, newPath string, isDir boo
 	return bs.boltdb.Update(func(tx *bolt.Tx) error {
 		var err error
 
-		fileInfoBucket := tx.Bucket([]byte(db.InfoNs))
+		fileInfoBucket := tx.Bucket([]byte(db.FileInfoNs))
 		if fileInfoBucket == nil {
 			return db.ErrBucketNotFound
 		}
