@@ -188,7 +188,7 @@ func (h *MultiUsersSvc) Init(adminName, adminPwd string) (string, error) {
 				return "", err
 			}
 
-			preferences := userstore.DefaultPreferences
+			preferences := db.DefaultPreferences
 			user := &db.User{
 				ID:   h.deps.ID().Gen(),
 				Name: userCfg.Name,
@@ -433,7 +433,7 @@ func (h *MultiUsersSvc) AddUser(c *gin.Context) {
 		return
 	}
 
-	newPreferences := userstore.DefaultPreferences
+	newPreferences := db.DefaultPreferences
 	err = h.deps.Users().AddUser(&db.User{
 		ID:   uid,
 		Name: req.Name,

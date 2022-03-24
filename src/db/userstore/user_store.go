@@ -22,16 +22,6 @@ var (
 	ErrReachedLimit     = errors.New("reached space limit")
 	ErrUserNotFound     = errors.New("user not found")
 	ErrNegtiveUsedSpace = errors.New("used space can not be negative")
-
-	DefaultPreferences = db.Preferences{
-		Bg:         db.DefaultBgConfig,
-		CSSURL:     db.DefaultCSSURL,
-		LanPackURL: db.DefaultLanPackURL,
-		Lan:        db.DefaultLan,
-		Theme:      db.DefaultTheme,
-		Avatar:     db.DefaultAvatar,
-		Email:      db.DefaultEmail,
-	}
 )
 
 type IUserStore interface {
@@ -93,7 +83,7 @@ func (us *KVUserStore) Init(rootName, rootPwd string) error {
 			UploadSpeedLimit:   db.DefaultUploadSpeedLimit,
 			DownloadSpeedLimit: db.DefaultDownloadSpeedLimit,
 		},
-		Preferences: &DefaultPreferences,
+		Preferences: &db.DefaultPreferences,
 	}
 
 	visitor := &db.User{
@@ -106,7 +96,7 @@ func (us *KVUserStore) Init(rootName, rootPwd string) error {
 			UploadSpeedLimit:   db.VisitorUploadSpeedLimit,
 			DownloadSpeedLimit: db.VisitorDownloadSpeedLimit,
 		},
-		Preferences: &DefaultPreferences,
+		Preferences: &db.DefaultPreferences,
 	}
 
 	for _, user := range []*db.User{admin, visitor} {
@@ -134,6 +124,10 @@ func (us *KVUserStore) IsInited() bool {
 func (us *KVUserStore) setUser(user *db.User) error {
 	var err error
 
+	if err = db.CheckUser(user, false); err != nil {
+		return err
+	}
+
 	userID := fmt.Sprint(user.ID)
 	err = us.store.SetStringIn(db.UserIDsNs, user.Name, userID)
 	if err != nil {
@@ -159,6 +153,9 @@ func (us *KVUserStore) getUser(id uint64) (*db.User, error) {
 		return nil, err
 	}
 
+	if err = db.CheckUser(user, true); err != nil {
+		return nil, err
+	}
 	return user, nil
 }
 
@@ -176,6 +173,10 @@ func (us *KVUserStore) getUserByName(name string) (*db.User, error) {
 	user := &db.User{}
 	err := json.Unmarshal([]byte(userBytes), user)
 	if err != nil {
+		return nil, err
+	}
+
+	if err = db.CheckUser(user, true); err != nil {
 		return nil, err
 	}
 	return user, nil

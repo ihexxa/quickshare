@@ -37,8 +37,8 @@ func TestUserStores(t *testing.T) {
 		if root.Quota.DownloadSpeedLimit != db.DefaultDownloadSpeedLimit {
 			t.Fatalf("incorrect root DownloadSpeedLimit")
 		}
-		if !db.ComparePreferences(root.Preferences, &DefaultPreferences) {
-			t.Fatalf("incorrect preference %v %v", root.Preferences, DefaultPreferences)
+		if !db.ComparePreferences(root.Preferences, &db.DefaultPreferences) {
+			t.Fatalf("incorrect preference %v %v", root.Preferences, db.DefaultPreferences)
 		}
 
 		visitor, err := store.GetUser(1)
@@ -63,7 +63,7 @@ func TestUserStores(t *testing.T) {
 		if visitor.Quota.DownloadSpeedLimit != db.VisitorDownloadSpeedLimit {
 			t.Fatalf("incorrect visitor DownloadSpeedLimit")
 		}
-		if !db.ComparePreferences(visitor.Preferences, &DefaultPreferences) {
+		if !db.ComparePreferences(visitor.Preferences, &db.DefaultPreferences) {
 			t.Fatalf("incorrect preference")
 		}
 
@@ -83,6 +83,7 @@ func TestUserStores(t *testing.T) {
 				UploadSpeedLimit:   upLimit1,
 				DownloadSpeedLimit: downLimit1,
 			},
+			Preferences: &db.DefaultPreferences,
 		})
 		if err != nil {
 			t.Fatal("there should be no error")
@@ -191,7 +192,7 @@ func TestUserStores(t *testing.T) {
 			Bg: &db.BgConfig{
 				Url:      "/url",
 				Repeat:   "repeat",
-				Position: "pos",
+				Position: "center",
 				Align:    "fixed",
 				BgColor:  "#333",
 			},

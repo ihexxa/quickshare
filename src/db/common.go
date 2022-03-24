@@ -37,7 +37,7 @@ var (
 	DefaultSiteName = "Quickshare"
 	DefaultSiteDesc = "Quickshare"
 	DefaultBgConfig = &BgConfig{
-		Repeat:   "repeated",
+		Repeat:   "repeat",
 		Position: "top",
 		Align:    "fixed",
 		BgColor:  "#ccc",
@@ -75,6 +75,16 @@ var (
 	DefaultDownloadSpeedLimit = 50 * 1024 * 1024          // 50MB
 	VisitorUploadSpeedLimit   = 10 * 1024 * 1024          // 10MB
 	VisitorDownloadSpeedLimit = 10 * 1024 * 1024          // 10MB
+
+	DefaultPreferences = Preferences{
+		Bg:         DefaultBgConfig,
+		CSSURL:     DefaultCSSURL,
+		LanPackURL: DefaultLanPackURL,
+		Lan:        DefaultLan,
+		Theme:      DefaultTheme,
+		Avatar:     DefaultAvatar,
+		Email:      DefaultEmail,
+	}
 )
 
 type FileInfo struct {
@@ -231,9 +241,6 @@ func CheckPreferences(prefers *Preferences, fillDefault bool) error {
 		prefers.Avatar = DefaultAvatar
 	}
 	if prefers.Email == "" {
-		if !fillDefault {
-			return ErrInvalidPreferences
-		}
 		prefers.Email = DefaultEmail
 	}
 	if prefers.Bg == nil {
@@ -281,7 +288,7 @@ func CheckBgConfig(cfg *BgConfig, fillDefault bool) error {
 	return nil
 }
 
-func CheckUser(user User, fillDefault bool) error {
+func CheckUser(user *User, fillDefault bool) error {
 	if user.ID == 0 && user.Role != AdminRole {
 		return ErrInvalidUser
 	}
