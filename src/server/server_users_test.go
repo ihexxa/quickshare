@@ -9,7 +9,6 @@ import (
 
 	"github.com/ihexxa/quickshare/src/client"
 	"github.com/ihexxa/quickshare/src/db"
-	"github.com/ihexxa/quickshare/src/db/userstore"
 	q "github.com/ihexxa/quickshare/src/handlers"
 	su "github.com/ihexxa/quickshare/src/handlers/singleuserhdr"
 )
@@ -94,7 +93,7 @@ func TestUsersHandlers(t *testing.T) {
 					user.Quota.SpaceLimit != 1024*1024*1024 || // TODO: export these
 					user.Quota.UploadSpeedLimit != 50*1024*1024 ||
 					user.Quota.DownloadSpeedLimit != 50*1024*1024 ||
-					!reflect.DeepEqual(user.Preferences, &userstore.DefaultPreferences) {
+					!reflect.DeepEqual(user.Preferences, &db.DefaultPreferences) {
 					t.Fatal(fmt.Errorf("incorrect user info (%v)", user))
 				}
 			}
@@ -103,7 +102,7 @@ func TestUsersHandlers(t *testing.T) {
 					user.Quota.SpaceLimit != 0 || // TODO: export these
 					user.Quota.UploadSpeedLimit != 10*1024*1024 ||
 					user.Quota.DownloadSpeedLimit != 10*1024*1024 ||
-					!reflect.DeepEqual(user.Preferences, &userstore.DefaultPreferences) {
+					!reflect.DeepEqual(user.Preferences, &db.DefaultPreferences) {
 					t.Fatal(fmt.Errorf("incorrect user info (%v)", user))
 				}
 			}
@@ -112,7 +111,7 @@ func TestUsersHandlers(t *testing.T) {
 					user.Quota.SpaceLimit != 1024 ||
 					user.Quota.UploadSpeedLimit != 409600 ||
 					user.Quota.DownloadSpeedLimit != 409600 ||
-					!reflect.DeepEqual(user.Preferences, &userstore.DefaultPreferences) {
+					!reflect.DeepEqual(user.Preferences, &db.DefaultPreferences) {
 					t.Fatal(fmt.Errorf("incorrect user info (%v)", user))
 				}
 			}
@@ -458,19 +457,23 @@ func TestUsersHandlers(t *testing.T) {
 				LanPackURL: "/lanpack",
 				Avatar:     "a1",
 				Email:      "email1",
+				Lan:        "en_US",
+				Theme:      "light",
 			},
 			&db.Preferences{
 				Bg: &db.BgConfig{
 					Url:      "/bgurl2",
-					Repeat:   "no-repeat2",
-					Position: "center2",
-					Align:    "fixed2",
+					Repeat:   "repeat",
+					Position: "top",
+					Align:    "scroll",
 					BgColor:  "#333",
 				},
 				CSSURL:     "/cssurl2",
 				LanPackURL: "/lanpack2",
 				Avatar:     "a2",
 				Email:      "email2",
+				Lan:        "zh_CN",
+				Theme:      "dark",
 			},
 		}
 		for _, prefer := range prefers {

@@ -152,7 +152,7 @@ func TestPermissions(t *testing.T) {
 			assertResp(t, resp, errs, expectedCodes["ListUsers"], fmt.Sprintf("%s-%s", desc, "ListUsers"))
 
 			// TODO: the id here should be uint64
-			tmpUserID := uint64(0)
+			tmpUserID := uint64(12345)
 			var err error
 			if addUserResp.ID != "" {
 				tmpUserID, err = strconv.ParseUint(addUserResp.ID, 10, 64)
@@ -160,9 +160,16 @@ func TestPermissions(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-			userID := uint64(0)
+			userID := uint64(12345)
 			if selfResp.ID != "" {
 				userID, err = strconv.ParseUint(selfResp.ID, 10, 64)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+			tmpAdminID := uint64(12345)
+			if addAdminResp.ID != "" {
+				tmpAdminID, err = strconv.ParseUint(addAdminResp.ID, 10, 64)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -187,7 +194,7 @@ func TestPermissions(t *testing.T) {
 			// update other users
 			resp, _, errs = cl.SetUser(tmpUserID, db.AdminRole, newQuota, token)
 			assertResp(t, resp, errs, expectedCodes["SetUserOthers"], fmt.Sprintf("%s-%s", desc, "SetUserOthers"))
-			resp, _, errs = cl.SetUser(0, db.UserRole, newQuota, token)
+			resp, _, errs = cl.SetUser(tmpAdminID, db.UserRole, newQuota, token)
 			assertResp(t, resp, errs, expectedCodes["SetUserOthersAdmin"], fmt.Sprintf("%s-%s", desc, "SetUserOthersAdmin"))
 
 			resp, _, errs = cl.DelUser(addUserResp.ID, token)
