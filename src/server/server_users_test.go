@@ -89,7 +89,7 @@ func TestUsersHandlers(t *testing.T) {
 		for _, user := range lsResp.Users {
 			if user.Name == adminName {
 				if user.ID != 0 ||
-					user.Role != userstore.AdminRole ||
+					user.Role != db.AdminRole ||
 					user.UsedSpace != 0 ||
 					user.Quota.SpaceLimit != 1024*1024*1024 || // TODO: export these
 					user.Quota.UploadSpeedLimit != 50*1024*1024 ||
@@ -99,7 +99,7 @@ func TestUsersHandlers(t *testing.T) {
 				}
 			}
 			if user.Name == "visitor" {
-				if user.Role != userstore.VisitorRole ||
+				if user.Role != db.VisitorRole ||
 					user.Quota.SpaceLimit != 0 || // TODO: export these
 					user.Quota.UploadSpeedLimit != 10*1024*1024 ||
 					user.Quota.DownloadSpeedLimit != 10*1024*1024 ||
@@ -108,7 +108,7 @@ func TestUsersHandlers(t *testing.T) {
 				}
 			}
 			if user.Name == "demo" {
-				if user.Role != userstore.UserRole ||
+				if user.Role != db.UserRole ||
 					user.Quota.SpaceLimit != 1024 ||
 					user.Quota.UploadSpeedLimit != 409600 ||
 					user.Quota.DownloadSpeedLimit != 409600 ||
@@ -125,7 +125,7 @@ func TestUsersHandlers(t *testing.T) {
 				ID:        0,
 				Name:      adminName,
 				Pwd:       adminPwd,
-				Role:      userstore.AdminRole,
+				Role:      db.AdminRole,
 				UsedSpace: 0,
 				Quota: &db.Quota{
 					UploadSpeedLimit:   50 * 1024 * 1024,
@@ -137,7 +137,7 @@ func TestUsersHandlers(t *testing.T) {
 				ID:        0,
 				Name:      "demo",
 				Pwd:       "Quicksh@re",
-				Role:      userstore.UserRole,
+				Role:      db.UserRole,
 				UsedSpace: 0,
 				Quota: &db.Quota{
 					UploadSpeedLimit:   409600,
@@ -171,7 +171,7 @@ func TestUsersHandlers(t *testing.T) {
 				// TODO: expose default values from userstore
 				t.Fatalf("user infos don't match %v", selfResp)
 			}
-			if selfResp.Role == userstore.AdminRole {
+			if selfResp.Role == db.AdminRole {
 				if selfResp.ID != "0" {
 					t.Fatalf("user id don't match %v", selfResp)
 				}
@@ -210,7 +210,7 @@ func TestUsersHandlers(t *testing.T) {
 		token := client.GetCookie(resp.Cookies(), su.TokenCookie)
 
 		userName, userPwd := "user_login", "1234"
-		resp, auResp, errs := usersCl.AddUser(userName, userPwd, userstore.UserRole, token)
+		resp, auResp, errs := usersCl.AddUser(userName, userPwd, db.UserRole, token)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
@@ -270,7 +270,7 @@ func TestUsersHandlers(t *testing.T) {
 
 		token := client.GetCookie(resp.Cookies(), su.TokenCookie)
 
-		userName, userPwd, userRole := "new_user", "1234", userstore.UserRole
+		userName, userPwd, userRole := "new_user", "1234", db.UserRole
 		resp, auResp, errs := usersCl.AddUser(userName, userPwd, userRole, token)
 		if len(errs) > 0 {
 			t.Fatal(errs)
@@ -297,7 +297,7 @@ func TestUsersHandlers(t *testing.T) {
 		for _, user := range lsResp.Users {
 			if user.ID == 0 {
 				if user.Name != adminName ||
-					user.Role != userstore.AdminRole {
+					user.Role != db.AdminRole {
 					t.Fatal(fmt.Errorf("incorrect root info (%v)", user))
 				}
 			}
@@ -309,7 +309,7 @@ func TestUsersHandlers(t *testing.T) {
 			}
 		}
 
-		newRole, newQuota := userstore.AdminRole, &db.Quota{
+		newRole, newQuota := db.AdminRole, &db.Quota{
 			SpaceLimit:         3,
 			UploadSpeedLimit:   3,
 			DownloadSpeedLimit: 3,
@@ -396,9 +396,9 @@ func TestUsersHandlers(t *testing.T) {
 			t.Fatal(resp.StatusCode)
 		}
 		for _, role := range append(roles, []string{
-			userstore.AdminRole,
-			userstore.UserRole,
-			userstore.VisitorRole,
+			db.AdminRole,
+			db.UserRole,
+			db.VisitorRole,
 		}...) {
 			if !lsResp.Roles[role] {
 				t.Fatalf("role(%s) not found", role)

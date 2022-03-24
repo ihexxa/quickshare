@@ -9,20 +9,72 @@ import (
 const (
 	SchemaV2 = "v2" // add size to file info
 
-	UsersNs   = "users"
-	InfoNs    = "sharing"
-	ShareIDNs = "sharingKey"
+	UserSchemaNs = "UserSchemaNs"
+	UserIDsNs    = "UserIDsNs"
+	UsersNs      = "UsersNs"
+	RolesNs      = "RolesNs"
+	InfoNs       = "InfoNs"
+	ShareIDNs    = "ShareIDNs"
 
 	uploadsPrefix = "uploads"
 
 	KeyInitTime = "keyInitTime"
+
+	AdminRole   = "admin"
+	UserRole    = "user"
+	VisitorRole = "visitor"
 )
 
 var (
-	ErrBucketNotFound = errors.New("bucket not found")
-	ErrKeyNotFound    = errors.New("key not found")
-	ErrCreateExisting = errors.New("create upload info which already exists")
-	ErrQuota          = errors.New("quota limit reached")
+	ErrInvalidUser        = errors.New("invalid user")
+	ErrInvalidQuota       = errors.New("invalid quota")
+	ErrInvalidPreferences = errors.New("invalid preferences")
+	ErrBucketNotFound     = errors.New("bucket not found")
+	ErrKeyNotFound        = errors.New("key not found")
+	ErrCreateExisting     = errors.New("create upload info which already exists")
+	ErrQuota              = errors.New("quota limit reached")
+
+	DefaultSiteName = "Quickshare"
+	DefaultSiteDesc = "Quickshare"
+	DefaultBgConfig = &BgConfig{
+		Repeat:   "repeated",
+		Position: "top",
+		Align:    "fixed",
+		BgColor:  "#ccc",
+	}
+	BgRepeatValues = map[string]bool{
+		"repeat-x":  true,
+		"repeat-y":  true,
+		"repeat":    true,
+		"space":     true,
+		"round":     true,
+		"no-repeat": true,
+	}
+	BgAlignValues = map[string]bool{
+		"scroll": true,
+		"fixed":  true,
+		"local":  true,
+	}
+	BgPositionValues = map[string]bool{
+		"top":    true,
+		"bottom": true,
+		"left":   true,
+		"right":  true,
+		"center": true,
+	}
+
+	DefaultCSSURL     = ""
+	DefaultLanPackURL = ""
+	DefaultLan        = "en_US"
+	DefaultTheme      = "light"
+	DefaultAvatar     = ""
+	DefaultEmail      = ""
+
+	DefaultSpaceLimit         = int64(1024 * 1024 * 1024) // 1GB
+	DefaultUploadSpeedLimit   = 50 * 1024 * 1024          // 50MB
+	DefaultDownloadSpeedLimit = 50 * 1024 * 1024          // 50MB
+	VisitorUploadSpeedLimit   = 10 * 1024 * 1024          // 10MB
+	VisitorDownloadSpeedLimit = 10 * 1024 * 1024          // 10MB
 )
 
 type FileInfo struct {
@@ -33,20 +85,30 @@ type FileInfo struct {
 	Size    int64  `json:"size"`
 }
 
+type UserCfg struct {
+	Name string `json:"name" yaml:"name"`
+	Role string `json:"role" yaml:"role"`
+	Pwd  string `json:"pwd" yaml:"pwd"`
+}
+
 type Quota struct {
-	SpaceLimit         int64 `json:"spaceLimit,string"`
-	UploadSpeedLimit   int   `json:"uploadSpeedLimit"`
-	DownloadSpeedLimit int   `json:"downloadSpeedLimit"`
+	SpaceLimit         int64 `json:"spaceLimit,string" yaml:"spaceLimit,string"`
+	UploadSpeedLimit   int   `json:"uploadSpeedLimit" yaml:"uploadSpeedLimit"`
+	DownloadSpeedLimit int   `json:"downloadSpeedLimit" yaml:"downloadSpeedLimit"`
 }
 
 type Preferences struct {
-	Bg         *BgConfig `json:"bg"`
-	CSSURL     string    `json:"cssURL"`
-	LanPackURL string    `json:"lanPackURL"`
-	Lan        string    `json:"lan"`
-	Theme      string    `json:"theme"`
-	Avatar     string    `json:"avatar"`
-	Email      string    `json:"email"`
+	Bg         *BgConfig `json:"bg" yaml:"bg"`
+	CSSURL     string    `json:"cssURL" yaml:"cssURL"`
+	LanPackURL string    `json:"lanPackURL" yaml:"lanPackURL"`
+	Lan        string    `json:"lan" yaml:"lan"`
+	Theme      string    `json:"theme" yaml:"theme"`
+	Avatar     string    `json:"avatar" yaml:"avatar"`
+	Email      string    `json:"email" yaml:"email"`
+}
+
+type SiteConfig struct {
+	ClientCfg *ClientConfig `json:"clientCfg" yaml:"clientCfg"`
 }
 
 type ClientConfig struct {
@@ -63,6 +125,22 @@ type BgConfig struct {
 	BgColor  string `json:"bgColor" yaml:"bgColor"`
 }
 
+type User struct {
+	ID          uint64       `json:"id,string" yaml:"id,string"`
+	Name        string       `json:"name" yaml:"name"`
+	Pwd         string       `json:"pwd" yaml:"pwd"`
+	Role        string       `json:"role" yaml:"role"`
+	UsedSpace   int64        `json:"usedSpace,string" yaml:"usedSpace,string"`
+	Quota       *Quota       `json:"quota" yaml:"quota"`
+	Preferences *Preferences `json:"preferences" yaml:"preferences"`
+}
+
+type UploadInfo struct {
+	RealFilePath string `json:"realFilePath" yaml:"realFilePath"`
+	Size         int64  `json:"size" yaml:"size"`
+	Uploaded     int64  `json:"uploaded" yaml:"uploaded"`
+}
+
 func ComparePreferences(p1, p2 *Preferences) bool {
 	return p1.CSSURL == p2.CSSURL &&
 		p1.LanPackURL == p2.LanPackURL &&
@@ -73,22 +151,158 @@ func ComparePreferences(p1, p2 *Preferences) bool {
 		reflect.DeepEqual(p1.Bg, p2.Bg)
 }
 
-type User struct {
-	ID          uint64       `json:"id,string"`
-	Name        string       `json:"name"`
-	Pwd         string       `json:"pwd"`
-	Role        string       `json:"role"`
-	UsedSpace   int64        `json:"usedSpace,string"`
-	Quota       *Quota       `json:"quota"`
-	Preferences *Preferences `json:"preferences"`
-}
-
-type UploadInfo struct {
-	RealFilePath string `json:"realFilePath"`
-	Size         int64  `json:"size"`
-	Uploaded     int64  `json:"uploaded"`
-}
-
 func UploadNS(user string) string {
 	return fmt.Sprintf("%s/%s", uploadsPrefix, user)
+}
+
+func CheckSiteCfg(cfg *SiteConfig, fillDefault bool) error {
+	if cfg.ClientCfg == nil {
+		if !fillDefault {
+			return errors.New("cfg.ClientCfg not defined")
+		}
+		cfg.ClientCfg = &ClientConfig{
+			SiteName: DefaultSiteName,
+			SiteDesc: DefaultSiteDesc,
+			Bg: &BgConfig{
+				Url:      DefaultBgConfig.Url,
+				Repeat:   DefaultBgConfig.Repeat,
+				Position: DefaultBgConfig.Position,
+				Align:    DefaultBgConfig.Align,
+				BgColor:  DefaultBgConfig.BgColor,
+			},
+		}
+
+		return nil
+	}
+
+	if cfg.ClientCfg.SiteName == "" {
+		cfg.ClientCfg.SiteName = DefaultSiteName
+	}
+	if cfg.ClientCfg.SiteDesc == "" {
+		cfg.ClientCfg.SiteDesc = DefaultSiteDesc
+	}
+
+	if cfg.ClientCfg.Bg == nil {
+		if !fillDefault {
+			return errors.New("cfg.ClientCfg.Bg not defined")
+		}
+		cfg.ClientCfg.Bg = DefaultBgConfig
+	}
+	if err := CheckBgConfig(cfg.ClientCfg.Bg, fillDefault); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func CheckQuota(quota *Quota) error {
+	if quota.SpaceLimit < 0 {
+		return ErrInvalidQuota
+	}
+	if quota.UploadSpeedLimit < 0 {
+		return ErrInvalidQuota
+	}
+	if quota.DownloadSpeedLimit < 0 {
+		return ErrInvalidQuota
+	}
+	return nil
+}
+
+func CheckPreferences(prefers *Preferences, fillDefault bool) error {
+	if prefers.CSSURL == "" {
+		prefers.CSSURL = DefaultCSSURL
+	}
+	if prefers.LanPackURL == "" {
+		prefers.LanPackURL = DefaultLanPackURL
+	}
+	if prefers.Lan == "" {
+		if !fillDefault {
+			return ErrInvalidPreferences
+		}
+		prefers.Lan = DefaultLan
+	}
+	if prefers.Theme == "" {
+		if !fillDefault {
+			return ErrInvalidPreferences
+		}
+		prefers.Theme = DefaultTheme
+	}
+	if prefers.Avatar == "" {
+		prefers.Avatar = DefaultAvatar
+	}
+	if prefers.Email == "" {
+		if !fillDefault {
+			return ErrInvalidPreferences
+		}
+		prefers.Email = DefaultEmail
+	}
+	if prefers.Bg == nil {
+		if !fillDefault {
+			return ErrInvalidPreferences
+		}
+		prefers.Bg = DefaultBgConfig
+	}
+	if err := CheckBgConfig(prefers.Bg, fillDefault); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func CheckBgConfig(cfg *BgConfig, fillDefault bool) error {
+	if cfg.Url == "" && cfg.BgColor == "" {
+		if !fillDefault {
+			return errors.New("one of Bg.Url or Bg.BgColor must be defined")
+		}
+		cfg.BgColor = DefaultBgConfig.BgColor
+	}
+	if !BgRepeatValues[cfg.Repeat] {
+		return fmt.Errorf("invalid repeat value (%s)", cfg.Repeat)
+	}
+	if !BgPositionValues[cfg.Position] {
+		return fmt.Errorf("invalid position value (%s)", cfg.Position)
+	}
+	if !BgAlignValues[cfg.Align] {
+		return fmt.Errorf("invalid align value (%s)", cfg.Align)
+	}
+
+	if cfg.Repeat == "" {
+		cfg.Repeat = DefaultBgConfig.Repeat
+	}
+	if cfg.Position == "" {
+		cfg.Position = DefaultBgConfig.Position
+	}
+	if cfg.Align == "" {
+		cfg.Align = DefaultBgConfig.Align
+	}
+	if cfg.BgColor == "" {
+		cfg.BgColor = DefaultBgConfig.BgColor
+	}
+	return nil
+}
+
+func CheckUser(user User, fillDefault bool) error {
+	if user.ID == 0 && user.Role != AdminRole {
+		return ErrInvalidUser
+	}
+	// TODO: add length check
+	if user.Name == "" || user.Pwd == "" || user.Role == "" {
+		return ErrInvalidUser
+	}
+	if user.UsedSpace < 0 {
+		return ErrInvalidUser
+	}
+	if user.Quota == nil || user.Preferences == nil {
+		return ErrInvalidUser
+	}
+
+	var err error
+	if err = CheckQuota(user.Quota); err != nil {
+		return err
+	}
+	if err = CheckPreferences(user.Preferences, fillDefault); err != nil {
+		return err
+	}
+
+	return nil
 }

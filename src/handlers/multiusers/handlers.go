@@ -37,98 +37,98 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 	apiACRules := map[string]bool{
 		// TODO: make these configurable
 		// admin rules
-		apiRuleCname(userstore.AdminRole, "GET", "/"):                              true,
-		apiRuleCname(userstore.AdminRole, "GET", publicPath):                       true,
-		apiRuleCname(userstore.AdminRole, "POST", "/v1/users/login"):               true,
-		apiRuleCname(userstore.AdminRole, "POST", "/v1/users/logout"):              true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/users/isauthed"):             true,
-		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/users/pwd"):                true,
-		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/users/"):                   true,
-		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/users/pwd/force-set"):      true,
-		apiRuleCname(userstore.AdminRole, "POST", "/v1/users/"):                    true,
-		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/users/"):                  true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/users/list"):                 true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/users/self"):                 true,
-		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/users/preferences"):        true,
-		apiRuleCname(userstore.AdminRole, "PUT", "/v1/users/used-space"):           true,
-		apiRuleCname(userstore.AdminRole, "POST", "/v1/roles/"):                    true,
-		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/roles/"):                  true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/roles/list"):                 true,
-		apiRuleCname(userstore.AdminRole, "POST", "/v1/fs/files"):                  true,
-		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/fs/files"):                true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/files"):                   true,
-		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/fs/files/chunks"):          true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/files/chunks"):            true,
-		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/fs/files/copy"):            true,
-		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/fs/files/move"):            true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/dirs"):                    true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/dirs/home"):               true,
-		apiRuleCname(userstore.AdminRole, "POST", "/v1/fs/dirs"):                   true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/uploadings"):              true,
-		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/fs/uploadings"):           true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/metadata"):                true,
-		apiRuleCname(userstore.AdminRole, "OPTIONS", "/v1/settings/health"):        true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/settings/client"):            true,
-		apiRuleCname(userstore.AdminRole, "PATCH", "/v1/settings/client"):          true,
-		apiRuleCname(userstore.AdminRole, "POST", "/v1/settings/errors"):           true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/settings/workers/queue-len"): true,
+		apiRuleCname(db.AdminRole, "GET", "/"):                              true,
+		apiRuleCname(db.AdminRole, "GET", publicPath):                       true,
+		apiRuleCname(db.AdminRole, "POST", "/v1/users/login"):               true,
+		apiRuleCname(db.AdminRole, "POST", "/v1/users/logout"):              true,
+		apiRuleCname(db.AdminRole, "GET", "/v1/users/isauthed"):             true,
+		apiRuleCname(db.AdminRole, "PATCH", "/v1/users/pwd"):                true,
+		apiRuleCname(db.AdminRole, "PATCH", "/v1/users/"):                   true,
+		apiRuleCname(db.AdminRole, "PATCH", "/v1/users/pwd/force-set"):      true,
+		apiRuleCname(db.AdminRole, "POST", "/v1/users/"):                    true,
+		apiRuleCname(db.AdminRole, "DELETE", "/v1/users/"):                  true,
+		apiRuleCname(db.AdminRole, "GET", "/v1/users/list"):                 true,
+		apiRuleCname(db.AdminRole, "GET", "/v1/users/self"):                 true,
+		apiRuleCname(db.AdminRole, "PATCH", "/v1/users/preferences"):        true,
+		apiRuleCname(db.AdminRole, "PUT", "/v1/users/used-space"):           true,
+		apiRuleCname(db.AdminRole, "POST", "/v1/roles/"):                    true,
+		apiRuleCname(db.AdminRole, "DELETE", "/v1/roles/"):                  true,
+		apiRuleCname(db.AdminRole, "GET", "/v1/roles/list"):                 true,
+		apiRuleCname(db.AdminRole, "POST", "/v1/fs/files"):                  true,
+		apiRuleCname(db.AdminRole, "DELETE", "/v1/fs/files"):                true,
+		apiRuleCname(db.AdminRole, "GET", "/v1/fs/files"):                   true,
+		apiRuleCname(db.AdminRole, "PATCH", "/v1/fs/files/chunks"):          true,
+		apiRuleCname(db.AdminRole, "GET", "/v1/fs/files/chunks"):            true,
+		apiRuleCname(db.AdminRole, "PATCH", "/v1/fs/files/copy"):            true,
+		apiRuleCname(db.AdminRole, "PATCH", "/v1/fs/files/move"):            true,
+		apiRuleCname(db.AdminRole, "GET", "/v1/fs/dirs"):                    true,
+		apiRuleCname(db.AdminRole, "GET", "/v1/fs/dirs/home"):               true,
+		apiRuleCname(db.AdminRole, "POST", "/v1/fs/dirs"):                   true,
+		apiRuleCname(db.AdminRole, "GET", "/v1/fs/uploadings"):              true,
+		apiRuleCname(db.AdminRole, "DELETE", "/v1/fs/uploadings"):           true,
+		apiRuleCname(db.AdminRole, "GET", "/v1/fs/metadata"):                true,
+		apiRuleCname(db.AdminRole, "OPTIONS", "/v1/settings/health"):        true,
+		apiRuleCname(db.AdminRole, "GET", "/v1/settings/client"):            true,
+		apiRuleCname(db.AdminRole, "PATCH", "/v1/settings/client"):          true,
+		apiRuleCname(db.AdminRole, "POST", "/v1/settings/errors"):           true,
+		apiRuleCname(db.AdminRole, "GET", "/v1/settings/workers/queue-len"): true,
 
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/captchas/"):         true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/captchas/imgs"):     true,
-		apiRuleCname(userstore.AdminRole, "POST", "/v1/fs/sharings"):      true,
-		apiRuleCname(userstore.AdminRole, "DELETE", "/v1/fs/sharings"):    true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/sharings"):       true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/sharings/exist"): true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/sharings/dirs"):  true,
-		apiRuleCname(userstore.AdminRole, "GET", "/v1/fs/sharings/ids"):   true,
-		apiRuleCname(userstore.AdminRole, "POST", "/v1/fs/hashes/sha1"):   true,
+		apiRuleCname(db.AdminRole, "GET", "/v1/captchas/"):         true,
+		apiRuleCname(db.AdminRole, "GET", "/v1/captchas/imgs"):     true,
+		apiRuleCname(db.AdminRole, "POST", "/v1/fs/sharings"):      true,
+		apiRuleCname(db.AdminRole, "DELETE", "/v1/fs/sharings"):    true,
+		apiRuleCname(db.AdminRole, "GET", "/v1/fs/sharings"):       true,
+		apiRuleCname(db.AdminRole, "GET", "/v1/fs/sharings/exist"): true,
+		apiRuleCname(db.AdminRole, "GET", "/v1/fs/sharings/dirs"):  true,
+		apiRuleCname(db.AdminRole, "GET", "/v1/fs/sharings/ids"):   true,
+		apiRuleCname(db.AdminRole, "POST", "/v1/fs/hashes/sha1"):   true,
 
 		// user rules
-		apiRuleCname(userstore.UserRole, "GET", "/"):                       true,
-		apiRuleCname(userstore.UserRole, "GET", publicPath):                true,
-		apiRuleCname(userstore.UserRole, "POST", "/v1/users/logout"):       true,
-		apiRuleCname(userstore.UserRole, "GET", "/v1/users/isauthed"):      true,
-		apiRuleCname(userstore.UserRole, "PATCH", "/v1/users/pwd"):         true,
-		apiRuleCname(userstore.UserRole, "GET", "/v1/users/self"):          true,
-		apiRuleCname(userstore.UserRole, "PATCH", "/v1/users/preferences"): true,
-		apiRuleCname(userstore.UserRole, "POST", "/v1/fs/files"):           true,
-		apiRuleCname(userstore.UserRole, "DELETE", "/v1/fs/files"):         true,
-		apiRuleCname(userstore.UserRole, "GET", "/v1/fs/files"):            true,
-		apiRuleCname(userstore.UserRole, "PATCH", "/v1/fs/files/chunks"):   true,
-		apiRuleCname(userstore.UserRole, "GET", "/v1/fs/files/chunks"):     true,
-		apiRuleCname(userstore.UserRole, "PATCH", "/v1/fs/files/copy"):     true,
-		apiRuleCname(userstore.UserRole, "PATCH", "/v1/fs/files/move"):     true,
-		apiRuleCname(userstore.UserRole, "GET", "/v1/fs/dirs"):             true,
-		apiRuleCname(userstore.UserRole, "GET", "/v1/fs/dirs/home"):        true,
-		apiRuleCname(userstore.UserRole, "POST", "/v1/fs/dirs"):            true,
-		apiRuleCname(userstore.UserRole, "GET", "/v1/fs/uploadings"):       true,
-		apiRuleCname(userstore.UserRole, "DELETE", "/v1/fs/uploadings"):    true,
-		apiRuleCname(userstore.UserRole, "GET", "/v1/fs/metadata"):         true,
-		apiRuleCname(userstore.UserRole, "OPTIONS", "/v1/settings/health"): true,
-		apiRuleCname(userstore.UserRole, "GET", "/v1/settings/client"):     true,
-		apiRuleCname(userstore.UserRole, "POST", "/v1/settings/errors"):    true,
-		apiRuleCname(userstore.UserRole, "GET", "/v1/captchas/"):           true,
-		apiRuleCname(userstore.UserRole, "GET", "/v1/captchas/imgs"):       true,
-		apiRuleCname(userstore.UserRole, "POST", "/v1/fs/sharings"):        true,
-		apiRuleCname(userstore.UserRole, "DELETE", "/v1/fs/sharings"):      true,
-		apiRuleCname(userstore.UserRole, "GET", "/v1/fs/sharings"):         true,
-		apiRuleCname(userstore.UserRole, "GET", "/v1/fs/sharings/exist"):   true,
-		apiRuleCname(userstore.UserRole, "GET", "/v1/fs/sharings/dirs"):    true,
-		apiRuleCname(userstore.UserRole, "GET", "/v1/fs/sharings/ids"):     true,
-		apiRuleCname(userstore.UserRole, "POST", "/v1/fs/hashes/sha1"):     true,
+		apiRuleCname(db.UserRole, "GET", "/"):                       true,
+		apiRuleCname(db.UserRole, "GET", publicPath):                true,
+		apiRuleCname(db.UserRole, "POST", "/v1/users/logout"):       true,
+		apiRuleCname(db.UserRole, "GET", "/v1/users/isauthed"):      true,
+		apiRuleCname(db.UserRole, "PATCH", "/v1/users/pwd"):         true,
+		apiRuleCname(db.UserRole, "GET", "/v1/users/self"):          true,
+		apiRuleCname(db.UserRole, "PATCH", "/v1/users/preferences"): true,
+		apiRuleCname(db.UserRole, "POST", "/v1/fs/files"):           true,
+		apiRuleCname(db.UserRole, "DELETE", "/v1/fs/files"):         true,
+		apiRuleCname(db.UserRole, "GET", "/v1/fs/files"):            true,
+		apiRuleCname(db.UserRole, "PATCH", "/v1/fs/files/chunks"):   true,
+		apiRuleCname(db.UserRole, "GET", "/v1/fs/files/chunks"):     true,
+		apiRuleCname(db.UserRole, "PATCH", "/v1/fs/files/copy"):     true,
+		apiRuleCname(db.UserRole, "PATCH", "/v1/fs/files/move"):     true,
+		apiRuleCname(db.UserRole, "GET", "/v1/fs/dirs"):             true,
+		apiRuleCname(db.UserRole, "GET", "/v1/fs/dirs/home"):        true,
+		apiRuleCname(db.UserRole, "POST", "/v1/fs/dirs"):            true,
+		apiRuleCname(db.UserRole, "GET", "/v1/fs/uploadings"):       true,
+		apiRuleCname(db.UserRole, "DELETE", "/v1/fs/uploadings"):    true,
+		apiRuleCname(db.UserRole, "GET", "/v1/fs/metadata"):         true,
+		apiRuleCname(db.UserRole, "OPTIONS", "/v1/settings/health"): true,
+		apiRuleCname(db.UserRole, "GET", "/v1/settings/client"):     true,
+		apiRuleCname(db.UserRole, "POST", "/v1/settings/errors"):    true,
+		apiRuleCname(db.UserRole, "GET", "/v1/captchas/"):           true,
+		apiRuleCname(db.UserRole, "GET", "/v1/captchas/imgs"):       true,
+		apiRuleCname(db.UserRole, "POST", "/v1/fs/sharings"):        true,
+		apiRuleCname(db.UserRole, "DELETE", "/v1/fs/sharings"):      true,
+		apiRuleCname(db.UserRole, "GET", "/v1/fs/sharings"):         true,
+		apiRuleCname(db.UserRole, "GET", "/v1/fs/sharings/exist"):   true,
+		apiRuleCname(db.UserRole, "GET", "/v1/fs/sharings/dirs"):    true,
+		apiRuleCname(db.UserRole, "GET", "/v1/fs/sharings/ids"):     true,
+		apiRuleCname(db.UserRole, "POST", "/v1/fs/hashes/sha1"):     true,
 		// visitor rules
-		apiRuleCname(userstore.VisitorRole, "GET", "/"):                       true,
-		apiRuleCname(userstore.VisitorRole, "GET", publicPath):                true,
-		apiRuleCname(userstore.VisitorRole, "POST", "/v1/users/login"):        true,
-		apiRuleCname(userstore.VisitorRole, "GET", "/v1/users/self"):          true,
-		apiRuleCname(userstore.VisitorRole, "GET", "/v1/fs/files"):            true,
-		apiRuleCname(userstore.VisitorRole, "GET", "/v1/fs/dirs"):             true,
-		apiRuleCname(userstore.VisitorRole, "OPTIONS", "/v1/settings/health"): true,
-		apiRuleCname(userstore.VisitorRole, "GET", "/v1/settings/client"):     true,
-		apiRuleCname(userstore.VisitorRole, "GET", "/v1/captchas/"):           true,
-		apiRuleCname(userstore.VisitorRole, "GET", "/v1/captchas/imgs"):       true,
-		apiRuleCname(userstore.VisitorRole, "GET", "/v1/fs/sharings/exist"):   true,
-		apiRuleCname(userstore.VisitorRole, "GET", "/v1/fs/sharings/dirs"):    true,
+		apiRuleCname(db.VisitorRole, "GET", "/"):                       true,
+		apiRuleCname(db.VisitorRole, "GET", publicPath):                true,
+		apiRuleCname(db.VisitorRole, "POST", "/v1/users/login"):        true,
+		apiRuleCname(db.VisitorRole, "GET", "/v1/users/self"):          true,
+		apiRuleCname(db.VisitorRole, "GET", "/v1/fs/files"):            true,
+		apiRuleCname(db.VisitorRole, "GET", "/v1/fs/dirs"):             true,
+		apiRuleCname(db.VisitorRole, "OPTIONS", "/v1/settings/health"): true,
+		apiRuleCname(db.VisitorRole, "GET", "/v1/settings/client"):     true,
+		apiRuleCname(db.VisitorRole, "GET", "/v1/captchas/"):           true,
+		apiRuleCname(db.VisitorRole, "GET", "/v1/captchas/imgs"):       true,
+		apiRuleCname(db.VisitorRole, "GET", "/v1/fs/sharings/exist"):   true,
+		apiRuleCname(db.VisitorRole, "GET", "/v1/fs/sharings/dirs"):    true,
 	}
 
 	handlers := &MultiUsersSvc{
@@ -167,7 +167,7 @@ func (h *MultiUsersSvc) Init(adminName, adminPwd string) (string, error) {
 		return "", fmt.Errorf("download speed limit can not be lower than chunk size: %d", q.DownloadChunkSize)
 	}
 	if ok {
-		userCfgs, ok := usersInterface.([]*userstore.UserCfg)
+		userCfgs, ok := usersInterface.([]*db.UserCfg)
 		if !ok {
 			return "", fmt.Errorf("predefined user is invalid: %s", err)
 		}
@@ -242,7 +242,7 @@ func (h *MultiUsersSvc) Login(c *gin.Context) {
 
 	user, err := h.deps.Users().GetUserByName(req.User)
 	if err != nil {
-		if errors.Is(err, userstore.ErrNotFound) {
+		if errors.Is(err, userstore.ErrUserNotFound) {
 			c.JSON(q.ErrResp(c, 403, err))
 			return
 		}
@@ -366,7 +366,7 @@ func (h *MultiUsersSvc) ForceSetPwd(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
-	if targetUser.Role == userstore.AdminRole {
+	if targetUser.Role == db.AdminRole {
 		c.JSON(q.ErrResp(c, 403, errors.New("can not set admin's password")))
 		return
 	}
@@ -626,7 +626,7 @@ func (h *MultiUsersSvc) isValidPwd(pwd string) error {
 }
 
 func (h *MultiUsersSvc) isValidRole(role string) error {
-	if role == userstore.AdminRole || role == userstore.UserRole || role == userstore.VisitorRole {
+	if role == db.AdminRole || role == db.UserRole || role == db.VisitorRole {
 		return errors.New("predefined roles can not be added/deleted")
 	}
 	return h.isValidUserName(role)

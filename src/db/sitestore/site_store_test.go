@@ -14,15 +14,15 @@ import (
 func TestSiteStore(t *testing.T) {
 
 	testSiteMethods := func(t *testing.T, store ISiteStore) {
-		siteCfg := &SiteConfig{
+		siteCfg := &db.SiteConfig{
 			ClientCfg: &db.ClientConfig{
 				SiteName: "quickshare",
 				SiteDesc: "simpel file sharing",
 				Bg: &db.BgConfig{
 					Url:      "/imgs/bg.jpg",
 					Repeat:   "no-repeat",
-					Position: "fixed",
-					Align:    "center",
+					Position: "center",
+					Align:    "fixed",
 					BgColor:  "#ccc",
 				},
 			},
@@ -55,16 +55,16 @@ func TestSiteStore(t *testing.T) {
 		if err != nil {
 			t.Fatal("fail to new kvstore", err)
 		}
-		err = store.Init(&SiteConfig{
+		err = store.Init(&db.SiteConfig{
 			ClientCfg: &db.ClientConfig{
 				SiteName: "",
 				SiteDesc: "",
 				Bg: &db.BgConfig{
-					Url:      "",
-					Repeat:   "",
-					Position: "",
-					Align:    "",
-					BgColor:  "#ccc",
+					Url:      "/imgs/bg.jpg",
+					Repeat:   "repeat",
+					Position: "top",
+					Align:    "scroll",
+					BgColor:  "#000",
 				},
 			},
 		})

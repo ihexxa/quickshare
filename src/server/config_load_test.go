@@ -8,8 +8,6 @@ import (
 	"github.com/ihexxa/gocfg"
 
 	"github.com/ihexxa/quickshare/src/db"
-	"github.com/ihexxa/quickshare/src/db/sitestore"
-	"github.com/ihexxa/quickshare/src/db/userstore"
 )
 
 func TestLoadCfg(t *testing.T) {
@@ -86,8 +84,8 @@ func TestLoadCfg(t *testing.T) {
 			SpaceLimit:         1,
 			LimiterCapacity:    1,
 			LimiterCyc:         1,
-			PredefinedUsers: []*userstore.UserCfg{
-				&userstore.UserCfg{
+			PredefinedUsers: []*db.UserCfg{
+				&db.UserCfg{
 					Name: "1",
 					Pwd:  "1",
 					Role: "1",
@@ -111,7 +109,7 @@ func TestLoadCfg(t *testing.T) {
 			SleepCyc:    1,
 			WorkerCount: 1,
 		},
-		Site: &sitestore.SiteConfig{
+		Site: &db.SiteConfig{
 			ClientCfg: &db.ClientConfig{
 				SiteName: "1",
 				SiteDesc: "1",
@@ -152,8 +150,8 @@ func TestLoadCfg(t *testing.T) {
 			SpaceLimit:         4,
 			LimiterCapacity:    4,
 			LimiterCyc:         4,
-			PredefinedUsers: []*userstore.UserCfg{
-				&userstore.UserCfg{
+			PredefinedUsers: []*db.UserCfg{
+				&db.UserCfg{
 					Name: "4",
 					Pwd:  "4",
 					Role: "4",
@@ -177,7 +175,7 @@ func TestLoadCfg(t *testing.T) {
 			SleepCyc:    4,
 			WorkerCount: 4,
 		},
-		Site: &sitestore.SiteConfig{
+		Site: &db.SiteConfig{
 			ClientCfg: &db.ClientConfig{
 				SiteName: "4",
 				SiteDesc: "4",
@@ -218,8 +216,8 @@ func TestLoadCfg(t *testing.T) {
 			SpaceLimit:         5,
 			LimiterCapacity:    5,
 			LimiterCyc:         5,
-			PredefinedUsers: []*userstore.UserCfg{
-				&userstore.UserCfg{
+			PredefinedUsers: []*db.UserCfg{
+				&db.UserCfg{
 					Name: "5",
 					Pwd:  "5",
 					Role: "5",
@@ -243,7 +241,7 @@ func TestLoadCfg(t *testing.T) {
 			SleepCyc:    4,
 			WorkerCount: 4,
 		},
-		Site: &sitestore.SiteConfig{
+		Site: &db.SiteConfig{
 			ClientCfg: &db.ClientConfig{
 				SiteName: "4",
 				SiteDesc: "4",
@@ -284,8 +282,8 @@ func TestLoadCfg(t *testing.T) {
 			SpaceLimit:         5,
 			LimiterCapacity:    5,
 			LimiterCyc:         5,
-			PredefinedUsers: []*userstore.UserCfg{
-				&userstore.UserCfg{
+			PredefinedUsers: []*db.UserCfg{
+				&db.UserCfg{
 					Name: "5",
 					Pwd:  "5",
 					Role: "5",
@@ -309,7 +307,7 @@ func TestLoadCfg(t *testing.T) {
 			SleepCyc:    4,
 			WorkerCount: 4,
 		},
-		Site: &sitestore.SiteConfig{
+		Site: &db.SiteConfig{
 			ClientCfg: &db.ClientConfig{
 				SiteName: "4",
 				SiteDesc: "4",

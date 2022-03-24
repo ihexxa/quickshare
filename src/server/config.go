@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/ihexxa/quickshare/src/db"
-	"github.com/ihexxa/quickshare/src/db/sitestore"
-	"github.com/ihexxa/quickshare/src/db/userstore"
 )
 
 type DbConfig struct {
@@ -19,23 +17,23 @@ type FSConfig struct {
 }
 
 type UsersCfg struct {
-	EnableAuth         bool                 `json:"enableAuth" yaml:"enableAuth"`
-	DefaultAdmin       string               `json:"defaultAdmin" yaml:"defaultAdmin" cfg:"env"`
-	DefaultAdminPwd    string               `json:"defaultAdminPwd" yaml:"defaultAdminPwd" cfg:"env"`
-	CookieTTL          int                  `json:"cookieTTL" yaml:"cookieTTL"`
-	CookieSecure       bool                 `json:"cookieSecure" yaml:"cookieSecure"`
-	CookieHttpOnly     bool                 `json:"cookieHttpOnly" yaml:"cookieHttpOnly"`
-	MinUserNameLen     int                  `json:"minUserNameLen" yaml:"minUserNameLen"`
-	MinPwdLen          int                  `json:"minPwdLen" yaml:"minPwdLen"`
-	CaptchaWidth       int                  `json:"captchaWidth" yaml:"captchaWidth"`
-	CaptchaHeight      int                  `json:"captchaHeight" yaml:"captchaHeight"`
-	CaptchaEnabled     bool                 `json:"captchaEnabled" yaml:"captchaEnabled"`
-	UploadSpeedLimit   int                  `json:"uploadSpeedLimit" yaml:"uploadSpeedLimit"`
-	DownloadSpeedLimit int                  `json:"downloadSpeedLimit" yaml:"downloadSpeedLimit"`
-	SpaceLimit         int                  `json:"spaceLimit" yaml:"spaceLimit"`
-	LimiterCapacity    int                  `json:"limiterCapacity" yaml:"limiterCapacity"`
-	LimiterCyc         int                  `json:"limiterCyc" yaml:"limiterCyc"`
-	PredefinedUsers    []*userstore.UserCfg `json:"predefinedUsers" yaml:"predefinedUsers"`
+	EnableAuth         bool          `json:"enableAuth" yaml:"enableAuth"`
+	DefaultAdmin       string        `json:"defaultAdmin" yaml:"defaultAdmin" cfg:"env"`
+	DefaultAdminPwd    string        `json:"defaultAdminPwd" yaml:"defaultAdminPwd" cfg:"env"`
+	CookieTTL          int           `json:"cookieTTL" yaml:"cookieTTL"`
+	CookieSecure       bool          `json:"cookieSecure" yaml:"cookieSecure"`
+	CookieHttpOnly     bool          `json:"cookieHttpOnly" yaml:"cookieHttpOnly"`
+	MinUserNameLen     int           `json:"minUserNameLen" yaml:"minUserNameLen"`
+	MinPwdLen          int           `json:"minPwdLen" yaml:"minPwdLen"`
+	CaptchaWidth       int           `json:"captchaWidth" yaml:"captchaWidth"`
+	CaptchaHeight      int           `json:"captchaHeight" yaml:"captchaHeight"`
+	CaptchaEnabled     bool          `json:"captchaEnabled" yaml:"captchaEnabled"`
+	UploadSpeedLimit   int           `json:"uploadSpeedLimit" yaml:"uploadSpeedLimit"`
+	DownloadSpeedLimit int           `json:"downloadSpeedLimit" yaml:"downloadSpeedLimit"`
+	SpaceLimit         int           `json:"spaceLimit" yaml:"spaceLimit"`
+	LimiterCapacity    int           `json:"limiterCapacity" yaml:"limiterCapacity"`
+	LimiterCyc         int           `json:"limiterCyc" yaml:"limiterCyc"`
+	PredefinedUsers    []*db.UserCfg `json:"predefinedUsers" yaml:"predefinedUsers"`
 }
 
 type Secrets struct {
@@ -59,13 +57,13 @@ type WorkerPoolCfg struct {
 }
 
 type Config struct {
-	Fs      *FSConfig             `json:"fs" yaml:"fs"`
-	Secrets *Secrets              `json:"secrets" yaml:"secrets"`
-	Server  *ServerCfg            `json:"server" yaml:"server"`
-	Users   *UsersCfg             `json:"users" yaml:"users"`
-	Workers *WorkerPoolCfg        `json:"workers" yaml:"workers"`
-	Site    *sitestore.SiteConfig `json:"site" yaml:"site"`
-	Db      *DbConfig             `json:"db" yaml:"db"`
+	Fs      *FSConfig      `json:"fs" yaml:"fs"`
+	Secrets *Secrets       `json:"secrets" yaml:"secrets"`
+	Server  *ServerCfg     `json:"server" yaml:"server"`
+	Users   *UsersCfg      `json:"users" yaml:"users"`
+	Workers *WorkerPoolCfg `json:"workers" yaml:"workers"`
+	Site    *db.SiteConfig `json:"site" yaml:"site"`
+	Db      *DbConfig      `json:"db" yaml:"db"`
 }
 
 func NewConfig() *Config {
@@ -101,7 +99,7 @@ func DefaultConfigStruct() *Config {
 			SpaceLimit:         1024 * 1024 * 100, // 100MB
 			LimiterCapacity:    1000,
 			LimiterCyc:         1000, // 1s
-			PredefinedUsers:    []*userstore.UserCfg{},
+			PredefinedUsers:    []*db.UserCfg{},
 		},
 		Secrets: &Secrets{
 			TokenSecret: "",
@@ -120,15 +118,15 @@ func DefaultConfigStruct() *Config {
 			SleepCyc:    1,
 			WorkerCount: 2,
 		},
-		Site: &sitestore.SiteConfig{
+		Site: &db.SiteConfig{
 			ClientCfg: &db.ClientConfig{
 				SiteName: "Quickshare",
 				SiteDesc: "quick and simple file sharing",
 				Bg: &db.BgConfig{
 					Url:      "/static/img/textured_paper.png",
 					Repeat:   "repeat",
-					Position: "fixed",
-					Align:    "center",
+					Position: "center",
+					Align:    "fixed",
 					BgColor:  "#ccc",
 				},
 			},

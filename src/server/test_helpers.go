@@ -14,7 +14,7 @@ import (
 
 	"github.com/ihexxa/gocfg"
 	"github.com/ihexxa/quickshare/src/client"
-	"github.com/ihexxa/quickshare/src/db/userstore"
+	"github.com/ihexxa/quickshare/src/db"
 	fspkg "github.com/ihexxa/quickshare/src/fs"
 )
 
@@ -62,7 +62,7 @@ func addUsers(t *testing.T, addr, userPwd string, userCount int, adminToken *htt
 	for i := range make([]int, userCount) {
 		userName := getUserName(i)
 
-		resp, adResp, errs := usersCl.AddUser(userName, userPwd, userstore.UserRole, adminToken)
+		resp, adResp, errs := usersCl.AddUser(userName, userPwd, db.UserRole, adminToken)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {

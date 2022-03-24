@@ -95,7 +95,7 @@ func (lk *AutoLocker) Exec(handler func()) {
 
 // related elements: role, user, action(listing, downloading)/sharing
 func (h *FileHandlers) canAccess(userName, role, op, sharedPath string) bool {
-	if role == userstore.AdminRole {
+	if role == db.AdminRole {
 		return true
 	}
 
@@ -625,7 +625,7 @@ func (h *FileHandlers) Download(c *gin.Context) {
 
 	var err error
 	userIDInt := userstore.VisitorID
-	if role != userstore.VisitorRole {
+	if role != db.VisitorRole {
 		userID := c.MustGet(q.UserIDParam).(string)
 		userIDInt, err = strconv.ParseUint(userID, 10, 64)
 		if err != nil {

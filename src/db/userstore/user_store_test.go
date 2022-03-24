@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/ihexxa/quickshare/src/db"
-	"github.com/ihexxa/quickshare/src/db/sitestore"
 	"github.com/ihexxa/quickshare/src/kvstore/boltdbpvd"
 )
 
@@ -26,16 +25,16 @@ func TestUserStores(t *testing.T) {
 		if root.Pwd != rootPwd {
 			t.Fatalf("passwords not match %s", err)
 		}
-		if root.Role != AdminRole {
+		if root.Role != db.AdminRole {
 			t.Fatalf("incorrect root role")
 		}
-		if root.Quota.SpaceLimit != defaultSpaceLimit {
+		if root.Quota.SpaceLimit != db.DefaultSpaceLimit {
 			t.Fatalf("incorrect root SpaceLimit")
 		}
-		if root.Quota.UploadSpeedLimit != defaultUploadSpeedLimit {
+		if root.Quota.UploadSpeedLimit != db.DefaultUploadSpeedLimit {
 			t.Fatalf("incorrect root UploadSpeedLimit")
 		}
-		if root.Quota.DownloadSpeedLimit != defaultDownloadSpeedLimit {
+		if root.Quota.DownloadSpeedLimit != db.DefaultDownloadSpeedLimit {
 			t.Fatalf("incorrect root DownloadSpeedLimit")
 		}
 		if !db.ComparePreferences(root.Preferences, &DefaultPreferences) {
@@ -52,16 +51,16 @@ func TestUserStores(t *testing.T) {
 		if visitor.Pwd != rootPwd {
 			t.Fatalf("passwords not match %s", err)
 		}
-		if visitor.Role != VisitorRole {
+		if visitor.Role != db.VisitorRole {
 			t.Fatalf("incorrect visitor role")
 		}
 		if visitor.Quota.SpaceLimit != 0 {
 			t.Fatalf("incorrect visitor SpaceLimit")
 		}
-		if visitor.Quota.UploadSpeedLimit != visitorUploadSpeedLimit {
+		if visitor.Quota.UploadSpeedLimit != db.VisitorUploadSpeedLimit {
 			t.Fatalf("incorrect visitor UploadSpeedLimit")
 		}
-		if visitor.Quota.DownloadSpeedLimit != visitorDownloadSpeedLimit {
+		if visitor.Quota.DownloadSpeedLimit != db.VisitorDownloadSpeedLimit {
 			t.Fatalf("incorrect visitor DownloadSpeedLimit")
 		}
 		if !db.ComparePreferences(visitor.Preferences, &DefaultPreferences) {
@@ -70,7 +69,7 @@ func TestUserStores(t *testing.T) {
 
 		id, name1 := uint64(2), "test_user1"
 		pwd1, pwd2 := "666", "888"
-		role1, role2 := UserRole, AdminRole
+		role1, role2 := db.UserRole, db.AdminRole
 		spaceLimit1, upLimit1, downLimit1 := int64(17), 5, 7
 		spaceLimit2, upLimit2, downLimit2 := int64(19), 13, 17
 
@@ -121,7 +120,7 @@ func TestUserStores(t *testing.T) {
 		}
 		for _, user := range users {
 			if user.ID == 0 {
-				if user.Name != rootName || user.Role != AdminRole {
+				if user.Name != rootName || user.Role != db.AdminRole {
 					t.Fatalf("incorrect root info %v", user)
 				}
 			}
@@ -129,6 +128,9 @@ func TestUserStores(t *testing.T) {
 				if user.Name != name1 || user.Role != role1 {
 					t.Fatalf("incorrect user info %v", user)
 				}
+			}
+			if user.Pwd != "" {
+				t.Fatalf("password must be empty")
 			}
 		}
 
@@ -243,10 +245,10 @@ func TestUserStores(t *testing.T) {
 			t.Fatalf("users size should be 2 (%d)", len(users))
 		}
 		for _, user := range users {
-			if user.ID == 0 && user.Name != rootName && user.Role != AdminRole {
+			if user.ID == 0 && user.Name != rootName && user.Role != db.AdminRole {
 				t.Fatalf("incorrect root info %v", user)
 			}
-			if user.ID == VisitorID && user.Name != VisitorName && user.Role != VisitorRole {
+			if user.ID == VisitorID && user.Name != VisitorName && user.Role != db.VisitorRole {
 				t.Fatalf("incorrect visitor info %v", user)
 			}
 		}
@@ -276,7 +278,7 @@ func TestUserStores(t *testing.T) {
 		}
 
 		for _, role := range append(roles, []string{
-			AdminRole, UserRole, VisitorRole,
+			db.AdminRole, db.UserRole, db.VisitorRole,
 		}...) {
 			if !roleMap[role] {
 				t.Fatalf("role(%s) not found", role)

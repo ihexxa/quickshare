@@ -803,7 +803,7 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
     }
 
     const bgAlign = this.props.ui.bg.align;
-    if (bgAlign != "scroll" && bgAlign != "fixed" && bgAlign != "local") {
+    if (bgAlign !== "scroll" && bgAlign !== "fixed" && bgAlign !== "local") {
       alertMsg(this.props.msg.pkg.get("bg.align.alert"));
       return;
     }
