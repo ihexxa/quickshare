@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/ihexxa/quickshare/src/client"
-	"github.com/ihexxa/quickshare/src/db/userstore"
+	"github.com/ihexxa/quickshare/src/db"
 	q "github.com/ihexxa/quickshare/src/handlers"
 )
 
@@ -82,7 +82,7 @@ func TestSpaceLimit(t *testing.T) {
 	for i := 0; i < userCount; i++ {
 		userName := getUserName(i)
 
-		resp, adResp, errs := usersCl.AddUser(userName, userPwd, userstore.UserRole, token)
+		resp, adResp, errs := usersCl.AddUser(userName, userPwd, db.UserRole, token)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {

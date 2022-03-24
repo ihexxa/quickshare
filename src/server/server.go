@@ -162,15 +162,15 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 		panic(fmt.Sprintf("fail to init bolt store: %s", err))
 	}
 
-	err = siteStore.Init(&sitestore.SiteConfig{
+	err = siteStore.Init(&db.SiteConfig{
 		ClientCfg: &db.ClientConfig{
 			SiteName: cfg.StringOr("Site.ClientCfg.SiteName", "Quickshare"),
 			SiteDesc: cfg.StringOr("Site.ClientCfg.SiteDesc", "quick and simple file sharing"),
 			Bg: &db.BgConfig{
 				Url:      cfg.StringOr("Site.ClientCfg.Bg.Url", "/static/img/textured_paper.png"),
 				Repeat:   cfg.StringOr("Site.ClientCfg.Bg.Repeat", "repeat"),
-				Position: cfg.StringOr("Site.ClientCfg.Bg.Position", "fixed"),
-				Align:    cfg.StringOr("Site.ClientCfg.Bg.Align", "center"),
+				Position: cfg.StringOr("Site.ClientCfg.Bg.Position", "center"),
+				Align:    cfg.StringOr("Site.ClientCfg.Bg.Align", "fixed"),
 				BgColor:  cfg.StringOr("Site.ClientCfg.Bg.BgColor", "#ccc"),
 			},
 		},

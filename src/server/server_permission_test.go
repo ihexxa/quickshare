@@ -11,7 +11,6 @@ import (
 
 	"github.com/ihexxa/quickshare/src/client"
 	"github.com/ihexxa/quickshare/src/db"
-	"github.com/ihexxa/quickshare/src/db/userstore"
 	q "github.com/ihexxa/quickshare/src/handlers"
 	"github.com/ihexxa/quickshare/src/handlers/settings"
 )
@@ -105,7 +104,7 @@ func TestPermissions(t *testing.T) {
 
 		testUsersAPIs := func(desc, user string, pwd string, requireAuth bool, expectedCodes map[string]int) {
 			newPwd := "12345"
-			newRole := userstore.AdminRole
+			newRole := db.AdminRole
 			newQuota := &db.Quota{
 				SpaceLimit:         int64(2046),
 				UploadSpeedLimit:   int(8 * 1024 * 1024),
@@ -146,7 +145,7 @@ func TestPermissions(t *testing.T) {
 			// user management
 			resp, addUserResp, errs := cl.AddUser(tmpUser, tmpPwd, tmpRole, token)
 			assertResp(t, resp, errs, expectedCodes["AddUser"], fmt.Sprintf("%s-%s", desc, "AddUser"))
-			resp, addAdminResp, errs := cl.AddUser(tmpAdmin, tmpAdminPwd, userstore.AdminRole, token)
+			resp, addAdminResp, errs := cl.AddUser(tmpAdmin, tmpAdminPwd, db.AdminRole, token)
 			assertResp(t, resp, errs, expectedCodes["AddUser"], fmt.Sprintf("%s-%s", desc, "AddUser"))
 
 			resp, _, errs = cl.ListUsers(token)
@@ -186,9 +185,9 @@ func TestPermissions(t *testing.T) {
 			resp, _, errs = cl.SetUser(userID, newRole, newQuota, token)
 			assertResp(t, resp, errs, expectedCodes["SetUserSelf"], fmt.Sprintf("%s-%s", desc, "SetUserSelf"))
 			// update other users
-			resp, _, errs = cl.SetUser(tmpUserID, userstore.AdminRole, newQuota, token)
+			resp, _, errs = cl.SetUser(tmpUserID, db.AdminRole, newQuota, token)
 			assertResp(t, resp, errs, expectedCodes["SetUserOthers"], fmt.Sprintf("%s-%s", desc, "SetUserOthers"))
-			resp, _, errs = cl.SetUser(0, userstore.UserRole, newQuota, token)
+			resp, _, errs = cl.SetUser(0, db.UserRole, newQuota, token)
 			assertResp(t, resp, errs, expectedCodes["SetUserOthersAdmin"], fmt.Sprintf("%s-%s", desc, "SetUserOthersAdmin"))
 
 			resp, _, errs = cl.DelUser(addUserResp.ID, token)

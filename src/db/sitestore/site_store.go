@@ -15,27 +15,12 @@ const (
 )
 
 var (
-	DefaultSiteName = "Quickshare"
-	DefaultSiteDesc = "Quickshare"
-	DefaultBgConfig = &db.BgConfig{
-		Repeat:   "repeated",
-		Position: "top",
-		Align:    "fixed",
-		BgColor:  "#ccc",
-	}
-)
-
-var (
 	ErrNotFound = errors.New("site config not found")
 )
 
 type ISiteStore interface {
 	SetClientCfg(cfg *db.ClientConfig) error
-	GetCfg() (*SiteConfig, error)
-}
-
-type SiteConfig struct {
-	ClientCfg *db.ClientConfig `json:"clientCfg" yaml:"clientCfg"`
+	GetCfg() (*db.SiteConfig, error)
 }
 
 type SiteStore struct {
@@ -50,7 +35,7 @@ func NewSiteStore(store kvstore.IKVStore) (*SiteStore, error) {
 	}, nil
 }
 
-func (st *SiteStore) Init(cfg *SiteConfig) error {
+func (st *SiteStore) Init(cfg *db.SiteConfig) error {
 	_, ok := st.store.GetStringIn(NsSite, KeySiteCfg)
 	if !ok {
 		var err error
@@ -63,26 +48,26 @@ func (st *SiteStore) Init(cfg *SiteConfig) error {
 	return nil
 }
 
-func (st *SiteStore) getCfg() (*SiteConfig, error) {
+func (st *SiteStore) getCfg() (*db.SiteConfig, error) {
 	cfgStr, ok := st.store.GetStringIn(NsSite, KeySiteCfg)
 	if !ok {
 		return nil, ErrNotFound
 	}
 
-	cfg := &SiteConfig{}
+	cfg := &db.SiteConfig{}
 	err := json.Unmarshal([]byte(cfgStr), cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	if err = CheckCfg(cfg, true); err != nil {
+	if err = db.CheckSiteCfg(cfg, true); err != nil {
 		return nil, err
 	}
 	return cfg, nil
 }
 
-func (st *SiteStore) setCfg(cfg *SiteConfig) error {
-	if err := CheckCfg(cfg, false); err != nil {
+func (st *SiteStore) setCfg(cfg *db.SiteConfig) error {
+	if err := db.CheckSiteCfg(cfg, false); err != nil {
 		return err
 	}
 
@@ -106,64 +91,9 @@ func (st *SiteStore) SetClientCfg(cfg *db.ClientConfig) error {
 	return st.setCfg(siteCfg)
 }
 
-func (st *SiteStore) GetCfg() (*SiteConfig, error) {
+func (st *SiteStore) GetCfg() (*db.SiteConfig, error) {
 	st.mtx.RLock()
 	defer st.mtx.RUnlock()
 
 	return st.getCfg()
-}
-
-func CheckCfg(cfg *SiteConfig, autoFill bool) error {
-	if cfg.ClientCfg == nil {
-		if !autoFill {
-			return errors.New("cfg.ClientCfg not defined")
-		}
-		cfg.ClientCfg = &db.ClientConfig{
-			SiteName: DefaultSiteName,
-			SiteDesc: DefaultSiteDesc,
-			Bg: &db.BgConfig{
-				Url:      DefaultBgConfig.Url,
-				Repeat:   DefaultBgConfig.Repeat,
-				Position: DefaultBgConfig.Position,
-				Align:    DefaultBgConfig.Align,
-				BgColor:  DefaultBgConfig.BgColor,
-			},
-		}
-
-		return nil
-	}
-
-	if cfg.ClientCfg.SiteName == "" {
-		cfg.ClientCfg.SiteName = DefaultSiteName
-	}
-	if cfg.ClientCfg.SiteDesc == "" {
-		cfg.ClientCfg.SiteDesc = DefaultSiteDesc
-	}
-
-	if cfg.ClientCfg.Bg == nil {
-		if !autoFill {
-			return errors.New("cfg.ClientCfg.Bg not defined")
-		}
-		cfg.ClientCfg.Bg = DefaultBgConfig
-	}
-	if cfg.ClientCfg.Bg.Url == "" && cfg.ClientCfg.Bg.BgColor == "" {
-		if !autoFill {
-			return errors.New("one of Bg.Url or Bg.BgColor must be defined")
-		}
-		cfg.ClientCfg.Bg.BgColor = DefaultBgConfig.BgColor
-	}
-	if cfg.ClientCfg.Bg.Repeat == "" {
-		cfg.ClientCfg.Bg.Repeat = DefaultBgConfig.Repeat
-	}
-	if cfg.ClientCfg.Bg.Position == "" {
-		cfg.ClientCfg.Bg.Position = DefaultBgConfig.Position
-	}
-	if cfg.ClientCfg.Bg.Align == "" {
-		cfg.ClientCfg.Bg.Align = DefaultBgConfig.Align
-	}
-	if cfg.ClientCfg.Bg.BgColor == "" {
-		cfg.ClientCfg.Bg.BgColor = DefaultBgConfig.BgColor
-	}
-
-	return nil
 }

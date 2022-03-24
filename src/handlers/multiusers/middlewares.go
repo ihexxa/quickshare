@@ -10,7 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/ihexxa/quickshare/src/db/userstore"
+	"github.com/ihexxa/quickshare/src/db"
 	q "github.com/ihexxa/quickshare/src/handlers"
 )
 
@@ -26,7 +26,7 @@ func (h *MultiUsersSvc) AuthN() gin.HandlerFunc {
 		claims := map[string]string{
 			q.UserIDParam: "",
 			q.UserParam:   "",
-			q.RoleParam:   userstore.VisitorRole,
+			q.RoleParam:   db.VisitorRole,
 			q.ExpireParam: "",
 		}
 
@@ -59,7 +59,7 @@ func (h *MultiUsersSvc) AuthN() gin.HandlerFunc {
 		} else {
 			claims[q.UserIDParam] = "0"
 			claims[q.UserParam] = "admin"
-			claims[q.RoleParam] = userstore.AdminRole
+			claims[q.RoleParam] = db.AdminRole
 			claims[q.ExpireParam] = ""
 		}
 
