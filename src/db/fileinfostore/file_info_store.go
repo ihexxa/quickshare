@@ -85,6 +85,10 @@ func (fi *FileInfoStore) getInfo(itemPath string) (*db.FileInfo, error) {
 	if err != nil {
 		return nil, fmt.Errorf("get file info: %w", err)
 	}
+
+	if err = db.CheckFileInfo(info, true); err != nil {
+		return nil, err
+	}
 	return info, nil
 }
 
@@ -98,9 +102,13 @@ func (fi *FileInfoStore) GetInfos(itemPaths []string) (map[string]*db.FileInfo, 
 		info, err := fi.getInfo(itemPath)
 		if err != nil {
 			if !errors.Is(err, ErrNotFound) {
+				// TODO: try to make info data consistent with fs
 				return nil, err
 			}
 			continue
+		}
+		if err = db.CheckFileInfo(info, true); err != nil {
+			return nil, err
 		}
 		infos[itemPath] = info
 	}
@@ -109,6 +117,10 @@ func (fi *FileInfoStore) GetInfos(itemPaths []string) (map[string]*db.FileInfo, 
 }
 
 func (fi *FileInfoStore) setInfo(itemPath string, info *db.FileInfo) error {
+	if err := db.CheckFileInfo(info, false); err != nil {
+		return err
+	}
+
 	infoStr, err := json.Marshal(info)
 	if err != nil {
 		return fmt.Errorf("set file info: %w", err)

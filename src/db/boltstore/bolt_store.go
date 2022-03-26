@@ -43,11 +43,19 @@ func (bs *BoltStore) getUserInfo(tx *bolt.Tx, userID uint64) (*db.User, error) {
 		return nil, fmt.Errorf("user id key(%d) info(%d) does match", userID, userInfo.ID)
 	}
 
+	if err = db.CheckUser(userInfo, true); err != nil {
+		return nil, err
+	}
+
 	return userInfo, nil
 }
 
 func (bs *BoltStore) setUserInfo(tx *bolt.Tx, userID uint64, userInfo *db.User) error {
 	var err error
+
+	if err = db.CheckUser(userInfo, false); err != nil {
+		return err
+	}
 
 	usersBucket := tx.Bucket([]byte(db.UsersNs))
 	if usersBucket == nil {
@@ -131,11 +139,19 @@ func (bs *BoltStore) getFileInfo(tx *bolt.Tx, userID uint64, itemPath string) (*
 	if err != nil {
 		return nil, err
 	}
+
+	if err = db.CheckFileInfo(fileInfo, true); err != nil {
+		return nil, err
+	}
 	return fileInfo, nil
 }
 
 func (bs *BoltStore) setFileInfo(tx *bolt.Tx, userID uint64, itemPath string, fileInfo *db.FileInfo) error {
 	var err error
+
+	if err = db.CheckFileInfo(fileInfo, false); err != nil {
+		return err
+	}
 
 	fileInfoBucket := tx.Bucket([]byte(db.FileInfoNs))
 	if fileInfoBucket == nil {

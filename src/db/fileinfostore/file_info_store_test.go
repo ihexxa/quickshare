@@ -99,14 +99,16 @@ func TestUserStores(t *testing.T) {
 	testInfoMethods := func(t *testing.T, store IFileInfoStore) {
 		pathInfos := map[string]*db.FileInfo{
 			"admin/item": &db.FileInfo{
-				Shared: false,
-				IsDir:  false,
-				Sha1:   "file",
+				Shared:  false,
+				ShareID: "",
+				IsDir:   false,
+				Sha1:    "file",
 			},
 			"admin/dir": &db.FileInfo{
-				Shared: true,
-				IsDir:  true,
-				Sha1:   "dir",
+				Shared:  true,
+				ShareID: "mockedShareID",
+				IsDir:   true,
+				Sha1:    "dir",
 			},
 		}
 		var err error
