@@ -7,8 +7,6 @@ import (
 )
 
 const (
-	SchemaV2 = "v2" // add size to file info
-
 	UserSchemaNs = "UserSchemaNs"
 	FileSchemaNs = "FileSchemaNs"
 	UserIDsNs    = "UserIDsNs"
@@ -27,6 +25,7 @@ const (
 )
 
 var (
+	ErrInvalidFileInfo    = errors.New("invalid fileInfo")
 	ErrInvalidUser        = errors.New("invalid user")
 	ErrInvalidQuota       = errors.New("invalid quota")
 	ErrInvalidPreferences = errors.New("invalid preferences")
@@ -206,6 +205,7 @@ func CheckSiteCfg(cfg *SiteConfig, fillDefault bool) error {
 	return nil
 }
 
+// TODO: check upper and lower limit
 func CheckQuota(quota *Quota) error {
 	if quota.SpaceLimit < 0 {
 		return ErrInvalidQuota
@@ -241,6 +241,7 @@ func CheckPreferences(prefers *Preferences, fillDefault bool) error {
 	if prefers.Avatar == "" {
 		prefers.Avatar = DefaultAvatar
 	}
+	// TODO: add strict checking
 	if prefers.Email == "" {
 		prefers.Email = DefaultEmail
 	}
@@ -312,5 +313,16 @@ func CheckUser(user *User, fillDefault bool) error {
 		return err
 	}
 
+	return nil
+}
+
+// TODO: auto trigger hash generating
+func CheckFileInfo(info *FileInfo, fillDefault bool) error {
+	if (info.Shared && info.ShareID == "") || (!info.Shared && info.ShareID != "") {
+		return fmt.Errorf("shared and ShareID are in conflict: %w", ErrInvalidFileInfo)
+	}
+	if !info.IsDir && (info.Shared || info.ShareID != "") {
+		return fmt.Errorf("dir can not be shared: %w", ErrInvalidFileInfo)
+	}
 	return nil
 }
