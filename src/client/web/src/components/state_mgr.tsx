@@ -4,7 +4,7 @@ import { initUploadMgr } from "../worker/upload_mgr";
 import BgWorker from "../worker/upload.bg.worker";
 import { FgWorker } from "../worker/upload.fg.worker";
 
-import { alertMsg } from "../common/env";
+import { Env } from "../common/env";
 import { getErrMsg } from "../common/utils";
 import { updater } from "./state_updater";
 import { ICoreState, newState } from "./core_state";
@@ -82,7 +82,7 @@ export class StateMgr extends React.Component<Props, State, {}> {
 
     const status = await updater().initAll(query);
     if (status !== "") {
-      alertMsg(getErrMsg(state.msg.pkg, "op.fail", status));
+      Env().alertMsg(getErrMsg(state.msg.pkg, "op.fail", status));
     }
     updater().setControlOption(loadingCtrl, ctrlOff);
     this.update(updater().updateAll);

@@ -1,10 +1,10 @@
 import * as React from "react";
-import { List, Map } from "immutable";
+import { List } from "immutable";
 
 import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { Flexbox } from "./layout/flexbox";
 import { updater } from "./state_updater";
-import { alertMsg } from "../common/env";
+import { Env } from "../common/env";
 import { Quota, Preferences } from "../client";
 import { getErrMsg } from "../common/utils";
 import { ctrlOn, ctrlOff, loadingCtrl } from "../common/controls";
@@ -95,7 +95,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
         this.state.captchaInput
       );
       if (loginStatus !== "") {
-        alertMsg(
+        Env().alertMsg(
           getErrMsg(this.props.msg.pkg, "op.fail", loginStatus.toString())
         );
         return;
@@ -104,7 +104,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
       const params = new URLSearchParams(document.location.search.substring(1));
       const initStatus = await updater().initAll(params);
       if (initStatus !== "") {
-        alertMsg(
+        Env().alertMsg(
           getErrMsg(this.props.msg.pkg, "op.fail", initStatus.toString())
         );
       }
@@ -121,7 +121,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
   refreshCaptcha = async () => {
     const status = await updater().getCaptchaID();
     if (status !== "") {
-      alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+      Env().alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
     } else {
       this.props.update(updater().updateLogin);
     }

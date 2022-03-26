@@ -3,7 +3,7 @@ import { List } from "immutable";
 import FileSize from "filesize";
 
 import { BtnList } from "./control/btn_list";
-import { alertMsg } from "../common/env";
+import { Env } from "../common/env";
 import { getErrMsg } from "../common/utils";
 import { updater } from "./state_updater";
 import { ICoreState, MsgProps, UIProps } from "./core_state";
@@ -72,7 +72,7 @@ export class UploadingsPanel extends React.Component<Props, State, {}> {
       this.props.update(updater().updateLogin);
       this.props.update(updater().updateUploadingsInfo);
     } catch (status: any) {
-      alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status.toString()));
+      Env().alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status.toString()));
     } finally {
       this.setLoading(false);
     }

@@ -25,7 +25,7 @@ import { UsersClient } from "../client/users";
 import { SettingsClient } from "../client/settings";
 import { UploadEntry, UploadState } from "../worker/interface";
 import { Up } from "../worker/upload_mgr";
-import { alertMsg } from "../common/env";
+import { Env } from "../common/env";
 import { controlName as panelTabs } from "./root_frame";
 import { errServer } from "../common/errors";
 import { ErrorLogger } from "../common/log_error";
@@ -201,7 +201,7 @@ export class Updater {
   mkDir = async (dirPath: string): Promise<string> => {
     const resp = await this.filesClient.mkdir(dirPath);
     if (resp.status !== 200) {
-      alertMsg(`failed to make dir ${dirPath}`);
+      Env().alertMsg(`failed to make dir ${dirPath}`);
       return errServer;
     }
     return "";
@@ -244,7 +244,7 @@ export class Updater {
     }
 
     if (fails.size > 0) {
-      alertMsg(
+      Env().alertMsg(
         `${this.props.msg.pkg.get("delete.fail")}: ${fails.join(",\n")}`
       );
       return errServer;
@@ -340,7 +340,7 @@ export class Updater {
     }
 
     if (fails.size > 0) {
-      alertMsg(`${this.props.msg.pkg.get("move.fail")}: ${fails.join(",\n")}`);
+      Env().alertMsg(`${this.props.msg.pkg.get("move.fail")}: ${fails.join(",\n")}`);
       return errServer;
     }
 
@@ -781,7 +781,7 @@ export class Updater {
         this.props.login.preferences.lan = "zh_CN";
         break;
       default:
-        alertMsg("language package not found");
+        Env().alertMsg("language package not found");
     }
   };
 

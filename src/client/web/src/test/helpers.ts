@@ -37,9 +37,9 @@ export function mockRandFile(filePath: string): File {
 }
 
 export function mockFileList(filePaths: Array<string>): List<File> {
-  const files = filePaths.map(filePath => {
+  const files = filePaths.map((filePath) => {
     return mockRandFile(filePath);
-  })
+  });
   return List<File>(files);
 }
 
@@ -47,4 +47,11 @@ export function initMockWorker() {
   const mockWorkerClass = mock(MockWorker);
   const mockWorker = instance(mockWorkerClass);
   initUploadMgr(mockWorker);
+}
+
+export class MockWebEnv {
+  constructor() {}
+
+  alertMsg = jest.fn();
+  confirmMsg = jest.fn();
 }
