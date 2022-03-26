@@ -115,7 +115,7 @@
 .theme-dark .container-center {
   margin: 2rem auto auto auto;
   width: 96%;
-  max-width: 80rem;
+  max-width: 100rem;
   z-index: 9;
 }
 
@@ -239,7 +239,7 @@
 }
 
 .theme-dark #root-container {
-  max-width: 80rem;
+  max-width: 100rem;
   width: 96%;
   text-align: left;
   margin: 3rem auto 8rem auto;
