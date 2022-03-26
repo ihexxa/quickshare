@@ -11,7 +11,7 @@ import { RiRestartFill } from "@react-icons/all-files/ri/RiRestartFill";
 import { RiCheckboxBlankLine } from "@react-icons/all-files/ri/RiCheckboxBlankLine";
 
 import { ErrorLogger } from "../common/log_error";
-import { alertMsg, confirmMsg } from "../common/env";
+import { Env } from "../common/env";
 import { getErrMsg } from "../common/utils";
 import { updater } from "./state_updater";
 import { ICoreState, MsgProps, UIProps } from "./core_state";
@@ -147,7 +147,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       // refresh used space
       const status = await updater().self();
       if (status !== "") {
-        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+        Env().alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
         return;
       }
       this.props.update(updater().updateLogin);
@@ -157,7 +157,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
 
   addUploads = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files.length > 200) {
-      alertMsg(this.props.msg.pkg.get("err.tooManyUploads"));
+      Env().alertMsg(this.props.msg.pkg.get("err.tooManyUploads"));
       return;
     }
 
@@ -168,14 +168,14 @@ export class FilesPanel extends React.Component<Props, State, {}> {
 
     const status = updater().addUploads(fileList);
     if (status !== "") {
-      alertMsg(getErrMsg(this.props.msg.pkg, "upload.add.fail", status));
+      Env().alertMsg(getErrMsg(this.props.msg.pkg, "upload.add.fail", status));
     }
     this.props.update(updater().updateUploadingsInfo);
   };
 
   mkDir = async () => {
     if (this.state.newFolderName === "") {
-      alertMsg(this.props.msg.pkg.get("browser.folder.add.fail"));
+      Env().alertMsg(this.props.msg.pkg.get("browser.folder.add.fail"));
       return;
     }
 
@@ -189,7 +189,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     try {
       const mkDirStatus = await updater().mkDir(dirPath);
       if (mkDirStatus !== "") {
-        alertMsg(
+        Env().alertMsg(
           getErrMsg(this.props.msg.pkg, "op.fail", mkDirStatus.toString())
         );
         return;
@@ -199,7 +199,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         this.props.filesInfo.dirPath
       );
       if (setItemsStatus !== "") {
-        alertMsg(
+        Env().alertMsg(
           getErrMsg(this.props.msg.pkg, "op.fail", setItemsStatus.toString())
         );
         return;
@@ -220,7 +220,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
 
     // TODO: selected should be cleaned after change the cwd
     if (this.props.filesInfo.dirPath.join("/") !== this.state.selectedSrc) {
-      alertMsg(this.props.msg.pkg.get("browser.del.fail"));
+      Env().alertMsg(this.props.msg.pkg.get("browser.del.fail"));
       this.setState({
         selectedSrc: this.props.filesInfo.dirPath.join("/"),
         selectedItems: Map<string, boolean>(),
@@ -229,7 +229,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     } else {
       const filesToDel = this.state.selectedItems.keySeq().join(", ");
       if (
-        !confirmMsg(
+        !Env().confirmMsg(
           `${this.props.msg.pkg.get("op.confirm")} [${
             this.state.selectedItems.size
           }]: ${filesToDel}`
@@ -248,7 +248,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         this.state.selectedItems
       );
       if (deleteStatus !== "") {
-        alertMsg(
+        Env().alertMsg(
           getErrMsg(this.props.msg.pkg, "op.fail", deleteStatus.toString())
         );
         return deleteStatus;
@@ -256,7 +256,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
 
       const selfStatus = await updater().self();
       if (selfStatus !== "") {
-        alertMsg(
+        Env().alertMsg(
           getErrMsg(this.props.msg.pkg, "op.fail", selfStatus.toString())
         );
         return selfStatus;
@@ -282,7 +282,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     const oldDir = this.state.selectedSrc;
     const newDir = this.props.filesInfo.dirPath.join("/");
     if (oldDir === newDir) {
-      alertMsg(this.props.msg.pkg.get("browser.move.fail"));
+      Env().alertMsg(this.props.msg.pkg.get("browser.move.fail"));
       return;
     }
 
@@ -295,7 +295,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         this.state.selectedItems
       );
       if (moveStatus !== "") {
-        alertMsg(
+        Env().alertMsg(
           getErrMsg(this.props.msg.pkg, "op.fail", moveStatus.toString())
         );
         return;
@@ -322,7 +322,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     try {
       const status = await updater().setHomeItems();
       if (status !== "") {
-        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+        Env().alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
         return;
       }
       this.props.update(updater().updateFilesInfo);
@@ -335,7 +335,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     if (dirPath === this.props.filesInfo.dirPath) {
       return;
     } else if (this.props.login.userRole !== roleAdmin && dirPath.size <= 1) {
-      alertMsg(this.props.msg.pkg.get("unauthed"));
+      Env().alertMsg(this.props.msg.pkg.get("unauthed"));
       return;
     }
 
@@ -343,13 +343,13 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     try {
       const status = await updater().setItems(dirPath);
       if (status !== "") {
-        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+        Env().alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
         return;
       }
 
       const isSharingStatus = await updater().syncIsSharing(dirPath.join("/"));
       if (isSharingStatus !== "") {
-        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", isSharingStatus));
+        Env().alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", isSharingStatus));
         return;
       }
 
@@ -402,7 +402,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
   };
 
   generateHash = async (filePath: string) => {
-    alertMsg(this.props.msg.pkg.get("refresh-hint"));
+    Env().alertMsg(this.props.msg.pkg.get("refresh-hint"));
     updater().generateHash(filePath);
   };
 
@@ -412,7 +412,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     try {
       const addStatus = await updater().addSharing();
       if (addStatus !== "") {
-        alertMsg(
+        Env().alertMsg(
           getErrMsg(this.props.msg.pkg, "op.fail", addStatus.toString())
         );
         return;
@@ -421,7 +421,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       updater().setSharing(true);
       const listStatus = await updater().listSharings();
       if (listStatus !== "") {
-        alertMsg(
+        Env().alertMsg(
           getErrMsg(this.props.msg.pkg, "op.fail", listStatus.toString())
         );
         return;
@@ -440,7 +440,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     try {
       const delStatus = await updater().deleteSharing(dirPath);
       if (delStatus !== "") {
-        alertMsg(
+        Env().alertMsg(
           getErrMsg(this.props.msg.pkg, "op.fail", delStatus.toString())
         );
         return;
@@ -449,7 +449,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       updater().setSharing(false);
       const listStatus = await updater().listSharings();
       if (listStatus !== "") {
-        alertMsg(
+        Env().alertMsg(
           getErrMsg(this.props.msg.pkg, "op.fail", listStatus.toString())
         );
         return;

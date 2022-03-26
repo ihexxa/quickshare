@@ -1,10 +1,9 @@
 import * as React from "react";
-import { List, Map } from "immutable";
+import { Map } from "immutable";
 
 import { updater } from "../state_updater";
-import { Flexbox } from "../layout/flexbox";
 import { ICoreState, MsgProps, UIProps } from "../core_state";
-import { alertMsg } from "../../common/env";
+import { Env } from "../../common/env";
 import { IconProps, getIcon } from "../visual/icons";
 import { colorClass } from "../visual/colors";
 
@@ -31,7 +30,7 @@ export class Tabs extends React.Component<Props, State, {}> {
 
   setTab = (targetControl: string, targetOption: string) => {
     if (!updater().setControlOption(targetControl, targetOption)) {
-      alertMsg(this.props.msg.pkg.get("op.fail"));
+      Env().alertMsg(this.props.msg.pkg.get("op.fail"));
     }
     this.props.update(updater().updateUI);
   };

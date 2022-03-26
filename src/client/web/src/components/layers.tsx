@@ -8,7 +8,6 @@ import { SettingsDialog } from "./dialog_settings";
 
 import { AuthPane, LoginProps } from "./pane_login";
 import { FilesProps } from "./panel_files";
-import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
 import {
   settingsDialogCtrl,

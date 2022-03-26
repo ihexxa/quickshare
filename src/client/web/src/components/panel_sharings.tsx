@@ -4,7 +4,7 @@ import { List, Map } from "immutable";
 import { BtnList } from "./control/btn_list";
 import { QRCodeIcon } from "./visual/qrcode";
 import { getErrMsg } from "../common/utils";
-import { alertMsg } from "../common/env";
+import { Env } from "../common/env";
 import { updater } from "./state_updater";
 import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { LoginProps } from "./pane_login";
@@ -68,7 +68,7 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
 
       await this.listSharings();
     } catch (e: any) {
-      alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+      Env().alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
     } finally {
       this.setLoading(false);
     }
@@ -79,7 +79,7 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
     try {
       const status = await updater().listSharings();
       if (status !== "") {
-        alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+        Env().alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
       }
       this.props.update(updater().updateFilesInfo);
       this.props.update(updater().updateSharingsInfo);

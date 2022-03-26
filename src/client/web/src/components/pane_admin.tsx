@@ -4,7 +4,7 @@ import FileSize from "filesize";
 
 import { RiMenuUnfoldFill } from "@react-icons/all-files/ri/RiMenuUnfoldFill";
 
-import { alertMsg, confirmMsg } from "../common/env";
+import { Env } from "../common/env";
 import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { User, Quota } from "../client";
 import { updater } from "./state_updater";
@@ -115,19 +115,19 @@ export class UserForm extends React.Component<
   };
 
   resetUsedSpace = async (userID: string) => {
-    if (!confirmMsg(this.props.msg.pkg.get("confirm.resetUsedSpace"))) {
+    if (!Env().confirmMsg(this.props.msg.pkg.get("confirm.resetUsedSpace"))) {
       return;
     }
 
     const status = await updater().resetUsedSpace(userID);
     if (status !== "") {
-      alertMsg(this.props.msg.pkg.get("resetUsedSpace"));
+      Env().alertMsg(this.props.msg.pkg.get("resetUsedSpace"));
     }
   };
 
   setPwd = async () => {
     if (this.state.newPwd1 !== this.state.newPwd2) {
-      alertMsg(this.props.msg.pkg.get("settings.pwd.notSame"));
+      Env().alertMsg(this.props.msg.pkg.get("settings.pwd.notSame"));
       return;
     }
 
@@ -138,10 +138,10 @@ export class UserForm extends React.Component<
         this.state.newPwd1
       );
       if (status !== "") {
-        alertMsg(this.props.msg.pkg.get("update.fail"));
+        Env().alertMsg(this.props.msg.pkg.get("update.fail"));
         return;
       }
-      alertMsg(this.props.msg.pkg.get("update.ok"));
+      Env().alertMsg(this.props.msg.pkg.get("update.ok"));
     } finally {
       this.setLoading(false);
     }
@@ -156,17 +156,17 @@ export class UserForm extends React.Component<
         this.state.quota
       );
       if (status !== "") {
-        alertMsg(this.props.msg.pkg.get("update.fail"));
+        Env().alertMsg(this.props.msg.pkg.get("update.fail"));
         return;
       }
 
       const listStatus = await updater().listUsers();
       if (listStatus !== "") {
-        alertMsg(this.props.msg.pkg.get("update.fail"));
+        Env().alertMsg(this.props.msg.pkg.get("update.fail"));
         return;
       }
 
-      alertMsg(this.props.msg.pkg.get("update.ok"));
+      Env().alertMsg(this.props.msg.pkg.get("update.ok"));
     } finally {
       this.props.update(updater().updateAdmin);
       this.setLoading(false);
@@ -174,7 +174,7 @@ export class UserForm extends React.Component<
   };
 
   delUser = async () => {
-    if (!confirmMsg(this.props.msg.pkg.get("op.confirm"))) {
+    if (!Env().confirmMsg(this.props.msg.pkg.get("op.confirm"))) {
       return;
     }
 
@@ -182,17 +182,17 @@ export class UserForm extends React.Component<
     try {
       const status = await updater().delUser(this.state.id);
       if (status !== "") {
-        alertMsg(this.props.msg.pkg.get("delete.fail"));
+        Env().alertMsg(this.props.msg.pkg.get("delete.fail"));
         return;
       }
 
       const listStatus = await updater().listUsers();
       if (listStatus !== "") {
-        alertMsg(this.props.msg.pkg.get("op.fail"));
+        Env().alertMsg(this.props.msg.pkg.get("op.fail"));
         return;
       }
 
-      alertMsg(this.props.msg.pkg.get("delete.ok"));
+      Env().alertMsg(this.props.msg.pkg.get("delete.ok"));
     } finally {
       this.props.update(updater().updateAdmin);
       this.setLoading(false);
@@ -446,17 +446,17 @@ export class AdminPane extends React.Component<Props, State, {}> {
     try {
       const status = await updater().addRole(this.state.newRole);
       if (status !== "") {
-        alertMsg(this.props.msg.pkg.get("add.fail"));
+        Env().alertMsg(this.props.msg.pkg.get("add.fail"));
         return;
       }
 
       const listStatus = await updater().listRoles();
       if (listStatus !== "") {
-        alertMsg(this.props.msg.pkg.get("add.fail"));
+        Env().alertMsg(this.props.msg.pkg.get("add.fail"));
         return;
       }
 
-      alertMsg(this.props.msg.pkg.get("add.ok"));
+      Env().alertMsg(this.props.msg.pkg.get("add.ok"));
     } finally {
       this.props.update(updater().updateAdmin);
       this.setLoading(false);
@@ -464,7 +464,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
   };
 
   delRole = async (role: string) => {
-    if (!confirmMsg(this.props.msg.pkg.get("role.delete.warning"))) {
+    if (!Env().confirmMsg(this.props.msg.pkg.get("role.delete.warning"))) {
       return;
     }
 
@@ -479,7 +479,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
 
       const listStatus = await updater().listRoles();
       if (listStatus !== "") {
-        alertMsg(this.props.msg.pkg.get("add.fail"));
+        Env().alertMsg(this.props.msg.pkg.get("add.fail"));
         return;
       }
 
@@ -492,7 +492,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
 
   addUser = async () => {
     if (this.state.newUserPwd1 !== this.state.newUserPwd2) {
-      alertMsg(this.props.msg.pkg.get("settings.pwd.notSame"));
+      Env().alertMsg(this.props.msg.pkg.get("settings.pwd.notSame"));
       return;
     }
 
@@ -509,17 +509,17 @@ export class AdminPane extends React.Component<Props, State, {}> {
         preferences: undefined,
       });
       if (status !== "") {
-        alertMsg(this.props.msg.pkg.get("add.fail"));
+        Env().alertMsg(this.props.msg.pkg.get("add.fail"));
         return;
       }
 
       const listStatus = await updater().listUsers();
       if (listStatus !== "") {
-        alertMsg(this.props.msg.pkg.get("op.fail"));
+        Env().alertMsg(this.props.msg.pkg.get("op.fail"));
         return;
       }
 
-      alertMsg(this.props.msg.pkg.get("add.ok"));
+      Env().alertMsg(this.props.msg.pkg.get("add.ok"));
     } finally {
       this.setState({
         newUserName: "",
@@ -773,7 +773,7 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
   setClientCfg = async () => {
     const bgURL = this.props.ui.bg.url;
     if (bgURL.length >= 4096) {
-      alertMsg(this.props.msg.pkg.get("bg.url.alert"));
+      Env().alertMsg(this.props.msg.pkg.get("bg.url.alert"));
       return;
     }
 
@@ -786,7 +786,7 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
       bgRepeat !== "round" &&
       bgRepeat !== "no-repeat"
     ) {
-      alertMsg(this.props.msg.pkg.get("bg.repeat.alert"));
+      Env().alertMsg(this.props.msg.pkg.get("bg.repeat.alert"));
       return;
     }
 
@@ -798,13 +798,13 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
       bgPos !== "right" &&
       bgPos !== "center"
     ) {
-      alertMsg(this.props.msg.pkg.get("bg.pos.alert"));
+      Env().alertMsg(this.props.msg.pkg.get("bg.pos.alert"));
       return;
     }
 
     const bgAlign = this.props.ui.bg.align;
     if (bgAlign !== "scroll" && bgAlign !== "fixed" && bgAlign !== "local") {
-      alertMsg(this.props.msg.pkg.get("bg.align.alert"));
+      Env().alertMsg(this.props.msg.pkg.get("bg.align.alert"));
       return;
     }
 
@@ -817,11 +817,11 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
         bg: this.props.ui.bg,
       });
       if (status !== "") {
-        alertMsg(this.props.msg.pkg.get("update.fail"));
+        Env().alertMsg(this.props.msg.pkg.get("update.fail"));
         return;
       }
 
-      alertMsg(this.props.msg.pkg.get("update.ok"));
+      Env().alertMsg(this.props.msg.pkg.get("update.ok"));
     } finally {
       this.setLoading(false);
     }

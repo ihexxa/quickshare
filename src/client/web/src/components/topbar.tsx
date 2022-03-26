@@ -1,7 +1,7 @@
 import * as React from "react";
 import { List } from "immutable";
 
-import { alertMsg, confirmMsg } from "../common/env";
+import { Env } from "../common/env";
 import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { LoginProps } from "./pane_login";
 import { updater } from "./state_updater";
@@ -28,20 +28,20 @@ export class TopBar extends React.Component<Props, State, {}> {
   };
 
   logout = async (): Promise<void> => {
-    if (!confirmMsg(this.props.msg.pkg.get("logout.confirm"))) {
+    if (!Env().confirmMsg(this.props.msg.pkg.get("logout.confirm"))) {
       return;
     }
 
     const status = await updater().logout();
     if (status !== "") {
-      alertMsg(this.props.msg.pkg.get("login.logout.fail"));
+      Env().alertMsg(this.props.msg.pkg.get("login.logout.fail"));
       return;
     }
 
     const params = new URLSearchParams(document.location.search.substring(1));
     const initStatus = await updater().initAll(params);
     if (initStatus !== "") {
-      alertMsg(this.props.msg.pkg.get("op.fail"));
+      Env().alertMsg(this.props.msg.pkg.get("op.fail"));
       return;
     }
     this.props.update(updater().updateAll);

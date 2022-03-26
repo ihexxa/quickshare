@@ -6,7 +6,7 @@ import { ICoreState, UIProps, MsgProps } from "./core_state";
 import { LoginProps } from "./pane_login";
 import { Flexbox } from "./layout/flexbox";
 import { updater } from "./state_updater";
-import { alertMsg, confirmMsg } from "../common/env";
+import { Env } from "../common/env";
 import { Container } from "./layout/container";
 import { Card } from "./layout/card";
 import { Rows } from "./layout/rows";
@@ -103,10 +103,10 @@ export class PaneSettings extends React.Component<Props, State, {}> {
     try {
       const status = await updater().syncPreferences();
       if (status !== "") {
-        alertMsg(this.props.msg.pkg.get("update.fail"));
+        Env().alertMsg(this.props.msg.pkg.get("update.fail"));
         return;
       }
-      alertMsg(this.props.msg.pkg.get("update.ok"));
+      Env().alertMsg(this.props.msg.pkg.get("update.ok"));
     } finally {
       this.setLoading(false);
     }
@@ -114,17 +114,17 @@ export class PaneSettings extends React.Component<Props, State, {}> {
 
   setPwd = async (): Promise<any> => {
     if (this.state.newPwd1 !== this.state.newPwd2) {
-      alertMsg(this.props.msg.pkg.get("settings.pwd.notSame"));
+      Env().alertMsg(this.props.msg.pkg.get("settings.pwd.notSame"));
       return;
     } else if (
       this.state.oldPwd == "" ||
       this.state.newPwd1 == "" ||
       this.state.newPwd2 == ""
     ) {
-      alertMsg(this.props.msg.pkg.get("settings.pwd.empty"));
+      Env().alertMsg(this.props.msg.pkg.get("settings.pwd.empty"));
       return;
     } else if (this.state.oldPwd == this.state.newPwd1) {
-      alertMsg(this.props.msg.pkg.get("settings.pwd.notChanged"));
+      Env().alertMsg(this.props.msg.pkg.get("settings.pwd.notChanged"));
       return;
     }
 
@@ -135,11 +135,11 @@ export class PaneSettings extends React.Component<Props, State, {}> {
         this.state.newPwd1
       );
       if (status !== "") {
-        alertMsg(this.props.msg.pkg.get("update.fail"));
+        Env().alertMsg(this.props.msg.pkg.get("update.fail"));
         return;
       }
 
-      alertMsg(this.props.msg.pkg.get("update.ok"));
+      Env().alertMsg(this.props.msg.pkg.get("update.ok"));
     } finally {
       this.setState({
         oldPwd: "",
@@ -155,10 +155,11 @@ export class PaneSettings extends React.Component<Props, State, {}> {
     try {
       const status = await updater().syncPreferences();
       if (status !== "") {
-        alertMsg(this.props.msg.pkg.get("update.fail"));
+        Env().alertMsg(this.props.msg.pkg.get("update.fail"));
+        return;
       }
+      Env().alertMsg(this.props.msg.pkg.get("update.ok"));
     } finally {
-      alertMsg(this.props.msg.pkg.get("update.ok"));
       this.props.update(updater().updateMsg);
     }
   };
@@ -168,22 +169,23 @@ export class PaneSettings extends React.Component<Props, State, {}> {
     try {
       const status = await updater().syncPreferences();
       if (status !== "") {
-        alertMsg(this.props.msg.pkg.get("update.fail"));
+        Env().alertMsg(this.props.msg.pkg.get("update.fail"));
+        return;
       }
+      Env().alertMsg(this.props.msg.pkg.get("update.ok"));
     } finally {
-      alertMsg(this.props.msg.pkg.get("update.ok"));
       this.props.update(updater().updateUI);
     }
   };
 
   truncateErrors = () => {
-    if (confirmMsg(this.props.msg.pkg.get("op.confirm"))) {
+    if (Env().confirmMsg(this.props.msg.pkg.get("op.confirm"))) {
       ErrorLogger().truncate();
     }
   };
 
   reportErrors = () => {
-    if (confirmMsg(this.props.msg.pkg.get("op.confirm"))) {
+    if (Env().confirmMsg(this.props.msg.pkg.get("op.confirm"))) {
       ErrorLogger().report();
     }
   };
