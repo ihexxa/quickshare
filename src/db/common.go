@@ -88,11 +88,11 @@ var (
 )
 
 type FileInfo struct {
-	IsDir   bool   `json:"isDir"`
-	Shared  bool   `json:"shared"`
-	ShareID string `json:"shareID"` // for short url
-	Sha1    string `json:"sha1"`
-	Size    int64  `json:"size"`
+	IsDir   bool   `json:"isDir" yaml:"isDir"`
+	Shared  bool   `json:"shared" yaml:"shared"`
+	ShareID string `json:"shareID" yaml:"shareID"`
+	Sha1    string `json:"sha1" yaml:"sha1"`
+	Size    int64  `json:"size" yaml:"size"`
 }
 
 type UserCfg struct {
