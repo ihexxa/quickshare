@@ -65,6 +65,20 @@ export class Updater {
     return "";
   };
 
+  listUploadArray = async (): Promise<Array<UploadEntry>> => {
+    const uploadsArray = new Array<UploadEntry>();
+    this.props.uploadingsInfo.uploadings.forEach((entry: UploadEntry) => {
+      uploadsArray.push(entry);
+    });
+
+    return uploadsArray;
+  };
+
+  addUploadArray = (fileArray: Array<File>): string => {
+    const fileList = List<File>(fileArray);
+    return this.addUploads(fileList);
+  };
+
   addUploads = (fileList: List<File>): string => {
     fileList.forEach((file) => {
       const filePath = getItemPath(
@@ -340,7 +354,9 @@ export class Updater {
     }
 
     if (fails.size > 0) {
-      Env().alertMsg(`${this.props.msg.pkg.get("move.fail")}: ${fails.join(",\n")}`);
+      Env().alertMsg(
+        `${this.props.msg.pkg.get("move.fail")}: ${fails.join(",\n")}`
+      );
       return errServer;
     }
 
