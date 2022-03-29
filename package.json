@@ -12,6 +12,7 @@
     "build:docker": "docker build . -t hexxa/quickshare:latest"
   },
   "dependencies": {
+    "tslint": "^5.0.0",
     "webpack-bundle-analyzer": "^4.4.2"
   }
 }
