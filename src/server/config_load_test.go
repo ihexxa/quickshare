@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/ihexxa/gocfg"
@@ -19,14 +20,28 @@ func TestLoadCfg(t *testing.T) {
 			DbPath:  "",
 			Configs: []string{},
 		},
-		// default config + config_1
+		// default config + db
+		&Args{
+			Host:    "",
+			Port:    0,
+			DbPath:  "testdata/test_quickshare.db",
+			Configs: []string{},
+		},
+		// default config + db + config_1 (dbPath is from config_1)
 		&Args{
 			Host:    "",
 			Port:    0,
 			DbPath:  "",
 			Configs: []string{"testdata/config_1.yml"},
 		},
-		// default config + config_1 + config_4
+		// // default config + db + config_1 (dbPath is from args)
+		&Args{
+			Host:    "",
+			Port:    0,
+			DbPath:  "testdata/test_quickshare.db",
+			Configs: []string{"testdata/config_1.yml"},
+		},
+		// default config + db + config_1 + config_4
 		&Args{
 			Host:    "",
 			Port:    0,
@@ -45,7 +60,7 @@ func TestLoadCfg(t *testing.T) {
 				"testdata/config_partial_db.yml",
 			},
 		},
-		// default config + config_1 + config_4 + db_partial + args(db)
+		// default config + db + config_1 + config_4 + config_partial_users.yml + config_partial_db.yml + args(db)
 		&Args{
 			Host:   "",
 			Port:   0,
@@ -60,6 +75,21 @@ func TestLoadCfg(t *testing.T) {
 	}
 
 	cfgDefault := DefaultConfigStruct()
+
+	cfgDBOnly := *cfgDefault
+	cfgDBOnly.Site = &db.SiteConfig{
+		ClientCfg: &db.ClientConfig{
+			SiteName: "Quickshare",
+			SiteDesc: "quick and simple file sharing",
+			Bg: &db.BgConfig{
+				Url:      "/static/img/textured_paper.png",
+				Repeat:   "repeat",
+				Position: "center",
+				Align:    "fixed",
+				BgColor:  "#ccc",
+			},
+		},
+	}
 
 	cfg1 := &Config{
 		Fs: &FSConfig{
@@ -111,19 +141,19 @@ func TestLoadCfg(t *testing.T) {
 		},
 		Site: &db.SiteConfig{
 			ClientCfg: &db.ClientConfig{
-				SiteName: "1",
-				SiteDesc: "1",
+				SiteName: "Quickshare",
+				SiteDesc: "quick and simple file sharing",
 				Bg: &db.BgConfig{
-					Url:      "1",
-					Repeat:   "1",
-					Position: "1",
-					Align:    "1",
-					BgColor:  "1",
+					Url:      "/static/img/textured_paper.png",
+					Repeat:   "repeat",
+					Position: "center",
+					Align:    "fixed",
+					BgColor:  "#ccc",
 				},
 			},
 		},
 		Db: &DbConfig{
-			DbPath: "1",
+			DbPath: "testdata/test_quickshare.db",
 		},
 	}
 
@@ -259,7 +289,7 @@ func TestLoadCfg(t *testing.T) {
 		},
 	}
 
-	cfgWithDB := &Config{
+	cfgWithPartialCfg := &Config{
 		Fs: &FSConfig{
 			Root:       "4",
 			OpensLimit: 4,
@@ -321,16 +351,18 @@ func TestLoadCfg(t *testing.T) {
 			},
 		},
 		Db: &DbConfig{
-			DbPath: "testdata/test_quickshare.db",
+			DbPath: "5",
 		},
 	}
 
 	expects := []*Config{
 		cfgDefault,
+		&cfgDBOnly,
+		cfg1,
 		cfg1,
 		cfg4,
 		cfg5,
-		cfgWithDB,
+		cfgWithPartialCfg,
 	}
 
 	testLoadCfg := func(t *testing.T) {
@@ -351,7 +383,11 @@ func TestLoadCfg(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if !Equal(gotCfg, expectCfg) {
+			if !reflect.DeepEqual(gotCfg.Template(), expectCfg.Template()) {
+				gotJSON, _ := gotCfg.JSON()
+				expectJSON, _ := expectCfg.JSON()
+				fmt.Printf("\ngot\n%s\n", gotJSON)
+				fmt.Printf("\nexpected\n%s\n", expectJSON)
 				t.Fatalf("%d, cfgs are not identical", i)
 			}
 		}

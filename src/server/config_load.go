@@ -20,38 +20,41 @@ type Args struct {
 	Configs []string `short:"c" long:"configs" description:"config path"`
 }
 
+// LoadCfg loads the default config, the config in database, config files and arguments in order.
+// All config values will be merged into one, and the latter overwrites the former.
+// Each config can be part of the whole ServerCfg
 func LoadCfg(args *Args) (*gocfg.Cfg, error) {
 	defaultCfg, err := DefaultConfig()
 	if err != nil {
 		return nil, err
 	}
-
 	cfg, err := gocfg.New(NewConfig()).Load(gocfg.JSONStr(defaultCfg))
 	if err != nil {
 		return nil, err
 	}
 
-	cfg, err = mergeConfigFiles(cfg, args.Configs)
+	tmpCfg := *cfg
+	dbPath, err := getDbPath(&tmpCfg, args.Configs, args.DbPath)
 	if err != nil {
 		return nil, err
 	}
-
-	dbPath := cfg.GrabString("Db.DbPath")
-	if args.DbPath != "" {
-		dbPath = args.DbPath
-		_, err := os.Stat(dbPath)
-		if err == nil {
-			cfg, err = mergeDbConfig(cfg, dbPath)
-			if err != nil {
-				return nil, err
-			}
-		} else if err != nil {
-			if !os.IsNotExist(err) {
-				return nil, err
-			} else {
-				fmt.Printf("warning: Database does not exist in (%s), skipped", dbPath)
-			}
+	_, err = os.Stat(dbPath)
+	if err == nil {
+		cfg, err = mergeDbConfig(cfg, dbPath)
+		if err != nil {
+			return nil, err
 		}
+	} else if err != nil {
+		if !os.IsNotExist(err) {
+			return nil, err
+		} else {
+			fmt.Printf("warning: Database does not exist in (%s), skipped", dbPath)
+		}
+	}
+
+	cfg, err = mergeConfigFiles(cfg, args.Configs)
+	if err != nil {
+		return nil, err
 	}
 
 	return mergeArgs(cfg, args)
@@ -81,6 +84,31 @@ func mergeDbConfig(cfg *gocfg.Cfg, dbPath string) (*gocfg.Cfg, error) {
 
 	cfgStr := fmt.Sprintf(`{"site": %s}`, string(clientCfgBytes))
 	return cfg.Load(gocfg.JSONStr(cfgStr))
+}
+
+// getDbPath returns db path from arguments, configs, default config in order
+// this is a little tricky
+func getDbPath(cfg *gocfg.Cfg, configPaths []string, argDbPath string) (string, error) {
+	if argDbPath != "" {
+		return argDbPath, nil
+	}
+
+	var err error
+
+	for _, configPath := range configPaths {
+		if strings.HasSuffix(configPath, ".yml") || strings.HasSuffix(configPath, ".yaml") {
+			cfg, err = cfg.Load(gocfg.YAML(configPath))
+		} else if strings.HasSuffix(configPath, ".json") {
+			cfg, err = cfg.Load(gocfg.JSON(configPath))
+		} else {
+			return "", fmt.Errorf("unknown config file type (.yml .yaml .json are supported): %s", configPath)
+		}
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return cfg.GrabString("Db.DbPath"), nil
 }
 
 func mergeConfigFiles(cfg *gocfg.Cfg, configPaths []string) (*gocfg.Cfg, error) {
