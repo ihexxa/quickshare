@@ -11,8 +11,5 @@
     "build": "yarn build:fe && bash scripts/build_be.sh",
     "build:docker": "docker build . -t hexxa/quickshare:latest"
   },
-  "dependencies": {
-    "tslint": "^5.0.0",
-    "webpack-bundle-analyzer": "^4.4.2"
-  }
+  "dependencies": {}
 }
