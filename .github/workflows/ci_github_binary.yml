@@ -1,4 +1,4 @@
-name: cd-binary
+name: ci-binary
 
 # Controls when the action will run.
 on:

@@ -40,7 +40,7 @@ workers:
 site:
   clientCfg:
     siteName: "Quickshare"
-    siteDesc: "quick and simple file sharing"
+    siteDesc: "Quick and simple file sharing"
     bg:
       url: "/static/img/textured_paper.png"
       repeat: "repeat"

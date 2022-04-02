@@ -156,7 +156,7 @@ export class RootFrame extends React.Component<Props, State, {}> {
 
           <div id="tail" className="container-center">
             <a href="https://github.com/ihexxa/quickshare">Quickshare</a> -
-            quick and simple file sharing.
+            Quick and simple file sharing.
           </div>
         </div>
       </div>

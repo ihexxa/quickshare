@@ -165,7 +165,7 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	err = siteStore.Init(&db.SiteConfig{
 		ClientCfg: &db.ClientConfig{
 			SiteName: cfg.StringOr("Site.ClientCfg.SiteName", "Quickshare"),
-			SiteDesc: cfg.StringOr("Site.ClientCfg.SiteDesc", "quick and simple file sharing"),
+			SiteDesc: cfg.StringOr("Site.ClientCfg.SiteDesc", "Quick and simple file sharing"),
 			Bg: &db.BgConfig{
 				Url:      cfg.StringOr("Site.ClientCfg.Bg.Url", "/static/img/textured_paper.png"),
 				Repeat:   cfg.StringOr("Site.ClientCfg.Bg.Repeat", "repeat"),
