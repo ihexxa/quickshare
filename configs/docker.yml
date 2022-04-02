@@ -2,8 +2,6 @@ fs:
   root: "/quickshare/root"
   opensLimit: 1024
   openTTL: 60 # 1 min
-secrets:
-  tokenSecret: ""
 server:
   debug: false
   host: "0.0.0.0"
@@ -12,36 +10,5 @@ server:
   writeTimeout: 86400000 # 1 day
   maxHeaderBytes: 512
   publicPath: "/quickshare/public"
-users:
-  enableAuth: true
-  defaultAdmin: ""
-  defaultAdminPwd: ""
-  cookieTTL: 604800 # 1 week
-  cookieSecure: false
-  cookieHttpOnly: true
-  minUserNameLen: 3
-  minPwdLen: 6
-  captchaWidth: 256
-  captchaHeight: 60
-  captchaEnabled: true
-  uploadSpeedLimit: 1048576 # 1MB/limiterCyc
-  downloadSpeedLimit: 1048576 # 1MB/limiterCyc
-  spaceLimit: 104857600 # 100MB
-  limiterCapacity: 1000
-  limiterCyc: 1000 # 1s
-  predefinedUsers: []
-workers:
-  queueSize: 1024
-  sleepCyc: 1 # in second
-  workerCount: 2
-site:
-  clientCfg:
-    siteName: "Quickshare"
-    siteDesc: "quick and simple file sharing"
-    bg:
-      url: "/static/img/textured_paper.png"
-      repeat: "repeat"
-      position: "center"
-      align: "fixed"
 db:
   dbPath: "/quickshare/root/quickshare.db"

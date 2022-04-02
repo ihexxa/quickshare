@@ -1,4 +1,4 @@
-name: cd-docker
+name: ci-docker
 
 on:
   release:

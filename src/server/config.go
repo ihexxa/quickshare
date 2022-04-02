@@ -89,7 +89,7 @@ func DefaultConfigStruct() *Config {
 			CookieTTL:          3600 * 24 * 7, // 1 week
 			CookieSecure:       false,
 			CookieHttpOnly:     true,
-			MinUserNameLen:     4,
+			MinUserNameLen:     3,
 			MinPwdLen:          8,
 			CaptchaWidth:       256,
 			CaptchaHeight:      60,
@@ -121,7 +121,7 @@ func DefaultConfigStruct() *Config {
 		Site: &db.SiteConfig{
 			ClientCfg: &db.ClientConfig{
 				SiteName: "Quickshare",
-				SiteDesc: "quick and simple file sharing",
+				SiteDesc: "Quick and simple file sharing",
 				Bg: &db.BgConfig{
 					Url:      "/static/img/textured_paper.png",
 					Repeat:   "repeat",
