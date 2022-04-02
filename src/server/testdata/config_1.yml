@@ -37,16 +37,16 @@ workers:
   queueSize: 1
   sleepCyc: 1
   workerCount: 1
-site:
-  clientCfg:
-    siteName: "1"
-    siteDesc: "1"
-    bg:
-      url: "1"
-      repeat: "1"
-      position: "1"
-      align: "1"
-      bgColor: "1"
+# site:
+#   clientCfg:
+#     siteName: "1"
+#     siteDesc: "1"
+#     bg:
+#       url: "1"
+#       repeat: "1"
+#       position: "1"
+#       align: "1"
+#       bgColor: "1"
 db:
-  dbPath: "1"
+  dbPath: "testdata/test_quickshare.db"
 
