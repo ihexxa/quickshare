@@ -39,7 +39,7 @@ func (h *FileHandlers) genSha1(msg worker.IMsg) error {
 	buf := make([]byte, 4096)
 	_, err = io.CopyBuffer(hasher, f, buf)
 	if err != nil {
-		return err
+		return fmt.Errorf("faile to copy buffer: %w", err)
 	}
 
 	sha1Sign := fmt.Sprintf("%x", hasher.Sum(nil))
@@ -47,5 +47,6 @@ func (h *FileHandlers) genSha1(msg worker.IMsg) error {
 	if err != nil {
 		return fmt.Errorf("fail to set sha1: %s", err)
 	}
+
 	return nil
 }

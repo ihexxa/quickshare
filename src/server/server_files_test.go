@@ -126,46 +126,36 @@ func TestFileHandlers(t *testing.T) {
 			"qs/files/dupdir/dup_file1":     "12345678",
 			"qs/files/dupdir/dup_file2.ext": "12345678",
 		}
-		renames := map[string]string{
-			"qs/files/dupdir/dup_file1":     "qs/files/dupdir/dup_file1_1",
-			"qs/files/dupdir/dup_file2.ext": "qs/files/dupdir/dup_file2_1.ext",
+
+		for filePath, content := range files {
+			assertUploadOK(t, filePath, content, addr, token)
+
+			// file operation(deleting tmp file) may be async
+			// so creating tmp file in the 2nd time may conflict with the first time if it is not deleted yet
+			// checking file until it is deleted
+			// TODO: use fs.Stat() to avoid flaky testing...
+			time.Sleep(1000)
+
+			assertDownloadOK(t, filePath, content, addr, token)
 		}
 
 		for filePath, content := range files {
-			for i := 0; i < 2; i++ {
-				assertUploadOK(t, filePath, content, addr, token)
-
-				// file operation(deleting tmp file) may be async
-				// so creating tmp file in the 2nd time may conflict with the first time if it is not deleted yet
-				// checking file until it is deleted
-				// TODO: use fs.Stat() to avoid flaky testing...
-				time.Sleep(1000)
-
-				err = fs.Close()
-				if err != nil {
-					t.Fatal(err)
-				}
-
-				if i == 0 {
-					assertDownloadOK(t, filePath, content, addr, token)
-				} else if i == 1 {
-					renamedFilePath, ok := renames[filePath]
-					if !ok {
-						t.Fatal("new name not found")
-					}
-					assertDownloadOK(t, renamedFilePath, content, addr, token)
-				}
+			res, _, _ := cl.Create(filePath, int64(len([]byte(content))))
+			if res.StatusCode != 400 {
+				t.Fatal(res.StatusCode)
 			}
 		}
 	})
 
 	t.Run("test: Upload-Delete-Upload: fd are closed correctly", func(t *testing.T) {
 		files := map[string]string{
-			"qs/files/close_Fd/dup_file1": "12345678",
+			"qs/files/close_fd/dup_file1": "12345678",
 		}
 
 		for i := 0; i < 2; i++ {
 			for filePath, content := range files {
+				time.Sleep(1000)
+
 				assertUploadOK(t, filePath, content, addr, token)
 
 				// file operation(deleting tmp file) may be async
@@ -185,9 +175,6 @@ func TestFileHandlers(t *testing.T) {
 				} else if res.StatusCode != 200 {
 					t.Fatal(res.StatusCode)
 				}
-
-				// tmpFile fd is closed, so follow must succeed
-				assertUploadOK(t, filePath, content, addr, token)
 			}
 		}
 	})
@@ -493,7 +480,7 @@ func TestFileHandlers(t *testing.T) {
 				res, _, errs = userFilesCl.IsSharing(fmt.Sprintf("%s/", dirPath))
 				if len(errs) > 0 {
 					t.Fatal(errs)
-				} else if res.StatusCode != 404 {
+				} else if res.StatusCode != 200 { // dirPath is cleaned
 					t.Fatal(res.StatusCode)
 				}
 			}
