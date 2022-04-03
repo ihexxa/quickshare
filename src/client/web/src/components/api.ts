@@ -1,6 +1,7 @@
 import { ICoreState } from "./core_state";
 import { updater, Updater } from "./state_updater";
 import { UploadEntry } from "../worker/interface";
+import { MetadataResp } from "../client";
 
 export class QuickshareAPI {
   private updater: Updater;
@@ -9,7 +10,7 @@ export class QuickshareAPI {
   }
   initAll = async (params: URLSearchParams): Promise<string> => {
     return this.updater.initAll(params);
-  }
+  };
 
   addUploadArray = (fileArray: Array<File>): string => {
     return this.updater.addUploadArray(fileArray);
@@ -25,7 +26,7 @@ export class QuickshareAPI {
 
   stopUploading = (filePath: string): string => {
     return this.updater.stopUploading(filePath);
-  }
+  };
 
   self = async (): Promise<string> => {
     return await this.updater.self();
@@ -33,6 +34,14 @@ export class QuickshareAPI {
 
   getProps = (): ICoreState => {
     return this.updater.props;
+  };
+
+  delete = async (
+    dir: string,
+    items: Array<MetadataResp>,
+    selectedItems: Array<string>
+  ): Promise<string> => {
+    return await this.updater.delete2(dir, items, selectedItems);
   };
 }
 

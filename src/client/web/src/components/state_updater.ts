@@ -221,6 +221,21 @@ export class Updater {
     return "";
   };
 
+  delete2 = async (
+    dir: string,
+    items: Array<MetadataResp>,
+    selectedItems: Array<string>
+  ): Promise<string> => {
+    const dirParts = List(dir.split("/")).filter((part) => part !== "");
+    const itemsList = List(items);
+    let selectedItemsMap = Map<string, boolean>();
+    selectedItems.forEach((item) => {
+      selectedItemsMap = selectedItemsMap.set(item, true);
+    });
+
+    return this.delete(dirParts, itemsList, selectedItemsMap);
+  };
+
   delete = async (
     dirParts: List<string>,
     items: List<MetadataResp>,
