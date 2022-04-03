@@ -31,6 +31,7 @@ var (
 	ErrInvalidPreferences = errors.New("invalid preferences")
 	ErrBucketNotFound     = errors.New("bucket not found")
 	ErrKeyNotFound        = errors.New("key not found")
+	ErrKeyExisting        = errors.New("key is existing")
 	ErrCreateExisting     = errors.New("create upload info which already exists")
 	ErrQuota              = errors.New("quota limit reached")
 

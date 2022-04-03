@@ -133,10 +133,12 @@ func ErrResp(c *gin.Context, code int, err error) (int, interface{}) {
 }
 
 func FsRootPath(userName, relFilePath string) string {
+	relFilePath = filepath.Clean(relFilePath)
 	return filepath.Join(userName, FsRootDir, relFilePath)
 }
 
 func UploadPath(userName, relFilePath string) string {
+	relFilePath = filepath.Clean(relFilePath)
 	return filepath.Join(UploadFolder(userName), fmt.Sprintf("%x", sha1.Sum([]byte(relFilePath))))
 }
 

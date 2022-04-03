@@ -48,7 +48,7 @@ func LoadCfg(args *Args) (*gocfg.Cfg, error) {
 		if !os.IsNotExist(err) {
 			return nil, err
 		} else {
-			fmt.Printf("warning: Database does not exist in (%s), skipped", dbPath)
+			fmt.Printf("warning: Database does not exist in (%s), skipped\n", dbPath)
 		}
 	}
 

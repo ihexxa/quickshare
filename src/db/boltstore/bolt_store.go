@@ -79,7 +79,7 @@ func (bs *BoltStore) getUploadInfo(tx *bolt.Tx, userID uint64, itemPath string) 
 
 	uploadInfoBucket := tx.Bucket([]byte(userUploadNS))
 	if uploadInfoBucket == nil {
-		return nil, bolt.ErrBucketNotFound
+		return nil, db.ErrBucketNotFound
 
 	}
 
@@ -169,6 +169,14 @@ func (bs *BoltStore) setFileInfo(tx *bolt.Tx, userID uint64, itemPath string, fi
 func (bs *BoltStore) AddUploadInfos(userID uint64, tmpPath, filePath string, info *db.FileInfo) error {
 	return bs.boltdb.Update(func(tx *bolt.Tx) error {
 		var err error
+
+		_, err = bs.getUploadInfo(tx, userID, tmpPath)
+		if err == nil {
+			return db.ErrKeyExisting
+		} else if !errors.Is(err, db.ErrBucketNotFound) && !errors.Is(err, db.ErrKeyNotFound) {
+			return err
+		}
+
 		// check space quota
 		userInfo, err := bs.getUserInfo(tx, userID)
 		if err != nil {
