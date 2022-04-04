@@ -43,7 +43,9 @@ var (
 		Align:    "fixed",
 		BgColor:  "#ccc",
 	}
-	BgRepeatValues = map[string]bool{
+	DefaultAllowSetBg = false
+	DefaultAutoTheme  = true
+	BgRepeatValues    = map[string]bool{
 		"repeat-x":  true,
 		"repeat-y":  true,
 		"repeat":    true,
@@ -123,9 +125,11 @@ type SiteConfig struct {
 }
 
 type ClientConfig struct {
-	SiteName string    `json:"siteName" yaml:"siteName"`
-	SiteDesc string    `json:"siteDesc" yaml:"siteDesc"`
-	Bg       *BgConfig `json:"bg" yaml:"bg"`
+	SiteName   string    `json:"siteName" yaml:"siteName"`
+	SiteDesc   string    `json:"siteDesc" yaml:"siteDesc"`
+	Bg         *BgConfig `json:"bg" yaml:"bg"`
+	AllowSetBg bool      `json:"allowSetBg" yaml:"allowSetBg"`
+	AutoTheme  bool      `json:"autoTheme" yaml:"autoTheme"`
 }
 
 type BgConfig struct {
@@ -172,8 +176,10 @@ func CheckSiteCfg(cfg *SiteConfig, fillDefault bool) error {
 			return errors.New("cfg.ClientCfg not defined")
 		}
 		cfg.ClientCfg = &ClientConfig{
-			SiteName: DefaultSiteName,
-			SiteDesc: DefaultSiteDesc,
+			SiteName:   DefaultSiteName,
+			SiteDesc:   DefaultSiteDesc,
+			AllowSetBg: DefaultAllowSetBg,
+			AutoTheme:  DefaultAutoTheme,
 			Bg: &BgConfig{
 				Url:      DefaultBgConfig.Url,
 				Repeat:   DefaultBgConfig.Repeat,
