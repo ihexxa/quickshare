@@ -174,6 +174,14 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     this.props.update(updater().updateUploadingsInfo);
   };
 
+  mkDirFromKb = async (
+    event: React.KeyboardEvent<HTMLInputElement>
+  ): Promise<void> => {
+    if (event.key === "Enter") {
+      return await this.mkDir();
+    }
+  };
+
   mkDir = async () => {
     if (this.state.newFolderName === "") {
       Env().alertMsg(this.props.msg.pkg.get("browser.folder.add.fail"));
@@ -719,6 +727,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
               <input
                 type="text"
                 onChange={this.onNewFolderNameChange}
+                onKeyUp={this.mkDirFromKb}
                 value={this.state.newFolderName}
                 placeholder={this.props.msg.pkg.get("browser.folder.name")}
                 className="inline-block"
