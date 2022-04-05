@@ -226,32 +226,47 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         selectedItems: Map<string, boolean>(),
       });
       return;
-    } else {
-      const filesToDel = this.state.selectedItems.keySeq().join(", ");
-      if (
-        !Env().confirmMsg(
-          `${this.props.msg.pkg.get("op.confirm")} [${
-            this.state.selectedItems.size
-          }]: ${filesToDel}`
-        )
-      ) {
-        return;
-      }
+    }
+    const filesToDel = this.state.selectedItems.keySeq().join(", ");
+    if (
+      !Env().confirmMsg(
+        `${this.props.msg.pkg.get("op.confirm")} [${
+          this.state.selectedItems.size
+        }]: ${filesToDel}`
+      )
+    ) {
+      return;
     }
 
     this.setLoading(true);
 
     try {
-      const deleteStatus = await updater().delete(
-        this.props.filesInfo.dirPath,
-        this.props.filesInfo.items,
-        this.state.selectedItems
-      );
+      const cwd = this.props.filesInfo.dirPath.join("/");
+      const itemsToDel = this.props.filesInfo.items
+        .filter((item) => {
+          return this.state.selectedItems.has(item.name);
+        })
+        .map((selectedItem: MetadataResp): string => {
+          return getItemPath(cwd, selectedItem.name);
+        })
+        .toArray();
+
+      const deleteStatus = await updater().deleteInArray(itemsToDel);
       if (deleteStatus !== "") {
         Env().alertMsg(
           getErrMsg(this.props.msg.pkg, "op.fail", deleteStatus.toString())
         );
         return deleteStatus;
+      }
+
+      const refreshStatus = await updater().setItems(
+        this.props.filesInfo.dirPath
+      );
+      if (refreshStatus !== "") {
+        Env().alertMsg(
+          getErrMsg(this.props.msg.pkg, "op.fail", refreshStatus.toString())
+        );
+        return refreshStatus;
       }
 
       const selfStatus = await updater().self();
@@ -349,7 +364,9 @@ export class FilesPanel extends React.Component<Props, State, {}> {
 
       const isSharingStatus = await updater().syncIsSharing(dirPath.join("/"));
       if (isSharingStatus !== "") {
-        Env().alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", isSharingStatus));
+        Env().alertMsg(
+          getErrMsg(this.props.msg.pkg, "op.fail", isSharingStatus)
+        );
         return;
       }
 

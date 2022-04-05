@@ -36,13 +36,9 @@ export class QuickshareAPI {
     return this.updater.props;
   };
 
-  delete = async (
-    dir: string,
-    items: Array<MetadataResp>,
-    selectedItems: Array<string>
-  ): Promise<string> => {
-    return await this.updater.delete2(dir, items, selectedItems);
-  };
+  deleteInArray = async(itemsToDel: Array<string>): Promise<string> => {
+    return await this.updater.deleteInArray(itemsToDel);
+  }
 }
 
 const api = new QuickshareAPI();
