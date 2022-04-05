@@ -130,6 +130,7 @@ func (h *FileHandlers) Create(c *gin.Context) {
 
 	userID := c.MustGet(q.UserIDParam).(string)
 	fsFilePath, err := h.getFSFilePath(userID, req.Path)
+
 	if err != nil {
 		if errors.Is(err, os.ErrExist) {
 			c.JSON(q.ErrResp(c, 400, err))
@@ -254,6 +255,7 @@ func (h *FileHandlers) Delete(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 400, errors.New("invalid file path")))
 		return
 	}
+
 	role := c.MustGet(q.RoleParam).(string)
 	userName := c.MustGet(q.UserParam).(string)
 	if !h.canAccess(userName, role, "delete", filePath) {

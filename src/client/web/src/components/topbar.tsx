@@ -62,7 +62,7 @@ export class TopBar extends React.Component<Props, State, {}> {
               id="topbar-title"
               href="https://github.com/ihexxa/quickshare"
               target="_blank"
-              className="h5"
+              className="h5 bold"
             >
               Quickshare
             </a>,
