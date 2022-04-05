@@ -1,6 +1,7 @@
 import { Map } from "immutable";
 
 export const msgs: Map<string, string> = Map({
+  "terms.nothingHere": "There is nothing here",
   "stateMgr.cap.fail": "failed to get captcha id",
   "browser.upload.del.fail": "Failed to delete uploading item",
   "browser.folder.add.fail": "Folder name can not be empty",

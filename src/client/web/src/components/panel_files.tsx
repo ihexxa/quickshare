@@ -34,6 +34,7 @@ import {
 import { HotkeyHandler } from "../common/hotkeys";
 import { CronTable } from "../common/cron";
 import { Title } from "./visual/title";
+import { NotFoundBanner } from "./visual/banner_notfound";
 
 export interface Item {
   name: string;
@@ -772,11 +773,17 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       />
     );
     const viewType = this.props.ui.control.controls.get(filesViewCtrl);
-    const view = (
-      <div className="margin-t-l">
-        {this.prepareColumns(this.props.filesInfo.items, showOp)}
-      </div>
-    ); // TODO: support better views in the future
+    const view =
+      this.props.filesInfo.items.size > 0 ? (
+        <div>
+          {orderByButtons}
+          <div className="margin-t-l">
+            {this.prepareColumns(this.props.filesInfo.items, showOp)}
+          </div>
+        </div>
+      ) : (
+        <NotFoundBanner title={this.props.msg.pkg.get("terms.nothingHere")} />
+      ); // TODO: support better views in the future
 
     const usedSpace = FileSize(
       // TODO: this a work around before transaction is introduced
@@ -925,7 +932,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
           />
 
           <div className="hr grey0-bg"></div>
-          {orderByButtons}
+
           {view}
         </Container>
       </div>
