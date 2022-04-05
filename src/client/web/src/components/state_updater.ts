@@ -1,4 +1,5 @@
 import { List, Map, Set } from "immutable";
+import _ from "lodash";
 
 import { ICoreState } from "./core_state";
 import { getItemPath, sortRows, Row } from "../common/utils";
@@ -221,65 +222,32 @@ export class Updater {
     return "";
   };
 
-  delete2 = async (
-    dir: string,
-    items: Array<MetadataResp>,
-    selectedItems: Array<string>
-  ): Promise<string> => {
-    const dirParts = List(dir.split("/")).filter((part) => part !== "");
-    const itemsList = List(items);
-    let selectedItemsMap = Map<string, boolean>();
-    selectedItems.forEach((item) => {
-      selectedItemsMap = selectedItemsMap.set(item, true);
-    });
-
-    return this.delete(dirParts, itemsList, selectedItemsMap);
-  };
-
-  delete = async (
-    dirParts: List<string>,
-    items: List<MetadataResp>,
-    selectedItems: Map<string, boolean>
-  ): Promise<string> => {
-    const pathsToDel = items
-      .filter((item) => {
-        return selectedItems.has(item.name);
-      })
-      .map((selectedItem: MetadataResp): string => {
-        return getItemPath(dirParts.join("/"), selectedItem.name);
-      });
-
+  deleteInArray = async (itemsToDel: Array<string>): Promise<string> => {
     const batchSize = 3;
-    let batch = List<string>();
+    const batches = _.chunk(itemsToDel, batchSize);
     let fails = List<string>();
 
-    for (let i = 0; i < pathsToDel.size; i++) {
-      batch = batch.push(pathsToDel.get(i));
-
-      if (batch.size >= batchSize || i == pathsToDel.size - 1) {
-        let promises = batch.map(async (itemPath): Promise<Response<any>> => {
+    for (let i = 0; i < batches.length; i++) {
+      let promises = batches[i].map(
+        async (itemPath: string): Promise<Response<any>> => {
           return this.filesClient.delete(itemPath);
-        });
+        }
+      );
 
-        const resps = await Promise.all(promises.toSeq());
-        resps.forEach((resp: Response<any>, i: number) => {
-          if (resp.status !== 200) {
-            fails = fails.push(batch.get(i));
-          }
-        });
-
-        batch = batch.clear();
-      }
+      const resps = await Promise.all(promises);
+      resps.forEach((resp: Response<any>, j: number) => {
+        if (resp.status !== 200) {
+          fails = fails.push(batches[i][j]);
+        }
+      });
     }
 
     if (fails.size > 0) {
-      Env().alertMsg(
-        `${this.props.msg.pkg.get("delete.fail")}: ${fails.join(",\n")}`
-      );
-      return errServer;
+      return `${errServer}: ${this.props.msg.pkg.get(
+        "delete.fail"
+      )}: ${fails.join(",\n")}`;
     }
-
-    return this.setItems(dirParts);
+    return "";
   };
 
   refreshFiles = async (): Promise<string> => {
