@@ -2,6 +2,7 @@ import { Map } from "immutable";
 
 export const msgs: Map<string, string> = Map({
   "stateMgr.cap.fail": "获取captcha id失败",
+  "terms.nothingHere": "这里空空如也",
   "browser.upload.del.fail": "删除上传失败",
   "browser.folder.add.fail": "文件夹名不可为空",
   "browser.del.fail": "至少选择一个文件或文件夹",

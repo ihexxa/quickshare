@@ -1,7 +1,7 @@
 import * as React from "react";
 import { List } from "immutable";
 
-import { RiQuestionnaireFill } from "@react-icons/all-files/ri/RiQuestionnaireFill";
+import { RiFileList2Fill } from "@react-icons/all-files/ri/RiFileList2Fill";
 
 import { Flexbox } from "../layout/flexbox";
 
@@ -13,7 +13,7 @@ export const NotFoundBanner = (props: Props) => {
   return (
     <Flexbox
       children={List([
-        <RiQuestionnaireFill size="4rem" className="margin-r-m red0-font" />,
+        <RiFileList2Fill size="4rem" className="margin-r-m normal-font" />,
         <span>
           <h3 className="title-l">{props.title}</h3>
         </span>,
