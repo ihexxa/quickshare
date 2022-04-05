@@ -213,6 +213,7 @@ export class UserForm extends React.Component<
     return (
       <div className="padding-t-m padding-b-m">
         <Columns
+          colKey={"paneAdmin"}
           rows={List([
             List([
               <div className="title-m-wrap">

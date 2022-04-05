@@ -7,6 +7,7 @@ export interface Props {
   childrenClassNames?: List<string>;
   style?: React.CSSProperties;
   className?: string;
+  colKey?: string;
 }
 
 export const Columns = (props: Props) => {
@@ -15,9 +16,10 @@ export const Columns = (props: Props) => {
       const cells = row.map((cell: React.ReactNode, j: number) => {
         const width = props.widths.get(j, Math.trunc(100 / row.size));
         const className = props.childrenClassNames.get(j, "");
+
         return (
           <div
-            key={`td-${i}-${j}`}
+            key={`${props.colKey}-${i}-${j}`}
             className={`float-l ${className}`}
             style={{ width }}
           >
@@ -27,7 +29,7 @@ export const Columns = (props: Props) => {
       });
 
       return (
-        <div key={`tr-${i}`}>
+        <div key={`${props.colKey}-${i}`}>
           {cells}
           <div className="fix"></div>
         </div>
