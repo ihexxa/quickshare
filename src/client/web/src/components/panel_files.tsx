@@ -503,142 +503,150 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         ? "hidden"
         : "";
 
-    const rows = sortedItems.map((item: MetadataResp): React.ReactNode => {
-      const isSelected = this.state.selectedItems.has(item.name);
-      const dirPath = this.props.filesInfo.dirPath.join("/");
-      const itemPath = dirPath.endsWith("/")
-        ? `${dirPath}${item.name}`
-        : `${dirPath}/${item.name}`;
+    const rows = sortedItems.map(
+      (item: MetadataResp, i: number): React.ReactNode => {
+        const isSelected = this.state.selectedItems.has(item.name);
+        const dirPath = this.props.filesInfo.dirPath.join("/");
+        const itemPath = dirPath.endsWith("/")
+          ? `${dirPath}${item.name}`
+          : `${dirPath}/${item.name}`;
 
-      const selectedIconColor = isSelected ? "focus-font" : "minor-font";
-      const descIconColor = this.state.showDetail.has(item.name)
-        ? "focus-font"
-        : "major-font";
-      const icon = item.isDir ? (
-        <RiFolder2Fill size="2rem" className="yellow0-font margin-r-m" />
-      ) : (
-        <RiFile2Fill size="2rem" className="focus-font margin-r-m" />
-      );
+        const selectedIconColor = isSelected ? "focus-font" : "minor-font";
+        const descIconColor = this.state.showDetail.has(item.name)
+          ? "focus-font"
+          : "major-font";
+        const icon = item.isDir ? (
+          <RiFolder2Fill size="2rem" className="yellow0-font margin-r-m" />
+        ) : (
+          <RiFile2Fill size="2rem" className="focus-font margin-r-m" />
+        );
 
-      const modTimeDate = new Date(item.modTime);
-      const modTimeFormatted = `${modTimeDate.getFullYear()}-${
-        modTimeDate.getMonth() + 1
-      }-${modTimeDate.getDate()}`;
-      const downloadPath = `/v1/fs/files?fp=${itemPath}`;
-      const name = item.isDir ? (
-        <span className="title-m-wrap">
-          <span className="clickable" onClick={() => this.gotoChild(item.name)}>
-            {item.name}
+        const modTimeDate = new Date(item.modTime);
+        const modTimeFormatted = `${modTimeDate.getFullYear()}-${
+          modTimeDate.getMonth() + 1
+        }-${modTimeDate.getDate()}`;
+        const downloadPath = `/v1/fs/files?fp=${itemPath}`;
+        const name = item.isDir ? (
+          <span className="title-m-wrap">
+            <span
+              className="clickable"
+              onClick={() => this.gotoChild(item.name)}
+            >
+              {item.name}
+            </span>
+            <span className="major-font">{` - ${modTimeFormatted}`}</span>
           </span>
-          <span className="major-font">{` - ${modTimeFormatted}`}</span>
-        </span>
-      ) : (
-        <span className="title-m-wrap">
-          <a className="clickable" href={downloadPath} target="_blank">
-            {item.name}
-          </a>
-          <span className="major-font">{` - ${modTimeFormatted}`}</span>
-        </span>
-      );
+        ) : (
+          <span className="title-m-wrap">
+            <a className="clickable" href={downloadPath} target="_blank">
+              {item.name}
+            </a>
+            <span className="major-font">{` - ${modTimeFormatted}`}</span>
+          </span>
+        );
 
-      const checkIcon = isSelected ? (
-        <RiCheckboxFill
-          size="2rem"
-          className={`${selectedIconColor} ${shareModeClass}`}
-          onClick={() => this.select(item.name)}
-        />
-      ) : (
-        <RiCheckboxBlankLine
-          size="2rem"
-          className={`${selectedIconColor} ${shareModeClass}`}
-          onClick={() => this.select(item.name)}
-        />
-      );
-
-      const op = item.isDir ? (
-        <div className={`txt-align-r icon-s ${showOp}`}>{checkIcon}</div>
-      ) : (
-        <div className={`txt-align-r icon-s ${showOp}`}>
-          <RiMenuUnfoldFill
+        const checkIcon = isSelected ? (
+          <RiCheckboxFill
             size="2rem"
-            className={`${descIconColor} margin-r-m`}
-            onClick={() => this.toggleDetail(item.name)}
+            className={`${selectedIconColor} ${shareModeClass}`}
+            onClick={() => this.select(item.name)}
           />
-          {checkIcon}
-        </div>
-      );
+        ) : (
+          <RiCheckboxBlankLine
+            size="2rem"
+            className={`${selectedIconColor} ${shareModeClass}`}
+            onClick={() => this.select(item.name)}
+          />
+        );
 
-      const absDownloadURL = `${document.location.protocol}//${document.location.hostname}:${document.location.port}${downloadPath}`;
-      const pathTitle = this.props.msg.pkg.get("item.downloadURL");
-      const modTimeTitle = this.props.msg.pkg.get("item.modTime");
-      const sizeTitle = this.props.msg.pkg.get("item.size");
-      const itemSize = FileSize(item.size, { round: 0 });
+        const op = item.isDir ? (
+          <div className={`txt-align-r icon-s ${showOp}`}>{checkIcon}</div>
+        ) : (
+          <div className={`txt-align-r icon-s ${showOp}`}>
+            <RiMenuUnfoldFill
+              size="2rem"
+              className={`${descIconColor} margin-r-m`}
+              onClick={() => this.toggleDetail(item.name)}
+            />
+            {checkIcon}
+          </div>
+        );
 
-      const descStateClass = this.state.showDetail.has(item.name)
-        ? "margin-t-m padding-m"
-        : "no-height";
-      const desc = (
-        <div className={`${descStateClass} major-font major-bg`}>
-          <div className="column">
-            <div className="card">
-              <span className="title-m minor-font">{pathTitle}</span>
-              <span className="font-s work-break-all">{absDownloadURL}</span>
+        const absDownloadURL = `${document.location.protocol}//${document.location.hostname}:${document.location.port}${downloadPath}`;
+        const pathTitle = this.props.msg.pkg.get("item.downloadURL");
+        const modTimeTitle = this.props.msg.pkg.get("item.modTime");
+        const sizeTitle = this.props.msg.pkg.get("item.size");
+        const itemSize = FileSize(item.size, { round: 0 });
+
+        const descStateClass = this.state.showDetail.has(item.name)
+          ? "margin-t-m padding-m"
+          : "no-height";
+        const desc = (
+          <div className={`${descStateClass} major-font major-bg`}>
+            <div className="column">
+              <div className="card">
+                <span className="title-m minor-font">{pathTitle}</span>
+                <span className="font-s work-break-all">{absDownloadURL}</span>
+              </div>
+            </div>
+
+            <div className="column">
+              <div className="card">
+                <span className="title-m minor-font">{modTimeTitle}</span>
+                <span className="font-s work-break-all">
+                  {modTimeFormatted}
+                </span>
+              </div>
+              <div className="card">
+                <span className="title-m minor-font">{sizeTitle}</span>
+                <span className="font-s work-break-all">{itemSize}</span>
+              </div>
+            </div>
+
+            <div className="fix">
+              <div className="card">
+                <Flexbox
+                  children={List([
+                    <span className="title-m minor-font">SHA1</span>,
+                    <RiRestartFill
+                      onClick={() => this.generateHash(itemPath)}
+                      size={"2rem"}
+                      className={`minor-font ${shareModeClass}`}
+                    />,
+                  ])}
+                  childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+                />
+                <div className="info minor-bg">{item.sha1}</div>
+              </div>
             </div>
           </div>
+        );
 
-          <div className="column">
-            <div className="card">
-              <span className="title-m minor-font">{modTimeTitle}</span>
-              <span className="font-s work-break-all">{modTimeFormatted}</span>
-            </div>
-            <div className="card">
-              <span className="title-m minor-font">{sizeTitle}</span>
-              <span className="font-s work-break-all">{itemSize}</span>
-            </div>
+        const cells = List<React.ReactNode>([
+          <div className="icon-s">{icon}</div>,
+          <div>{name}</div>,
+          <div className="title-m major-font padding-l-s">{itemSize}</div>,
+          <div className="txt-align-r">{op}</div>,
+        ]);
+
+        const tableCols = (
+          <Columns
+            rows={List([cells])}
+            widths={List(["3rem", "calc(100% - 18rem)", "8rem", "7rem"])}
+            childrenClassNames={List(["", "", "", ""])}
+            colKey={`filesPanel-${i}`}
+          />
+        );
+
+        return (
+          <div key={`filesPanel-row-${i}`}>
+            {tableCols}
+            {desc}
+            <div className="hr"></div>
           </div>
-
-          <div className="fix">
-            <div className="card">
-              <Flexbox
-                children={List([
-                  <span className="title-m minor-font">SHA1</span>,
-                  <RiRestartFill
-                    onClick={() => this.generateHash(itemPath)}
-                    size={"2rem"}
-                    className={`minor-font ${shareModeClass}`}
-                  />,
-                ])}
-                childrenStyles={List([{}, { justifyContent: "flex-end" }])}
-              />
-              <div className="info minor-bg">{item.sha1}</div>
-            </div>
-          </div>
-        </div>
-      );
-
-      const cells = List<React.ReactNode>([
-        <div className="icon-s">{icon}</div>,
-        <div>{name}</div>,
-        <div className="title-m major-font padding-l-s">{itemSize}</div>,
-        <div className="txt-align-r">{op}</div>,
-      ]);
-
-      const tableCols = (
-        <Columns
-          rows={List([cells])}
-          widths={List(["3rem", "calc(100% - 18rem)", "8rem", "7rem"])}
-          childrenClassNames={List(["", "", "", ""])}
-        />
-      );
-
-      return (
-        <div>
-          {tableCols}
-          {desc}
-          <div className="hr"></div>
-        </div>
-      );
-    });
+        );
+      }
+    );
 
     return <div>{rows}</div>;
   };
