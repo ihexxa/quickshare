@@ -36,9 +36,9 @@ export class QuickshareAPI {
     return this.updater.props;
   };
 
-  deleteInArray = async(itemsToDel: Array<string>): Promise<string> => {
+  deleteInArray = async (itemsToDel: Array<string>): Promise<string> => {
     return await this.updater.deleteInArray(itemsToDel);
-  }
+  };
 }
 
 const api = new QuickshareAPI();
