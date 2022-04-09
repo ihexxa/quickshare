@@ -64,7 +64,7 @@ export class TopBar extends React.Component<Props, State, {}> {
               target="_blank"
               className="h5 bold"
             >
-              Quickshare
+              {this.props.ui.clientCfg.siteName}
             </a>,
             <QRCodeIcon
               value={document.URL}
