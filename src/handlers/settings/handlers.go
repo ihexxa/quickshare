@@ -29,10 +29,8 @@ func (h *SettingsSvc) Health(c *gin.Context) {
 }
 
 type ClientCfgMsg struct {
-	SiteName       string       `json:"siteName"`
-	SiteDesc       string       `json:"siteDesc"`
-	Bg             *db.BgConfig `json:"bg"`
-	CaptchaEnabled bool         `json:"captchaEnabled"`
+	ClientCfg      *db.ClientConfig `json:"cfg"`
+	CaptchaEnabled bool             `json:"captchaEnabled"`
 }
 
 func (h *SettingsSvc) GetClientCfg(c *gin.Context) {
@@ -44,9 +42,7 @@ func (h *SettingsSvc) GetClientCfg(c *gin.Context) {
 	}
 
 	c.JSON(200, &ClientCfgMsg{
-		SiteName:       siteCfg.ClientCfg.SiteName,
-		SiteDesc:       siteCfg.ClientCfg.SiteDesc,
-		Bg:             siteCfg.ClientCfg.Bg,
+		ClientCfg:      siteCfg.ClientCfg,
 		CaptchaEnabled: h.cfg.BoolOr("Users.CaptchaEnabled", true),
 	})
 }
@@ -59,16 +55,24 @@ func (h *SettingsSvc) SetClientCfg(c *gin.Context) {
 		return
 	}
 
-	clientCfg := &db.ClientConfig{
-		SiteName: req.SiteName,
-		SiteDesc: req.SiteDesc,
-		Bg:       req.Bg,
-		// TODO: captchaEnabled is not persisted in db
-	}
+	// TODO: captchaEnabled is not persisted in db
+	clientCfg := req.ClientCfg
 	if err = validateClientCfg(clientCfg); err != nil {
 		c.JSON(q.ErrResp(c, 400, err))
 		return
 	}
+
+	// update config
+	// TODO: refine the model
+	h.cfg.SetString("Site.ClientCfg.SiteName", req.ClientCfg.SiteName)
+	h.cfg.SetString("Site.ClientCfg.SiteDesc", req.ClientCfg.SiteDesc)
+	h.cfg.SetString("Site.ClientCfg.Bg.Url", req.ClientCfg.Bg.Url)
+	h.cfg.SetString("Site.ClientCfg.Bg.Repeat", req.ClientCfg.Bg.Repeat)
+	h.cfg.SetString("Site.ClientCfg.Bg.Position", req.ClientCfg.Bg.Position)
+	h.cfg.SetString("Site.ClientCfg.Bg.Align", req.ClientCfg.Bg.Align)
+	h.cfg.SetString("Site.ClientCfg.Bg.BgColor", req.ClientCfg.Bg.BgColor)
+	h.cfg.SetBool("Site.ClientCfg.AllowSetBg", req.ClientCfg.AllowSetBg)
+	h.cfg.SetBool("Site.ClientCfg.AutoTheme", req.ClientCfg.AutoTheme)
 
 	err = h.deps.SiteStore().SetClientCfg(clientCfg)
 	if err != nil {

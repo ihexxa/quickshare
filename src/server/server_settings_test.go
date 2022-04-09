@@ -90,9 +90,8 @@ func TestSettingsHandlers(t *testing.T) {
 
 		for _, cfg := range cfgs {
 			clientCfgMsg := &settings.ClientCfgMsg{
-				SiteName: cfg.SiteName,
-				SiteDesc: cfg.SiteDesc,
-				Bg:       cfg.Bg,
+				ClientCfg:      cfg,
+				CaptchaEnabled: false,
 			}
 			resp, _, errs := settingsCl.SetClientCfg(clientCfgMsg, adminToken)
 			if len(errs) > 0 {
@@ -108,13 +107,7 @@ func TestSettingsHandlers(t *testing.T) {
 				t.Fatal(resp.StatusCode)
 			}
 
-			cfgEqual := func(cfg1, cfg2 *settings.ClientCfgMsg) bool {
-				return cfg1.SiteName == cfg2.SiteName &&
-					cfg1.SiteDesc == cfg2.SiteDesc &&
-					reflect.DeepEqual(cfg1.Bg, cfg2.Bg)
-			}
-
-			if !cfgEqual(clientCfgMsg, clientCfgMsgGot) {
+			if !reflect.DeepEqual(clientCfgMsg, clientCfgMsgGot) {
 				t.Fatalf("client cfgs are not equal: got(%v) expected(%v)", clientCfgMsg, clientCfgMsgGot)
 			}
 
@@ -134,7 +127,7 @@ func TestSettingsHandlers(t *testing.T) {
 					t.Fatal(resp.StatusCode)
 				}
 
-				if !cfgEqual(clientCfgMsg, clientCfgMsgGot) {
+				if !reflect.DeepEqual(clientCfgMsg, clientCfgMsgGot) {
 					t.Fatalf("client cfgs are not equal: got(%v) expected(%v)", clientCfgMsg, clientCfgMsgGot)
 				}
 			}
