@@ -169,7 +169,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
             className="h5"
             id="title"
           >
-            Quickshare
+            {this.props.ui.clientCfg.siteName}
           </a>
 
           <div className="hr"></div>
