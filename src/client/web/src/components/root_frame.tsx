@@ -11,6 +11,8 @@ import { LoginProps } from "./pane_login";
 import { Layers } from "./layers";
 import { AdminProps } from "./pane_admin";
 import { TopBar } from "./topbar";
+import { CronTable } from "../common/cron";
+import { updater } from "./state_updater";
 
 export const controlName = "panelTabs";
 export interface Props {
@@ -28,6 +30,18 @@ export interface State { }
 export class RootFrame extends React.Component<Props, State, {}> {
   constructor(p: Props) {
     super(p);
+  }
+
+  componentDidMount(): void {
+    CronTable().setInterval("autoSwitchTheme", {
+      func: updater().autoSwitchTheme,
+      args: [],
+      delay: 60 * 1000,
+    });
+  }
+
+  componentWillUnmount() {
+    CronTable().clearInterval("autoSwitchTheme");
   }
 
   makeBgStyle = (): Object => {

@@ -576,20 +576,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
     return (
       <div className="font-m">
         <Container>
-          <Flexbox
-            children={List([
-              <h5 className="title-m">{this.props.msg.pkg.get("siteSettings")}</h5>,
-              <button onClick={this.addUser} className="button-default">
-                {this.props.msg.pkg.get("update")}
-              </button>,
-            ])}
-            childrenStyles={List([{}, { justifyContent: "flex-end" }])}
-          />
-        </Container>
-
-
-        <Container>
-          <BgCfg
+          <SiteCfg
             ui={this.props.ui}
             msg={this.props.msg}
             update={this.props.update}
@@ -718,20 +705,26 @@ export class AdminPane extends React.Component<Props, State, {}> {
   }
 }
 
-interface BgProps {
+interface SiteCfgProps {
   msg: MsgProps;
   ui: UIProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
-interface BgState { }
-export class BgCfg extends React.Component<BgProps, BgState, {}> {
+interface SiteCfgState {}
+export class SiteCfg extends React.Component<SiteCfgProps, SiteCfgState, {}> {
   onChangeSiteName = (ev: React.ChangeEvent<HTMLInputElement>) => {
-    updater().setClientCfg({ ...this.props.ui.clientCfg, siteName: ev.target.value });
+    updater().setClientCfg({
+      ...this.props.ui.clientCfg,
+      siteName: ev.target.value,
+    });
     this.props.update(updater().updateUI);
   };
   onChangeSiteDesc = (ev: React.ChangeEvent<HTMLInputElement>) => {
-    updater().setClientCfg({ ...this.props.ui.clientCfg, siteDesc: ev.target.value });
+    updater().setClientCfg({
+      ...this.props.ui.clientCfg,
+      siteDesc: ev.target.value,
+    });
     this.props.update(updater().updateUI);
   };
   onChangeAllowSetBg = (enabled: boolean) => {
@@ -782,7 +775,7 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
     this.props.update(updater().updateUI);
   };
 
-  constructor(p: BgProps) {
+  constructor(p: SiteCfgProps) {
     super(p);
   }
 
@@ -870,7 +863,9 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
       <div>
         <Flexbox
           children={List([
-            <h5 className="title-m">{this.props.msg.pkg.get("cfg.bg")}</h5>,
+            <h5 className="title-m">
+              {this.props.msg.pkg.get("siteSettings")}
+            </h5>,
 
             <span>
               <button
@@ -912,13 +907,19 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
           />
         </span>
 
+        <div className="hr"></div>
+
         <div>
           <div className="label">{this.props.msg.pkg.get("allowSetBg")}</div>
           <button
             onClick={() => {
               this.onChangeAllowSetBg(true);
             }}
-            className="button-default inline-block margin-r-m"
+            className={`${
+              this.props.ui.clientCfg.allowSetBg
+                ? "white-font focus-bg"
+                : "button-default"
+            } inline-block margin-r-m`}
           >
             {this.props.msg.pkg.get("term.enabled")}
           </button>
@@ -926,11 +927,17 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
             onClick={() => {
               this.onChangeAllowSetBg(false);
             }}
-            className="button-default inline-block margin-r-m"
+            className={`${
+              this.props.ui.clientCfg.allowSetBg
+                ? "button-default"
+                : "white-font focus-bg"
+            } inline-block margin-r-m`}
           >
             {this.props.msg.pkg.get("term.disabled")}
           </button>
         </div>
+
+        <div className="hr"></div>
 
         <div>
           <div className="label">{this.props.msg.pkg.get("autoTheme")}</div>
@@ -938,7 +945,11 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
             onClick={() => {
               this.onChangeAutoTheme(true);
             }}
-            className="button-default inline-block margin-r-m"
+            className={`${
+              this.props.ui.clientCfg.autoTheme
+                ? "white-font focus-bg"
+                : "button-default"
+            } inline-block margin-r-m`}
           >
             {this.props.msg.pkg.get("term.enabled")}
           </button>
@@ -946,7 +957,11 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
             onClick={() => {
               this.onChangeAutoTheme(false);
             }}
-            className="button-default inline-block margin-r-m"
+            className={`${
+              this.props.ui.clientCfg.autoTheme
+                ? "button-default"
+                : "white-font focus-bg"
+            } inline-block margin-r-m`}
           >
             {this.props.msg.pkg.get("term.disabled")}
           </button>
@@ -1017,7 +1032,7 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
             />
           </div>
         </div>
-      </div >
+      </div>
     );
   }
 }

@@ -62,6 +62,7 @@ export class SettingsDialog extends React.Component<Props, State, {}> {
           <PaneSettings
             login={this.props.login}
             msg={this.props.msg}
+            ui={this.props.ui}
             update={this.props.update}
           />
         </div>

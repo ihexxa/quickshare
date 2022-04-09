@@ -34,6 +34,7 @@ describe("PaneSettings", () => {
     const paneSettings = new PaneSettings({
       msg: coreState.msg,
       login: coreState.login,
+      ui: coreState.ui,
       update: (updater: (prevState: ICoreState) => ICoreState) => {},
     });
 
