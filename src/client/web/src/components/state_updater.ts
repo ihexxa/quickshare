@@ -562,8 +562,6 @@ export class Updater {
       return initClientCfgStatus;
     }
 
-    console.log(this.props.ui.control.controls.toJSON());
-
     this.initControls(paramMap);
     this.initUITree();
 
@@ -789,6 +787,22 @@ export class Updater {
 
   setTheme = (theme: string) => {
     this.props.login.preferences.theme = theme;
+  };
+
+  autoSwitchTheme = () => {
+    if (!this.props.ui.clientCfg.autoTheme) {
+      return;
+    }
+
+    const date = new Date();
+    if (
+      (date.getHours() >= 18 && date.getHours() <= 23) ||
+      (date.getHours() >= 0 && date.getHours() <= 6)
+    ) {
+      this.setTheme("dark");
+    } else {
+      this.setTheme("light");
+    }
   };
 
   setControlOption = (controlName: string, option: string): boolean => {

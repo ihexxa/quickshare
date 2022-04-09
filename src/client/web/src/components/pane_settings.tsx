@@ -15,6 +15,7 @@ import { loadingCtrl, ctrlOn, ctrlOff } from "../common/controls";
 export interface Props {
   login: LoginProps;
   msg: MsgProps;
+  ui: UIProps;
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
@@ -211,6 +212,86 @@ export class PaneSettings extends React.Component<Props, State, {}> {
 
   render() {
     const errRows = this.prepareErrorRows();
+    const bgConfigPane = this.props.ui.clientCfg.allowSetBg ? (
+      <Container>
+        <Flexbox
+          children={List([
+            <h5 className="title-m">{this.props.msg.pkg.get("cfg.bg")}</h5>,
+
+            <button className="button-default" onClick={this.syncPreferences}>
+              {this.props.msg.pkg.get("update")}
+            </button>,
+          ])}
+          childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+        />
+
+        <div className="hr"></div>
+
+        <div>
+          <div className="inline-block margin-r-m">
+            <div className="label">{this.props.msg.pkg.get("cfg.bg.url")}</div>
+            <input
+              name="bg_url"
+              type="text"
+              onChange={this.changeBgUrl}
+              value={this.props.login.preferences.bg.url}
+              placeholder={this.props.msg.pkg.get("cfg.bg.url")}
+            />
+          </div>
+
+          <div className="inline-block margin-r-m">
+            <div className="label">
+              {this.props.msg.pkg.get("cfg.bg.repeat")}
+            </div>
+            <input
+              name="bg_repeat"
+              type="text"
+              onChange={this.changeBgRepeat}
+              value={this.props.login.preferences.bg.repeat}
+              placeholder={this.props.msg.pkg.get("cfg.bg.repeat")}
+            />
+          </div>
+
+          <div className="inline-block margin-r-m">
+            <div className="label">{this.props.msg.pkg.get("cfg.bg.pos")}</div>
+            <input
+              name="bg_pos"
+              type="text"
+              onChange={this.changeBgPos}
+              value={this.props.login.preferences.bg.position}
+              placeholder={this.props.msg.pkg.get("cfg.bg.pos")}
+            />
+          </div>
+
+          <div className="inline-block margin-r-m">
+            <div className="label">
+              {this.props.msg.pkg.get("cfg.bg.align")}
+            </div>
+            <input
+              name="bg_align"
+              type="text"
+              onChange={this.changeBgAlign}
+              value={this.props.login.preferences.bg.align}
+              placeholder={this.props.msg.pkg.get("cfg.bg.align")}
+            />
+          </div>
+
+          <div className="inline-block margin-r-m">
+            <div className="label">
+              {this.props.msg.pkg.get("cfg.bg.bgColor")}
+            </div>
+            <input
+              name="bg_bgColor"
+              type="text"
+              onChange={this.changeBgBgColor}
+              value={this.props.login.preferences.bg.bgColor}
+              placeholder={this.props.msg.pkg.get("cfg.bg.bgColor")}
+            />
+          </div>
+        </div>
+      </Container>
+    ) : null;
+
     const errorReportPane =
       errRows.size > 0 ? (
         <Container>
@@ -361,7 +442,11 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               onClick={() => {
                 this.setLan("en_US");
               }}
-              className="button-default inline-block margin-r-m"
+              className={`${
+                this.props.login.preferences.lan === "en_US"
+                  ? "focus-bg white-font"
+                  : "button-default"
+              } inline-block margin-r-m`}
             >
               {this.props.msg.pkg.get("enUS")}
             </button>
@@ -369,7 +454,11 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               onClick={() => {
                 this.setLan("zh_CN");
               }}
-              className="button-default inline-block margin-r-m"
+              className={`${
+                this.props.login.preferences.lan === "zh_CN"
+                  ? "focus-bg white-font"
+                  : "button-default"
+              } inline-block margin-r-m`}
             >
               {this.props.msg.pkg.get("zhCN")}
             </button>
@@ -391,7 +480,11 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               onClick={() => {
                 this.setTheme("light");
               }}
-              className="button-default inline-block margin-r-m"
+              className={`${
+                this.props.login.preferences.theme === "light"
+                  ? "focus-bg white-font"
+                  : "button-default"
+              } inline-block margin-r-m`}
             >
               {this.props.msg.pkg.get("theme.light")}
             </button>
@@ -399,7 +492,11 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               onClick={() => {
                 this.setTheme("dark");
               }}
-              className="button-default inline-block margin-r-m"
+              className={`${
+                this.props.login.preferences.theme === "dark"
+                  ? "focus-bg white-font"
+                  : "button-default"
+              } inline-block margin-r-m`}
             >
               {this.props.msg.pkg.get("theme.dark")}
             </button>
@@ -443,88 +540,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
           </div>
         </Container> */}
 
-        <Container>
-          <Flexbox
-            children={List([
-              <h5 className="title-m">{this.props.msg.pkg.get("cfg.bg")}</h5>,
-
-              <button className="button-default" onClick={this.syncPreferences}>
-                {this.props.msg.pkg.get("update")}
-              </button>,
-            ])}
-            childrenStyles={List([{}, { justifyContent: "flex-end" }])}
-          />
-
-          <div className="hr"></div>
-
-          <div>
-            <div className="inline-block margin-r-m">
-              <div className="label">
-                {this.props.msg.pkg.get("cfg.bg.url")}
-              </div>
-              <input
-                name="bg_url"
-                type="text"
-                onChange={this.changeBgUrl}
-                value={this.props.login.preferences.bg.url}
-                placeholder={this.props.msg.pkg.get("cfg.bg.url")}
-              />
-            </div>
-
-            <div className="inline-block margin-r-m">
-              <div className="label">
-                {this.props.msg.pkg.get("cfg.bg.repeat")}
-              </div>
-              <input
-                name="bg_repeat"
-                type="text"
-                onChange={this.changeBgRepeat}
-                value={this.props.login.preferences.bg.repeat}
-                placeholder={this.props.msg.pkg.get("cfg.bg.repeat")}
-              />
-            </div>
-
-            <div className="inline-block margin-r-m">
-              <div className="label">
-                {this.props.msg.pkg.get("cfg.bg.pos")}
-              </div>
-              <input
-                name="bg_pos"
-                type="text"
-                onChange={this.changeBgPos}
-                value={this.props.login.preferences.bg.position}
-                placeholder={this.props.msg.pkg.get("cfg.bg.pos")}
-              />
-            </div>
-
-            <div className="inline-block margin-r-m">
-              <div className="label">
-                {this.props.msg.pkg.get("cfg.bg.align")}
-              </div>
-              <input
-                name="bg_align"
-                type="text"
-                onChange={this.changeBgAlign}
-                value={this.props.login.preferences.bg.align}
-                placeholder={this.props.msg.pkg.get("cfg.bg.align")}
-              />
-            </div>
-
-            <div className="inline-block margin-r-m">
-              <div className="label">
-                {this.props.msg.pkg.get("cfg.bg.bgColor")}
-              </div>
-              <input
-                name="bg_bgColor"
-                type="text"
-                onChange={this.changeBgBgColor}
-                value={this.props.login.preferences.bg.bgColor}
-                placeholder={this.props.msg.pkg.get("cfg.bg.bgColor")}
-              />
-            </div>
-          </div>
-        </Container>
-
+        {bgConfigPane}
         {errorReportPane}
 
         {/* <div className="hr"></div>
