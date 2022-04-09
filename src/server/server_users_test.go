@@ -10,6 +10,7 @@ import (
 	"github.com/ihexxa/quickshare/src/client"
 	"github.com/ihexxa/quickshare/src/db"
 	q "github.com/ihexxa/quickshare/src/handlers"
+	"github.com/ihexxa/quickshare/src/handlers/settings"
 	su "github.com/ihexxa/quickshare/src/handlers/singleuserhdr"
 )
 
@@ -44,6 +45,21 @@ func TestUsersHandlers(t *testing.T) {
 		},
 		"db": {
 			"dbPath": "tmpTestData/quickshare"
+		},
+		"site": {
+			"clientCfg": {
+				"siteName": "Quickshare",
+				"siteDesc": "Quick and simple file sharing",
+				"bg": {
+					"url":      "/static/img/textured_paper.png",
+					"repeat":   "repeat",
+					"position": "center",
+					"align":    "fixed",
+					"bgColor":  "#ccc"
+				},
+				"allowSetBg": true,
+				"autoTheme":  true
+			}
 		}
 	}`
 	adminName := "qs"
@@ -57,6 +73,7 @@ func TestUsersHandlers(t *testing.T) {
 	fs := srv.depsFS()
 
 	usersCl := client.NewSingleUserClient(addr)
+	settingsCl := client.NewSettingsClient(addr)
 
 	if !isServerReady(addr) {
 		t.Fatal("fail to start server")
@@ -433,7 +450,7 @@ func TestUsersHandlers(t *testing.T) {
 		}
 	})
 
-	t.Run("Login,SetPreferences, Self, Logout", func(t *testing.T) {
+	t.Run("Login, SetPreferences, Self, Logout", func(t *testing.T) {
 		usersCl := client.NewSingleUserClient(addr)
 		resp, _, errs := usersCl.Login(adminName, adminNewPwd)
 		if len(errs) > 0 {
@@ -445,7 +462,7 @@ func TestUsersHandlers(t *testing.T) {
 		token := client.GetCookie(resp.Cookies(), su.TokenCookie)
 
 		prefers := []*db.Preferences{
-			&db.Preferences{
+			{
 				Bg: &db.BgConfig{
 					Url:      "/bgurl",
 					Repeat:   "no-repeat",
@@ -460,7 +477,7 @@ func TestUsersHandlers(t *testing.T) {
 				Lan:        "en_US",
 				Theme:      "light",
 			},
-			&db.Preferences{
+			{
 				Bg: &db.BgConfig{
 					Url:      "/bgurl2",
 					Repeat:   "repeat",
@@ -490,6 +507,50 @@ func TestUsersHandlers(t *testing.T) {
 			} else if resp.StatusCode != 200 {
 				t.Fatal(resp.StatusCode)
 			} else if !reflect.DeepEqual(selfResp.Preferences, prefer) {
+				fmt.Printf("\n%+v\n%+v\n", selfResp.Preferences, selfResp.Preferences.Bg)
+				fmt.Printf("\n%+v\n%+v\n", prefer, prefer.Bg)
+				t.Fatal("preference not equal")
+			}
+		}
+
+		// disable setting bg in preferences
+		resp, _, errs = settingsCl.SetClientCfg(&settings.ClientCfgMsg{
+			ClientCfg: &db.ClientConfig{
+				SiteName:   "Quickshare",
+				SiteDesc:   "Quick and simple file sharing",
+				Bg:         db.DefaultBgConfig,
+				AllowSetBg: false,
+				AutoTheme:  true,
+			},
+			CaptchaEnabled: false,
+		},
+			token,
+		)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+
+		for _, prefer := range prefers {
+			resp, _, errs := usersCl.SetPreferences(prefer, token)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if resp.StatusCode != 200 {
+				t.Fatal(resp.StatusCode)
+			}
+
+			resp, selfResp, errs := usersCl.Self(token)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if resp.StatusCode != 200 {
+				t.Fatal(resp.StatusCode)
+			}
+
+			prefer.Bg = db.DefaultPreferences.Bg
+			if !reflect.DeepEqual(selfResp.Preferences, prefer) {
+				fmt.Printf("\n%+v\n%+v\n", selfResp.Preferences, selfResp.Preferences.Bg)
+				fmt.Printf("\n%+v\n%+v\n", prefer, prefer.Bg)
 				t.Fatal("preference not equal")
 			}
 		}

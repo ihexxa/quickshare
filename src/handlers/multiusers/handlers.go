@@ -654,6 +654,11 @@ func (h *MultiUsersSvc) Self(c *gin.Context) {
 		return
 	}
 
+	allowSetBg := h.cfg.BoolOr("Site.ClientCfg.AllowSetBg", false)
+	if !allowSetBg {
+		user.Preferences.Bg = db.DefaultBgConfig
+	}
+
 	c.JSON(200, &SelfResp{
 		ID:          claims[q.UserIDParam],
 		Name:        claims[q.UserParam],
@@ -708,7 +713,11 @@ func (h *MultiUsersSvc) SetPreferences(c *gin.Context) {
 		return
 	}
 
-	// TODO: validate
+	allowSetBg := h.cfg.BoolOr("Site.ClientCfg.AllowSetBg", false)
+	if !allowSetBg {
+		req.Preferences.Bg = db.DefaultBgConfig
+	}
+
 	err = h.deps.Users().SetPreferences(uid, req.Preferences)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))

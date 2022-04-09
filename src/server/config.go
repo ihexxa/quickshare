@@ -129,6 +129,8 @@ func DefaultConfigStruct() *Config {
 					Align:    "fixed",
 					BgColor:  "#ccc",
 				},
+				AllowSetBg: false,
+				AutoTheme:  true,
 			},
 		},
 		Db: &DbConfig{

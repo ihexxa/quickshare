@@ -63,6 +63,7 @@ func (st *SiteStore) getCfg() (*db.SiteConfig, error) {
 	if err = db.CheckSiteCfg(cfg, true); err != nil {
 		return nil, err
 	}
+
 	return cfg, nil
 }
 
