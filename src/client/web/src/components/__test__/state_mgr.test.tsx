@@ -142,7 +142,7 @@ describe("State Manager", () => {
     expect(coreState.msg.pkg).toEqual(MsgPackage.get("en_US"));
 
     // ui
-    expect(coreState.ui.bg).toEqual(settingsResps.getClientCfgMockResp.data.bg);
+    expect(coreState.ui.clientCfg.bg).toEqual(settingsResps.getClientCfgMockResp.data.clientCfg.bg);
   });
 
   test("initUpdater for visitor in sharing mode", async () => {
@@ -257,7 +257,7 @@ describe("State Manager", () => {
     expect(coreState.msg.pkg).toEqual(MsgPackage.get("en_US"));
 
     // ui
-    expect(coreState.ui.bg).toEqual(settingsResps.getClientCfgMockResp.data.bg);
+    expect(coreState.ui.clientCfg.bg).toEqual(settingsResps.getClientCfgMockResp.data.clientCfg.bg);
   });
 
   test("initUpdater for visitor", async () => {
@@ -352,7 +352,7 @@ describe("State Manager", () => {
     expect(coreState.msg.pkg).toEqual(MsgPackage.get("en_US"));
 
     // ui
-    expect(coreState.ui.bg).toEqual({
+    expect(coreState.ui.clientCfg.bg).toEqual({
       align: "clientCfg_bg_align",
       position: "clientCfg_bg_position",
       repeat: "clientCfg_bg_repeat",

@@ -93,10 +93,16 @@ export interface GetSharingDirResp {
   sharingDir: string;
 }
 
-export interface ClientConfigMsg {
+export interface ClientConfig {
   siteName: string;
   siteDesc: string;
   bg: BgConfig;
+  allowSetBg: boolean;
+  autoTheme: boolean;
+}
+
+export interface ClientConfigMsg {
+  clientCfg: ClientConfig;
   captchaEnabled?: boolean;
 }
 

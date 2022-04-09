@@ -143,4 +143,11 @@ export const msgs: Map<string, string> = Map({
   theme: "主题",
   "theme.light": "光白",
   "theme.dark": "暗黑",
+  "siteSettings": "网站设置",
+  "siteName": "网站名",
+  "siteDesc": "网站描述",
+  "allowSetBg": "允许用户自定义背景",
+  "autoTheme": "自动切换主题",
+  "term.enabled": "启用",
+  "term.disabled": "关闭",
 });

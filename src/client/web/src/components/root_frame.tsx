@@ -24,7 +24,7 @@ export interface Props {
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
-export interface State {}
+export interface State { }
 export class RootFrame extends React.Component<Props, State, {}> {
   constructor(p: Props) {
     super(p);
@@ -47,15 +47,15 @@ export class RootFrame extends React.Component<Props, State, {}> {
       };
     }
 
-    if (this.props.ui.bg.url !== "") {
+    if (this.props.ui.clientCfg.bg.url !== "") {
       return {
-        background: `url("${this.props.ui.bg.url}") ${this.props.ui.bg.repeat} ${this.props.ui.bg.position} ${this.props.ui.bg.align}`,
+        background: `url("${this.props.ui.clientCfg.bg.url}") ${this.props.ui.clientCfg.bg.repeat} ${this.props.ui.clientCfg.bg.position} ${this.props.ui.clientCfg.bg.align}`,
       };
     }
 
-    if (this.props.ui.bg.bgColor !== "") {
+    if (this.props.ui.clientCfg.bg.bgColor !== "") {
       return {
-        backgroundColor: this.props.ui.bg.bgColor,
+        backgroundColor: this.props.ui.clientCfg.bg.bgColor,
       };
     }
 

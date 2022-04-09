@@ -2,7 +2,7 @@ import { List, Set, Map } from "immutable";
 
 import { UploadEntry } from "../worker/interface";
 import { MsgPackage } from "../i18n/msger";
-import { User, MetadataResp } from "../client";
+import { User, MetadataResp, ClientConfig } from "../client";
 import { FilesProps } from "./panel_files";
 import { UploadingsProps } from "./panel_uploadings";
 import { SharingsProps } from "./panel_sharings";
@@ -25,17 +25,9 @@ export interface MsgProps {
 }
 
 export interface UIProps {
-  isVertical: boolean;
-  siteName: string;
-  siteDesc: string;
+  clientCfg: ClientConfig;
   captchaEnabled: boolean;
-  bg: {
-    url: string;
-    repeat: string;
-    position: string;
-    align: string;
-    bgColor: string;
-  };
+  isVertical: boolean;
   control: {
     controls: Map<string, string>;
     options: Map<string, Set<string>>;
@@ -120,14 +112,18 @@ export function initState(): ICoreState {
     },
     ui: {
       isVertical: isVertical(),
-      siteName: "",
-      siteDesc: "",
-      bg: {
-        url: "",
-        repeat: "",
-        position: "",
-        align: "",
-        bgColor: "",
+      clientCfg: {
+        siteName: "",
+        siteDesc: "",
+        bg: {
+          url: "",
+          repeat: "",
+          position: "",
+          align: "",
+          bgColor: "",
+        },
+        allowSetBg: false,
+        autoTheme: true,
       },
       captchaEnabled: true,
       control: {
