@@ -216,6 +216,8 @@ func TestLoadCfg(t *testing.T) {
 					Align:    "4",
 					BgColor:  "4",
 				},
+				AllowSetBg: true,
+				AutoTheme:  true,
 			},
 		},
 		Db: &DbConfig{
@@ -282,6 +284,8 @@ func TestLoadCfg(t *testing.T) {
 					Align:    "4",
 					BgColor:  "4",
 				},
+				AllowSetBg: true,
+				AutoTheme:  true,
 			},
 		},
 		Db: &DbConfig{
@@ -348,6 +352,8 @@ func TestLoadCfg(t *testing.T) {
 					Align:    "4",
 					BgColor:  "4",
 				},
+				AllowSetBg: true,
+				AutoTheme:  true,
 			},
 		},
 		Db: &DbConfig{

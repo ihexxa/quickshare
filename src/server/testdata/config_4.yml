@@ -47,5 +47,7 @@ site:
       position: "4"
       align: "4"
       bgColor: "4"
+    allowSetBg: true
+    autoTheme: true
 db:
   dbPath: "4"
