@@ -29,7 +29,7 @@ func (h *SettingsSvc) Health(c *gin.Context) {
 }
 
 type ClientCfgMsg struct {
-	ClientCfg      *db.ClientConfig `json:"cfg"`
+	ClientCfg      *db.ClientConfig `json:"clientCfg"`
 	CaptchaEnabled bool             `json:"captchaEnabled"`
 }
 

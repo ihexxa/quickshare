@@ -576,6 +576,19 @@ export class AdminPane extends React.Component<Props, State, {}> {
     return (
       <div className="font-m">
         <Container>
+          <Flexbox
+            children={List([
+              <h5 className="title-m">{this.props.msg.pkg.get("siteSettings")}</h5>,
+              <button onClick={this.addUser} className="button-default">
+                {this.props.msg.pkg.get("update")}
+              </button>,
+            ])}
+            childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+          />
+        </Container>
+
+
+        <Container>
           <BgCfg
             ui={this.props.ui}
             msg={this.props.msg}
@@ -711,53 +724,60 @@ interface BgProps {
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
-interface BgState {}
+interface BgState { }
 export class BgCfg extends React.Component<BgProps, BgState, {}> {
-  changeSiteName = (ev: React.ChangeEvent<HTMLInputElement>) => {
-    updater().setClientCfg({ ...this.props.ui, siteName: ev.target.value });
+  onChangeSiteName = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    updater().setClientCfg({ ...this.props.ui.clientCfg, siteName: ev.target.value });
     this.props.update(updater().updateUI);
   };
-
-  changeSiteDesc = (ev: React.ChangeEvent<HTMLInputElement>) => {
-    updater().setClientCfg({ ...this.props.ui, siteDesc: ev.target.value });
+  onChangeSiteDesc = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    updater().setClientCfg({ ...this.props.ui.clientCfg, siteDesc: ev.target.value });
+    this.props.update(updater().updateUI);
+  };
+  onChangeAllowSetBg = (enabled: boolean) => {
+    updater().setClientCfg({ ...this.props.ui.clientCfg, allowSetBg: enabled });
+    this.props.update(updater().updateUI);
+  };
+  onChangeAutoTheme = (enabled: boolean) => {
+    updater().setClientCfg({ ...this.props.ui.clientCfg, autoTheme: enabled });
     this.props.update(updater().updateUI);
   };
 
   changeBgUrl = (ev: React.ChangeEvent<HTMLInputElement>) => {
     updater().setClientCfg({
-      ...this.props.ui,
-      bg: { ...this.props.ui.bg, url: ev.target.value },
+      ...this.props.ui.clientCfg,
+      bg: { ...this.props.ui.clientCfg.bg, url: ev.target.value },
     });
     this.props.update(updater().updateUI);
   };
 
   changeBgRepeat = (ev: React.ChangeEvent<HTMLInputElement>) => {
     updater().setClientCfg({
-      ...this.props.ui,
-      bg: { ...this.props.ui.bg, repeat: ev.target.value },
+      ...this.props.ui.clientCfg,
+      bg: { ...this.props.ui.clientCfg.bg, repeat: ev.target.value },
     });
     this.props.update(updater().updateUI);
   };
 
   changeBgPos = (ev: React.ChangeEvent<HTMLInputElement>) => {
     updater().setClientCfg({
-      ...this.props.ui,
-      bg: { ...this.props.ui.bg, position: ev.target.value },
+      ...this.props.ui.clientCfg,
+      bg: { ...this.props.ui.clientCfg.bg, position: ev.target.value },
     });
     this.props.update(updater().updateUI);
   };
 
   changeBgAlign = (ev: React.ChangeEvent<HTMLInputElement>) => {
     updater().setClientCfg({
-      ...this.props.ui,
-      bg: { ...this.props.ui.bg, align: ev.target.value },
+      ...this.props.ui.clientCfg,
+      bg: { ...this.props.ui.clientCfg.bg, align: ev.target.value },
     });
     this.props.update(updater().updateUI);
   };
   changeBgBgColor = (ev: React.ChangeEvent<HTMLInputElement>) => {
     updater().setClientCfg({
-      ...this.props.ui,
-      bg: { ...this.props.ui.bg, bgColor: ev.target.value },
+      ...this.props.ui.clientCfg,
+      bg: { ...this.props.ui.clientCfg.bg, bgColor: ev.target.value },
     });
     this.props.update(updater().updateUI);
   };
@@ -772,13 +792,13 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
   };
 
   setClientCfg = async () => {
-    const bgURL = this.props.ui.bg.url;
+    const bgURL = this.props.ui.clientCfg.bg.url;
     if (bgURL.length >= 4096) {
       Env().alertMsg(this.props.msg.pkg.get("bg.url.alert"));
       return;
     }
 
-    const bgRepeat = this.props.ui.bg.repeat;
+    const bgRepeat = this.props.ui.clientCfg.bg.repeat;
     if (
       bgRepeat !== "repeat-x" &&
       bgRepeat !== "repeat-y" &&
@@ -791,7 +811,7 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
       return;
     }
 
-    const bgPos = this.props.ui.bg.position;
+    const bgPos = this.props.ui.clientCfg.bg.position;
     if (
       bgPos !== "top" &&
       bgPos !== "bottom" &&
@@ -803,7 +823,7 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
       return;
     }
 
-    const bgAlign = this.props.ui.bg.align;
+    const bgAlign = this.props.ui.clientCfg.bg.align;
     if (bgAlign !== "scroll" && bgAlign !== "fixed" && bgAlign !== "local") {
       Env().alertMsg(this.props.msg.pkg.get("bg.align.alert"));
       return;
@@ -813,9 +833,8 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
 
     try {
       const status = await updater().setClientCfgRemote({
-        siteName: this.props.ui.siteName,
-        siteDesc: this.props.ui.siteDesc,
-        bg: this.props.ui.bg,
+        clientCfg: this.props.ui.clientCfg,
+        // captchaEnabled is omitted
       });
       if (status !== "") {
         Env().alertMsg(this.props.msg.pkg.get("update.fail"));
@@ -840,6 +859,8 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
         align: "fixed",
         bgColor: "",
       },
+      allowSetBg: false,
+      autoTheme: true,
     });
     this.props.update(updater().updateUI);
   };
@@ -871,6 +892,68 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
 
         <div className="hr"></div>
 
+        <span className="inline-block margin-r-m">
+          <div className="label">{this.props.msg.pkg.get("siteName")}</div>
+          <input
+            type="text"
+            onChange={this.onChangeSiteName}
+            value={this.props.ui.clientCfg.siteName}
+            placeholder={this.props.msg.pkg.get("siteName")}
+          />
+        </span>
+
+        <span className="inline-block margin-r-m">
+          <div className="label">{this.props.msg.pkg.get("siteDesc")}</div>
+          <input
+            type="text"
+            onChange={this.onChangeSiteDesc}
+            value={this.props.ui.clientCfg.siteDesc}
+            placeholder={this.props.msg.pkg.get("siteDesc")}
+          />
+        </span>
+
+        <div>
+          <div className="label">{this.props.msg.pkg.get("allowSetBg")}</div>
+          <button
+            onClick={() => {
+              this.onChangeAllowSetBg(true);
+            }}
+            className="button-default inline-block margin-r-m"
+          >
+            {this.props.msg.pkg.get("term.enabled")}
+          </button>
+          <button
+            onClick={() => {
+              this.onChangeAllowSetBg(false);
+            }}
+            className="button-default inline-block margin-r-m"
+          >
+            {this.props.msg.pkg.get("term.disabled")}
+          </button>
+        </div>
+
+        <div>
+          <div className="label">{this.props.msg.pkg.get("autoTheme")}</div>
+          <button
+            onClick={() => {
+              this.onChangeAutoTheme(true);
+            }}
+            className="button-default inline-block margin-r-m"
+          >
+            {this.props.msg.pkg.get("term.enabled")}
+          </button>
+          <button
+            onClick={() => {
+              this.onChangeAutoTheme(false);
+            }}
+            className="button-default inline-block margin-r-m"
+          >
+            {this.props.msg.pkg.get("term.disabled")}
+          </button>
+        </div>
+
+        <div className="hr"></div>
+
         <div>
           <div className="inline-block margin-r-m">
             <div className="label">{this.props.msg.pkg.get("cfg.bg.url")}</div>
@@ -878,7 +961,7 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
               name="bg_url"
               type="text"
               onChange={this.changeBgUrl}
-              value={this.props.ui.bg.url}
+              value={this.props.ui.clientCfg.bg.url}
               style={{ width: "20rem" }}
               placeholder={this.props.msg.pkg.get("cfg.bg.url")}
             />
@@ -892,7 +975,7 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
               name="bg_repeat"
               type="text"
               onChange={this.changeBgRepeat}
-              value={this.props.ui.bg.repeat}
+              value={this.props.ui.clientCfg.bg.repeat}
               placeholder={this.props.msg.pkg.get("cfg.bg.repeat")}
             />
           </div>
@@ -903,7 +986,7 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
               name="bg_pos"
               type="text"
               onChange={this.changeBgPos}
-              value={this.props.ui.bg.position}
+              value={this.props.ui.clientCfg.bg.position}
               placeholder={this.props.msg.pkg.get("cfg.bg.pos")}
             />
           </div>
@@ -916,7 +999,7 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
               name="bg_align"
               type="text"
               onChange={this.changeBgAlign}
-              value={this.props.ui.bg.align}
+              value={this.props.ui.clientCfg.bg.align}
               placeholder={this.props.msg.pkg.get("cfg.bg.align")}
             />
           </div>
@@ -929,12 +1012,12 @@ export class BgCfg extends React.Component<BgProps, BgState, {}> {
               name="bg_bgColor"
               type="text"
               onChange={this.changeBgBgColor}
-              value={this.props.ui.bg.bgColor}
+              value={this.props.ui.clientCfg.bg.bgColor}
               placeholder={this.props.msg.pkg.get("cfg.bg.bgColor")}
             />
           </div>
         </div>
-      </div>
+      </div >
     );
   }
 }

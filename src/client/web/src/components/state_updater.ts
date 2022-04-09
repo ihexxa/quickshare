@@ -19,6 +19,7 @@ import {
   roleAdmin,
   visitorID,
   ClientConfigMsg,
+  ClientConfig,
   Preferences,
 } from "../client";
 import { FilesClient, shareIDQuery, shareDirQuery } from "../client/files";
@@ -561,6 +562,8 @@ export class Updater {
       return initClientCfgStatus;
     }
 
+    console.log(this.props.ui.control.controls.toJSON());
+
     this.initControls(paramMap);
     this.initUITree();
 
@@ -816,12 +819,10 @@ export class Updater {
     return resp.status === 200 ? "" : errServer;
   };
 
-  setClientCfg = (cfg: ClientConfigMsg) => {
+  setClientCfg = (cfg: ClientConfig) => {
     this.props.ui = {
       ...this.props.ui,
-      siteName: cfg.siteName,
-      siteDesc: cfg.siteDesc,
-      bg: cfg.bg,
+      clientCfg: cfg,
     };
   };
 
@@ -841,11 +842,9 @@ export class Updater {
     if (resp.status !== 200) {
       return errServer;
     }
-    const clientCfg = resp.data as ClientConfigMsg;
-    this.props.ui.siteName = clientCfg.siteName;
-    this.props.ui.siteDesc = clientCfg.siteDesc;
-    this.props.ui.bg = clientCfg.bg;
-    this.props.ui.captchaEnabled = clientCfg.captchaEnabled;
+    const clientCfgMsg = resp.data as ClientConfigMsg;
+    this.props.ui.clientCfg = clientCfgMsg.clientCfg;
+    this.props.ui.captchaEnabled = clientCfgMsg.captchaEnabled;
     return "";
   };
 

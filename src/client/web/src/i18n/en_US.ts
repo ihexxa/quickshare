@@ -146,4 +146,11 @@ export const msgs: Map<string, string> = Map({
   theme: "Theme",
   "theme.light": "Light",
   "theme.dark": "Dark",
+  "siteSettings": "Site Settings",
+  "siteName": "Site Name",
+  "siteDesc": "Site Description",
+  "allowSetBg": "Allow user to customize background",
+  "autoTheme": "Enable auto theme switching",
+  "term.enabled": "Enabled",
+  "term.disabled": "Disabled",
 });
