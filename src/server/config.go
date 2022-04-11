@@ -123,11 +123,11 @@ func DefaultConfigStruct() *Config {
 				SiteName: "Quickshare",
 				SiteDesc: "Quick and simple file sharing",
 				Bg: &db.BgConfig{
-					Url:      "/static/img/textured_paper.png",
+					Url:      "",
 					Repeat:   "repeat",
 					Position: "center",
 					Align:    "fixed",
-					BgColor:  "#ccc",
+					BgColor:  "",
 				},
 				AllowSetBg: false,
 				AutoTheme:  true,

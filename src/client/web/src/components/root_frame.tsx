@@ -45,20 +45,22 @@ export class RootFrame extends React.Component<Props, State, {}> {
   }
 
   makeBgStyle = (): Object => {
-    if (
-      this.props.login.preferences != null &&
-      this.props.login.preferences.bg.url !== ""
-    ) {
-      const bgConfig = this.props.login.preferences.bg;
-      return {
-        background: `url("${bgConfig.url}") ${bgConfig.repeat} ${bgConfig.position} ${bgConfig.align}`,
-      };
-    }
+    if (this.props.ui.clientCfg.allowSetBg) {
+      if (
+        this.props.login.preferences != null &&
+        this.props.login.preferences.bg.url !== ""
+      ) {
+        const bgConfig = this.props.login.preferences.bg;
+        return {
+          background: `url("${bgConfig.url}") ${bgConfig.repeat} ${bgConfig.position} ${bgConfig.align}`,
+        };
+      }
 
-    if (this.props.login.preferences.bg.bgColor !== "") {
-      return {
-        backgroundColor: this.props.login.preferences.bg.bgColor,
-      };
+      if (this.props.login.preferences.bg.bgColor !== "") {
+        return {
+          backgroundColor: this.props.login.preferences.bg.bgColor,
+        };
+      }
     }
 
     if (this.props.ui.clientCfg.bg.url !== "") {

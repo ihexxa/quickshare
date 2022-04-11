@@ -38,10 +38,11 @@ var (
 	DefaultSiteName = "Quickshare"
 	DefaultSiteDesc = "Quickshare"
 	DefaultBgConfig = &BgConfig{
+		Url:      "",
 		Repeat:   "repeat",
 		Position: "top",
 		Align:    "fixed",
-		BgColor:  "#ccc",
+		BgColor:  "",
 	}
 	DefaultAllowSetBg = false
 	DefaultAutoTheme  = true
@@ -266,12 +267,6 @@ func CheckPreferences(prefers *Preferences, fillDefault bool) error {
 }
 
 func CheckBgConfig(cfg *BgConfig, fillDefault bool) error {
-	if cfg.Url == "" && cfg.BgColor == "" {
-		if !fillDefault {
-			return errors.New("one of Bg.Url or Bg.BgColor must be defined")
-		}
-		cfg.BgColor = DefaultBgConfig.BgColor
-	}
 	if !BgRepeatValues[cfg.Repeat] {
 		return fmt.Errorf("invalid repeat value (%s)", cfg.Repeat)
 	}
@@ -290,9 +285,6 @@ func CheckBgConfig(cfg *BgConfig, fillDefault bool) error {
 	}
 	if cfg.Align == "" {
 		cfg.Align = DefaultBgConfig.Align
-	}
-	if cfg.BgColor == "" {
-		cfg.BgColor = DefaultBgConfig.BgColor
 	}
 	return nil
 }
