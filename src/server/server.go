@@ -167,11 +167,11 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 			SiteName: cfg.StringOr("Site.ClientCfg.SiteName", "Quickshare"),
 			SiteDesc: cfg.StringOr("Site.ClientCfg.SiteDesc", "Quick and simple file sharing"),
 			Bg: &db.BgConfig{
-				Url:      cfg.StringOr("Site.ClientCfg.Bg.Url", "/static/img/textured_paper.png"),
+				Url:      cfg.StringOr("Site.ClientCfg.Bg.Url", ""),
 				Repeat:   cfg.StringOr("Site.ClientCfg.Bg.Repeat", "repeat"),
 				Position: cfg.StringOr("Site.ClientCfg.Bg.Position", "center"),
 				Align:    cfg.StringOr("Site.ClientCfg.Bg.Align", "fixed"),
-				BgColor:  cfg.StringOr("Site.ClientCfg.Bg.BgColor", "#ccc"),
+				BgColor:  cfg.StringOr("Site.ClientCfg.Bg.BgColor", ""),
 			},
 		},
 	})
