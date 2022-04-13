@@ -26,7 +26,7 @@ export interface Props {
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
-export interface State { }
+export interface State {}
 export class RootFrame extends React.Component<Props, State, {}> {
   constructor(p: Props) {
     super(p);
@@ -95,84 +95,86 @@ export class RootFrame extends React.Component<Props, State, {}> {
     return (
       <div id="root-frame" className={`${theme} ${fontSizeClass}`}>
         <div id="bg" style={bgStyle}>
-          <Layers
-            login={this.props.login}
-            admin={this.props.admin}
-            ui={this.props.ui}
-            msg={this.props.msg}
-            filesInfo={this.props.filesInfo}
-            update={this.props.update}
-          />
-
-          <TopBar
-            login={this.props.login}
-            msg={this.props.msg}
-            ui={this.props.ui}
-            update={this.props.update}
-          />
-
-          <div id="top-menu">
-            <Tabs
-              targetControl={controlName}
-              tabIcons={Map<string, IconProps>({
-                filesPanel: {
-                  name: "RiFolder2Fill",
-                  size: iconSize("s"),
-                  color: "focus",
-                },
-                uploadingsPanel: {
-                  name: "RiUploadCloudFill",
-                  size: iconSize("s"),
-                  color: "focus",
-                },
-                sharingsPanel: {
-                  name: "RiShareBoxLine",
-                  size: iconSize("s"),
-                  color: "focus",
-                },
-              })}
+          <div id="custom">
+            <Layers
+              login={this.props.login}
+              admin={this.props.admin}
               ui={this.props.ui}
               msg={this.props.msg}
+              filesInfo={this.props.filesInfo}
               update={this.props.update}
             />
-          </div>
 
-          <div className="container-center">
-            <span className={filesPanelClass}>
-              <FilesPanel
-                filesInfo={this.props.filesInfo}
-                msg={this.props.msg}
-                login={this.props.login}
+            <TopBar
+              login={this.props.login}
+              msg={this.props.msg}
+              ui={this.props.ui}
+              update={this.props.update}
+            />
+
+            <div id="top-menu">
+              <Tabs
+                targetControl={controlName}
+                tabIcons={Map<string, IconProps>({
+                  filesPanel: {
+                    name: "RiFolder2Fill",
+                    size: iconSize("s"),
+                    color: "focus",
+                  },
+                  uploadingsPanel: {
+                    name: "RiUploadCloudFill",
+                    size: iconSize("s"),
+                    color: "focus",
+                  },
+                  sharingsPanel: {
+                    name: "RiShareBoxLine",
+                    size: iconSize("s"),
+                    color: "focus",
+                  },
+                })}
                 ui={this.props.ui}
-                enabled={displaying === "filesPanel"}
+                msg={this.props.msg}
                 update={this.props.update}
               />
-            </span>
+            </div>
 
-            <span className={uploadingsPanelClass}>
-              <UploadingsPanel
-                uploadingsInfo={this.props.uploadingsInfo}
-                msg={this.props.msg}
-                login={this.props.login}
-                ui={this.props.ui}
-                update={this.props.update}
-              />
-            </span>
+            <div className="container-center">
+              <span className={filesPanelClass}>
+                <FilesPanel
+                  filesInfo={this.props.filesInfo}
+                  msg={this.props.msg}
+                  login={this.props.login}
+                  ui={this.props.ui}
+                  enabled={displaying === "filesPanel"}
+                  update={this.props.update}
+                />
+              </span>
 
-            <span className={sharingsPanelClass}>
-              <SharingsPanel
-                sharingsInfo={this.props.sharingsInfo}
-                msg={this.props.msg}
-                login={this.props.login}
-                ui={this.props.ui}
-                update={this.props.update}
-              />
-            </span>
-          </div>
+              <span className={uploadingsPanelClass}>
+                <UploadingsPanel
+                  uploadingsInfo={this.props.uploadingsInfo}
+                  msg={this.props.msg}
+                  login={this.props.login}
+                  ui={this.props.ui}
+                  update={this.props.update}
+                />
+              </span>
 
-          <div id="tail" className="container-center">
-            <a href="https://github.com/ihexxa/quickshare">Quickshare</a> -
-            Quick and simple file sharing.
+              <span className={sharingsPanelClass}>
+                <SharingsPanel
+                  sharingsInfo={this.props.sharingsInfo}
+                  msg={this.props.msg}
+                  login={this.props.login}
+                  ui={this.props.ui}
+                  update={this.props.update}
+                />
+              </span>
+            </div>
+
+            <div id="tail" className="container-center">
+              <a href="https://github.com/ihexxa/quickshare">Quickshare</a> -
+              Quick and simple file sharing.
+            </div>
           </div>
         </div>
       </div>
