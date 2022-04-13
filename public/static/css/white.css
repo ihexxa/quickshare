@@ -52,7 +52,7 @@
 }
 
 .theme-default #bg {
-  /* background: url("/static/img/textured_paper.png") repeat fixed center; */
+  background: url("/static/img/textured_paper.png") repeat fixed center;
   position: fixed;
   left: 0;
   right: 0;
