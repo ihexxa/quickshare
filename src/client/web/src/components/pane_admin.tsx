@@ -656,7 +656,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
           {userList}
         </Container>
 
-        <Container>
+        {/* <Container>
           <div>
             <Flexbox
               children={List([
@@ -684,9 +684,9 @@ export class AdminPane extends React.Component<Props, State, {}> {
               childrenStyles={List([{}, { justifyContent: "flex-end" }])}
             />
           </div>
-        </Container>
+        </Container> */}
 
-        <Container>
+        {/* <Container>
           <Flexbox
             children={List([
               <h5 className="title-m">
@@ -699,7 +699,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
           <div className="hr"></div>
 
           {roleList}
-        </Container>
+        </Container> */}
       </div>
     );
   }
