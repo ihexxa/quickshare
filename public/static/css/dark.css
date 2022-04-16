@@ -125,7 +125,7 @@
   right: 0;
   top: 0;
   bottom: 0;
-  background-color: rgba(20, 20, 20, 0.8);
+  background-color: rgba(40, 40, 40, 0.7);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   overflow: scroll;
@@ -156,7 +156,7 @@
   z-index: 100;
 }
 
-.theme-dark #tail {
+.theme-dark #footer {
   font-size: 1.2rem;
   text-align: center;
   margin: 4rem auto;
