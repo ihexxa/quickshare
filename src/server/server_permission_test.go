@@ -750,10 +750,10 @@ func TestPermissions(t *testing.T) {
 			resp, gccResp, errs := settingsCl.GetClientCfg(token)
 			assertResp(t, resp, errs, expectedCodes["GetClientCfg"], fmt.Sprintf("%s-%s", desc, "GetClientCfg"))
 
-			clientCfg := gccResp
-			clientCfg.ClientCfg.SiteName = "new site name"
+			clientCfgMsg := gccResp
+			clientCfgMsg.ClientCfg.SiteName = "new name"
 
-			resp, _, errs = settingsCl.SetClientCfg(clientCfg, token)
+			resp, _, errs = settingsCl.SetClientCfg(clientCfgMsg, token)
 			assertResp(t, resp, errs, expectedCodes["SetClientCfg"], fmt.Sprintf("%s-%s", desc, "SetClientCfg"))
 
 			resp, _, errs = settingsCl.ReportErrors(errReports, token)
