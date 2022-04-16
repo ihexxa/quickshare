@@ -32,7 +32,7 @@ import {
   loadingCtrl,
 } from "../common/controls";
 import { HotkeyHandler } from "../common/hotkeys";
-import { CronTable } from "../common/cron";
+import { CronJobs } from "../common/cron";
 import { Title } from "./visual/title";
 import { NotFoundBanner } from "./visual/banner_notfound";
 
@@ -107,7 +107,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
   }
 
   componentDidMount(): void {
-    CronTable().setInterval("refreshFileList", {
+    CronJobs().setInterval("refreshFileList", {
       func: updater().refreshFiles,
       args: [],
       delay: 5000,
@@ -123,7 +123,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
   }
 
   componentWillUnmount() {
-    CronTable().clearInterval("refreshFileList");
+    CronJobs().clearInterval("refreshFileList");
 
     document.removeEventListener("keyup", this.hotkeyHandler.handle);
   }

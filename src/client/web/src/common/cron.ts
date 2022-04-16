@@ -34,7 +34,7 @@ export class Cron {
   };
 }
 
-const cronTable = new Cron();
-export const CronTable = (): Cron => {
-  return cronTable;
+const cronJobs = new Cron();
+export const CronJobs = (): Cron => {
+  return cronJobs;
 };
