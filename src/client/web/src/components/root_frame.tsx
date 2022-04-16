@@ -11,7 +11,7 @@ import { LoginProps } from "./pane_login";
 import { Layers } from "./layers";
 import { AdminProps } from "./pane_admin";
 import { TopBar } from "./topbar";
-import { CronTable } from "../common/cron";
+import { CronJobs } from "../common/cron";
 import { updater } from "./state_updater";
 
 export const controlName = "panelTabs";
@@ -33,7 +33,7 @@ export class RootFrame extends React.Component<Props, State, {}> {
   }
 
   componentDidMount(): void {
-    CronTable().setInterval("autoSwitchTheme", {
+    CronJobs().setInterval("autoSwitchTheme", {
       func: updater().autoSwitchTheme,
       args: [],
       delay: 60 * 1000,
@@ -41,7 +41,7 @@ export class RootFrame extends React.Component<Props, State, {}> {
   }
 
   componentWillUnmount() {
-    CronTable().clearInterval("autoSwitchTheme");
+    CronJobs().clearInterval("autoSwitchTheme");
   }
 
   makeBgStyle = (): Object => {
@@ -171,7 +171,7 @@ export class RootFrame extends React.Component<Props, State, {}> {
               </span>
             </div>
 
-            <div id="tail" className="container-center">
+            <div id="footer" className="container-center">
               <a href="https://github.com/ihexxa/quickshare">Quickshare</a> -
               Quick and simple file sharing.
             </div>

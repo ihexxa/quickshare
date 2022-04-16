@@ -14,7 +14,7 @@ import { UsersClient } from "../client/users";
 import { SettingsClient } from "../client/settings";
 import { IUsersClient, IFilesClient, ISettingsClient } from "../client";
 import { loadingCtrl, ctrlOn, ctrlOff } from "../common/controls";
-import { CronTable } from "../common/cron";
+import { CronJobs } from "../common/cron";
 
 export interface Props {}
 export interface State extends ICoreState {}
@@ -35,7 +35,7 @@ export class StateMgr extends React.Component<Props, State, {}> {
   }
 
   componentDidMount(): void {
-    CronTable().setInterval("refreshState", {
+    CronJobs().setInterval("refreshState", {
       func: this.update,
       args: [updater().updateAll],
       delay: 1000,
@@ -43,7 +43,7 @@ export class StateMgr extends React.Component<Props, State, {}> {
   }
 
   componentWillUnmount() {
-    CronTable().clearInterval("refreshState");
+    CronJobs().clearInterval("refreshState");
   }
 
   setUsersClient = (client: IUsersClient) => {

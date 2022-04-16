@@ -15,7 +15,7 @@ import { NotFoundBanner } from "./visual/banner_notfound";
 import { Title } from "./visual/title";
 import { shareIDQuery } from "../client/files";
 import { loadingCtrl, ctrlOn, ctrlOff } from "../common/controls";
-import { CronTable } from "../common/cron";
+import { CronJobs } from "../common/cron";
 
 export interface SharingsProps {
   sharings: Map<string, string>;
@@ -40,7 +40,7 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
   }
 
   componentDidMount(): void {
-    CronTable().setInterval("listSharings", {
+    CronJobs().setInterval("listSharings", {
       func: updater().listSharings,
       args: [],
       delay: 5000,
@@ -48,7 +48,7 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
   }
 
   componentWillUnmount() {
-    CronTable().clearInterval("listSharings");
+    CronJobs().clearInterval("listSharings");
   }
 
   setLoading = (state: boolean) => {
