@@ -63,6 +63,7 @@ export class TopBar extends React.Component<Props, State, {}> {
               href="https://github.com/ihexxa/quickshare"
               target="_blank"
               className="h5 bold"
+              title={this.props.ui.clientCfg.siteDesc}
             >
               {this.props.ui.clientCfg.siteName}
             </a>,
