@@ -83,8 +83,10 @@ func (h *SettingsSvc) SetClientCfg(c *gin.Context) {
 }
 
 func validateClientCfg(cfg *db.ClientConfig) error {
-	if cfg.SiteName == "" {
-		return errors.New("site name is empty")
+	if len(cfg.SiteName) == 0 || len(cfg.SiteName) >= 12 {
+		return errors.New("site name is too short or too long")
+	} else if len(cfg.SiteDesc) >= 64 {
+		return errors.New("site description is too short or too long")
 	}
 	return nil
 }
