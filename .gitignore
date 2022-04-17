@@ -5,8 +5,8 @@
 **/files
 **/node_modules/*
 **/yarn-error
-**/public/static/*.js
-**/public/index.html
+**/static/public/js/*.js
+**/static/public/index.html
 **/**/*.d.ts.map
 
 # backend
