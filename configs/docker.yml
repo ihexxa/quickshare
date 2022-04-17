@@ -9,6 +9,6 @@ server:
   readTimeout: 2000
   writeTimeout: 86400000 # 1 day
   maxHeaderBytes: 512
-  publicPath: "/quickshare/public"
+  publicPath: "/quickshare/static/public"
 db:
   dbPath: "/quickshare/root/quickshare.db"

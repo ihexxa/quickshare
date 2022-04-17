@@ -5,13 +5,13 @@ fs:
 secrets:
   tokenSecret: ""
 server:
-  debug: true
+  debug: false
   host: "0.0.0.0"
   port: 8686
   readTimeout: 2000
   writeTimeout: 86400000 # 1 day
   maxHeaderBytes: 512
-  publicPath: "public"
+  publicPath: "static/public"
 users:
   enableAuth: true
   defaultAdmin: ""
@@ -38,7 +38,7 @@ site:
     siteName: "Quickshare"
     siteDesc: "Quick and simple file sharing"
     bg:
-      url: "/static/img/textured_paper.png"
+      url: ""
       repeat: "repeat"
       position: "center"
       align: "fixed"
