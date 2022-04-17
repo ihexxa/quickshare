@@ -73,7 +73,7 @@ hexxa/quickshare
 
 ### Run from source code
 
-Before start, please confirm that Go/Golang (>=1.15), Node.js and Yarn are installed on your machine.
+Before start, please confirm that Go/Golang (>=1.17), Node.js and Yarn are installed on your machine.
 
 ```
 # clone this repo
