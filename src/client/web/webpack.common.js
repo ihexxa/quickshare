@@ -8,6 +8,15 @@ const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
 
 
 module.exports = {
+  entry: ["./src/app.tsx", "./src/components/api.ts"],
+  context: `${__dirname}`,  
+  output: {
+    globalObject: "this",
+    path: `${__dirname}/../../../static/public/js`,
+    chunkFilename: "[name].bundle.js",
+    filename: "[name].bundle.js",
+    library: "Q",
+  },
   module: {
     rules: [
       {
