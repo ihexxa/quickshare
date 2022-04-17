@@ -846,7 +846,7 @@ export class SiteCfg extends React.Component<SiteCfgProps, SiteCfgState, {}> {
       siteName: "Quickshare",
       siteDesc: "Quickshare",
       bg: {
-        url: "/static/img/textured_paper.png",
+        url: "",
         repeat: "repeat",
         position: "center",
         align: "fixed",
