@@ -52,7 +52,7 @@
 }
 
 .theme-dark #bg {
-  background: url("/static/img/px_by_Gre3g.webp") repeat fixed center;
+  background: url("/img/px_by_Gre3g.webp") repeat fixed center;
   background-color: rgb(22 22 24);
   color: #ccc;
   position: fixed;
