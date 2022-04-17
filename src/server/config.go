@@ -111,7 +111,7 @@ func DefaultConfigStruct() *Config {
 			ReadTimeout:    2000,
 			WriteTimeout:   1000 * 3600 * 24, // 1 day
 			MaxHeaderBytes: 512,
-			PublicPath:     "public",
+			PublicPath:     "static/public",
 		},
 		Workers: &WorkerPoolCfg{
 			QueueSize:   1024,
