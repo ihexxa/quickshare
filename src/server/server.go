@@ -39,6 +39,7 @@ import (
 	"github.com/ihexxa/quickshare/src/kvstore"
 	"github.com/ihexxa/quickshare/src/kvstore/boltdbpvd"
 	"github.com/ihexxa/quickshare/src/worker/localworker"
+	qsstatic "github.com/ihexxa/quickshare/static"
 )
 
 type Server struct {
@@ -251,16 +252,23 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 		return nil, fmt.Errorf("new setting service error: %w", err)
 	}
 
+	// middleware
+	router.Use(userHdrs.AuthN())
+	router.Use(userHdrs.APIAccessControl())
+
 	publicPath, ok := cfg.String("Server.PublicPath")
 	if !ok || publicPath == "" {
 		return nil, errors.New("publicPath not found or empty")
 	}
-
-	// middleware
-	router.Use(userHdrs.AuthN())
-	router.Use(userHdrs.APIAccessControl())
-	// tmp static server
-	router.Use(static.Serve("/", static.LocalFile(publicPath, false)))
+	if cfg.BoolOr("Server.Debug", false) {
+		router.Use(static.Serve("/", static.LocalFile(publicPath, false)))
+	} else {
+		esFS, err := qsstatic.NewEmbedStaticFS()
+		if err != nil {
+			return nil, err
+		}
+		router.Use(static.Serve("/", esFS))
+	}
 
 	// handler
 	v1 := router.Group("/v1")

@@ -82,7 +82,10 @@ func (h *MultiUsersSvc) APIAccessControl() gin.HandlerFunc {
 			return
 		} else if accessPath == "/" || // TODO: temporarily allow accessing static resources
 			accessPath == "/favicon.ico" ||
-			strings.HasPrefix(accessPath, "/static") {
+			strings.HasPrefix(accessPath, "/css") ||
+			strings.HasPrefix(accessPath, "/font") ||
+			strings.HasPrefix(accessPath, "/img") ||
+			strings.HasPrefix(accessPath, "/js") {
 			c.Next()
 			return
 		}
