@@ -789,20 +789,23 @@ export class Updater {
     this.props.login.preferences.theme = theme;
   };
 
-  autoSwitchTheme = () => {
-    if (!this.props.ui.clientCfg.autoTheme) {
-      return;
-    }
-
+  getCurrentTheme = () => {
     const date = new Date();
+
     if (
       (date.getHours() >= 18 && date.getHours() <= 23) ||
       (date.getHours() >= 0 && date.getHours() <= 6)
     ) {
-      this.setTheme("dark");
-    } else {
-      this.setTheme("light");
+      return "dark";
     }
+    return "light";
+  };
+
+  autoSwitchTheme = () => {
+    if (!this.props.ui.clientCfg.autoTheme) {
+      return;
+    }
+    this.setTheme(this.getCurrentTheme());
   };
 
   setControlOption = (controlName: string, option: string): boolean => {
