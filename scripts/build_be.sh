@@ -6,7 +6,7 @@ rm -r dist && mkdir dist
 
 # set this for builders behind GFW...
 go env -w GOPROXY=https://goproxy.cn,direct
-go get github.com/mitchellh/gox@v1.0.1
+go install github.com/mitchellh/gox@v1.0.1
 PATH=$PATH:$HOME/go/bin
 cd cmd/start
 gox \
