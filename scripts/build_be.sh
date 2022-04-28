@@ -15,12 +15,11 @@ gox \
 
 distributions=('quickshare_windows_386' 'quickshare_windows_amd64' 'quickshare_darwin_amd64' 'quickshare_darwin_arm64' 'quickshare_linux_386' 'quickshare_linux_amd64' 'quickshare_linux_arm' 'quickshare_linux_arm64')
 
-cd $QSROOT
-for dist in ${distributions[@]}; do
-    cp -R $QSROOT/public $QSROOT/dist/$dist # $QSROOT/public must be ready
-    cp $QSROOT/configs/lan.yml $QSROOT/dist/$dist
-    zip -r -q $QSROOT/dist/$dist.zip ./dist/$dist/*
-    rm -r $QSROOT/dist/$dist
+cd "$QSROOT"
+for dist in "${distributions[@]}"; do
+    cp "$QSROOT"/configs/lan.yml "$QSROOT"/dist/"$dist"
+    zip -r -q "$QSROOT"/dist/"$dist".zip ./dist/"$dist"/*
+    rm -r "$QSROOT"/dist/"$dist"
 done
 
 echo "Done"
