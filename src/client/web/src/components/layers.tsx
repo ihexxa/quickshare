@@ -82,15 +82,15 @@ export class Layers extends React.Component<Props, State, {}> {
         </div>
 
         <div id="login-layer" className={`layer ${loginPaneClass}`}>
-          <div id="root-container">
-            <AuthPane
-              login={this.props.login}
-              ui={this.props.ui}
-              update={this.props.update}
-              msg={this.props.msg}
-              enabled={!hideLogin}
-            />
-          </div>
+            {/* <div id="root-container"> */}
+              <AuthPane
+                login={this.props.login}
+                ui={this.props.ui}
+                update={this.props.update}
+                msg={this.props.msg}
+                enabled={!hideLogin}
+              />
+          {/* </div> */}
         </div>
 
         <div id="settings-layer" className={`layer ${showSettings}`}>

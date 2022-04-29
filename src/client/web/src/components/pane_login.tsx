@@ -69,7 +69,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
     if (this.props.enabled) {
       this.hotkeyHandler.handle(ev);
     }
-  }
+  };
 
   changeUser = (ev: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ user: ev.target.value });
@@ -129,52 +129,47 @@ export class AuthPane extends React.Component<Props, State, {}> {
 
   render() {
     const row3 = this.props.ui.captchaEnabled ? (
-      <Flexbox
-        children={List([
-          <div className="input-wrap">
-            <input
-              id="captcha-input"
-              type="text"
-              onChange={this.changeCaptcha}
-              value={this.state.captchaInput}
-              placeholder={this.props.msg.pkg.get("login.captcha")}
-            />
-          </div>,
+      <div>
+        <div id="captcha-input" className="float-l">
+          <input
+            type="text"
+            onChange={this.changeCaptcha}
+            value={this.state.captchaInput}
+            placeholder={this.props.msg.pkg.get("login.captcha")}
+          />
+        </div>
 
-          <img
-            id="captcha"
-            src={`/v1/captchas/imgs?capid=${this.props.login.captchaID}`}
-            className={`captcha ${this.state.captchaLoaded ? "" : "hidden"}`}
-            onClick={this.refreshCaptcha}
-            onLoad={() => this.setState({ captchaLoaded: true })}
-          />,
-        ])}
-        childrenStyles={List([
-          { justifyContent: "flex-start" },
-          { justifyContent: "flex-end" },
-        ])}
-      />
+        <img
+          id="captcha"
+          src={`/v1/captchas/imgs?capid=${this.props.login.captchaID}`}
+          className={`captcha float-l ${
+            this.state.captchaLoaded ? "" : "hidden"
+          }`}
+          onClick={this.refreshCaptcha}
+          onLoad={() => this.setState({ captchaLoaded: true })}
+        />
+        <div className="fix"></div>
+      </div>
     ) : null;
 
     return (
       <div
         id="pane-login"
-        className="container"
-        style={{ display: this.props.login.authed ? "none" : "block" }}
+        style={{ display: this.props.login.authed ? "none" : "" }}
       >
         <div className="login-container">
-          <a
-            href="https://github.com/ihexxa/quickshare"
-            target="_blank"
-            className="h5"
-            id="title"
-          >
-            {this.props.ui.clientCfg.siteName}
-          </a>
+          <div className="padding-t-l padding-b-l margin-l-l margin-r-l">
+            <a
+              href="https://github.com/ihexxa/quickshare"
+              target="_blank"
+              className="h5 margin-t-m"
+              id="title"
+            >
+              {this.props.ui.clientCfg.siteName}
+            </a>
 
-          <div className="hr"></div>
+            <div className="hr"></div>
 
-          <div className="input-wrap">
             <input
               name="user"
               type="text"
@@ -182,9 +177,7 @@ export class AuthPane extends React.Component<Props, State, {}> {
               value={this.state.user}
               placeholder={this.props.msg.pkg.get("login.username")}
             />
-          </div>
 
-          <div className="input-wrap">
             <input
               name="pwd"
               type="password"
@@ -192,13 +185,13 @@ export class AuthPane extends React.Component<Props, State, {}> {
               value={this.state.pwd}
               placeholder={this.props.msg.pkg.get("login.pwd")}
             />
+
+            {row3}
+
+            <button id="btn-login" onClick={this.login} className="margin-b-l">
+              {this.props.msg.pkg.get("login.login")}
+            </button>
           </div>
-
-          {row3}
-
-          <button id="btn-login" onClick={this.login}>
-            {this.props.msg.pkg.get("login.login")}
-          </button>
         </div>
       </div>
     );
