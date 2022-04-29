@@ -178,8 +178,8 @@
 }
 
 .theme-dark #pane-login {
-  max-width: 48rem;
-  padding: 2rem;
+  width: 100%;
+  margin: auto;
 }
 
 .theme-dark #pane-login #title {
@@ -188,26 +188,19 @@
 }
 
 .theme-dark #pane-login .login-container {
-  margin: 2rem;
-}
-
-.theme-dark #pane-login .input-wrap {
-  width: 100%;
-  background-color: #eaebf6;
-  margin: 2rem 0 0 0;
+  background-color: white;
+  margin: 4rem 1rem auto 1rem;
   border-radius: 0.6rem;
-  line-height: 4rem;
 }
 
 .theme-dark #pane-login #captcha-input {
-  width: calc(100% - 1rem);
+  width: calc(50% - 1rem);
 }
 
 .theme-dark #pane-login #captcha {
-  width: calc(100% - 1rem);
+  width: calc(50% - 1rem);
   background-color: #eaebf6;
-  border: solid 1px #eaebf6;
-  margin: 2rem 0 0 0;
+  margin: 0 0 0 2rem;
   border-radius: 0.6rem;
   height: 3.8rem;
 }
@@ -216,11 +209,12 @@
 .theme-dark #pane-login input:hover,
 .theme-dark #pane-login input:focus,
 .theme-dark #pane-login input:active {
-  width: 100%;
-  padding: 0;
+  width: calc(100% - 1.6rem);
+  background-color: #eaebf6;
+  border-radius: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  margin: auto auto 2rem auto;
   border: none;
-  margin: 0 1rem;
-  background-color: transparent;
   outline: none;
   box-shadow: none;
 }
@@ -229,7 +223,6 @@
   background-color: #1abc9c;
   color: #fff;
   width: 100%;
-  margin-top: 2rem;
   height: 4rem;
 }
 
@@ -242,7 +235,7 @@
   max-width: 100rem;
   width: 96%;
   text-align: left;
-  margin: 3rem auto 8rem auto;
+  margin: 3rem auto auto auto;
 }
 
 .theme-dark .tabs button {
