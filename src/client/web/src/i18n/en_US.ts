@@ -153,4 +153,5 @@ export const msgs: Map<string, string> = Map({
   "autoTheme": "Enable auto theme switching",
   "term.enabled": "Enabled",
   "term.disabled": "Disabled",
+  "term.dropAnywhere": "Drop files anywhere"
 });

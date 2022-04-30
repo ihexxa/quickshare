@@ -150,4 +150,5 @@ export const msgs: Map<string, string> = Map({
   "autoTheme": "自动切换主题",
   "term.enabled": "启用",
   "term.disabled": "关闭",
+  "term.dropAnywhere": "把文件在任意处释放"
 });

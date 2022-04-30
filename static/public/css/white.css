@@ -330,6 +330,30 @@
   background-color: #ecf0f1;
 }
 
+.theme-default .drop-area-container {
+  position: relative;
+  width: 100%;
+  padding-top: 20rem;
+}
+
+.theme-default .drop-area {
+  opacity: 0.8;
+  backdrop-filter: blur(9.5px);
+  text-align: center;
+  border-radius: 0.8rem;
+  padding: 2rem 0;
+  margin: auto;
+  width: 25rem;
+}
+
+.theme-default #login-layer {
+  z-index: 200;
+}
+
+.theme-default #drop-area-layer {
+  z-index: 4;
+}
+
 /* +colors */
 
 .theme-default .minor-font {
@@ -359,6 +383,9 @@
 }
 .theme-default .minor-bg {
   background-color: #ecf0f6;
+}
+.theme-default .reverse-bg {
+  background-color: #000;
 }
 .theme-default ::placeholder {
   color: #95a5a6;

@@ -156,15 +156,15 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     }
   };
 
-  addUploads = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files.length > 200) {
+  addFileList = (originalFileList: FileList) => {
+    if (originalFileList.length > 200) {
       Env().alertMsg(this.props.msg.pkg.get("err.tooManyUploads"));
       return;
     }
 
     let fileList = List<File>();
-    for (let i = 0; i < event.target.files.length; i++) {
-      fileList = fileList.push(event.target.files[i]);
+    for (let i = 0; i < originalFileList.length; i++) {
+      fileList = fileList.push(originalFileList[i]);
     }
 
     const status = updater().addUploads(fileList);
@@ -172,6 +172,10 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       Env().alertMsg(getErrMsg(this.props.msg.pkg, "upload.add.fail", status));
     }
     this.props.update(updater().updateUploadingsInfo);
+  };
+
+  addUploads = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.addFileList(event.target.files);
   };
 
   mkDirFromKb = async (
