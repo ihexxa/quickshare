@@ -1,5 +1,5 @@
 import * as React from "react";
-import { List } from "immutable";
+import { throttle } from "throttle-debounce";
 
 import { updater } from "./state_updater";
 import { ICoreState, MsgProps, UIProps } from "./core_state";
@@ -16,10 +16,12 @@ import {
   loadingCtrl,
   ctrlOn,
   ctrlHidden,
+  dropAreaCtrl,
 } from "../common/controls";
 import { LoadingIcon } from "./visual/loading";
 import { Title } from "./visual/title";
 import { HotkeyHandler } from "../common/hotkeys";
+import { getIcon } from "./visual/icons";
 
 export interface Props {
   filesInfo: FilesProps;
@@ -65,6 +67,10 @@ export class Layers extends React.Component<Props, State, {}> {
       (this.props.ui.control.controls.get(sharingCtrl) === ctrlOn &&
         this.props.filesInfo.isSharing);
     const loginPaneClass = hideLogin ? "hidden" : "";
+    const dropAreaClass =
+      this.props.ui.control.controls.get(dropAreaCtrl) === ctrlOn
+        ? ""
+        : "hidden";
 
     const showSettings =
       this.props.ui.control.controls.get(settingsDialogCtrl) === ctrlOn
@@ -82,15 +88,23 @@ export class Layers extends React.Component<Props, State, {}> {
         </div>
 
         <div id="login-layer" className={`layer ${loginPaneClass}`}>
-            {/* <div id="root-container"> */}
-              <AuthPane
-                login={this.props.login}
-                ui={this.props.ui}
-                update={this.props.update}
-                msg={this.props.msg}
-                enabled={!hideLogin}
-              />
-          {/* </div> */}
+          <AuthPane
+            login={this.props.login}
+            ui={this.props.ui}
+            update={this.props.update}
+            msg={this.props.msg}
+            enabled={!hideLogin}
+          />
+        </div>
+
+        {/* ${dropAreaClass} */}
+        <div id="drop-area-layer" className={`${dropAreaClass}`}>
+          <div className="drop-area-container">
+            <div className="drop-area major-bg focus-font">
+              <div>{getIcon("RiFolderUploadFill", "4rem", "focus")}</div>
+              <span>{this.props.msg.pkg.get("term.dropAnywhere")}</span>
+            </div>
+          </div>
         </div>
 
         <div id="settings-layer" className={`layer ${showSettings}`}>

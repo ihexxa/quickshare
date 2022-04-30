@@ -23,6 +23,7 @@ import { BiSortUp } from "@react-icons/all-files/bi/BiSortUp";
 import { RiListSettingsFill } from "@react-icons/all-files/ri/RiListSettingsFill";
 import { RiHardDriveFill } from "@react-icons/all-files/ri/RiHardDriveFill";
 import { RiGridFill } from "@react-icons/all-files/ri/RiGridFill";
+import { RiFolderUploadFill } from "@react-icons/all-files/ri/RiFolderUploadFill";
 
 import { colorClass } from "./colors";
 
@@ -54,6 +55,7 @@ const icons = Map<string, IconType>({
   RiListSettingsFill: RiListSettingsFill,
   RiHardDriveFill: RiHardDriveFill,
   RiGridFill: RiGridFill,
+  RiFolderUploadFill: RiFolderUploadFill,
 });
 
 export function getIconWithProps(

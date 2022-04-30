@@ -328,6 +328,22 @@
   background-color: #333;
 }
 
+.theme-dark .drop-area-container {
+  position: relative;
+  width: 100%;
+  padding-top: 20rem;
+}
+
+.theme-dark .drop-area {
+  opacity: 0.8;
+  backdrop-filter: blur(9.5px);
+  text-align: center;
+  border-radius: 0.8rem;
+  padding: 2rem 0;
+  margin: auto;
+  width: 25rem;
+}
+
 /* +colors */
 
 .theme-dark .major-font {
@@ -353,6 +369,9 @@
 }
 .theme-dark .focus-bg {
   background-color: #16a085;
+}
+.theme-dark .reverse-bg {
+  background-color: #fff;
 }
 .theme-dark .minor-bg {
   background-color: #333;

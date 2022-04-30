@@ -1,5 +1,6 @@
 import * as React from "react";
-import { Map } from "immutable";
+import { Map, List } from "immutable";
+import { throttle } from "throttle-debounce";
 
 import { ICoreState, MsgProps, UIProps } from "./core_state";
 import { FilesPanel, FilesProps } from "./panel_files";
@@ -13,8 +14,10 @@ import { AdminProps } from "./pane_admin";
 import { TopBar } from "./topbar";
 import { CronJobs } from "../common/cron";
 import { updater } from "./state_updater";
+import { dropAreaCtrl, ctrlOn, ctrlOff } from "../common/controls";
 
 export const controlName = "panelTabs";
+const dragOverthrottlePeriod = 200;
 export interface Props {
   filesInfo: FilesProps;
   uploadingsInfo: UploadingsProps;
@@ -26,10 +29,16 @@ export interface Props {
   update?: (updater: (prevState: ICoreState) => ICoreState) => void;
 }
 
-export interface State {}
+export interface State {
+  lastDragOverTime: number;
+}
 export class RootFrame extends React.Component<Props, State, {}> {
+  private filesPanelRef: FilesPanel;
   constructor(p: Props) {
     super(p);
+    this.state = {
+      lastDragOverTime: 0,
+    };
   }
 
   componentDidMount(): void {
@@ -38,11 +47,21 @@ export class RootFrame extends React.Component<Props, State, {}> {
       args: [],
       delay: 60 * 1000,
     });
+
+    CronJobs().setInterval("endDrag", {
+      func: this.endDrag,
+      args: [],
+      delay: dragOverthrottlePeriod * 2,
+    });
   }
 
   componentWillUnmount() {
     CronJobs().clearInterval("autoSwitchTheme");
   }
+
+  private setFilesPanelRef = (ref: FilesPanel) => {
+    this.filesPanelRef = ref;
+  };
 
   makeBgStyle = (): Object => {
     if (this.props.ui.clientCfg.allowSetBg) {
@@ -78,6 +97,39 @@ export class RootFrame extends React.Component<Props, State, {}> {
     return {};
   };
 
+  onDragOver = (ev: React.DragEvent<HTMLDivElement>) => {
+    this.onDragOverImp();
+    ev.preventDefault();
+  };
+
+  onDragOverImp = throttle(dragOverthrottlePeriod, () => {
+    updater().setControlOption(dropAreaCtrl, ctrlOn);
+    this.props.update(updater().updateUI);
+    this.setState({ lastDragOverTime: Date.now() });
+  });
+
+  onDrop = (ev: React.DragEvent<HTMLDivElement>) => {
+    if (ev.dataTransfer?.files?.length > 0) {
+      this.filesPanelRef.addFileList(ev.dataTransfer.files);
+    }
+    ev.preventDefault();
+  };
+
+  endDrag = () => {
+    const now = Date.now();
+    const isDragOverOff =
+      this.props.ui.control.controls.get(dropAreaCtrl) === ctrlOff;
+    if (
+      now - this.state.lastDragOverTime < dragOverthrottlePeriod * 1.5 ||
+      isDragOverOff
+    ) {
+      return;
+    }
+
+    updater().setControlOption(dropAreaCtrl, ctrlOff);
+    this.props.update(updater().updateUI);
+  };
+
   render() {
     const bgStyle = this.makeBgStyle();
     const autoTheme =
@@ -97,7 +149,12 @@ export class RootFrame extends React.Component<Props, State, {}> {
     const sharingsPanelClass = displaying === "sharingsPanel" ? "" : "hidden";
 
     return (
-      <div id="root-frame" className={`${theme} ${fontSizeClass}`}>
+      <div
+        id="root-frame"
+        className={`${theme} ${fontSizeClass}`}
+        onDragOver={this.onDragOver}
+        onDrop={this.onDrop}
+      >
         <div id="bg" style={bgStyle}>
           <div id="custom">
             <Layers
@@ -151,6 +208,7 @@ export class RootFrame extends React.Component<Props, State, {}> {
                   ui={this.props.ui}
                   enabled={displaying === "filesPanel"}
                   update={this.props.update}
+                  ref={this.setFilesPanelRef}
                 />
               </span>
 
