@@ -97,7 +97,6 @@ export class Layers extends React.Component<Props, State, {}> {
           />
         </div>
 
-        {/* ${dropAreaClass} */}
         <div id="drop-area-layer" className={`${dropAreaClass}`}>
           <div className="drop-area-container">
             <div className="drop-area major-bg focus-font">
