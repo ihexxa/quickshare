@@ -24,6 +24,7 @@ import {
   settingsDialogCtrl,
   settingsTabsCtrl,
   filesViewCtrl,
+  dropAreaCtrl,
 } from "../../common/controls";
 
 describe("Login", () => {
@@ -145,6 +146,7 @@ describe("Login", () => {
           [sharingCtrl]: ctrlOff,
           [filesViewCtrl]: "rows",
           [loadingCtrl]: ctrlOff,
+          [dropAreaCtrl]: ctrlOff,
         }),
         options: Map<string, Set<string>>({
           [panelTabs]: Set<string>([
@@ -157,6 +159,7 @@ describe("Login", () => {
           [sharingCtrl]: Set<string>([ctrlOn, ctrlOff]),
           [filesViewCtrl]: Set<string>(["rows", "table"]),
           [loadingCtrl]: Set<string>([ctrlOn, ctrlOff]),
+          [dropAreaCtrl]: Set<string>([ctrlOn, ctrlOff]),
         }),
       },
     });
