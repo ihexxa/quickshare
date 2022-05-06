@@ -102,11 +102,11 @@ func DefaultConfigStruct() *Config {
 			PredefinedUsers:    []*db.UserCfg{},
 		},
 		Secrets: &Secrets{
-			TokenSecret: "",
+			TokenSecret: "", // it will auto generated if it is left as empty
 		},
 		Server: &ServerCfg{
 			Debug:          false,
-			Host:           "127.0.0.1",
+			Host:           "0.0.0.0",
 			Port:           8686,
 			ReadTimeout:    2000,
 			WriteTimeout:   1000 * 3600 * 24, // 1 day
