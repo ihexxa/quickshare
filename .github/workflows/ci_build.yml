@@ -4,7 +4,7 @@ name: ci-quickshare
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: 
+    branches:
       - main
       - dev-**
   pull_request:
@@ -33,16 +33,16 @@ jobs:
         with:
           node-version: "12"
       - run: go version
-
       - name: Install dependencies
         run: |
           yarn
-
       - name: Backend tests
         run: |
           go test ./...
-
       - name: Frontend tests
         run: |
           cd ./src/client/web
           yarn test
+      - name: Build
+        run: |
+          yarn build
