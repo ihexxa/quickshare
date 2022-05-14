@@ -135,13 +135,14 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	opensLimit := cfg.GrabInt("Fs.OpensLimit")
 	openTTL := cfg.GrabInt("Fs.OpenTTL")
 	readerTTL := cfg.GrabInt("Server.WriteTimeout") / 1000 // millisecond -> second
-	dbPath := cfg.GrabString("Db.DbPath")
 
 	ider := simpleidgen.New()
 	filesystem := local.NewLocalFS(rootPath, 0660, opensLimit, openTTL, readerTTL, ider)
 	jwtEncDec := jwt.NewJWTEncDec(secret)
 
-	if err := filesystem.MkdirAll(dbPath); err != nil {
+	dbPath := cfg.GrabString("Db.DbPath")
+	dbDir := filepath.Dir(dbPath)
+	if err := filesystem.MkdirAll(dbDir); err != nil {
 		panic(fmt.Sprintf("fail to create path for db: %s", err))
 	}
 
