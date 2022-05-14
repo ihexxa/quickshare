@@ -78,7 +78,7 @@ func DefaultConfig() (string, error) {
 func DefaultConfigStruct() *Config {
 	return &Config{
 		Fs: &FSConfig{
-			Root:       "root",
+			Root:       "quickshare",
 			OpensLimit: 1024,
 			OpenTTL:    60, // 1 min
 		},
