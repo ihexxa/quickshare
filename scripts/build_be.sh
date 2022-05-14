@@ -1,7 +1,8 @@
 #!/bin/bash
 set -o nounset errexit
 
-export QSROOT=$(pwd)
+QSROOT=$(pwd)
+export QSROOT
 rm -r dist && mkdir dist
 
 # set this for builders behind GFW...

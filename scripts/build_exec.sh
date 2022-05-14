@@ -1,16 +1,17 @@
 #!/bin/bash
 set -o nounset errexit
 
-export QSROOT
 QSROOT=$(pwd)
+export QSROOT
 rm -r dist && mkdir dist
-docker builder prune
 
-# set this for users behind GFW...
+# set this for builders behind GFW...
 go env -w GOPROXY=https://goproxy.cn,direct
-go get -d -v ./...
-go get github.com/mitchellh/gox
+go install github.com/mitchellh/gox@v1.0.1
+PATH=$PATH:$HOME/go/bin
 cd cmd/start
 gox \
     -osarch="linux/amd64" \
     -output "$QSROOT/dist/quickshare/start"
+
+echo "Done"
