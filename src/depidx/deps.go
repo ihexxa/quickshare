@@ -4,6 +4,7 @@ import (
 	"github.com/ihexxa/gocfg"
 	"go.uber.org/zap"
 
+	"github.com/ihexxa/quickshare/src/cron"
 	"github.com/ihexxa/quickshare/src/cryptoutil"
 	"github.com/ihexxa/quickshare/src/db/boltstore"
 	"github.com/ihexxa/quickshare/src/db/fileinfostore"
@@ -36,6 +37,7 @@ type Deps struct {
 	limiter   iolimiter.ILimiter
 	workers   worker.IWorkerPool
 	boltStore *boltstore.BoltStore
+	cron      cron.ICron
 }
 
 func NewDeps(cfg gocfg.ICfg) *Deps {
@@ -128,4 +130,12 @@ func (deps *Deps) BoltStore() *boltstore.BoltStore {
 
 func (deps *Deps) SetBoltStore(boltStore *boltstore.BoltStore) {
 	deps.boltStore = boltStore
+}
+
+func (deps *Deps) Cron() cron.ICron {
+	return deps.cron
+}
+
+func (deps *Deps) SetCron(cronImp cron.ICron) {
+	deps.cron = cronImp
 }
