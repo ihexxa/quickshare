@@ -14,7 +14,6 @@ import (
 	"github.com/ihexxa/quickshare/src/idgen"
 	"github.com/ihexxa/quickshare/src/iolimiter"
 	"github.com/ihexxa/quickshare/src/kvstore"
-	"github.com/ihexxa/quickshare/src/search/fileindex"
 	"github.com/ihexxa/quickshare/src/worker"
 )
 
@@ -39,7 +38,6 @@ type Deps struct {
 	workers   worker.IWorkerPool
 	boltStore *boltstore.BoltStore
 	cron      cron.ICron
-	fileIndex fileindex.IFileIndex
 }
 
 func NewDeps(cfg gocfg.ICfg) *Deps {
@@ -140,12 +138,4 @@ func (deps *Deps) Cron() cron.ICron {
 
 func (deps *Deps) SetCron(cronImp cron.ICron) {
 	deps.cron = cronImp
-}
-
-func (deps *Deps) FileIndex() fileindex.IFileIndex {
-	return deps.fileIndex
-}
-
-func (deps *Deps) SetFileIndex(fileIndex fileindex.IFileIndex) {
-	deps.fileIndex = fileIndex
 }
