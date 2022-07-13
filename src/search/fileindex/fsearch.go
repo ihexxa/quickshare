@@ -1,20 +1,25 @@
 package fileindex
 
 import (
-	// "strings"
+	"bufio"
+	"errors"
+	"fmt"
+	"io"
+	"os"
+	"strings"
 
 	"github.com/ihexxa/fsearch"
 	"github.com/ihexxa/quickshare/src/fs"
 )
 
 type FileTreeIndex struct {
-	db    fs.ISimpleFS
+	fs    fs.ISimpleFS
 	index *fsearch.FSearch
 }
 
-func NewFileTreeIndex(db fs.ISimpleFS) *FileTreeIndex {
+func NewFileTreeIndex(fs fs.ISimpleFS) *FileTreeIndex {
 	return &FileTreeIndex{
-		db: db,
+		fs: fs,
 		// TODO: support max result size config
 		index: fsearch.New("/", 1024),
 	}
@@ -38,4 +43,62 @@ func (idx *FileTreeIndex) RenamePath(pathname, newName string) error {
 
 func (idx *FileTreeIndex) MovePath(pathname, dstParentPath string) error {
 	return idx.index.MovePath(pathname, dstParentPath)
+}
+
+func (idx *FileTreeIndex) WriteTo(pathname string) error {
+	rowsChan := idx.index.Marshal()
+	err := idx.fs.Create(pathname)
+	if err != nil && !errors.Is(err, os.ErrExist) {
+		return err
+	}
+
+	var row string
+	var ok bool
+	var wrote int
+	var offset int64
+	batch := []string{}
+	for {
+		row, ok = <-rowsChan
+		if !ok || len(batch) > 1024 {
+			wrote, err = idx.fs.WriteAt(pathname, []byte(strings.Join(batch, "\n")), offset)
+			if err != nil {
+				return err
+			}
+			offset += int64(wrote)
+		}
+		if !ok {
+			break
+		}
+		batch = append(batch, row)
+	}
+
+	return idx.index.Error()
+}
+
+func (idx *FileTreeIndex) ReadFrom(pathname string) error {
+	f, readerId, err := idx.fs.GetFileReader(pathname)
+	if err != nil {
+		return err
+	}
+	defer idx.fs.CloseReader(fmt.Sprint(readerId))
+
+	var row string
+	rowSeparator := byte('\n')
+	reader := bufio.NewReader(f)
+	rowsChan := make(chan string, 1024)
+	defer close(rowsChan)
+	for {
+		row, err = reader.ReadString(rowSeparator)
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				rowsChan <- row // some content may still read
+				break
+			} else {
+				return err
+			}
+		}
+		rowsChan <- row
+	}
+
+	return idx.index.Error()
 }
