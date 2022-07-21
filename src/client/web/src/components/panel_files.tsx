@@ -576,7 +576,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
           </div>
         );
 
-        const absDownloadURL = `${document.location.protocol}//${document.location.hostname}:${document.location.port}${downloadPath}`;
+        const absDownloadURL = `${document.location.protocol}//${document.location.host}${downloadPath}`;
         const pathTitle = this.props.msg.pkg.get("item.downloadURL");
         const modTimeTitle = this.props.msg.pkg.get("item.modTime");
         const sizeTitle = this.props.msg.pkg.get("item.size");
