@@ -10,5 +10,6 @@ server:
   writeTimeout: 86400000 # 1 day
   maxHeaderBytes: 512
   publicPath: "/quickshare/static/public"
+  searchResultLimit: 16
 db:
   dbPath: "/quickshare/root/quickshare.db"
