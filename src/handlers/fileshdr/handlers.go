@@ -17,6 +17,7 @@ import (
 	"github.com/ihexxa/gocfg"
 	"github.com/ihexxa/multipart"
 
+	"github.com/ihexxa/fsearch"
 	"github.com/ihexxa/quickshare/src/db"
 	"github.com/ihexxa/quickshare/src/db/userstore"
 	"github.com/ihexxa/quickshare/src/depidx"
@@ -210,6 +211,12 @@ func (h *FileHandlers) Create(c *gin.Context) {
 			return
 		}
 
+		err = h.deps.FileIndex().AddPath(fsFilePath)
+		if err != nil {
+			c.JSON(q.ErrResp(c, 500, err))
+			return
+		}
+
 		c.JSON(q.Resp(200))
 		return
 	}
@@ -290,6 +297,12 @@ func (h *FileHandlers) Delete(c *gin.Context) {
 			txErr = err
 			return
 		}
+
+		err = h.deps.FileIndex().DelPath(filePath)
+		if err != nil && !errors.Is(err, fsearch.ErrNotFound) {
+			txErr = err
+			return
+		}
 	})
 
 	if txErr != nil {
@@ -364,6 +377,11 @@ func (h *FileHandlers) Mkdir(c *gin.Context) {
 		return
 	}
 
+	err = h.deps.FileIndex().AddPath(dirPath)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
 	c.JSON(q.Resp(200))
 }
 
@@ -416,6 +434,18 @@ func (h *FileHandlers) Move(c *gin.Context) {
 	}
 
 	err = h.deps.FS().Rename(oldPath, newPath)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
+	newPathBase := filepath.Base(newPath)
+	err = h.deps.FileIndex().AddPath(newPathBase)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+	err = h.deps.FileIndex().MovePath(oldPath, newPathBase)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -523,6 +553,12 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 					string(msg),
 				),
 			)
+			if err != nil {
+				txErr, statusCode = err, 500
+				return
+			}
+
+			err = h.deps.FileIndex().AddPath(fsFilePath)
 			if err != nil {
 				txErr, statusCode = err, 500
 				return

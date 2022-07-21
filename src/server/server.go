@@ -38,6 +38,7 @@ import (
 	"github.com/ihexxa/quickshare/src/iolimiter"
 	"github.com/ihexxa/quickshare/src/kvstore"
 	"github.com/ihexxa/quickshare/src/kvstore/boltdbpvd"
+	"github.com/ihexxa/quickshare/src/search/fileindex"
 	"github.com/ihexxa/quickshare/src/worker/localworker"
 	qsstatic "github.com/ihexxa/quickshare/static"
 )
@@ -140,6 +141,9 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	filesystem := local.NewLocalFS(rootPath, 0660, opensLimit, openTTL, readerTTL, ider)
 	jwtEncDec := jwt.NewJWTEncDec(secret)
 
+	searchResultLimit := cfg.GrabInt("Server.SearchResultLimit")
+	fileIndex := fileindex.NewFileTreeIndex(filesystem, "/", searchResultLimit)
+
 	dbPath := cfg.GrabString("Db.DbPath")
 	dbDir := filepath.Dir(dbPath)
 	if err := filesystem.MkdirAll(dbDir); err != nil {
@@ -196,6 +200,7 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	deps.SetID(ider)
 	deps.SetLog(logger)
 	deps.SetLimiter(limiter)
+	deps.SetIFileIndex(fileIndex)
 
 	queueSize := cfg.GrabInt("Workers.QueueSize")
 	sleepCyc := cfg.GrabInt("Workers.SleepCyc")

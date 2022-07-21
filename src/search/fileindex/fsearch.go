@@ -12,16 +12,26 @@ import (
 	"github.com/ihexxa/quickshare/src/fs"
 )
 
+type IFileIndex interface {
+	Search(keyword string) ([]string, error)
+	AddPath(pathname string) error
+	DelPath(pathname string) error
+	RenamePath(pathname, newName string) error
+	MovePath(pathname, dstParentPath string) error
+	WriteTo(pathname string) error
+	ReadFrom(pathname string) error
+}
+
 type FileTreeIndex struct {
 	fs    fs.ISimpleFS
 	index *fsearch.FSearch
 }
 
-func NewFileTreeIndex(fs fs.ISimpleFS) *FileTreeIndex {
+func NewFileTreeIndex(fs fs.ISimpleFS, pathSeparator string, maxResultSize int) *FileTreeIndex {
 	return &FileTreeIndex{
 		fs: fs,
 		// TODO: support max result size config
-		index: fsearch.New("/", 1024),
+		index: fsearch.New(pathSeparator, maxResultSize),
 	}
 }
 
