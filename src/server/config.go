@@ -41,13 +41,14 @@ type Secrets struct {
 }
 
 type ServerCfg struct {
-	Debug          bool   `json:"debug" yaml:"debug"`
-	Host           string `json:"host" yaml:"host"`
-	Port           int    `json:"port" yaml:"port" cfg:"env"`
-	ReadTimeout    int    `json:"readTimeout" yaml:"readTimeout"`
-	WriteTimeout   int    `json:"writeTimeout" yaml:"writeTimeout"`
-	MaxHeaderBytes int    `json:"maxHeaderBytes" yaml:"maxHeaderBytes"`
-	PublicPath     string `json:"publicPath" yaml:"publicPath"`
+	Debug             bool   `json:"debug" yaml:"debug"`
+	Host              string `json:"host" yaml:"host"`
+	Port              int    `json:"port" yaml:"port" cfg:"env"`
+	ReadTimeout       int    `json:"readTimeout" yaml:"readTimeout"`
+	WriteTimeout      int    `json:"writeTimeout" yaml:"writeTimeout"`
+	MaxHeaderBytes    int    `json:"maxHeaderBytes" yaml:"maxHeaderBytes"`
+	PublicPath        string `json:"publicPath" yaml:"publicPath"`
+	SearchResultLimit int    `json:"searchResultLimit" yaml:"searchResultLimit"`
 }
 
 type WorkerPoolCfg struct {
@@ -105,13 +106,14 @@ func DefaultConfigStruct() *Config {
 			TokenSecret: "", // it will auto generated if it is left as empty
 		},
 		Server: &ServerCfg{
-			Debug:          false,
-			Host:           "0.0.0.0",
-			Port:           8686,
-			ReadTimeout:    2000,
-			WriteTimeout:   1000 * 3600 * 24, // 1 day
-			MaxHeaderBytes: 512,
-			PublicPath:     "static/public",
+			Debug:             false,
+			Host:              "0.0.0.0",
+			Port:              8686,
+			ReadTimeout:       2000,
+			WriteTimeout:      1000 * 3600 * 24, // 1 day
+			MaxHeaderBytes:    512,
+			PublicPath:        "static/public",
+			SearchResultLimit: 16,
 		},
 		Workers: &WorkerPoolCfg{
 			QueueSize:   1024,
