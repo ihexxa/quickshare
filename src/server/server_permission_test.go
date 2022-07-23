@@ -409,6 +409,7 @@ func TestPermissions(t *testing.T) {
 			// DelUploading
 
 			// GenerateHash
+			// Search
 
 			cl := client.NewSingleUserClient(addr)
 			token := &http.Cookie{}
@@ -493,6 +494,8 @@ func TestPermissions(t *testing.T) {
 			assertResp(t, resp, errs, expectedCodes["Delete"], fmt.Sprintf("%s-%s", desc, "Delete"))
 			resp, _, errs = filesCl.Delete(targetPathFile)
 			assertResp(t, resp, errs, expectedCodes["DeleteTarget"], fmt.Sprintf("%s-%s", desc, "DeleteTarget"))
+			resp, _, errs = filesCl.SearchItems(targetPathFile)
+			assertResp(t, resp, errs, expectedCodes["SearchTarget"], fmt.Sprintf("%s-%s", desc, "SearchTarget"))
 
 			if requireAuth {
 				resp, _, errs := cl.Logout(token)
@@ -521,6 +524,7 @@ func TestPermissions(t *testing.T) {
 			"DownloadTarget":     200,
 			"Delete":             200,
 			"DeleteTarget":       200,
+			"SearchTarget":       200,
 		})
 		testFileOpPermission("user file operations", "user", "1234", true, "user2/files", "", map[string]int{
 			"ListHome":           200,
@@ -543,6 +547,7 @@ func TestPermissions(t *testing.T) {
 			"DownloadTarget":     403,
 			"Delete":             200,
 			"DeleteTarget":       403,
+			"SearchTarget":       200,
 		})
 		testFileOpPermission("visitor file operations", "visitor", "", false, "user2/files", "", map[string]int{
 			"ListHome":           403,
@@ -565,6 +570,7 @@ func TestPermissions(t *testing.T) {
 			"DownloadTarget":     403,
 			"Delete":             403,
 			"DeleteTarget":       403,
+			"SearchTarget":       403,
 		})
 
 		// sharing permission tests
@@ -614,6 +620,7 @@ func TestPermissions(t *testing.T) {
 			"DownloadTargetFile": 200,
 			"Delete":             200,
 			"DeleteTarget":       403,
+			"SearchTarget":       200,
 		})
 
 		testShareOpPermission := func(user string, pwd string, requireAuth bool, targetPath string, expectedCodes map[string]int) {

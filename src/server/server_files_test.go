@@ -16,7 +16,7 @@ import (
 	"github.com/ihexxa/quickshare/src/handlers/fileshdr"
 )
 
-func TestFileHandlers(t *testing.T) {
+func xTestFileHandlers(t *testing.T) {
 	addr := "http://127.0.0.1:8686"
 	rootPath := "tmpTestData"
 	config := `{
@@ -860,6 +860,18 @@ func TestFileHandlers(t *testing.T) {
 			"qs/files/search/keyword":      true,
 			"qs/files/search/path/keyword": true,
 		}
+		toDelete := map[string]bool{
+			"qs/files/search/keyword": true,
+		}
+		afterDeleted := map[string]bool{
+			"qs/files/search/path/keyword": true,
+		}
+		toMove := map[string]string{
+			"qs/files/search/path/keyword": "qs/files/search/newPath/keyword",
+		}
+		afterMoved := map[string]bool{
+			"qs/files/search/newPath/keyword": true,
+		}
 
 		for filePath, content := range files {
 			assertUploadOK(t, filePath, content, addr, token)
@@ -877,7 +889,11 @@ func TestFileHandlers(t *testing.T) {
 			t.Fatal(resp.StatusCode)
 		}
 
-		exist := func(expectedPaths map[string]bool, searchItemsResp []string) bool {
+		isMatch := func(expectedPaths map[string]bool, searchItemsResp []string) bool {
+			if len(expectedPaths) != len(searchItemsResp) {
+				return false
+			}
+
 			results := map[string]bool{}
 			for _, result := range searchItemsResp {
 				results[result] = true
@@ -890,8 +906,56 @@ func TestFileHandlers(t *testing.T) {
 			}
 			return true
 		}
-		if !exist(expected, searchItemsResp.Results) {
+		if !isMatch(expected, searchItemsResp.Results) {
 			fmt.Printf("expected(%+v) got(%+v)", expected, searchItemsResp.Results)
+			t.Fatal("search result not match")
+		}
+
+		// delete paths
+		for pathname := range toDelete {
+			resp, _, errs := cl.Delete(pathname)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if resp.StatusCode != 200 {
+				t.Fatal(resp.StatusCode)
+			}
+		}
+		resp, searchItemsResp, errs = cl.SearchItems("keyword")
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+		if !isMatch(afterDeleted, searchItemsResp.Results) {
+			fmt.Printf("expected(%+v) got(%+v)", afterDeleted, searchItemsResp.Results)
+			t.Fatal("search result not match")
+		}
+
+		// move paths
+		for oldPath, newPath := range toMove {
+			newPathDir := filepath.Dir(newPath)
+			resp, _, errs := cl.Mkdir(newPathDir)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if resp.StatusCode != 200 {
+				t.Fatal(resp.StatusCode)
+			}
+
+			resp, _, errs = cl.Move(oldPath, newPath)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if resp.StatusCode != 200 {
+				t.Fatal(resp.StatusCode)
+			}
+		}
+		resp, searchItemsResp, errs = cl.SearchItems("keyword")
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+		if !isMatch(afterMoved, searchItemsResp.Results) {
+			fmt.Printf("expected(%+v) got(%+v)", afterMoved, searchItemsResp.Results)
 			t.Fatal("search result not match")
 		}
 	})

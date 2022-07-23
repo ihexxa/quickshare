@@ -440,13 +440,13 @@ func (h *FileHandlers) Move(c *gin.Context) {
 		return
 	}
 
-	newPathBase := filepath.Base(newPath)
-	err = h.deps.FileIndex().AddPath(newPathBase)
+	newPathDir := filepath.Dir(newPath)
+	err = h.deps.FileIndex().AddPath(newPathDir)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
-	err = h.deps.FileIndex().MovePath(oldPath, newPathBase)
+	err = h.deps.FileIndex().MovePath(oldPath, newPathDir)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
