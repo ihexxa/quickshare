@@ -248,3 +248,18 @@ func (cl *FilesClient) GetSharingDir(shareID string) (*http.Response, string, []
 	}
 	return resp, sdResp.SharingDir, nil
 }
+
+func (cl *FilesClient) SearchItems(keyword string) (*http.Response, *fileshdr.SearchItemsResp, []error) {
+	resp, body, errs := cl.r.Get(cl.url("/v1/fs/search")).
+		AddCookie(cl.token).
+		Param(fileshdr.Keyword, keyword).
+		End()
+
+	searchResp := &fileshdr.SearchItemsResp{}
+	err := json.Unmarshal([]byte(body), searchResp)
+	if err != nil {
+		errs = append(errs, err)
+		return nil, nil, errs
+	}
+	return resp, searchResp, nil
+}

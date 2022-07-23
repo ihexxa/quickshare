@@ -30,6 +30,7 @@ const (
 	FilePathQuery = "fp"
 	ListDirQuery  = "dp"
 	ShareIDQuery  = "shid"
+	Keyword       = "k"
 
 	// headers
 	rangeHeader       = "Range"
@@ -1149,6 +1150,25 @@ func (h *FileHandlers) GetSharingDir(c *gin.Context) {
 		return
 	}
 	c.JSON(200, &GetSharingDirResp{SharingDir: dirPath})
+}
+
+type SearchItemsResp struct {
+	Results []string `json:"results"`
+}
+
+func (h *FileHandlers) SearchItems(c *gin.Context) {
+	keyword := c.Query(Keyword)
+	if keyword == "" {
+		c.JSON(q.ErrResp(c, 400, errors.New("empty keyword")))
+		return
+	}
+
+	results, err := h.deps.FileIndex().Search(keyword)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+	c.JSON(200, &SearchItemsResp{Results: results})
 }
 
 func (h *FileHandlers) GetStreamReader(userID uint64, fd io.Reader) (io.ReadCloser, error) {
