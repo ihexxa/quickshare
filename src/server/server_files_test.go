@@ -850,6 +850,52 @@ func TestFileHandlers(t *testing.T) {
 		}
 	})
 
+	t.Run("Search", func(t *testing.T) {
+		files := map[string]string{
+			"qs/files/search/keyword":      "12345678",
+			"qs/files/search/path/keyword": "12345678",
+			"qs/files/search/normal_file":  "12345678",
+		}
+		expected := map[string]bool{
+			"qs/files/search/keyword":      true,
+			"qs/files/search/path/keyword": true,
+		}
+
+		for filePath, content := range files {
+			assertUploadOK(t, filePath, content, addr, token)
+
+			err = fs.Sync()
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+
+		resp, searchItemsResp, errs := cl.SearchItems("keyword")
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+
+		exist := func(expectedPaths map[string]bool, searchItemsResp []string) bool {
+			results := map[string]bool{}
+			for _, result := range searchItemsResp {
+				results[result] = true
+			}
+
+			for got := range expectedPaths {
+				if !results[got] {
+					return false
+				}
+			}
+			return true
+		}
+		if !exist(expected, searchItemsResp.Results) {
+			fmt.Printf("expected(%+v) got(%+v)", expected, searchItemsResp.Results)
+			t.Fatal("search result not match")
+		}
+	})
+
 	resp, _, errs = usersCl.Logout(token)
 	if len(errs) > 0 {
 		t.Fatal(errs)
