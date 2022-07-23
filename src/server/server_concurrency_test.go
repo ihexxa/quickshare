@@ -10,7 +10,7 @@ import (
 	q "github.com/ihexxa/quickshare/src/handlers"
 )
 
-func xTestConcurrency(t *testing.T) {
+func TestConcurrency(t *testing.T) {
 	addr := "http://127.0.0.1:8686"
 	rootPath := "tmpTestData"
 	config := `{
