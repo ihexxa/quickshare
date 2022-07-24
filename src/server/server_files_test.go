@@ -16,7 +16,7 @@ import (
 	"github.com/ihexxa/quickshare/src/handlers/fileshdr"
 )
 
-func xTestFileHandlers(t *testing.T) {
+func TestFileHandlers(t *testing.T) {
 	addr := "http://127.0.0.1:8686"
 	rootPath := "tmpTestData"
 	config := `{
