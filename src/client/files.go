@@ -263,3 +263,9 @@ func (cl *FilesClient) SearchItems(keyword string) (*http.Response, *fileshdr.Se
 	}
 	return resp, searchResp, nil
 }
+
+func (cl *FilesClient) Reindex() (*http.Response, string, []error) {
+	return cl.r.Put(cl.url("/v1/fs/reindex")).
+		AddCookie(cl.token).
+		End()
+}

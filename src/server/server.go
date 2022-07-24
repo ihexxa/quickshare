@@ -328,6 +328,7 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 
 	filesAPI.GET("/metadata", fileHdrs.Metadata)
 	filesAPI.GET("/search", fileHdrs.SearchItems)
+	filesAPI.PUT("/reindex", fileHdrs.Reindex)
 
 	filesAPI.POST("/hashes/sha1", fileHdrs.GenerateHash)
 
