@@ -62,6 +62,7 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(db.AdminRole, "PATCH", "/v1/fs/files/copy"):            true,
 		apiRuleCname(db.AdminRole, "PATCH", "/v1/fs/files/move"):            true,
 		apiRuleCname(db.AdminRole, "GET", "/v1/fs/search"):                  true,
+		apiRuleCname(db.AdminRole, "PUT", "/v1/fs/reindex"):                 true,
 		apiRuleCname(db.AdminRole, "GET", "/v1/fs/dirs"):                    true,
 		apiRuleCname(db.AdminRole, "GET", "/v1/fs/dirs/home"):               true,
 		apiRuleCname(db.AdminRole, "POST", "/v1/fs/dirs"):                   true,

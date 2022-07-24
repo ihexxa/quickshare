@@ -850,6 +850,24 @@ func TestFileHandlers(t *testing.T) {
 		}
 	})
 
+	compareSearchResults := func(expectedPaths map[string]bool, searchItemsResp []string) bool {
+		if len(expectedPaths) != len(searchItemsResp) {
+			return false
+		}
+
+		results := map[string]bool{}
+		for _, result := range searchItemsResp {
+			results[result] = true
+		}
+
+		for got := range expectedPaths {
+			if !results[got] {
+				return false
+			}
+		}
+		return true
+	}
+
 	t.Run("Search", func(t *testing.T) {
 		files := map[string]string{
 			"qs/files/search/keyword":      "12345678",
@@ -889,24 +907,7 @@ func TestFileHandlers(t *testing.T) {
 			t.Fatal(resp.StatusCode)
 		}
 
-		isMatch := func(expectedPaths map[string]bool, searchItemsResp []string) bool {
-			if len(expectedPaths) != len(searchItemsResp) {
-				return false
-			}
-
-			results := map[string]bool{}
-			for _, result := range searchItemsResp {
-				results[result] = true
-			}
-
-			for got := range expectedPaths {
-				if !results[got] {
-					return false
-				}
-			}
-			return true
-		}
-		if !isMatch(expected, searchItemsResp.Results) {
+		if !compareSearchResults(expected, searchItemsResp.Results) {
 			fmt.Printf("expected(%+v) got(%+v)", expected, searchItemsResp.Results)
 			t.Fatal("search result not match")
 		}
@@ -926,7 +927,7 @@ func TestFileHandlers(t *testing.T) {
 		} else if resp.StatusCode != 200 {
 			t.Fatal(resp.StatusCode)
 		}
-		if !isMatch(afterDeleted, searchItemsResp.Results) {
+		if !compareSearchResults(afterDeleted, searchItemsResp.Results) {
 			fmt.Printf("expected(%+v) got(%+v)", afterDeleted, searchItemsResp.Results)
 			t.Fatal("search result not match")
 		}
@@ -954,8 +955,67 @@ func TestFileHandlers(t *testing.T) {
 		} else if resp.StatusCode != 200 {
 			t.Fatal(resp.StatusCode)
 		}
-		if !isMatch(afterMoved, searchItemsResp.Results) {
+		if !compareSearchResults(afterMoved, searchItemsResp.Results) {
 			fmt.Printf("expected(%+v) got(%+v)", afterMoved, searchItemsResp.Results)
+			t.Fatal("search result not match")
+		}
+	})
+
+	t.Run("Reindexing", func(t *testing.T) {
+		newFiles := map[string]bool{
+			"qs/files/reindexing/reindexkey":          true,
+			"qs/files/reindexing/pathname/reindexkey": true,
+		}
+
+		for newFilePath := range newFiles {
+			newFileDir := filepath.Dir(newFilePath)
+			err := fs.MkdirAll(newFileDir)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			err = fs.Create(newFilePath)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+		fs.Sync()
+
+		resp, _, errs := cl.Reindex()
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+
+		settingsCl := client.NewSettingsClient(addr)
+		for {
+			reportResp, wqResp, errs := settingsCl.WorkerQueueLen(token)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if reportResp.StatusCode != 200 {
+				t.Fatal(reportResp.StatusCode)
+			}
+
+			if wqResp.QueueLen == 0 {
+				break
+			} else {
+				fmt.Printf("%d messages left\n", wqResp.QueueLen)
+				time.Sleep(1 * time.Second)
+			}
+		}
+		// TODO: currently async worker status is not visible
+		// still need to wait for worker finishing indexing...
+		time.Sleep(3 * time.Second)
+
+		resp, searchItemsResp, errs := cl.SearchItems("reindexkey")
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		}
+		if !compareSearchResults(newFiles, searchItemsResp.Results) {
+			fmt.Printf("expected(%+v) got(%+v)", newFiles, searchItemsResp.Results)
 			t.Fatal("search result not match")
 		}
 	})

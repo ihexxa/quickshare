@@ -51,6 +51,7 @@ func NewFileHandlers(cfg gocfg.ICfg, deps *depidx.Deps) (*FileHandlers, error) {
 		deps: deps,
 	}
 	deps.Workers().AddHandler(MsgTypeSha1, handlers.genSha1)
+	deps.Workers().AddHandler(MsgTypeIndexing, handlers.indexingItems)
 
 	return handlers, nil
 }
@@ -1169,6 +1170,29 @@ func (h *FileHandlers) SearchItems(c *gin.Context) {
 		return
 	}
 	c.JSON(200, &SearchItemsResp{Results: results})
+}
+
+func (h *FileHandlers) Reindex(c *gin.Context) {
+	msg, err := json.Marshal(IndexingParams{})
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
+	err = h.deps.Workers().TryPut(
+		localworker.NewMsg(
+			h.deps.ID().Gen(),
+			map[string]string{localworker.MsgTypeKey: MsgTypeIndexing},
+			string(msg),
+		),
+	)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
+	c.JSON(q.Resp(200))
+	return
 }
 
 func (h *FileHandlers) GetStreamReader(userID uint64, fd io.Reader) (io.ReadCloser, error) {

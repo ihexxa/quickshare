@@ -5,12 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
+	"path"
 
 	"github.com/ihexxa/quickshare/src/worker"
 )
 
 const (
-	MsgTypeSha1 = "sha1"
+	MsgTypeSha1     = "sha1"
+	MsgTypeIndexing = "indexing"
 )
 
 type Sha1Params struct {
@@ -48,5 +51,41 @@ func (h *FileHandlers) genSha1(msg worker.IMsg) error {
 		return fmt.Errorf("fail to set sha1: %s", err)
 	}
 
+	return nil
+}
+
+type IndexingParams struct{}
+
+func (h *FileHandlers) indexingItems(msg worker.IMsg) error {
+	err := h.deps.FileIndex().Reset()
+	if err != nil {
+		return err
+	}
+
+	root := ""
+	queue := []string{root}
+	var infos []os.FileInfo
+	for len(queue) > 0 {
+		pathname := queue[0]
+		queue = queue[1:]
+		infos, err = h.deps.FS().ListDir(pathname)
+		if err != nil {
+			return err
+		}
+
+		for _, fileInfo := range infos {
+			childPath := path.Join(pathname, fileInfo.Name())
+			if fileInfo.IsDir() {
+				queue = append(queue, childPath)
+			} else {
+				err = h.deps.FileIndex().AddPath(childPath)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	h.deps.Log().Info("reindexing done")
 	return nil
 }

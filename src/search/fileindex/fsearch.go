@@ -20,19 +20,28 @@ type IFileIndex interface {
 	MovePath(pathname, dstParentPath string) error
 	WriteTo(pathname string) error
 	ReadFrom(pathname string) error
+	Reset() error
 }
 
 type FileTreeIndex struct {
-	fs    fs.ISimpleFS
-	index *fsearch.FSearch
+	fs            fs.ISimpleFS
+	index         *fsearch.FSearch
+	pathSeparator string
+	maxResultSize int
 }
 
 func NewFileTreeIndex(fs fs.ISimpleFS, pathSeparator string, maxResultSize int) *FileTreeIndex {
 	return &FileTreeIndex{
-		fs: fs,
-		// TODO: support max result size config
-		index: fsearch.New(pathSeparator, maxResultSize),
+		fs:            fs,
+		index:         fsearch.New(pathSeparator, maxResultSize),
+		pathSeparator: pathSeparator,
+		maxResultSize: maxResultSize,
 	}
+}
+
+func (idx *FileTreeIndex) Reset() error {
+	idx.index = fsearch.New(idx.pathSeparator, idx.maxResultSize)
+	return nil
 }
 
 func (idx *FileTreeIndex) Search(keyword string) ([]string, error) {
