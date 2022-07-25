@@ -6,6 +6,7 @@ import {
   ListSharingsResp,
   ListSharingIDsResp,
   GetSharingDirResp,
+  SearchItemsResp,
   IFilesClient,
 } from "./";
 
@@ -34,6 +35,8 @@ export interface FilesClientResps {
   isSharingMockResp?: Response;
   generateHashMockResp?: Response;
   downloadMockResp: Response;
+  searchMockResp: Response<SearchItemsResp>;
+  reindexMockResp: Response;
 }
 
 const sharingIDs = new Map<string, string>();
@@ -131,6 +134,18 @@ export const resps = {
         },
       ],
     },
+  },
+  searchMockResp: {
+    status: 200,
+    statusText: "",
+    data: {
+      results: ["mock_search_result1", "mock_search_result2"],
+    },
+  },
+  reindexMockResp: {
+    status: 200,
+    statusText: "",
+    data: {},
   },
   deleteUploadingMockResp: { status: 200, statusText: "", data: {} },
   addSharingMockResp: { status: 200, statusText: "", data: {} },
@@ -263,6 +278,14 @@ export class MockFilesClient {
   download = (url: string): Promise<Response> => {
     return this.wrapPromise(this.resps.downloadMockResp);
   };
+
+  search = (keyword: string): Promise<Response> => {
+    return this.wrapPromise(this.resps.searchMockResp);
+  };
+
+  reindex = (): Promise<Response> => {
+    return this.wrapPromise(this.resps.reindexMockResp);
+  };
 }
 
 // JestFilesClient supports jest function mockings
@@ -291,15 +314,11 @@ export class JestFilesClient {
   deleteUploading = jest
     .fn()
     .mockReturnValue(makePromise(resps.deleteUploadingMockResp));
-  addSharing = jest
-    .fn()
-    .mockReturnValue(makePromise(resps.addSharingMockResp));
+  addSharing = jest.fn().mockReturnValue(makePromise(resps.addSharingMockResp));
   deleteSharing = jest
     .fn()
     .mockReturnValue(makePromise(resps.deleteSharingMockResp));
-  isSharing = jest
-    .fn()
-    .mockReturnValue(makePromise(resps.isSharingMockResp));
+  isSharing = jest.fn().mockReturnValue(makePromise(resps.isSharingMockResp));
   listSharings = jest
     .fn()
     .mockReturnValue(makePromise(resps.listSharingsMockResp));
@@ -313,6 +332,8 @@ export class JestFilesClient {
     .fn()
     .mockReturnValue(makePromise(resps.generateHashMockResp));
   download = jest.fn().mockReturnValue(makePromise(resps.downloadMockResp));
+  search = jest.fn().mockReturnValue(makePromise(resps.searchMockResp));
+  reindex = jest.fn().mockReturnValue(makePromise(resps.reindexMockResp));
 }
 
 export const NewMockFilesClient = (url: string): IFilesClient => {
