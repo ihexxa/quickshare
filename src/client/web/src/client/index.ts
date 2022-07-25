@@ -93,6 +93,10 @@ export interface GetSharingDirResp {
   sharingDir: string;
 }
 
+export interface SearchItemsResp {
+  results: string[];
+}
+
 export interface ClientConfig {
   siteName: string;
   siteDesc: string;

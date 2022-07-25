@@ -14,6 +14,7 @@ export const filePathQuery = "fp";
 export const listDirQuery = "dp";
 export const shareIDQuery = "shid";
 export const shareDirQuery = "shdir";
+export const keywordQuery = "k";
 // TODO: get timeout from server
 
 function translateResp(resp: Response<any>): Response<any> {
@@ -236,5 +237,23 @@ export class FilesClient extends BaseClient {
       method: "get",
       url,
     });
-  }
+  };
+
+  search = (keyword: string): Promise<Response> => {
+    return this.do({
+      method: "get",
+      url: `${this.url}/v1/fs/search`,
+      params: {
+        [keywordQuery]: keyword,
+      },
+    });
+  };
+
+  reindex = (): Promise<Response> => {
+    return this.do({
+      method: "put",
+      url: `${this.url}/v1/fs/reindex`,
+      data: {},
+    });
+  };
 }
