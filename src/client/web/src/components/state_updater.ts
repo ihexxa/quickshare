@@ -289,7 +289,13 @@ export class Updater {
 
   gotoSearchResult = async (pathname: string): Promise<string> => {
     const metadataResp = await this.filesClient.metadata(pathname);
-    if (metadataResp.status !== 200) {
+    if (metadataResp.status === 404) {
+      const deleteResp = await this.filesClient.delete(pathname);
+      if (deleteResp.status !== 200) {
+        return errServer;
+      }
+      return "term.noResult";
+    } else if (metadataResp.status !== 200) {
       return errServer;
     }
 
@@ -297,6 +303,9 @@ export class Updater {
     let targetDir = List(parts);
     if (!metadataResp.data.isDir) {
       targetDir = targetDir.slice(0, parts.length - 1);
+    }
+    if (targetDir.join("/") === "") {
+      targetDir = targetDir.push("/");
     }
     return updater().setItems(List(targetDir));
   };
