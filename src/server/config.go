@@ -6,6 +6,8 @@ import (
 	"github.com/ihexxa/quickshare/src/db"
 )
 
+const fileIndexPath = "/fileindex.jsonl"
+
 type DbConfig struct {
 	DbPath string `json:"dbPath" yaml:"dbPath"`
 }
