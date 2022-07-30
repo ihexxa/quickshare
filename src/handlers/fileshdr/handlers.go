@@ -282,19 +282,13 @@ func (h *FileHandlers) Delete(c *gin.Context) {
 	var txErr error
 	locker := h.NewAutoLocker(c, lockName(filePath))
 	locker.Exec(func() {
-		info, err := h.deps.FS().Stat(filePath)
-		if err != nil {
-			txErr = err
-			return
-		}
-
 		err = h.deps.FS().Remove(filePath)
 		if err != nil {
 			txErr = err
 			return
 		}
 
-		err = h.deps.BoltStore().DelInfos(userIDInt, filePath, info.IsDir())
+		err = h.deps.BoltStore().DelInfos(userIDInt, filePath)
 		if err != nil {
 			txErr = err
 			return
@@ -1173,7 +1167,6 @@ func (h *FileHandlers) SearchItems(c *gin.Context) {
 		}
 
 		for _, searchResult := range searchResults {
-			fmt.Println(keyword, searchResult)
 			if _, ok := resultsMap[searchResult]; !ok {
 				resultsMap[searchResult] = 0
 			}

@@ -310,7 +310,7 @@ func (bs *BoltStore) delShareID(tx *bolt.Tx, itemPath string) error {
 	return nil
 }
 
-func (bs *BoltStore) DelInfos(userID uint64, itemPath string, isDir bool) error {
+func (bs *BoltStore) DelInfos(userID uint64, itemPath string) error {
 	return bs.boltdb.Update(func(tx *bolt.Tx) error {
 		var err error
 
@@ -336,11 +336,10 @@ func (bs *BoltStore) DelInfos(userID uint64, itemPath string, isDir bool) error 
 			if err != nil {
 				return err
 			}
-			if fileInfo.IsDir {
-				err = bs.delShareID(tx, childPath)
-				if err != nil {
-					return err
-				}
+
+			err = bs.delShareID(tx, childPath)
+			if err != nil {
+				return err
 			}
 		}
 

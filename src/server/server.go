@@ -144,10 +144,26 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	searchResultLimit := cfg.GrabInt("Server.SearchResultLimit")
 	fileIndex := fileindex.NewFileTreeIndex(filesystem, "/", searchResultLimit)
 
+	indexInfo, err := filesystem.Stat(fileIndexPath)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			panic(fmt.Sprintf("failed to detect file index: %s", err))
+		} else {
+			logger.Info("warning: no file index found")
+		}
+	} else if indexInfo.IsDir() {
+		panic(fmt.Sprintf("file index is folder, not file: %s", fileIndexPath))
+	} else {
+		err = fileIndex.ReadFrom(fileIndexPath)
+		if err != nil {
+			panic(fmt.Sprintf("failed to load file index: %s", err))
+		}
+	}
+
 	dbPath := cfg.GrabString("Db.DbPath")
 	dbDir := filepath.Dir(dbPath)
-	if err := filesystem.MkdirAll(dbDir); err != nil {
-		panic(fmt.Sprintf("fail to create path for db: %s", err))
+	if err = filesystem.MkdirAll(dbDir); err != nil {
+		panic(fmt.Sprintf("failed to create path for db: %s", err))
 	}
 
 	kv := boltdbpvd.New(dbPath, 1024)
@@ -393,6 +409,10 @@ func (s *Server) Start() error {
 
 func (s *Server) Shutdown() error {
 	// TODO: add timeout
+	err := s.deps.FileIndex().WriteTo(fileIndexPath)
+	if err != nil {
+		s.deps.Log().Errorf("failed to persist file index: %s", err)
+	}
 	s.deps.Workers().Stop()
 	s.deps.FS().Close()
 	s.deps.Log().Sync()
