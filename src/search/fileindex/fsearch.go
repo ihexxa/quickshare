@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 
 	"github.com/ihexxa/fsearch"
@@ -21,6 +20,7 @@ type IFileIndex interface {
 	WriteTo(pathname string) error
 	ReadFrom(pathname string) error
 	Reset() error
+	String() string
 }
 
 type FileTreeIndex struct {
@@ -66,8 +66,12 @@ func (idx *FileTreeIndex) MovePath(pathname, dstParentPath string) error {
 
 func (idx *FileTreeIndex) WriteTo(pathname string) error {
 	rowsChan := idx.index.Marshal()
-	err := idx.fs.Create(pathname)
-	if err != nil && !errors.Is(err, os.ErrExist) {
+	err := idx.fs.Remove(pathname)
+	if err != nil {
+		return err
+	}
+	err = idx.fs.Create(pathname)
+	if err != nil {
 		return err
 	}
 
@@ -78,17 +82,20 @@ func (idx *FileTreeIndex) WriteTo(pathname string) error {
 	batch := []string{}
 	for {
 		row, ok = <-rowsChan
+		if ok {
+			batch = append(batch, row+"\n")
+		}
 		if !ok || len(batch) > 1024 {
-			wrote, err = idx.fs.WriteAt(pathname, []byte(strings.Join(batch, "\n")), offset)
+			wrote, err = idx.fs.WriteAt(pathname, []byte(strings.Join(batch, "")), offset)
 			if err != nil {
 				return err
 			}
 			offset += int64(wrote)
+			batch = batch[:0]
 		}
 		if !ok {
 			break
 		}
-		batch = append(batch, row)
 	}
 
 	return idx.index.Error()
@@ -105,19 +112,37 @@ func (idx *FileTreeIndex) ReadFrom(pathname string) error {
 	rowSeparator := byte('\n')
 	reader := bufio.NewReader(f)
 	rowsChan := make(chan string, 1024)
-	defer close(rowsChan)
-	for {
-		row, err = reader.ReadString(rowSeparator)
-		if err != nil {
-			if errors.Is(err, io.EOF) {
-				rowsChan <- row // some content may still read
-				break
-			} else {
-				return err
+
+	var workerErr error
+	readWorker := func() {
+		defer close(rowsChan)
+		for {
+			row, err = reader.ReadString(rowSeparator)
+			if err != nil {
+				if errors.Is(err, io.EOF) {
+					if row != "" {
+						rowsChan <- row
+					}
+					break
+				} else {
+					workerErr = err
+					break
+				}
+			}
+			if row != "" {
+				rowsChan <- row
 			}
 		}
-		rowsChan <- row
 	}
+	go readWorker()
 
+	idx.index.Unmarshal(rowsChan)
+	if workerErr != nil {
+		return err
+	}
 	return idx.index.Error()
+}
+
+func (idx *FileTreeIndex) String() string {
+	return idx.index.String()
 }
