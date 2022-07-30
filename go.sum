@@ -53,6 +53,7 @@ github.com/ihexxa/q-radix/v3 v3.0.4 h1:Hk+Av57Q+fwFtHobd5uQjOFdY/V31nl4p+K4mO3cr
 github.com/ihexxa/q-radix/v3 v3.0.4/go.mod h1:DYXQuLlICQ2pCdPQOzyovzSPq0P8sKwxv5HhVQAwSVQ=
 github.com/ihexxa/q-radix/v3 v3.0.5 h1:dF3+NOZXSK3dSL/46BS5JC/gBe4kw7qiKITRPppo+rQ=
 github.com/ihexxa/q-radix/v3 v3.0.5/go.mod h1:DYXQuLlICQ2pCdPQOzyovzSPq0P8sKwxv5HhVQAwSVQ=
+github.com/ihexxa/randstr v0.3.0 h1:rXG67TwC2g71eSjMvXX1RauWc32wkZrdf6OOSIfun80=
 github.com/ihexxa/randstr v0.3.0/go.mod h1:QUBxemrXFcSziCClYa9/2m5N+87kGNKYaGxDfv05+uY=
 github.com/jessevdk/go-flags v1.4.0 h1:4IU2WS7AumrZ/40jfhf4QVDMsQwqA7VEHozFRrGARJA=
 github.com/jessevdk/go-flags v1.4.0/go.mod h1:4FA24M0QyGHXBuZZK/XkWh8h0e1EYbRYJSGM75WSRxI=
