@@ -1181,10 +1181,15 @@ func (h *FileHandlers) SearchItems(c *gin.Context) {
 		}
 	}
 
+	role := c.MustGet(q.RoleParam).(string)
+	userName := c.MustGet(q.UserParam).(string)
 	results := []string{}
 	for pathname, count := range resultsMap {
 		if count >= len(keywords) {
-			results = append(results, pathname)
+			if role == db.AdminRole ||
+				(role != db.AdminRole && strings.HasPrefix(pathname, userName)) {
+				results = append(results, pathname)
+			}
 		}
 	}
 

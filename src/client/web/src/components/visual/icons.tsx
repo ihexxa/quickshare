@@ -24,6 +24,7 @@ import { RiListSettingsFill } from "@react-icons/all-files/ri/RiListSettingsFill
 import { RiHardDriveFill } from "@react-icons/all-files/ri/RiHardDriveFill";
 import { RiGridFill } from "@react-icons/all-files/ri/RiGridFill";
 import { RiFolderUploadFill } from "@react-icons/all-files/ri/RiFolderUploadFill";
+import { RiFileSearchFill } from "@react-icons/all-files/ri/RiFileSearchFill";
 
 import { colorClass } from "./colors";
 
@@ -34,28 +35,29 @@ export interface IconProps {
 }
 
 const icons = Map<string, IconType>({
-  RiFileList2Fill: RiFileList2Fill,
-  RiFolder2Fill: RiFolder2Fill,
-  RiShareBoxLine: RiShareBoxLine,
-  RiUploadCloudFill: RiUploadCloudFill,
-  RiSettings3Fill: RiSettings3Fill,
-  RiWindowFill: RiWindowFill,
-  RiCheckboxBlankFill: RiCheckboxBlankFill,
-  RiCheckboxFill: RiCheckboxFill,
-  RiMenuFill: RiMenuFill,
-  RiInformationFill: RiInformationFill,
-  RiDeleteBin2Fill: RiDeleteBin2Fill,
-  RiArchiveDrawerFill: RiArchiveDrawerFill,
-  RiArrowUpDownFill: RiArrowUpDownFill,
-  BiTable: BiTable,
-  BiListUl: BiListUl,
-  RiMore2Fill: RiMore2Fill,
-  RiCheckboxBlankLine: RiCheckboxBlankLine,
-  BiSortUp: BiSortUp,
-  RiListSettingsFill: RiListSettingsFill,
-  RiHardDriveFill: RiHardDriveFill,
-  RiGridFill: RiGridFill,
-  RiFolderUploadFill: RiFolderUploadFill,
+  RiFileList2Fill,
+  RiFolder2Fill,
+  RiShareBoxLine,
+  RiUploadCloudFill,
+  RiSettings3Fill,
+  RiWindowFill,
+  RiCheckboxBlankFill,
+  RiCheckboxFill,
+  RiMenuFill,
+  RiInformationFill,
+  RiDeleteBin2Fill,
+  RiArchiveDrawerFill,
+  RiArrowUpDownFill,
+  BiTable,
+  BiListUl,
+  RiMore2Fill,
+  RiCheckboxBlankLine,
+  BiSortUp,
+  RiListSettingsFill,
+  RiHardDriveFill,
+  RiGridFill,
+  RiFolderUploadFill,
+  RiFileSearchFill,
 });
 
 export function getIconWithProps(

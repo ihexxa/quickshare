@@ -287,6 +287,24 @@ export class Updater {
     return errServer;
   };
 
+  gotoSearchResult = async (pathname: string): Promise<string> => {
+    const metadataResp = await this.filesClient.metadata(pathname);
+    if (metadataResp.status !== 200) {
+      return errServer;
+    }
+
+    const parts = pathname.split("/");
+    let targetDir = List(parts);
+    if (!metadataResp.data.isDir) {
+      targetDir = targetDir.slice(0, parts.length - 1);
+    }
+    return updater().setItems(List(targetDir));
+  };
+
+  truncateSearchResults = () => {
+    this.props.filesInfo.searchResults = List([]);
+  };
+
   updateItems = (items: List<MetadataResp>) => {
     this.props.filesInfo.items = items;
   };
@@ -991,6 +1009,24 @@ export class Updater {
   resetUsedSpace = async (userID: string): Promise<string> => {
     const resp = await this.usersClient.resetUsedSpace(userID);
     return resp.status == 200 ? "" : errServer;
+  };
+
+  search = async (keywords: string[]): Promise<string> => {
+    const resp = await this.filesClient.search(keywords);
+    if (resp.status !== 200) {
+      return errServer;
+    }
+
+    this.props.filesInfo.searchResults = List(
+      resp.data.results.sort((path1: string, path2: string) => {
+        return path1.length <= path2.length ? -1 : 1;
+      })
+    );
+    return "";
+  };
+
+  hasResult = (): boolean => {
+    return this.props.filesInfo.searchResults.size > 0;
   };
 
   updateAll = (prevState: ICoreState): ICoreState => {

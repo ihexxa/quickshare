@@ -150,5 +150,10 @@ export const msgs: Map<string, string> = Map({
   "autoTheme": "自动切换主题",
   "term.enabled": "启用",
   "term.disabled": "关闭",
-  "term.dropAnywhere": "把文件在任意处释放"
+  "term.dropAnywhere": "把文件在任意处释放",
+  "term.search": "搜索",
+  "term.results": "结果",
+  "term.noResult": "未找到结果",
+  "action.go": "前往",
+  "hint.keywords": "请输入关键字，以空格分隔"
 });

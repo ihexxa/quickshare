@@ -61,6 +61,7 @@ export function initState(): ICoreState {
       isSharing: false,
       orderBy: filesOrderBy,
       order: true,
+      searchResults: List<string>([]),
     },
     uploadingsInfo: {
       uploadings: List<UploadEntry>([]),
