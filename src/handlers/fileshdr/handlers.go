@@ -1158,17 +1158,36 @@ type SearchItemsResp struct {
 }
 
 func (h *FileHandlers) SearchItems(c *gin.Context) {
-	keyword := c.Query(Keyword)
-	if keyword == "" {
+	keywords := c.QueryArray(Keyword)
+	if len(keywords) == 0 {
 		c.JSON(q.ErrResp(c, 400, errors.New("empty keyword")))
 		return
 	}
 
-	results, err := h.deps.FileIndex().Search(keyword)
-	if err != nil {
-		c.JSON(q.ErrResp(c, 500, err))
-		return
+	resultsMap := map[string]int{}
+	for _, keyword := range keywords {
+		searchResults, err := h.deps.FileIndex().Search(keyword)
+		if err != nil {
+			c.JSON(q.ErrResp(c, 500, err))
+			return
+		}
+
+		for _, searchResult := range searchResults {
+			fmt.Println(keyword, searchResult)
+			if _, ok := resultsMap[searchResult]; !ok {
+				resultsMap[searchResult] = 0
+			}
+			resultsMap[searchResult] += 1
+		}
 	}
+
+	results := []string{}
+	for pathname, count := range resultsMap {
+		if count >= len(keywords) {
+			results = append(results, pathname)
+		}
+	}
+
 	c.JSON(200, &SearchItemsResp{Results: results})
 }
 
