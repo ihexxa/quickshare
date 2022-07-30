@@ -153,5 +153,10 @@ export const msgs: Map<string, string> = Map({
   "autoTheme": "Enable auto theme switching",
   "term.enabled": "Enabled",
   "term.disabled": "Disabled",
-  "term.dropAnywhere": "Drop files anywhere"
+  "term.dropAnywhere": "Drop files anywhere",
+  "term.search": "Search",
+  "term.results": "Results",
+  "term.noResult": "No result found",
+  "action.go": "Go",
+  "hint.keywords": "Please input keyword(s), separated by spaces"
 });

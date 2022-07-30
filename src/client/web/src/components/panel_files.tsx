@@ -51,6 +51,7 @@ export interface FilesProps {
   items: List<MetadataResp>;
   orderBy: string;
   order: boolean;
+  searchResults: List<string>;
 }
 
 export interface Props {
@@ -74,6 +75,7 @@ export interface State {
   selectedItems: Map<string, boolean>;
   showDetail: Set<string>;
   uploadFiles: string;
+  searchKeywords: string;
 }
 
 export class FilesPanel extends React.Component<Props, State, {}> {
@@ -90,6 +92,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       selectedItems: Map<string, boolean>(),
       showDetail: Set<string>(),
       uploadFiles: "",
+      searchKeywords: "",
     };
 
     Up().setStatusCb(this.updateProgress);
@@ -130,6 +133,10 @@ export class FilesPanel extends React.Component<Props, State, {}> {
 
   onNewFolderNameChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ newFolderName: ev.target.value });
+  };
+
+  onSearchKeywordsChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ searchKeywords: ev.target.value });
   };
 
   setLoading = (state: boolean) => {
@@ -674,6 +681,54 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     this.props.update(updater().updateFilesInfo);
   };
 
+  search = async () => {
+    if (this.state.searchKeywords.trim() === "") {
+      Env().alertMsg(this.props.msg.pkg.get("hint.keywords"));
+      return;
+    }
+    const keywords = this.state.searchKeywords.split(" ");
+    if (keywords.length === 0) {
+      Env().alertMsg(this.props.msg.pkg.get("hint.keywords"));
+      return;
+    }
+
+    const status = await updater().search(keywords);
+    if (status !== "") {
+      Env().alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+      return;
+    } else if (!updater().hasResult()) {
+      Env().alertMsg(this.props.msg.pkg.get("term.noResult"));
+      return;
+    }
+    this.props.update(updater().updateFilesInfo);
+  };
+
+  searchKb = async (
+    event: React.KeyboardEvent<HTMLInputElement>
+  ): Promise<void> => {
+    if (event.key === "Enter") {
+      return await this.search();
+    }
+  };
+
+  gotoSearchResult = async (pathname: string) => {
+    this.setLoading(true);
+    try {
+      const status = await updater().gotoSearchResult(pathname);
+      if (status !== "") {
+        Env().alertMsg(getErrMsg(this.props.msg.pkg, "op.fail", status));
+      }
+    } finally {
+      this.setLoading(false);
+    }
+  };
+
+  truncateSearchResults = async () => {
+    updater().truncateSearchResults();
+    this.setState({ searchKeywords: "" });
+    this.props.update(updater().updateFilesInfo);
+  };
+
   render() {
     const showEndpoints =
       this.props.login.userRole === roleAdmin ? "" : "hidden";
@@ -686,14 +741,50 @@ export class FilesPanel extends React.Component<Props, State, {}> {
             iconColor="normal"
             iconName="RiGridFill"
           />
-          <div className="hr"></div>
 
-          <button onClick={gotoRoot} className="button-default margin-r-m">
-            {this.props.msg.pkg.get("endpoints.root")}
-          </button>
-          <button onClick={this.goHome} className="button-default">
-            {this.props.msg.pkg.get("endpoints.home")}
-          </button>
+          <div className="hr"></div>
+          <Flexbox
+            children={List([
+              <>
+                <button
+                  onClick={gotoRoot}
+                  className="button-default margin-r-m"
+                >
+                  {this.props.msg.pkg.get("endpoints.root")}
+                </button>
+                <button onClick={this.goHome} className="button-default">
+                  {this.props.msg.pkg.get("endpoints.home")}
+                </button>
+              </>,
+
+              <>
+                <input
+                  type="text"
+                  onChange={this.onSearchKeywordsChange}
+                  onKeyUp={this.searchKb}
+                  value={this.state.searchKeywords}
+                  placeholder={this.props.msg.pkg.get("hint.keywords")}
+                  className="inline-block margin-r-m"
+                />
+                <button
+                  onClick={this.search}
+                  className="button-default margin-r-m"
+                >
+                  {this.props.msg.pkg.get("term.search")}
+                </button>
+                <button
+                  onClick={this.truncateSearchResults}
+                  className="button-default"
+                >
+                  {this.props.msg.pkg.get("reset")}
+                </button>
+              </>,
+            ])}
+            childrenStyles={List([
+              { flex: "0 0 50%" },
+              { flex: "0 0 50%", justifyContent: "flex-end" },
+            ])}
+          />
         </Container>
       </div>
     );
@@ -836,9 +927,48 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         ? "focus-font"
         : "major-font";
 
+    const showSearchResults =
+      this.props.filesInfo.searchResults.size > 0 ? "" : "hidden";
+    const searchResultPane = this.props.filesInfo.searchResults.map(
+      (searchResult: string) => {
+        return (
+          <>
+            <Flexbox
+              children={List([
+                <span className="font-s">{searchResult}</span>,
+                <button
+                  type="button"
+                  onClick={() => {
+                    this.gotoSearchResult(searchResult);
+                  }}
+                  className="button-default"
+                >
+                  {this.props.msg.pkg.get("action.go")}
+                </button>,
+              ])}
+              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+            />
+            <div className="hr"></div>
+          </>
+        );
+      }
+    );
+
     const itemListPane = (
       <div>
         {endPoints}
+
+        <div className={showSearchResults}>
+          <Container>
+            <Title
+              title={this.props.msg.pkg.get("term.results")}
+              iconColor="normal"
+              iconName="RiFileSearchFill"
+            />
+            <div className="hr"></div>
+            {searchResultPane}
+          </Container>
+        </div>
 
         <div className={showOp}>
           <Container>{ops}</Container>

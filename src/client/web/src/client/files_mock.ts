@@ -279,7 +279,7 @@ export class MockFilesClient {
     return this.wrapPromise(this.resps.downloadMockResp);
   };
 
-  search = (keyword: string): Promise<Response> => {
+  search = (keywords: string[]): Promise<Response> => {
     return this.wrapPromise(this.resps.searchMockResp);
   };
 

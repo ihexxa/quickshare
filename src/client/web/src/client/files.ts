@@ -239,13 +239,16 @@ export class FilesClient extends BaseClient {
     });
   };
 
-  search = (keyword: string): Promise<Response> => {
+  search = (keywords: string[]): Promise<Response> => {
+    const params = new URLSearchParams();
+    keywords.forEach(keyword => {
+      params.append(keywordQuery, keyword);
+    });
+
     return this.do({
       method: "get",
       url: `${this.url}/v1/fs/search`,
-      params: {
-        [keywordQuery]: keyword,
-      },
+      params,
     });
   };
 

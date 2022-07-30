@@ -163,6 +163,7 @@ export interface IFilesClient {
   getSharingDir: (shareID: string) => Promise<Response<GetSharingDirResp>>;
   generateHash: (filePath: string) => Promise<Response>;
   download: (url: string) => Promise<Response>;
+  search: (keywords: string[]) => Promise<Response<SearchItemsResp>>;
 }
 
 export interface ISettingsClient {
