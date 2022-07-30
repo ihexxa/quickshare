@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/ihexxa/quickshare/src/handlers/fileshdr"
 	"github.com/parnurzeal/gorequest"
@@ -249,10 +250,15 @@ func (cl *FilesClient) GetSharingDir(shareID string) (*http.Response, string, []
 	return resp, sdResp.SharingDir, nil
 }
 
-func (cl *FilesClient) SearchItems(keyword string) (*http.Response, *fileshdr.SearchItemsResp, []error) {
+func (cl *FilesClient) SearchItems(keywords []string) (*http.Response, *fileshdr.SearchItemsResp, []error) {
+	values := url.Values{}
+	for _, keyword := range keywords {
+		values.Add(fileshdr.Keyword, keyword)
+	}
+
 	resp, body, errs := cl.r.Get(cl.url("/v1/fs/search")).
 		AddCookie(cl.token).
-		Param(fileshdr.Keyword, keyword).
+		Query(values.Encode()).
 		End()
 
 	searchResp := &fileshdr.SearchItemsResp{}

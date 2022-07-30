@@ -868,39 +868,45 @@ func TestFileHandlers(t *testing.T) {
 		return true
 	}
 
-	t.Run("Search", func(t *testing.T) {
+	t.Run("SearchItems", func(t *testing.T) {
+		path1 := "qs/files/search/keyword1keyword2/file"
+		path1Dir := "qs/files/search/keyword1keyword2"
+		path2 := "qs/files/search/path/keyword1keyword2"
+		path22 := "qs/files/search/new_path/keyword1keyword2"
+		path3 := "qs/files/search/normal_file"
+
 		files := map[string]string{
-			"qs/files/search/keyword":      "12345678",
-			"qs/files/search/path/keyword": "12345678",
-			"qs/files/search/normal_file":  "12345678",
+			path1: "12345678",
+			path2: "12345678",
+			path3: "12345678",
 		}
 		expected := map[string]bool{
-			"qs/files/search/keyword":      true,
-			"qs/files/search/path/keyword": true,
+			path1Dir: true,
+			path2:    true,
 		}
 		toDelete := map[string]bool{
-			"qs/files/search/keyword": true,
+			path1Dir: true,
 		}
 		afterDeleted := map[string]bool{
-			"qs/files/search/path/keyword": true,
+			path2: true,
 		}
 		toMove := map[string]string{
-			"qs/files/search/path/keyword": "qs/files/search/newPath/keyword",
+			path2: path22,
 		}
 		afterMoved := map[string]bool{
-			"qs/files/search/newPath/keyword": true,
+			path22: true,
 		}
 
 		for filePath, content := range files {
 			assertUploadOK(t, filePath, content, addr, token)
-
 			err = fs.Sync()
 			if err != nil {
 				t.Fatal(err)
 			}
 		}
 
-		resp, searchItemsResp, errs := cl.SearchItems("keyword")
+		keywords := []string{"keyword1", "keyword2"}
+		resp, searchItemsResp, errs := cl.SearchItems(keywords)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
@@ -921,7 +927,7 @@ func TestFileHandlers(t *testing.T) {
 				t.Fatal(resp.StatusCode)
 			}
 		}
-		resp, searchItemsResp, errs = cl.SearchItems("keyword")
+		resp, searchItemsResp, errs = cl.SearchItems(keywords)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
@@ -949,7 +955,7 @@ func TestFileHandlers(t *testing.T) {
 				t.Fatal(resp.StatusCode)
 			}
 		}
-		resp, searchItemsResp, errs = cl.SearchItems("keyword")
+		resp, searchItemsResp, errs = cl.SearchItems(keywords)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
@@ -1008,7 +1014,7 @@ func TestFileHandlers(t *testing.T) {
 		// still need to wait for worker finishing indexing...
 		time.Sleep(3 * time.Second)
 
-		resp, searchItemsResp, errs := cl.SearchItems("reindexkey")
+		resp, searchItemsResp, errs := cl.SearchItems([]string{"reindexkey"})
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {

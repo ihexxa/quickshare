@@ -494,7 +494,7 @@ func TestPermissions(t *testing.T) {
 			assertResp(t, resp, errs, expectedCodes["Delete"], fmt.Sprintf("%s-%s", desc, "Delete"))
 			resp, _, errs = filesCl.Delete(targetPathFile)
 			assertResp(t, resp, errs, expectedCodes["DeleteTarget"], fmt.Sprintf("%s-%s", desc, "DeleteTarget"))
-			resp, _, errs = filesCl.SearchItems(targetPathFile)
+			resp, _, errs = filesCl.SearchItems([]string{targetPathFile})
 			assertResp(t, resp, errs, expectedCodes["SearchTarget"], fmt.Sprintf("%s-%s", desc, "SearchTarget"))
 
 			if requireAuth {
