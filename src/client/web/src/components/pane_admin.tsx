@@ -268,6 +268,20 @@ export class UserForm extends React.Component<
 
           <div className="hr"></div>
 
+          <div>
+            <Flexbox
+              children={List([
+                <span>{this.props.msg.pkg.get("action.reindex.desc")}</span>,
+                <button className="button-default" onClick={resetUsedSpace}>
+                  {this.props.msg.pkg.get("action.reindex")}
+                </button>,
+              ])}
+              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+            />
+          </div>
+
+          <div className="hr"></div>
+
           <Flexbox
             className="margin-t-m"
             children={List([
@@ -490,6 +504,10 @@ export class AdminPane extends React.Component<Props, State, {}> {
       this.props.update(updater().updateAdmin);
     }
   };
+
+  reindex = async () => {
+    return updater().reindex();
+  }
 
   addUser = async () => {
     if (this.state.newUserPwd1 !== this.state.newUserPwd2) {

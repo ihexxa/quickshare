@@ -63,7 +63,7 @@ func TestSpaceLimit(t *testing.T) {
 		t.Fatal("fail to start server")
 	}
 
-	usersCl := client.NewSingleUserClient(addr)
+	usersCl := client.NewUsersClient(addr)
 	resp, _, errs := usersCl.Login(adminName, adminPwd)
 	if len(errs) > 0 {
 		t.Fatal(errs)
@@ -100,7 +100,7 @@ func TestSpaceLimit(t *testing.T) {
 	}
 
 	t.Run("test space limiting: Upload", func(t *testing.T) {
-		usersCl := client.NewSingleUserClient(addr)
+		usersCl := client.NewUsersClient(addr)
 		resp, _, errs := usersCl.Login(getUserName(0), userPwd)
 		if len(errs) > 0 {
 			t.Fatal(errs)
@@ -230,7 +230,7 @@ func TestSpaceLimit(t *testing.T) {
 	})
 
 	t.Run("ResetUsedSpace", func(t *testing.T) {
-		usersCl := client.NewSingleUserClient(addr)
+		usersCl := client.NewUsersClient(addr)
 		resp, _, errs := usersCl.Login("test", "test")
 		if len(errs) > 0 {
 			t.Fatal(errs)

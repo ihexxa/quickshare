@@ -114,7 +114,7 @@ func TestPermissions(t *testing.T) {
 			tmpAdmin, tmpAdminPwd := "tmpAdmin", "1234"
 			tmpNewRole := "tmpNewRole"
 
-			cl := client.NewSingleUserClient(addr)
+			cl := client.NewUsersClient(addr)
 			token := &http.Cookie{}
 			if requireAuth {
 				resp, _, errs := cl.Login(user, pwd)
@@ -290,7 +290,7 @@ func TestPermissions(t *testing.T) {
 			// Mkdir
 			// Move
 
-			cl := client.NewSingleUserClient(addr)
+			cl := client.NewUsersClient(addr)
 			token := &http.Cookie{}
 
 			if requireAuth {
@@ -381,7 +381,7 @@ func TestPermissions(t *testing.T) {
 		})
 
 		uploadSample := func() {
-			cl := client.NewSingleUserClient(addr)
+			cl := client.NewUsersClient(addr)
 			token := &http.Cookie{}
 
 			resp, _, errs := cl.Login("user2", "1234")
@@ -411,7 +411,7 @@ func TestPermissions(t *testing.T) {
 			// GenerateHash
 			// Search
 
-			cl := client.NewSingleUserClient(addr)
+			cl := client.NewUsersClient(addr)
 			token := &http.Cookie{}
 			if requireAuth {
 				resp, _, errs := cl.Login(user, pwd)
@@ -575,7 +575,7 @@ func TestPermissions(t *testing.T) {
 
 		// sharing permission tests
 		enableSharing := func() {
-			cl := client.NewSingleUserClient(addr)
+			cl := client.NewUsersClient(addr)
 			token := &http.Cookie{}
 
 			resp, _, errs := cl.Login("share", "1234")
@@ -631,7 +631,7 @@ func TestPermissions(t *testing.T) {
 			// ListSharingIDs
 			// GetSharingDir
 
-			cl := client.NewSingleUserClient(addr)
+			cl := client.NewUsersClient(addr)
 			token := &http.Cookie{}
 			homePath := "/"
 			desc := user
@@ -727,7 +727,7 @@ func TestPermissions(t *testing.T) {
 			// SetClientCfg
 			// ReportErrors
 
-			cl := client.NewSingleUserClient(addr)
+			cl := client.NewUsersClient(addr)
 			token := &http.Cookie{}
 			desc := user
 			errReports := &settings.ClientErrorReports{

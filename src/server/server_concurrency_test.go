@@ -48,7 +48,7 @@ func TestConcurrency(t *testing.T) {
 		t.Fatal("fail to start server")
 	}
 
-	usersCl := client.NewSingleUserClient(addr)
+	usersCl := client.NewUsersClient(addr)
 	resp, _, errs := usersCl.Login(adminName, adminPwd)
 	if len(errs) > 0 {
 		t.Fatal(errs)
@@ -67,7 +67,7 @@ func TestConcurrency(t *testing.T) {
 
 	filesCount := 10
 	mockClient := func(name, pwd string, wg *sync.WaitGroup) {
-		usersCl := client.NewSingleUserClient(addr)
+		usersCl := client.NewUsersClient(addr)
 		resp, _, errs := usersCl.Login(name, pwd)
 		if len(errs) > 0 {
 			t.Fatal(errs)

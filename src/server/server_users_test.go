@@ -72,7 +72,7 @@ func TestUsersHandlers(t *testing.T) {
 	defer srv.Shutdown()
 	fs := srv.depsFS()
 
-	usersCl := client.NewSingleUserClient(addr)
+	usersCl := client.NewUsersClient(addr)
 	settingsCl := client.NewSettingsClient(addr)
 
 	if !isServerReady(addr) {
@@ -82,7 +82,7 @@ func TestUsersHandlers(t *testing.T) {
 	var err error
 
 	t.Run("test inited users", func(t *testing.T) {
-		usersCl := client.NewSingleUserClient(addr)
+		usersCl := client.NewUsersClient(addr)
 		resp, _, errs := usersCl.Login(adminName, adminPwd)
 		if len(errs) > 0 {
 			t.Fatal(errs)
@@ -164,7 +164,7 @@ func TestUsersHandlers(t *testing.T) {
 		}
 
 		for _, user := range users {
-			usersCl := client.NewSingleUserClient(addr)
+			usersCl := client.NewUsersClient(addr)
 			resp, _, errs := usersCl.Login(user.Name, user.Pwd)
 			if len(errs) > 0 {
 				t.Fatal(errs)
@@ -451,7 +451,7 @@ func TestUsersHandlers(t *testing.T) {
 	})
 
 	t.Run("Login, SetPreferences, Self, Logout", func(t *testing.T) {
-		usersCl := client.NewSingleUserClient(addr)
+		usersCl := client.NewUsersClient(addr)
 		resp, _, errs := usersCl.Login(adminName, adminNewPwd)
 		if len(errs) > 0 {
 			t.Fatal(errs)

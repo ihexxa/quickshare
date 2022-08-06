@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
@@ -16,6 +17,7 @@ import (
 	"github.com/ihexxa/quickshare/src/client"
 	"github.com/ihexxa/quickshare/src/db"
 	fspkg "github.com/ihexxa/quickshare/src/fs"
+	q "github.com/ihexxa/quickshare/src/handlers"
 )
 
 func startTestServer(config string) *Server {
@@ -57,7 +59,7 @@ func getUserName(id int) string {
 }
 
 func addUsers(t *testing.T, addr, userPwd string, userCount int, adminToken *http.Cookie) map[string]string {
-	usersCl := client.NewSingleUserClient(addr)
+	usersCl := client.NewUsersClient(addr)
 	users := map[string]string{}
 	for i := range make([]int, userCount) {
 		userName := getUserName(i)
@@ -219,4 +221,26 @@ func assertResp(t *testing.T, resp *http.Response, errs []error, expectedCode in
 	} else if resp.StatusCode != expectedCode {
 		t.Fatal(desc, resp.StatusCode, expectedCode)
 	}
+}
+
+func joinErrs(errs []error) error {
+	msgs := []string{}
+	for _, err := range errs {
+		msgs = append(msgs, err.Error())
+	}
+
+	return errors.New(strings.Join(msgs, ","))
+}
+
+func loginFilesClient(addr, user, pwd string) (*client.FilesClient, error) {
+	usersCl := client.NewUsersClient(addr)
+	resp, _, errs := usersCl.Login(user, pwd)
+	if len(errs) > 0 {
+		return nil, joinErrs(errs)
+	} else if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("unexpected code(%d)", resp.StatusCode)
+	}
+
+	token := client.GetCookie(resp.Cookies(), q.TokenCookie)
+	return client.NewFilesClient(addr, token), nil
 }

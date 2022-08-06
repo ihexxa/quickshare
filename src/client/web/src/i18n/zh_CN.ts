@@ -155,5 +155,7 @@ export const msgs: Map<string, string> = Map({
   "term.results": "结果",
   "term.noResult": "未找到结果",
   "action.go": "前往",
-  "hint.keywords": "请输入关键字，以空格分隔"
+  "hint.keywords": "请输入关键字，以空格分隔",
+  "action.reindex": "重新索引",
+  "action.reindex.desc": "重新建立搜索索引",
 });
