@@ -62,7 +62,7 @@ func TestSettingsHandlers(t *testing.T) {
 		t.Fatal("fail to start server")
 	}
 
-	usersCl := client.NewSingleUserClient(addr)
+	usersCl := client.NewUsersClient(addr)
 	resp, _, errs := usersCl.Login(adminName, adminPwd)
 	if len(errs) > 0 {
 		t.Fatal(errs)

@@ -11,24 +11,24 @@ import (
 	"github.com/parnurzeal/gorequest"
 )
 
-type SingleUserClient struct {
+type UsersClient struct {
 	addr string
 	r    *gorequest.SuperAgent
 }
 
-func NewSingleUserClient(addr string) *SingleUserClient {
+func NewUsersClient(addr string) *UsersClient {
 	gr := gorequest.New()
-	return &SingleUserClient{
+	return &UsersClient{
 		addr: addr,
 		r:    gr,
 	}
 }
 
-func (cl *SingleUserClient) url(urlpath string) string {
+func (cl *UsersClient) url(urlpath string) string {
 	return fmt.Sprintf("%s%s", cl.addr, urlpath)
 }
 
-func (cl *SingleUserClient) Login(user, pwd string) (*http.Response, string, []error) {
+func (cl *UsersClient) Login(user, pwd string) (*http.Response, string, []error) {
 	return cl.r.Post(cl.url("/v1/users/login")).
 		Send(multiusers.LoginReq{
 			User: user,
@@ -37,13 +37,13 @@ func (cl *SingleUserClient) Login(user, pwd string) (*http.Response, string, []e
 		End()
 }
 
-func (cl *SingleUserClient) Logout(token *http.Cookie) (*http.Response, string, []error) {
+func (cl *UsersClient) Logout(token *http.Cookie) (*http.Response, string, []error) {
 	return cl.r.Post(cl.url("/v1/users/logout")).
 		AddCookie(token).
 		End()
 }
 
-func (cl *SingleUserClient) SetPwd(oldPwd, newPwd string, token *http.Cookie) (*http.Response, string, []error) {
+func (cl *UsersClient) SetPwd(oldPwd, newPwd string, token *http.Cookie) (*http.Response, string, []error) {
 	return cl.r.Patch(cl.url("/v1/users/pwd")).
 		Send(multiusers.SetPwdReq{
 			OldPwd: oldPwd,
@@ -53,7 +53,7 @@ func (cl *SingleUserClient) SetPwd(oldPwd, newPwd string, token *http.Cookie) (*
 		End()
 }
 
-func (cl *SingleUserClient) ForceSetPwd(userID, newPwd string, token *http.Cookie) (*http.Response, string, []error) {
+func (cl *UsersClient) ForceSetPwd(userID, newPwd string, token *http.Cookie) (*http.Response, string, []error) {
 	return cl.r.Patch(cl.url("/v1/users/pwd/force-set")).
 		Send(multiusers.ForceSetPwdReq{
 			ID:     userID,
@@ -63,7 +63,7 @@ func (cl *SingleUserClient) ForceSetPwd(userID, newPwd string, token *http.Cooki
 		End()
 }
 
-func (cl *SingleUserClient) SetUser(ID uint64, role string, quota *db.Quota, token *http.Cookie) (*http.Response, string, []error) {
+func (cl *UsersClient) SetUser(ID uint64, role string, quota *db.Quota, token *http.Cookie) (*http.Response, string, []error) {
 	return cl.r.Patch(cl.url("/v1/users/")).
 		Send(multiusers.SetUserReq{
 			ID:    ID,
@@ -74,7 +74,7 @@ func (cl *SingleUserClient) SetUser(ID uint64, role string, quota *db.Quota, tok
 		End()
 }
 
-func (cl *SingleUserClient) AddUser(name, pwd, role string, token *http.Cookie) (*http.Response, *multiusers.AddUserResp, []error) {
+func (cl *UsersClient) AddUser(name, pwd, role string, token *http.Cookie) (*http.Response, *multiusers.AddUserResp, []error) {
 	resp, body, errs := cl.r.Post(cl.url("/v1/users/")).
 		AddCookie(token).
 		Send(multiusers.AddUserReq{
@@ -97,14 +97,14 @@ func (cl *SingleUserClient) AddUser(name, pwd, role string, token *http.Cookie) 
 	return resp, auResp, errs
 }
 
-func (cl *SingleUserClient) DelUser(id string, token *http.Cookie) (*http.Response, string, []error) {
+func (cl *UsersClient) DelUser(id string, token *http.Cookie) (*http.Response, string, []error) {
 	return cl.r.Delete(cl.url("/v1/users/")).
 		AddCookie(token).
 		Param(handlers.UserIDParam, id).
 		End()
 }
 
-func (cl *SingleUserClient) ListUsers(token *http.Cookie) (*http.Response, *multiusers.ListUsersResp, []error) {
+func (cl *UsersClient) ListUsers(token *http.Cookie) (*http.Response, *multiusers.ListUsersResp, []error) {
 	resp, body, errs := cl.r.Get(cl.url("/v1/users/list")).
 		AddCookie(token).
 		End()
@@ -121,7 +121,7 @@ func (cl *SingleUserClient) ListUsers(token *http.Cookie) (*http.Response, *mult
 	return resp, lsResp, errs
 }
 
-func (cl *SingleUserClient) AddRole(role string, token *http.Cookie) (*http.Response, string, []error) {
+func (cl *UsersClient) AddRole(role string, token *http.Cookie) (*http.Response, string, []error) {
 	return cl.r.Post(cl.url("/v1/roles/")).
 		AddCookie(token).
 		Send(multiusers.AddRoleReq{
@@ -130,7 +130,7 @@ func (cl *SingleUserClient) AddRole(role string, token *http.Cookie) (*http.Resp
 		End()
 }
 
-func (cl *SingleUserClient) DelRole(role string, token *http.Cookie) (*http.Response, string, []error) {
+func (cl *UsersClient) DelRole(role string, token *http.Cookie) (*http.Response, string, []error) {
 	return cl.r.Delete(cl.url("/v1/roles/")).
 		AddCookie(token).
 		Send(multiusers.DelRoleReq{
@@ -139,7 +139,7 @@ func (cl *SingleUserClient) DelRole(role string, token *http.Cookie) (*http.Resp
 		End()
 }
 
-func (cl *SingleUserClient) ListRoles(token *http.Cookie) (*http.Response, *multiusers.ListRolesResp, []error) {
+func (cl *UsersClient) ListRoles(token *http.Cookie) (*http.Response, *multiusers.ListRolesResp, []error) {
 	resp, body, errs := cl.r.Get(cl.url("/v1/roles/list")).
 		AddCookie(token).
 		End()
@@ -156,7 +156,7 @@ func (cl *SingleUserClient) ListRoles(token *http.Cookie) (*http.Response, *mult
 	return resp, lsResp, errs
 }
 
-func (cl *SingleUserClient) Self(token *http.Cookie) (*http.Response, *multiusers.SelfResp, []error) {
+func (cl *UsersClient) Self(token *http.Cookie) (*http.Response, *multiusers.SelfResp, []error) {
 	resp, body, errs := cl.r.Get(cl.url("/v1/users/self")).
 		AddCookie(token).
 		End()
@@ -173,7 +173,7 @@ func (cl *SingleUserClient) Self(token *http.Cookie) (*http.Response, *multiuser
 	return resp, selfResp, errs
 }
 
-func (cl *SingleUserClient) SetPreferences(prefers *db.Preferences, token *http.Cookie) (*http.Response, string, []error) {
+func (cl *UsersClient) SetPreferences(prefers *db.Preferences, token *http.Cookie) (*http.Response, string, []error) {
 	return cl.r.Patch(cl.url("/v1/users/preferences")).
 		Send(multiusers.SetPreferencesReq{
 			Preferences: prefers,
@@ -182,13 +182,13 @@ func (cl *SingleUserClient) SetPreferences(prefers *db.Preferences, token *http.
 		End()
 }
 
-func (cl *SingleUserClient) IsAuthed(token *http.Cookie) (*http.Response, string, []error) {
+func (cl *UsersClient) IsAuthed(token *http.Cookie) (*http.Response, string, []error) {
 	return cl.r.Get(cl.url("/v1/users/isauthed")).
 		AddCookie(token).
 		End()
 }
 
-func (cl *SingleUserClient) ResetUsedSpace(userID uint64, token *http.Cookie) (*http.Response, string, []error) {
+func (cl *UsersClient) ResetUsedSpace(userID uint64, token *http.Cookie) (*http.Response, string, []error) {
 	return cl.r.Put(cl.url("/v1/users/used-space")).
 		Send(multiusers.ResetUsedSpaceReq{
 			UserID: userID,

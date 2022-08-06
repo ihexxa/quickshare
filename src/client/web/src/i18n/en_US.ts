@@ -158,5 +158,7 @@ export const msgs: Map<string, string> = Map({
   "term.results": "Results",
   "term.noResult": "No result found",
   "action.go": "Go",
-  "hint.keywords": "Please input keyword(s), separated by spaces"
+  "hint.keywords": "Please input keyword(s), separated by spaces",
+  "action.reindex": "Reindex",
+  "action.reindex.desc": "Reconstruct the searching index",
 });

@@ -1034,6 +1034,11 @@ export class Updater {
     return "";
   };
 
+  reindex = async (): Promise<string> => {
+    const resp = await this.filesClient.reindex();
+    return resp.status === 200 ? "" : errServer;
+  }
+
   hasResult = (): boolean => {
     return this.props.filesInfo.searchResults.size > 0;
   };

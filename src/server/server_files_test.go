@@ -62,7 +62,7 @@ func TestFileHandlers(t *testing.T) {
 		t.Fatal("fail to start server")
 	}
 
-	usersCl := client.NewSingleUserClient(addr)
+	usersCl := client.NewUsersClient(addr)
 	resp, _, errs := usersCl.Login(adminName, adminPwd)
 	if len(errs) > 0 {
 		t.Fatal(errs)
@@ -405,7 +405,7 @@ func TestFileHandlers(t *testing.T) {
 			}
 		}
 
-		userUsersCl := client.NewSingleUserClient(addr)
+		userUsersCl := client.NewUsersClient(addr)
 		resp, _, errs := userUsersCl.Login("demo", "Quicksh@re")
 		if len(errs) > 0 {
 			t.Fatal(errs)
@@ -916,6 +916,19 @@ func TestFileHandlers(t *testing.T) {
 		if !compareSearchResults(expected, searchItemsResp.Results) {
 			fmt.Printf("expected(%+v) got(%+v)", expected, searchItemsResp.Results)
 			t.Fatal("search result not match")
+		}
+
+		userFilesClient, err := loginFilesClient(addr, "demo", "Quicksh@re")
+		if err != nil {
+			t.Fatal(err)
+		}
+		resp, searchItemsResp, errs = userFilesClient.SearchItems(keywords)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		} else if resp.StatusCode != 200 {
+			t.Fatal(resp.StatusCode)
+		} else if len(searchItemsResp.Results) > 0 {
+			t.Fatal("shoud return empty results")
 		}
 
 		// delete paths

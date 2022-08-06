@@ -164,6 +164,7 @@ export interface IFilesClient {
   generateHash: (filePath: string) => Promise<Response>;
   download: (url: string) => Promise<Response>;
   search: (keywords: string[]) => Promise<Response<SearchItemsResp>>;
+  reindex: () => Promise<Response>;
 }
 
 export interface ISettingsClient {
