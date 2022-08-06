@@ -268,20 +268,6 @@ export class UserForm extends React.Component<
 
           <div className="hr"></div>
 
-          <div>
-            <Flexbox
-              children={List([
-                <span>{this.props.msg.pkg.get("action.reindex.desc")}</span>,
-                <button className="button-default" onClick={resetUsedSpace}>
-                  {this.props.msg.pkg.get("action.reindex")}
-                </button>,
-              ])}
-              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
-            />
-          </div>
-
-          <div className="hr"></div>
-
           <Flexbox
             className="margin-t-m"
             children={List([
@@ -504,10 +490,6 @@ export class AdminPane extends React.Component<Props, State, {}> {
       this.props.update(updater().updateAdmin);
     }
   };
-
-  reindex = async () => {
-    return updater().reindex();
-  }
 
   addUser = async () => {
     if (this.state.newUserPwd1 !== this.state.newUserPwd2) {
@@ -876,6 +858,13 @@ export class SiteCfg extends React.Component<SiteCfgProps, SiteCfgState, {}> {
     this.props.update(updater().updateUI);
   };
 
+  reindex = async () => {
+    if (!Env().confirmMsg(this.props.msg.pkg.get("action.reindex.confirm"))) {
+      return;
+    }
+    return updater().reindex();
+  };
+
   render() {
     return (
       <div>
@@ -1049,6 +1038,17 @@ export class SiteCfg extends React.Component<SiteCfgProps, SiteCfgState, {}> {
               placeholder={this.props.msg.pkg.get("cfg.bg.bgColor")}
             />
           </div>
+        </div>
+
+        <div className="hr"></div>
+
+        <div>
+          <div className="label">
+            {this.props.msg.pkg.get("action.reindex.desc")}
+          </div>
+          <button className="button-default" onClick={this.reindex}>
+            {this.props.msg.pkg.get("action.reindex")}
+          </button>
         </div>
       </div>
     );
