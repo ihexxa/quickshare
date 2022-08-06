@@ -158,4 +158,5 @@ export const msgs: Map<string, string> = Map({
   "hint.keywords": "请输入关键字，以空格分隔",
   "action.reindex": "重新索引",
   "action.reindex.desc": "重新建立搜索索引",
+  "action.reindex.confirm": "当文件数量较多，重新建立索引将可能花费一些时间",
 });
