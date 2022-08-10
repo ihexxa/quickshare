@@ -70,7 +70,7 @@ func TestFileHandlers(t *testing.T) {
 		t.Fatal(resp.StatusCode)
 	}
 	token := client.GetCookie(resp.Cookies(), q.TokenCookie)
-	cl := client.NewFilesClient(addr, token)
+	adminFilesClient := client.NewFilesClient(addr, token)
 
 	var err error
 	// TODO: remove all files under home folder before testing
@@ -90,7 +90,7 @@ func TestFileHandlers(t *testing.T) {
 			}
 		}
 
-		resp, lhResp, errs := cl.ListHome()
+		resp, lhResp, errs := adminFilesClient.ListHome()
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
@@ -140,7 +140,7 @@ func TestFileHandlers(t *testing.T) {
 		}
 
 		for filePath, content := range files {
-			res, _, _ := cl.Create(filePath, int64(len([]byte(content))))
+			res, _, _ := adminFilesClient.Create(filePath, int64(len([]byte(content))))
 			if res.StatusCode != 400 {
 				t.Fatal(res.StatusCode)
 			}
@@ -169,7 +169,7 @@ func TestFileHandlers(t *testing.T) {
 					t.Fatal(err)
 				}
 
-				res, _, errs := cl.Delete(filePath)
+				res, _, errs := adminFilesClient.Delete(filePath)
 				if len(errs) > 0 {
 					t.Fatal(errs)
 				} else if res.StatusCode != 200 {
@@ -187,7 +187,7 @@ func TestFileHandlers(t *testing.T) {
 		} {
 			fileSize := int64(len([]byte(content)))
 			// create a file
-			res, _, errs := cl.Create(filePath, fileSize)
+			res, _, errs := adminFilesClient.Create(filePath, fileSize)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if res.StatusCode != 200 {
@@ -217,7 +217,7 @@ func TestFileHandlers(t *testing.T) {
 
 				chunk := contentBytes[i:right]
 				chunkBase64 := base64.StdEncoding.EncodeToString(chunk)
-				res, _, errs = cl.UploadChunk(filePath, chunkBase64, int64(i))
+				res, _, errs = adminFilesClient.UploadChunk(filePath, chunkBase64, int64(i))
 				i = right
 				if len(errs) > 0 {
 					t.Fatal(errs)
@@ -226,7 +226,7 @@ func TestFileHandlers(t *testing.T) {
 				}
 
 				if int64(i) != fileSize {
-					_, statusResp, errs := cl.UploadStatus(filePath)
+					_, statusResp, errs := adminFilesClient.UploadStatus(filePath)
 					if len(errs) > 0 {
 						t.Fatal(errs)
 					} else if statusResp.Path != filePath ||
@@ -253,7 +253,7 @@ func TestFileHandlers(t *testing.T) {
 			}
 
 			// metadata
-			_, mRes, errs := cl.Metadata(filePath)
+			_, mRes, errs := adminFilesClient.Metadata(filePath)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if mRes.Name != info.Name() ||
@@ -264,7 +264,7 @@ func TestFileHandlers(t *testing.T) {
 			}
 
 			// delete file
-			res, _, errs = cl.Delete(filePath)
+			res, _, errs = adminFilesClient.Delete(filePath)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if res.StatusCode != 200 {
@@ -283,7 +283,7 @@ func TestFileHandlers(t *testing.T) {
 				"f3.md": "3333333",
 			},
 		} {
-			res, _, errs := cl.Mkdir(dirPath)
+			res, _, errs := adminFilesClient.Mkdir(dirPath)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if res.StatusCode != 200 {
@@ -300,7 +300,7 @@ func TestFileHandlers(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			_, lResp, errs := cl.List(dirPath)
+			_, lResp, errs := adminFilesClient.List(dirPath)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			}
@@ -320,7 +320,7 @@ func TestFileHandlers(t *testing.T) {
 		dstDir := "qs/files/move/dst"
 
 		for _, dirPath := range []string{srcDir, dstDir} {
-			res, _, errs := cl.Mkdir(dirPath)
+			res, _, errs := adminFilesClient.Mkdir(dirPath)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if res.StatusCode != 200 {
@@ -339,7 +339,7 @@ func TestFileHandlers(t *testing.T) {
 			// fileSize := int64(len([]byte(content)))
 			assertUploadOK(t, oldPath, content, addr, token)
 
-			res, _, errs := cl.Move(oldPath, newPath)
+			res, _, errs := adminFilesClient.Move(oldPath, newPath)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if res.StatusCode != 200 {
@@ -352,7 +352,7 @@ func TestFileHandlers(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		_, lResp, errs := cl.List(dstDir)
+		_, lResp, errs := adminFilesClient.List(dstDir)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		}
@@ -366,7 +366,7 @@ func TestFileHandlers(t *testing.T) {
 		}
 
 		for _, dirPath := range []string{srcDir, dstDir} {
-			res, _, errs := cl.Delete(dirPath)
+			res, _, errs := adminFilesClient.Delete(dirPath)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if res.StatusCode != 200 {
@@ -422,31 +422,31 @@ func TestFileHandlers(t *testing.T) {
 				dirPath := filepath.Dir(filePath)
 				sharedPaths[dirPath] = true
 
-				res, _, errs := cl.AddSharing(dirPath)
+				res, _, errs := adminFilesClient.AddSharing(dirPath)
 				if len(errs) > 0 {
 					t.Fatal(errs)
 				} else if res.StatusCode != 200 {
 					t.Fatal(res.StatusCode)
 				}
 
-				res, _, errs = cl.AddSharing(filePath)
+				res, _, errs = adminFilesClient.AddSharing(filePath)
 				if res.StatusCode != 400 {
 					t.Fatal(res.StatusCode)
 				}
 
-				res, _, errs = cl.AddSharing(filepath.Join(filePath, "not_exist"))
+				res, _, errs = adminFilesClient.AddSharing(filepath.Join(filePath, "not_exist"))
 				if res.StatusCode != 500 {
 					t.Fatal(res.StatusCode)
 				}
 			}
 
-			res, _, errs := cl.AddSharing("/")
+			res, _, errs := adminFilesClient.AddSharing("/")
 			if res.StatusCode != 403 {
 				t.Fatal(res.StatusCode)
 			}
 
 			// check listSharings
-			res, shRes, errs := cl.ListSharingIDs()
+			res, shRes, errs := adminFilesClient.ListSharingIDs()
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if res.StatusCode != 200 {
@@ -510,7 +510,7 @@ func TestFileHandlers(t *testing.T) {
 			for filePath := range files {
 				dirPath := filepath.Dir(filePath)
 
-				res, _, errs := cl.DelSharing(dirPath)
+				res, _, errs := adminFilesClient.DelSharing(dirPath)
 				if len(errs) > 0 {
 					t.Fatal(errs)
 				} else if res.StatusCode != 200 {
@@ -519,7 +519,7 @@ func TestFileHandlers(t *testing.T) {
 			}
 
 			// check listSharings
-			res, shRes, errs = cl.ListSharingIDs()
+			res, shRes, errs = adminFilesClient.ListSharingIDs()
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if res.StatusCode != 200 {
@@ -613,7 +613,7 @@ func TestFileHandlers(t *testing.T) {
 
 	t.Run("test uploading APIs: ListUploadings, Create, ListUploadings, DelUploading", func(t *testing.T) {
 		// it should return no error even no file is uploaded
-		res, lResp, errs := cl.ListUploadings()
+		res, lResp, errs := adminFilesClient.ListUploadings()
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if res.StatusCode != 200 {
@@ -627,7 +627,7 @@ func TestFileHandlers(t *testing.T) {
 
 		for filePath, content := range files {
 			fileSize := int64(len([]byte(content)))
-			res, _, errs := cl.Create(filePath, fileSize)
+			res, _, errs := adminFilesClient.Create(filePath, fileSize)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if res.StatusCode != 200 {
@@ -635,7 +635,7 @@ func TestFileHandlers(t *testing.T) {
 			}
 		}
 
-		res, lResp, errs = cl.ListUploadings()
+		res, lResp, errs = adminFilesClient.ListUploadings()
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if res.StatusCode != 200 {
@@ -658,7 +658,7 @@ func TestFileHandlers(t *testing.T) {
 		}
 
 		for filePath := range files {
-			res, _, errs := cl.DelUploading(filePath)
+			res, _, errs := adminFilesClient.DelUploading(filePath)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if res.StatusCode != 200 {
@@ -666,7 +666,7 @@ func TestFileHandlers(t *testing.T) {
 			}
 		}
 
-		res, lResp, errs = cl.ListUploadings()
+		res, lResp, errs = adminFilesClient.ListUploadings()
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if res.StatusCode != 200 {
@@ -685,7 +685,7 @@ func TestFileHandlers(t *testing.T) {
 
 		for filePath, content := range files {
 			fileSize := int64(len([]byte(content)))
-			res, _, errs := cl.Create(filePath, fileSize)
+			res, _, errs := adminFilesClient.Create(filePath, fileSize)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if res.StatusCode != 200 {
@@ -699,7 +699,7 @@ func TestFileHandlers(t *testing.T) {
 			offset := int64(0)
 			for _, chunk := range chunks {
 				base64Content := base64.StdEncoding.EncodeToString(chunk)
-				res, bodyStr, errs := cl.UploadChunk(filePath, base64Content, offset)
+				res, bodyStr, errs := adminFilesClient.UploadChunk(filePath, base64Content, offset)
 				offset += int64(len(chunk))
 
 				if len(errs) > 0 {
@@ -715,7 +715,7 @@ func TestFileHandlers(t *testing.T) {
 			}
 
 			// metadata
-			_, mRes, errs := cl.Metadata(filePath)
+			_, mRes, errs := adminFilesClient.Metadata(filePath)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if mRes.Size != fileSize {
@@ -737,7 +737,7 @@ func TestFileHandlers(t *testing.T) {
 
 		for filePath, content := range files {
 			fileSize := int64(len([]byte(content)))
-			res, _, errs := cl.Create(filePath, fileSize)
+			res, _, errs := adminFilesClient.Create(filePath, fileSize)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if res.StatusCode != 200 {
@@ -755,7 +755,7 @@ func TestFileHandlers(t *testing.T) {
 			offset := int64(0)
 			for _, chunk := range chunks {
 				base64Content := base64.StdEncoding.EncodeToString(chunk)
-				res, _, errs := cl.UploadChunk(filePath, base64Content, offset)
+				res, _, errs := adminFilesClient.UploadChunk(filePath, base64Content, offset)
 				offset += int64(len(chunk))
 
 				if len(errs) > 0 {
@@ -771,7 +771,7 @@ func TestFileHandlers(t *testing.T) {
 			}
 
 			// metadata
-			_, mRes, errs := cl.Metadata(filePath)
+			_, mRes, errs := adminFilesClient.Metadata(filePath)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if mRes.Size != fileSize {
@@ -793,7 +793,7 @@ func TestFileHandlers(t *testing.T) {
 		srcDir := "qs/files/folder/move/src"
 		dstDir := "qs/files/folder/move/dst"
 
-		res, _, errs := cl.Mkdir(srcDir)
+		res, _, errs := adminFilesClient.Mkdir(srcDir)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if res.StatusCode != 200 {
@@ -810,21 +810,21 @@ func TestFileHandlers(t *testing.T) {
 			assertUploadOK(t, oldPath, content, addr, token)
 		}
 
-		res, _, errs = cl.AddSharing(srcDir)
+		res, _, errs = adminFilesClient.AddSharing(srcDir)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if res.StatusCode != 200 {
 			t.Fatal(res.StatusCode)
 		}
 
-		res, _, errs = cl.Move(srcDir, dstDir)
+		res, _, errs = adminFilesClient.Move(srcDir, dstDir)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if res.StatusCode != 200 {
 			t.Fatal(res.StatusCode)
 		}
 
-		res, _, errs = cl.IsSharing(dstDir)
+		res, _, errs = adminFilesClient.IsSharing(dstDir)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if res.StatusCode != 404 { // should not be in sharing
@@ -836,7 +836,7 @@ func TestFileHandlers(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		_, lResp, errs := cl.List(dstDir)
+		_, lResp, errs := adminFilesClient.List(dstDir)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		}
@@ -906,7 +906,7 @@ func TestFileHandlers(t *testing.T) {
 		}
 
 		keywords := []string{"keyword1", "keyword2"}
-		resp, searchItemsResp, errs := cl.SearchItems(keywords)
+		resp, searchItemsResp, errs := adminFilesClient.SearchItems(keywords)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
@@ -933,14 +933,14 @@ func TestFileHandlers(t *testing.T) {
 
 		// delete paths
 		for pathname := range toDelete {
-			resp, _, errs := cl.Delete(pathname)
+			resp, _, errs := adminFilesClient.Delete(pathname)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if resp.StatusCode != 200 {
 				t.Fatal(resp.StatusCode)
 			}
 		}
-		resp, searchItemsResp, errs = cl.SearchItems(keywords)
+		resp, searchItemsResp, errs = adminFilesClient.SearchItems(keywords)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
@@ -954,21 +954,21 @@ func TestFileHandlers(t *testing.T) {
 		// move paths
 		for oldPath, newPath := range toMove {
 			newPathDir := filepath.Dir(newPath)
-			resp, _, errs := cl.Mkdir(newPathDir)
+			resp, _, errs := adminFilesClient.Mkdir(newPathDir)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if resp.StatusCode != 200 {
 				t.Fatal(resp.StatusCode)
 			}
 
-			resp, _, errs = cl.Move(oldPath, newPath)
+			resp, _, errs = adminFilesClient.Move(oldPath, newPath)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if resp.StatusCode != 200 {
 				t.Fatal(resp.StatusCode)
 			}
 		}
-		resp, searchItemsResp, errs = cl.SearchItems(keywords)
+		resp, searchItemsResp, errs = adminFilesClient.SearchItems(keywords)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
@@ -1000,16 +1000,16 @@ func TestFileHandlers(t *testing.T) {
 		}
 		fs.Sync()
 
-		resp, _, errs := cl.Reindex()
+		resp, _, errs := adminFilesClient.Reindex()
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
 			t.Fatal(resp.StatusCode)
 		}
 
-		settingsCl := client.NewSettingsClient(addr)
+		settingsCl := client.NewSettingsClient(addr, token)
 		for {
-			reportResp, wqResp, errs := settingsCl.WorkerQueueLen(token)
+			reportResp, wqResp, errs := settingsCl.WorkerQueueLen()
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if reportResp.StatusCode != 200 {
@@ -1027,7 +1027,7 @@ func TestFileHandlers(t *testing.T) {
 		// still need to wait for worker finishing indexing...
 		time.Sleep(3 * time.Second)
 
-		resp, searchItemsResp, errs := cl.SearchItems([]string{"reindexkey"})
+		resp, searchItemsResp, errs := adminFilesClient.SearchItems([]string{"reindexkey"})
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
@@ -1039,7 +1039,7 @@ func TestFileHandlers(t *testing.T) {
 		}
 	})
 
-	resp, _, errs = usersCl.Logout(token)
+	resp, _, errs = usersCl.Logout()
 	if len(errs) > 0 {
 		t.Fatal(errs)
 	} else if resp.StatusCode != 200 {

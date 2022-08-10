@@ -1,6 +1,7 @@
 package server
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"sync"
@@ -48,33 +49,37 @@ func TestConcurrency(t *testing.T) {
 		t.Fatal("fail to start server")
 	}
 
-	usersCl := client.NewUsersClient(addr)
-	resp, _, errs := usersCl.Login(adminName, adminPwd)
+	adminUsersCli := client.NewUsersClient(addr)
+	resp, _, errs := adminUsersCli.Login(adminName, adminPwd)
 	if len(errs) > 0 {
 		t.Fatal(errs)
 	} else if resp.StatusCode != 200 {
 		t.Fatal(resp.StatusCode)
 	}
-	token := client.GetCookie(resp.Cookies(), q.TokenCookie)
+	adminToken := client.GetCookie(resp.Cookies(), q.TokenCookie)
 
 	userCount := 5
 	userPwd := "1234"
-	users := addUsers(t, addr, userPwd, userCount, token)
+	users := addUsers(t, addr, userPwd, userCount, adminToken)
 
 	getFilePath := func(name string, i int) string {
 		return fmt.Sprintf("%s/files/home_file_%d", name, i)
 	}
 
 	filesCount := 10
+	clientErrs := []error{}
 	mockClient := func(name, pwd string, wg *sync.WaitGroup) {
-		usersCl := client.NewUsersClient(addr)
-		resp, _, errs := usersCl.Login(name, pwd)
+		defer wg.Done()
+
+		userUsersCli := client.NewUsersClient(addr)
+		resp, _, errs := userUsersCli.Login(name, pwd)
 		if len(errs) > 0 {
-			t.Fatal(errs)
+			clientErrs = append(clientErrs, errs...)
+			return
 		} else if resp.StatusCode != 200 {
-			t.Fatal("failed to add user")
+			clientErrs = append(clientErrs, fmt.Errorf("failed to login"))
+			return
 		}
-		token := client.GetCookie(resp.Cookies(), q.TokenCookie)
 
 		files := map[string]string{}
 		content := "12345678"
@@ -82,53 +87,75 @@ func TestConcurrency(t *testing.T) {
 			files[getFilePath(name, i)] = content
 		}
 
+		userToken := userUsersCli.Token()
 		for filePath, content := range files {
-			assertUploadOK(t, filePath, content, addr, token)
-			assertDownloadOK(t, filePath, content, addr, token)
+			assertUploadOK(t, filePath, content, addr, userToken)
+			assertDownloadOK(t, filePath, content, addr, userToken)
 		}
 
-		filesCl := client.NewFilesClient(addr, token)
+		filesCl := client.NewFilesClient(addr, userToken)
 		resp, lsResp, errs := filesCl.ListHome()
 		if len(errs) > 0 {
-			t.Fatal(errs)
+			clientErrs = append(clientErrs, errs...)
+			return
 		} else if resp.StatusCode != 200 {
-			t.Fatal("failed to add user")
+			clientErrs = append(clientErrs, errors.New("failed to list home"))
+			return
 		}
 
 		if lsResp.Cwd != fmt.Sprintf("%s/files", name) {
-			t.Fatalf("incorrct cwd (%s)", lsResp.Cwd)
+			clientErrs = append(clientErrs, fmt.Errorf("incorrct cwd (%s)", lsResp.Cwd))
+			return
+
 		} else if len(lsResp.Metadatas) != len(files) {
-			t.Fatalf("incorrct metadata size (%d)", len(lsResp.Metadatas))
+			clientErrs = append(clientErrs, fmt.Errorf("incorrct metadata size (%d)", len(lsResp.Metadatas)))
+			return
 		}
 
-		resp, selfResp, errs := usersCl.Self(token)
+		resp, selfResp, errs := userUsersCli.Self()
 		if len(errs) > 0 {
-			t.Fatal(errs)
+			clientErrs = append(clientErrs, errs...)
+			return
 		} else if resp.StatusCode != 200 {
-			t.Fatal("failed to self")
+			clientErrs = append(clientErrs, errors.New("failed to self"))
+			return
 		}
 		if selfResp.UsedSpace != int64(filesCount*len(content)) {
-			t.Fatalf("usedSpace(%d) doesn't match (%d)", selfResp.UsedSpace, filesCount*len(content))
+			clientErrs = append(
+				clientErrs,
+				fmt.Errorf("usedSpace(%d) doesn't match (%d)", selfResp.UsedSpace, filesCount*len(content)),
+			)
+			return
 		}
 
 		resp, _, errs = filesCl.Delete(getFilePath(name, 0))
 		if len(errs) > 0 {
-			t.Fatal(errs)
+			clientErrs = append(clientErrs, errs...)
+			return
 		} else if resp.StatusCode != 200 {
-			t.Fatal("failed to add user")
+			clientErrs = append(clientErrs, errors.New("failed to add user"))
+			return
 		}
 
-		resp, selfResp, errs = usersCl.Self(token)
+		resp, selfResp, errs = userUsersCli.Self()
 		if len(errs) > 0 {
-			t.Fatal(errs)
+			clientErrs = append(clientErrs, errs...)
+			return
 		} else if resp.StatusCode != 200 {
-			t.Fatal("failed to self")
+			clientErrs = append(clientErrs, errors.New("failed to self"))
+			return
 		}
 		if selfResp.UsedSpace != int64((filesCount-1)*len(content)) {
-			t.Fatalf("usedSpace(%d) doesn't match (%d)", selfResp.UsedSpace, int64((filesCount-1)*len(content)))
+			clientErrs = append(
+				clientErrs,
+				fmt.Errorf(
+					"usedSpace(%d) doesn't match (%d)",
+					selfResp.UsedSpace,
+					int64((filesCount-1)*len(content)),
+				),
+			)
+			return
 		}
-
-		wg.Done()
 	}
 
 	var wg sync.WaitGroup
@@ -139,12 +166,8 @@ func TestConcurrency(t *testing.T) {
 		}
 
 		wg.Wait()
+		if len(clientErrs) > 0 {
+			t.Fatal(joinErrs(clientErrs))
+		}
 	})
-
-	resp, _, errs = usersCl.Logout(token)
-	if len(errs) > 0 {
-		t.Fatal(errs)
-	} else if resp.StatusCode != 200 {
-		t.Fatal(resp.StatusCode)
-	}
 }

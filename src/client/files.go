@@ -12,16 +12,16 @@ import (
 
 type FilesClient struct {
 	addr  string
-	r     *gorequest.SuperAgent
 	token *http.Cookie
+	r     *gorequest.SuperAgent
 }
 
 func NewFilesClient(addr string, token *http.Cookie) *FilesClient {
 	gr := gorequest.New()
 	return &FilesClient{
 		addr:  addr,
-		r:     gr,
 		token: token,
+		r:     gr,
 	}
 }
 

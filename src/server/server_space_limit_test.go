@@ -63,14 +63,14 @@ func TestSpaceLimit(t *testing.T) {
 		t.Fatal("fail to start server")
 	}
 
-	usersCl := client.NewUsersClient(addr)
-	resp, _, errs := usersCl.Login(adminName, adminPwd)
+	adminUsersCli := client.NewUsersClient(addr)
+	resp, _, errs := adminUsersCli.Login(adminName, adminPwd)
 	if len(errs) > 0 {
 		t.Fatal(errs)
 	} else if resp.StatusCode != 200 {
 		t.Fatal(resp.StatusCode)
 	}
-	token := client.GetCookie(resp.Cookies(), q.TokenCookie)
+	adminToken := client.GetCookie(resp.Cookies(), q.TokenCookie)
 
 	userCount := 1
 	userPwd := "1234"
@@ -82,7 +82,7 @@ func TestSpaceLimit(t *testing.T) {
 	for i := 0; i < userCount; i++ {
 		userName := getUserName(i)
 
-		resp, adResp, errs := usersCl.AddUser(userName, userPwd, db.UserRole, token)
+		resp, adResp, errs := adminUsersCli.AddUser(userName, userPwd, db.UserRole)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
@@ -92,7 +92,7 @@ func TestSpaceLimit(t *testing.T) {
 		users[userName] = adResp.ID
 	}
 
-	resp, _, errs = usersCl.Logout(token)
+	resp, _, errs = adminUsersCli.Logout()
 	if len(errs) > 0 {
 		t.Fatal(errs)
 	} else if resp.StatusCode != 200 {
@@ -100,14 +100,14 @@ func TestSpaceLimit(t *testing.T) {
 	}
 
 	t.Run("test space limiting: Upload", func(t *testing.T) {
-		usersCl := client.NewUsersClient(addr)
-		resp, _, errs := usersCl.Login(getUserName(0), userPwd)
+		usersCli := client.NewUsersClient(addr)
+		resp, _, errs := usersCli.Login(getUserName(0), userPwd)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
 			t.Fatal(resp.StatusCode)
 		}
-		token := client.GetCookie(resp.Cookies(), q.TokenCookie)
+		userToken := client.GetCookie(resp.Cookies(), q.TokenCookie)
 
 		fileContent := ""
 		for i := 0; i < fileSize; i++ {
@@ -115,12 +115,12 @@ func TestSpaceLimit(t *testing.T) {
 		}
 
 		for i := 0; i < spaceLimit/fileSize; i++ {
-			ok := assertUploadOK(t, fmt.Sprintf("%s/files/spacelimit/f_%d", getUserName(0), i), fileContent, addr, token)
+			ok := assertUploadOK(t, fmt.Sprintf("%s/files/spacelimit/f_%d", getUserName(0), i), fileContent, addr, userToken)
 			if !ok {
 				t.Fatalf("space limit failed at %d", i)
 			}
 
-			resp, selfResp, errs := usersCl.Self(token)
+			resp, selfResp, errs := usersCli.Self()
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if resp.StatusCode != 200 {
@@ -130,9 +130,9 @@ func TestSpaceLimit(t *testing.T) {
 			}
 		}
 
-		cl := client.NewFilesClient(addr, token)
+		userFilesClient := client.NewFilesClient(addr, userToken)
 		filePath := fmt.Sprintf("%s/files/spacelimit/f_%d", getUserName(0), 11)
-		res, _, errs := cl.Create(filePath, 1)
+		res, _, errs := userFilesClient.Create(filePath, 1)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if res.StatusCode != 403 {
@@ -140,14 +140,14 @@ func TestSpaceLimit(t *testing.T) {
 		}
 
 		for i := 0; i < spaceLimit/fileSize; i++ {
-			resp, _, errs := cl.Delete(fmt.Sprintf("%s/files/spacelimit/f_%d", getUserName(0), i))
+			resp, _, errs := userFilesClient.Delete(fmt.Sprintf("%s/files/spacelimit/f_%d", getUserName(0), i))
 			if len(errs) > 0 {
 				t.Fatalf("failed to delete %d", i)
 			} else if resp.StatusCode != 200 {
 				t.Fatalf("failed to delete status %d", resp.StatusCode)
 			}
 
-			resp, selfResp, errs := usersCl.Self(token)
+			resp, selfResp, errs := usersCli.Self()
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if resp.StatusCode != 200 {
@@ -161,10 +161,10 @@ func TestSpaceLimit(t *testing.T) {
 	t.Run("usedSpace keeps correct in operations: Mkdir-Create-UploadChunk-AddSharing-Move-IsSharing-List", func(t *testing.T) {
 		srcDir := "qs/files/folder/move/src"
 		dstDir := "qs/files/folder/move/dst"
-		filesCl := client.NewFilesClient(addr, token)
+		adminFilesCli := client.NewFilesClient(addr, adminToken)
 
 		getUsedSpace := func() int64 {
-			resp, selfResp, errs := usersCl.Self(token)
+			resp, selfResp, errs := adminUsersCli.Self()
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if resp.StatusCode != 200 {
@@ -177,7 +177,7 @@ func TestSpaceLimit(t *testing.T) {
 		initUsedSpace := getUsedSpace()
 
 		for _, dirPath := range []string{srcDir, dstDir} {
-			res, _, errs := filesCl.Mkdir(dirPath)
+			res, _, errs := adminFilesCli.Mkdir(dirPath)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if res.StatusCode != 200 {
@@ -195,7 +195,7 @@ func TestSpaceLimit(t *testing.T) {
 		}
 		for fileName, content := range files {
 			oldPath := filepath.Join(srcDir, fileName)
-			assertUploadOK(t, oldPath, content, addr, token)
+			assertUploadOK(t, oldPath, content, addr, adminToken)
 			expectedUsedSpace += int64(len(content))
 		}
 		if getUsedSpace() != expectedUsedSpace {
@@ -205,7 +205,7 @@ func TestSpaceLimit(t *testing.T) {
 		for fileName := range files {
 			oldPath := filepath.Join(srcDir, fileName)
 			newPath := filepath.Join(dstDir, fileName)
-			res, _, errs := filesCl.Move(oldPath, newPath)
+			res, _, errs := adminFilesCli.Move(oldPath, newPath)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if res.StatusCode != 200 {
@@ -217,7 +217,7 @@ func TestSpaceLimit(t *testing.T) {
 			}
 		}
 
-		res, _, errs := filesCl.Delete(dstDir)
+		res, _, errs := adminFilesCli.Delete(dstDir)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if res.StatusCode != 200 {
@@ -230,21 +230,21 @@ func TestSpaceLimit(t *testing.T) {
 	})
 
 	t.Run("ResetUsedSpace", func(t *testing.T) {
-		usersCl := client.NewUsersClient(addr)
-		resp, _, errs := usersCl.Login("test", "test")
+		usersCli := client.NewUsersClient(addr)
+		resp, _, errs := usersCli.Login("test", "test")
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
 			t.Fatal(resp.StatusCode)
 		}
-		token := client.GetCookie(resp.Cookies(), q.TokenCookie)
+		userToken := client.GetCookie(resp.Cookies(), q.TokenCookie)
 
-		ok := assertUploadOK(t, "test/files/spacelimit/byte1", "0", addr, token)
+		ok := assertUploadOK(t, "test/files/spacelimit/byte1", "0", addr, userToken)
 		if !ok {
 			t.Fatal("upload failed")
 		}
 
-		resp, selfResp, errs := usersCl.Self(token)
+		resp, selfResp, errs := usersCli.Self()
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
@@ -256,16 +256,16 @@ func TestSpaceLimit(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		resp, _, errs = usersCl.ResetUsedSpace(uidInt, token)
+		resp, _, errs = usersCli.ResetUsedSpace(uidInt)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
 			t.Fatal(resp.StatusCode)
 		}
 
-		settingsCl := client.NewSettingsClient(addr)
+		settingsCli := client.NewSettingsClient(addr, userToken)
 		for i := 0; i < 20; i++ {
-			resp, wqlResp, errs := settingsCl.WorkerQueueLen(token)
+			resp, wqlResp, errs := settingsCli.WorkerQueueLen()
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if resp.StatusCode != 200 {
@@ -279,7 +279,7 @@ func TestSpaceLimit(t *testing.T) {
 			time.Sleep(200)
 		}
 
-		resp, selfResp, errs = usersCl.Self(token)
+		resp, selfResp, errs = usersCli.Self()
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
@@ -288,11 +288,4 @@ func TestSpaceLimit(t *testing.T) {
 			t.Fatalf("used space not equal %d %d", selfResp.UsedSpace, originalUsedSpace)
 		}
 	})
-
-	resp, _, errs = usersCl.Logout(token)
-	if len(errs) > 0 {
-		t.Fatal(errs)
-	} else if resp.StatusCode != 200 {
-		t.Fatal(resp.StatusCode)
-	}
 }

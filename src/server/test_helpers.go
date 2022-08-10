@@ -59,12 +59,13 @@ func getUserName(id int) string {
 }
 
 func addUsers(t *testing.T, addr, userPwd string, userCount int, adminToken *http.Cookie) map[string]string {
-	usersCl := client.NewUsersClient(addr)
+	adminUsersCli := client.NewUsersClient(addr)
+	adminUsersCli.SetToken(adminToken)
 	users := map[string]string{}
 	for i := range make([]int, userCount) {
 		userName := getUserName(i)
 
-		resp, adResp, errs := usersCl.AddUser(userName, userPwd, db.UserRole, adminToken)
+		resp, adResp, errs := adminUsersCli.AddUser(userName, userPwd, db.UserRole)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
@@ -79,7 +80,7 @@ func addUsers(t *testing.T, addr, userPwd string, userCount int, adminToken *htt
 
 func isServerReady(addr string) bool {
 	retry := 20
-	setCl := client.NewSettingsClient(addr)
+	setCl := client.NewSettingsClient(addr, nil)
 
 	for retry > 0 {
 		_, _, errs := setCl.Health()
