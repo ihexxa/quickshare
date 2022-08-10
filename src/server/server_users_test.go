@@ -11,7 +11,6 @@ import (
 	"github.com/ihexxa/quickshare/src/db"
 	q "github.com/ihexxa/quickshare/src/handlers"
 	"github.com/ihexxa/quickshare/src/handlers/settings"
-	su "github.com/ihexxa/quickshare/src/handlers/singleuserhdr"
 )
 
 func TestUsersHandlers(t *testing.T) {
@@ -72,8 +71,7 @@ func TestUsersHandlers(t *testing.T) {
 	defer srv.Shutdown()
 	fs := srv.depsFS()
 
-	usersCl := client.NewUsersClient(addr)
-	settingsCl := client.NewSettingsClient(addr)
+	// adminUsersCli := client.NewUsersClient(addr)
 
 	if !isServerReady(addr) {
 		t.Fatal("fail to start server")
@@ -82,16 +80,16 @@ func TestUsersHandlers(t *testing.T) {
 	var err error
 
 	t.Run("test inited users", func(t *testing.T) {
-		usersCl := client.NewUsersClient(addr)
-		resp, _, errs := usersCl.Login(adminName, adminPwd)
+		usersCli := client.NewUsersClient(addr)
+		resp, _, errs := usersCli.Login(adminName, adminPwd)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
 			t.Fatal(resp.StatusCode)
 		}
-		token := client.GetCookie(resp.Cookies(), su.TokenCookie)
+		// userToken := client.GetCookie(resp.Cookies(), su.TokenCookie)
 
-		resp, lsResp, errs := usersCl.ListUsers(token)
+		resp, lsResp, errs := usersCli.ListUsers()
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
@@ -164,16 +162,15 @@ func TestUsersHandlers(t *testing.T) {
 		}
 
 		for _, user := range users {
-			usersCl := client.NewUsersClient(addr)
-			resp, _, errs := usersCl.Login(user.Name, user.Pwd)
+			userUsersCli := client.NewUsersClient(addr)
+			resp, _, errs := userUsersCli.Login(user.Name, user.Pwd)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if resp.StatusCode != 200 {
 				t.Fatal(resp.StatusCode)
 			}
-			token := client.GetCookie(resp.Cookies(), su.TokenCookie)
 
-			resp, selfResp, errs := usersCl.Self(token)
+			resp, selfResp, errs := userUsersCli.Self()
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if resp.StatusCode != 200 {
@@ -193,21 +190,21 @@ func TestUsersHandlers(t *testing.T) {
 				}
 			}
 
-			resp, _, errs = usersCl.SetPwd(user.Pwd, adminNewPwd, token)
+			resp, _, errs = userUsersCli.SetPwd(user.Pwd, adminNewPwd)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if resp.StatusCode != 200 {
 				t.Fatal(resp.StatusCode)
 			}
 
-			resp, _, errs = usersCl.Logout(token)
+			resp, _, errs = userUsersCli.Logout()
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if resp.StatusCode != 200 {
 				t.Fatal(resp.StatusCode)
 			}
 
-			resp, _, errs = usersCl.Login(user.Name, adminNewPwd)
+			resp, _, errs = userUsersCli.Login(user.Name, adminNewPwd)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if resp.StatusCode != 200 {
@@ -217,16 +214,17 @@ func TestUsersHandlers(t *testing.T) {
 	})
 
 	t.Run("test users APIs: Login-AddUser-Logout-Login-Logout", func(t *testing.T) {
-		resp, _, errs := usersCl.Login(adminName, adminNewPwd)
+		adminUsersCli := client.NewUsersClient(addr)
+		resp, _, errs := adminUsersCli.Login(adminName, adminNewPwd)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
 			t.Fatal(resp.StatusCode)
 		}
-		token := client.GetCookie(resp.Cookies(), su.TokenCookie)
+		// adminToken := client.GetCookie(resp.Cookies(), su.TokenCookie)
 
 		userName, userPwd := "user_login", "1234"
-		resp, auResp, errs := usersCl.AddUser(userName, userPwd, db.UserRole, token)
+		resp, auResp, errs := adminUsersCli.AddUser(userName, userPwd, db.UserRole)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
@@ -247,28 +245,28 @@ func TestUsersHandlers(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		resp, _, errs = usersCl.Logout(token)
+		resp, _, errs = adminUsersCli.Logout()
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
 			t.Fatal(resp.StatusCode)
 		}
 
-		resp, _, errs = usersCl.Login(userName, userPwd)
+		resp, _, errs = adminUsersCli.Login(adminName, adminNewPwd)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
 			t.Fatal(resp.StatusCode)
 		}
 
-		resp, _, errs = usersCl.DelUser(auResp.ID, token)
+		resp, _, errs = adminUsersCli.DelUser(auResp.ID)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
 			t.Fatal(resp.StatusCode)
 		}
 
-		resp, _, errs = usersCl.Logout(token)
+		resp, _, errs = adminUsersCli.Logout()
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
@@ -277,17 +275,18 @@ func TestUsersHandlers(t *testing.T) {
 	})
 
 	t.Run("test users APIs: Login-AddUser-ListUsers-SetUser-ListUsers-DelUser-ListUsers", func(t *testing.T) {
-		resp, _, errs := usersCl.Login(adminName, adminNewPwd)
+		adminUsersCli := client.NewUsersClient(addr)
+		resp, _, errs := adminUsersCli.Login(adminName, adminNewPwd)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
 			t.Fatal(resp.StatusCode)
 		}
 
-		token := client.GetCookie(resp.Cookies(), su.TokenCookie)
+		// token := client.GetCookie(resp.Cookies(), su.TokenCookie)
 
 		userName, userPwd, userRole := "new_user", "1234", db.UserRole
-		resp, auResp, errs := usersCl.AddUser(userName, userPwd, userRole, token)
+		resp, auResp, errs := adminUsersCli.AddUser(userName, userPwd, userRole)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
@@ -300,7 +299,7 @@ func TestUsersHandlers(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		resp, lsResp, errs := usersCl.ListUsers(token)
+		resp, lsResp, errs := adminUsersCli.ListUsers()
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
@@ -330,14 +329,14 @@ func TestUsersHandlers(t *testing.T) {
 			UploadSpeedLimit:   3,
 			DownloadSpeedLimit: 3,
 		}
-		resp, _, errs = usersCl.SetUser(newUserID, newRole, newQuota, token)
+		resp, _, errs = adminUsersCli.SetUser(newUserID, newRole, newQuota)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
 			t.Fatal(resp.StatusCode)
 		}
 
-		resp, lsResp, errs = usersCl.ListUsers(token)
+		resp, lsResp, errs = adminUsersCli.ListUsers()
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
@@ -360,14 +359,14 @@ func TestUsersHandlers(t *testing.T) {
 			}
 		}
 
-		resp, _, errs = usersCl.DelUser(auResp.ID, token)
+		resp, _, errs = adminUsersCli.DelUser(auResp.ID)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
 			t.Fatal(resp.StatusCode)
 		}
 
-		resp, lsResp, errs = usersCl.ListUsers(token)
+		resp, lsResp, errs = adminUsersCli.ListUsers()
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
@@ -377,7 +376,7 @@ func TestUsersHandlers(t *testing.T) {
 			t.Fatal(fmt.Errorf("incorrect users size (%d)", len(lsResp.Users)))
 		}
 
-		resp, _, errs = usersCl.Logout(token)
+		resp, _, errs = adminUsersCli.Logout()
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
@@ -386,18 +385,19 @@ func TestUsersHandlers(t *testing.T) {
 	})
 
 	t.Run("test roles APIs: Login-AddRole-ListRoles-DelRole-ListRoles-Logout", func(t *testing.T) {
-		resp, _, errs := usersCl.Login(adminName, adminNewPwd)
+		adminUsersCli := client.NewUsersClient(addr)
+		resp, _, errs := adminUsersCli.Login(adminName, adminNewPwd)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
 			t.Fatal(resp.StatusCode)
 		}
 
-		token := client.GetCookie(resp.Cookies(), su.TokenCookie)
+		// token := client.GetCookie(resp.Cookies(), su.TokenCookie)
 		roles := []string{"role1", "role2"}
 
 		for _, role := range roles {
-			resp, _, errs := usersCl.AddRole(role, token)
+			resp, _, errs := adminUsersCli.AddRole(role)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if resp.StatusCode != 200 {
@@ -405,7 +405,7 @@ func TestUsersHandlers(t *testing.T) {
 			}
 		}
 
-		resp, lsResp, errs := usersCl.ListRoles(token)
+		resp, lsResp, errs := adminUsersCli.ListRoles()
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
@@ -422,7 +422,7 @@ func TestUsersHandlers(t *testing.T) {
 		}
 
 		for _, role := range roles {
-			resp, _, errs := usersCl.DelRole(role, token)
+			resp, _, errs := adminUsersCli.DelRole(role)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if resp.StatusCode != 200 {
@@ -430,7 +430,7 @@ func TestUsersHandlers(t *testing.T) {
 			}
 		}
 
-		resp, lsResp, errs = usersCl.ListRoles(token)
+		resp, lsResp, errs = adminUsersCli.ListRoles()
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
@@ -442,7 +442,7 @@ func TestUsersHandlers(t *testing.T) {
 			}
 		}
 
-		resp, _, errs = usersCl.Logout(token)
+		resp, _, errs = adminUsersCli.Logout()
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
@@ -451,15 +451,15 @@ func TestUsersHandlers(t *testing.T) {
 	})
 
 	t.Run("Login, SetPreferences, Self, Logout", func(t *testing.T) {
-		usersCl := client.NewUsersClient(addr)
-		resp, _, errs := usersCl.Login(adminName, adminNewPwd)
+		adminUsersCli := client.NewUsersClient(addr)
+		resp, _, errs := adminUsersCli.Login(adminName, adminNewPwd)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
 			t.Fatal(resp.StatusCode)
 		}
 
-		token := client.GetCookie(resp.Cookies(), su.TokenCookie)
+		// token := client.GetCookie(resp.Cookies(), su.TokenCookie)
 
 		prefers := []*db.Preferences{
 			{
@@ -494,14 +494,14 @@ func TestUsersHandlers(t *testing.T) {
 			},
 		}
 		for _, prefer := range prefers {
-			resp, _, errs := usersCl.SetPreferences(prefer, token)
+			resp, _, errs := adminUsersCli.SetPreferences(prefer)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if resp.StatusCode != 200 {
 				t.Fatal(resp.StatusCode)
 			}
 
-			resp, selfResp, errs := usersCl.Self(token)
+			resp, selfResp, errs := adminUsersCli.Self()
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if resp.StatusCode != 200 {
@@ -514,6 +514,8 @@ func TestUsersHandlers(t *testing.T) {
 		}
 
 		// disable setting bg in preferences
+
+		settingsCl := client.NewSettingsClient(addr, adminUsersCli.Token())
 		resp, _, errs = settingsCl.SetClientCfg(&settings.ClientCfgMsg{
 			ClientCfg: &db.ClientConfig{
 				SiteName:   "Quickshare",
@@ -523,9 +525,7 @@ func TestUsersHandlers(t *testing.T) {
 				AutoTheme:  true,
 			},
 			CaptchaEnabled: false,
-		},
-			token,
-		)
+		})
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {
@@ -533,14 +533,14 @@ func TestUsersHandlers(t *testing.T) {
 		}
 
 		for _, prefer := range prefers {
-			resp, _, errs := usersCl.SetPreferences(prefer, token)
+			resp, _, errs := adminUsersCli.SetPreferences(prefer)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if resp.StatusCode != 200 {
 				t.Fatal(resp.StatusCode)
 			}
 
-			resp, selfResp, errs := usersCl.Self(token)
+			resp, selfResp, errs := adminUsersCli.Self()
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if resp.StatusCode != 200 {

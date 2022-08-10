@@ -115,40 +115,41 @@ func TestPermissions(t *testing.T) {
 			tmpNewRole := "tmpNewRole"
 
 			cl := client.NewUsersClient(addr)
-			token := &http.Cookie{}
+			// token := &http.Cookie{}
 			if requireAuth {
 				resp, _, errs := cl.Login(user, pwd)
 				assertResp(t, resp, errs, 200, desc)
-				token = client.GetCookie(resp.Cookies(), q.TokenCookie)
+				// token = client.GetCookie(resp.Cookies(), q.TokenCookie)
+				// token = cl.Token()
 			} else {
 				resp, _, errs := cl.Login(user, pwd)
 				assertResp(t, resp, errs, 403, desc)
 			}
 
-			resp, _, errs := cl.SetPwd(pwd, newPwd, token)
+			resp, _, errs := cl.SetPwd(pwd, newPwd)
 			assertResp(t, resp, errs, expectedCodes["SetPwd"], fmt.Sprintf("%s-%s", desc, "SetPwd"))
 			// set back the password
-			resp, _, errs = cl.SetPwd(newPwd, pwd, token)
+			resp, _, errs = cl.SetPwd(newPwd, pwd)
 			assertResp(t, resp, errs, expectedCodes["SetPwd"], fmt.Sprintf("%s-%s", desc, "SetPwd"))
 
-			resp, selfResp, errs := cl.Self(token)
+			resp, selfResp, errs := cl.Self()
 			assertResp(t, resp, errs, expectedCodes["Self"], fmt.Sprintf("%s-%s", desc, "Self"))
 
 			prefer := selfResp.Preferences
 
-			resp, _, errs = cl.SetPreferences(prefer, token)
+			resp, _, errs = cl.SetPreferences(prefer)
 			assertResp(t, resp, errs, expectedCodes["SetPreferences"], fmt.Sprintf("%s-%s", desc, "SetPreferences"))
 
-			resp, _, errs = cl.IsAuthed(token)
+			resp, _, errs = cl.IsAuthed()
 			assertResp(t, resp, errs, expectedCodes["IsAuthed"], fmt.Sprintf("%s-%s", desc, "IsAuthed"))
 
 			// user management
-			resp, addUserResp, errs := cl.AddUser(tmpUser, tmpPwd, tmpRole, token)
+			resp, addUserResp, errs := cl.AddUser(tmpUser, tmpPwd, tmpRole)
 			assertResp(t, resp, errs, expectedCodes["AddUser"], fmt.Sprintf("%s-%s", desc, "AddUser"))
-			resp, addAdminResp, errs := cl.AddUser(tmpAdmin, tmpAdminPwd, db.AdminRole, token)
+			resp, addAdminResp, errs := cl.AddUser(tmpAdmin, tmpAdminPwd, db.AdminRole)
 			assertResp(t, resp, errs, expectedCodes["AddUser"], fmt.Sprintf("%s-%s", desc, "AddUser"))
 
-			resp, _, errs = cl.ListUsers(token)
+			resp, _, errs = cl.ListUsers()
 			assertResp(t, resp, errs, expectedCodes["ListUsers"], fmt.Sprintf("%s-%s", desc, "ListUsers"))
 
 			// TODO: the id here should be uint64
@@ -175,48 +176,48 @@ func TestPermissions(t *testing.T) {
 				}
 			}
 
-			resp, _, errs = cl.ForceSetPwd(selfResp.ID, newPwd, token)
+			resp, _, errs = cl.ForceSetPwd(selfResp.ID, newPwd)
 			assertResp(t, resp, errs, expectedCodes["ForceSetPwd"], fmt.Sprintf("%s-%s", desc, "ForceSetPwd"))
-			resp, _, errs = cl.ForceSetPwd(selfResp.ID, pwd, token)
+			resp, _, errs = cl.ForceSetPwd(selfResp.ID, pwd)
 			assertResp(t, resp, errs, expectedCodes["ForceSetPwd"], fmt.Sprintf("%s-%s", desc, "ForceSetPwdBack"))
 
-			resp, _, errs = cl.ForceSetPwd(addUserResp.ID, newPwd, token)
+			resp, _, errs = cl.ForceSetPwd(addUserResp.ID, newPwd)
 			assertResp(t, resp, errs, expectedCodes["ForceSetPwdOther"], fmt.Sprintf("%s-%s", desc, "ForceSetPwdOther"))
-			resp, _, errs = cl.ForceSetPwd(addUserResp.ID, pwd, token)
+			resp, _, errs = cl.ForceSetPwd(addUserResp.ID, pwd)
 			assertResp(t, resp, errs, expectedCodes["ForceSetPwdOther"], fmt.Sprintf("%s-%s", desc, "ForceSetPwdOtherBack"))
 
-			resp, _, errs = cl.ForceSetPwd(addAdminResp.ID, newPwd, token)
+			resp, _, errs = cl.ForceSetPwd(addAdminResp.ID, newPwd)
 			assertResp(t, resp, errs, expectedCodes["ForceSetPwdOtherAdmin"], fmt.Sprintf("%s-%s", desc, "ForceSetPwdOtherAdmin"))
 
 			// update self
-			resp, _, errs = cl.SetUser(userID, newRole, newQuota, token)
+			resp, _, errs = cl.SetUser(userID, newRole, newQuota)
 			assertResp(t, resp, errs, expectedCodes["SetUserSelf"], fmt.Sprintf("%s-%s", desc, "SetUserSelf"))
 			// update other users
-			resp, _, errs = cl.SetUser(tmpUserID, db.AdminRole, newQuota, token)
+			resp, _, errs = cl.SetUser(tmpUserID, db.AdminRole, newQuota)
 			assertResp(t, resp, errs, expectedCodes["SetUserOthers"], fmt.Sprintf("%s-%s", desc, "SetUserOthers"))
-			resp, _, errs = cl.SetUser(tmpAdminID, db.UserRole, newQuota, token)
+			resp, _, errs = cl.SetUser(tmpAdminID, db.UserRole, newQuota)
 			assertResp(t, resp, errs, expectedCodes["SetUserOthersAdmin"], fmt.Sprintf("%s-%s", desc, "SetUserOthersAdmin"))
 
-			resp, _, errs = cl.DelUser(addUserResp.ID, token)
+			resp, _, errs = cl.DelUser(addUserResp.ID)
 			assertResp(t, resp, errs, expectedCodes["DelUser"], fmt.Sprintf("%s-%s", desc, "DelUser"))
-			resp, _, errs = cl.DelUser(addAdminResp.ID, token)
+			resp, _, errs = cl.DelUser(addAdminResp.ID)
 			assertResp(t, resp, errs, expectedCodes["DelUserAdmin"], fmt.Sprintf("%s-%s", desc, "DelUserAdmin"))
 
 			// role management
-			resp, _, errs = cl.AddRole(tmpNewRole, token)
+			resp, _, errs = cl.AddRole(tmpNewRole)
 			assertResp(t, resp, errs, expectedCodes["AddRole"], fmt.Sprintf("%s-%s", desc, "AddRole"))
 
-			resp, _, errs = cl.ListRoles(token)
+			resp, _, errs = cl.ListRoles()
 			assertResp(t, resp, errs, expectedCodes["ListRoles"], fmt.Sprintf("%s-%s", desc, "ListRoles"))
 
-			resp, _, errs = cl.DelRole(tmpNewRole, token)
+			resp, _, errs = cl.DelRole(tmpNewRole)
 			assertResp(t, resp, errs, expectedCodes["DelRole"], fmt.Sprintf("%s-%s", desc, "DelRole"))
 
 			if requireAuth {
-				resp, _, errs := cl.Logout(token)
+				resp, _, errs := cl.Logout()
 				assertResp(t, resp, errs, 200, fmt.Sprintf("%s-%s", desc, "logout"))
 			} else {
-				resp, _, errs := cl.Logout(token)
+				resp, _, errs := cl.Logout()
 				assertResp(t, resp, errs, 403, fmt.Sprintf("%s-%s", desc, "logout"))
 			}
 		}
@@ -339,7 +340,7 @@ func TestPermissions(t *testing.T) {
 			}
 
 			if requireAuth {
-				resp, _, errs := cl.Logout(token)
+				resp, _, errs := cl.Logout()
 				assertResp(t, resp, errs, 200, desc)
 			}
 		}
@@ -498,7 +499,7 @@ func TestPermissions(t *testing.T) {
 			assertResp(t, resp, errs, expectedCodes["SearchTarget"], fmt.Sprintf("%s-%s", desc, "SearchTarget"))
 
 			if requireAuth {
-				resp, _, errs := cl.Logout(token)
+				resp, _, errs := cl.Logout()
 				assertResp(t, resp, errs, 200, desc)
 			}
 		}
@@ -749,21 +750,21 @@ func TestPermissions(t *testing.T) {
 				token = client.GetCookie(resp.Cookies(), q.TokenCookie)
 			}
 
-			settingsCl := client.NewSettingsClient(addr)
+			settingsCl := client.NewSettingsClient(addr, token)
 
 			resp, _, errs := settingsCl.Health()
 			assertResp(t, resp, errs, expectedCodes["Health"], fmt.Sprintf("%s-%s", desc, "Health"))
 
-			resp, gccResp, errs := settingsCl.GetClientCfg(token)
+			resp, gccResp, errs := settingsCl.GetClientCfg()
 			assertResp(t, resp, errs, expectedCodes["GetClientCfg"], fmt.Sprintf("%s-%s", desc, "GetClientCfg"))
 
 			clientCfgMsg := gccResp
 			clientCfgMsg.ClientCfg.SiteName = "new name"
 
-			resp, _, errs = settingsCl.SetClientCfg(clientCfgMsg, token)
+			resp, _, errs = settingsCl.SetClientCfg(clientCfgMsg)
 			assertResp(t, resp, errs, expectedCodes["SetClientCfg"], fmt.Sprintf("%s-%s", desc, "SetClientCfg"))
 
-			resp, _, errs = settingsCl.ReportErrors(errReports, token)
+			resp, _, errs = settingsCl.ReportErrors(errReports)
 			assertResp(t, resp, errs, expectedCodes["ReportErrors"], fmt.Sprintf("%s-%s", desc, "ReportErrors"))
 		}
 

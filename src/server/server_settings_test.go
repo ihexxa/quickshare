@@ -73,7 +73,7 @@ func TestSettingsHandlers(t *testing.T) {
 	users := addUsers(t, addr, userPwd, 1, adminToken)
 
 	t.Run("get/set client config", func(t *testing.T) {
-		settingsCl := client.NewSettingsClient(addr)
+		adminSettingsCli := client.NewSettingsClient(addr, adminToken)
 		cfgs := []*db.ClientConfig{
 			&db.ClientConfig{
 				SiteName: "quickshare",
@@ -93,14 +93,14 @@ func TestSettingsHandlers(t *testing.T) {
 				ClientCfg:      cfg,
 				CaptchaEnabled: false,
 			}
-			resp, _, errs := settingsCl.SetClientCfg(clientCfgMsg, adminToken)
+			resp, _, errs := adminSettingsCli.SetClientCfg(clientCfgMsg)
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if resp.StatusCode != 200 {
 				t.Fatal(resp.StatusCode)
 			}
 
-			resp, clientCfgMsgGot, errs := settingsCl.GetClientCfg(adminToken)
+			resp, clientCfgMsgGot, errs := adminSettingsCli.GetClientCfg()
 			if len(errs) > 0 {
 				t.Fatal(errs)
 			} else if resp.StatusCode != 200 {
@@ -120,7 +120,8 @@ func TestSettingsHandlers(t *testing.T) {
 				}
 				userToken := client.GetCookie(resp.Cookies(), q.TokenCookie)
 
-				resp, clientCfgMsgGot, errs := settingsCl.GetClientCfg(userToken)
+				userSettingsCli := client.NewSettingsClient(addr, userToken)
+				resp, clientCfgMsgGot, errs := userSettingsCli.GetClientCfg()
 				if len(errs) > 0 {
 					t.Fatal(errs)
 				} else if resp.StatusCode != 200 {
@@ -135,7 +136,7 @@ func TestSettingsHandlers(t *testing.T) {
 	})
 
 	t.Run("ReportErrors", func(t *testing.T) {
-		settingsCl := client.NewSettingsClient(addr)
+		adminSettingsCli := client.NewSettingsClient(addr, adminToken)
 		reports := &settings.ClientErrorReports{
 			Reports: []*settings.ClientErrorReport{
 				&settings.ClientErrorReport{
@@ -149,7 +150,7 @@ func TestSettingsHandlers(t *testing.T) {
 			},
 		}
 
-		reportResp, _, errs := settingsCl.ReportErrors(reports, adminToken)
+		reportResp, _, errs := adminSettingsCli.ReportErrors(reports)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if reportResp.StatusCode != 200 {
@@ -178,9 +179,9 @@ func TestSettingsHandlers(t *testing.T) {
 	})
 
 	t.Run("WorkerQueueLen", func(t *testing.T) {
-		settingsCl := client.NewSettingsClient(addr)
+		adminSettingsCli := client.NewSettingsClient(addr, adminToken)
 
-		reportResp, _, errs := settingsCl.WorkerQueueLen(adminToken)
+		reportResp, _, errs := adminSettingsCli.WorkerQueueLen()
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if reportResp.StatusCode != 200 {
