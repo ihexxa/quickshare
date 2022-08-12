@@ -13,6 +13,7 @@ server:
   maxHeaderBytes: 512
   publicPath: "static/public"
   searchResultLimit: 16
+  initFileIndex: true
 users:
   enableAuth: true
   defaultAdmin: ""
