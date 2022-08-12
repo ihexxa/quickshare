@@ -11,6 +11,7 @@ server:
   maxHeaderBytes: 512
   publicPath: "/quickshare/static/public"
   searchResultLimit: 16
+  initFileIndex: true
 users:
   enableAuth: true
   defaultAdmin: ""

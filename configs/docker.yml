@@ -11,5 +11,6 @@ server:
   maxHeaderBytes: 512
   publicPath: "/quickshare/static/public"
   searchResultLimit: 16
+  initFileIndex: true
 db:
   dbPath: "/quickshare/root/quickshare.db"
