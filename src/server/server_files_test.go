@@ -40,7 +40,8 @@ func TestFileHandlers(t *testing.T) {
 		},
 		"server": {
 			"debug": true,
-			"host": "127.0.0.1"
+			"host": "127.0.0.1",
+			"initFileIndex": true
 		},
 		"fs": {
 			"root": "tmpTestData"

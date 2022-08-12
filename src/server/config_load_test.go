@@ -134,6 +134,7 @@ func TestLoadCfg(t *testing.T) {
 			MaxHeaderBytes:    1,
 			PublicPath:        "1",
 			SearchResultLimit: 16,
+			InitFileIndex:     true,
 		},
 		Workers: &WorkerPoolCfg{
 			QueueSize:   1,
@@ -201,6 +202,7 @@ func TestLoadCfg(t *testing.T) {
 			MaxHeaderBytes:    4,
 			PublicPath:        "4",
 			SearchResultLimit: 16,
+			InitFileIndex:     true,
 		},
 		Workers: &WorkerPoolCfg{
 			QueueSize:   4,
@@ -270,6 +272,7 @@ func TestLoadCfg(t *testing.T) {
 			MaxHeaderBytes:    4,
 			PublicPath:        "4",
 			SearchResultLimit: 16,
+			InitFileIndex:     true,
 		},
 		Workers: &WorkerPoolCfg{
 			QueueSize:   4,
@@ -339,6 +342,7 @@ func TestLoadCfg(t *testing.T) {
 			MaxHeaderBytes:    4,
 			PublicPath:        "4",
 			SearchResultLimit: 16,
+			InitFileIndex:     true,
 		},
 		Workers: &WorkerPoolCfg{
 			QueueSize:   4,

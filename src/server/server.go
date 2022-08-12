@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/sha1"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -123,6 +124,7 @@ func mkRoot(rootPath string) {
 }
 
 func initDeps(cfg gocfg.ICfg) *depidx.Deps {
+	var err error
 	logger := initLogger(cfg)
 
 	secret, ok := cfg.String("ENV.TOKENSECRET")
@@ -140,25 +142,6 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	ider := simpleidgen.New()
 	filesystem := local.NewLocalFS(rootPath, 0660, opensLimit, openTTL, readerTTL, ider)
 	jwtEncDec := jwt.NewJWTEncDec(secret)
-
-	searchResultLimit := cfg.GrabInt("Server.SearchResultLimit")
-	fileIndex := fileindex.NewFileTreeIndex(filesystem, "/", searchResultLimit)
-
-	indexInfo, err := filesystem.Stat(fileIndexPath)
-	if err != nil {
-		if !os.IsNotExist(err) {
-			panic(fmt.Sprintf("failed to detect file index: %s", err))
-		} else {
-			logger.Info("warning: no file index found")
-		}
-	} else if indexInfo.IsDir() {
-		panic(fmt.Sprintf("file index is folder, not file: %s", fileIndexPath))
-	} else {
-		err = fileIndex.ReadFrom(fileIndexPath)
-		if err != nil {
-			panic(fmt.Sprintf("failed to load file index: %s", err))
-		}
-	}
 
 	dbPath := cfg.GrabString("Db.DbPath")
 	dbDir := filepath.Dir(dbPath)
@@ -216,7 +199,6 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	deps.SetID(ider)
 	deps.SetLog(logger)
 	deps.SetLimiter(limiter)
-	deps.SetIFileIndex(fileIndex)
 
 	queueSize := cfg.GrabInt("Workers.QueueSize")
 	sleepCyc := cfg.GrabInt("Workers.SleepCyc")
@@ -225,6 +207,42 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	workers := localworker.NewWorkerPool(queueSize, sleepCyc, workerCount, logger)
 	workers.Start()
 	deps.SetWorkers(workers)
+
+	searchResultLimit := cfg.GrabInt("Server.SearchResultLimit")
+	initFileIndex := cfg.GrabBool("Server.InitFileIndex")
+	fileIndex := fileindex.NewFileTreeIndex(filesystem, "/", searchResultLimit)
+	indexInfo, err := filesystem.Stat(fileIndexPath)
+	inited := false
+	if err != nil {
+		if !os.IsNotExist(err) {
+			logger.Infof("failed to detect file index: %s", err)
+		} else {
+			logger.Info("warning: no file index found")
+		}
+	} else if indexInfo.IsDir() {
+		logger.Infof("file index is folder, not file: %s", fileIndexPath)
+	} else {
+		err = fileIndex.ReadFrom(fileIndexPath)
+		if err != nil {
+			logger.Infof("failed to load file index: %s", err)
+		} else {
+			inited = true
+		}
+	}
+	if !inited && initFileIndex {
+		msg, _ := json.Marshal(fileshdr.IndexingParams{})
+		err = deps.Workers().TryPut(
+			localworker.NewMsg(
+				deps.ID().Gen(),
+				map[string]string{localworker.MsgTypeKey: fileshdr.MsgTypeIndexing},
+				string(msg),
+			),
+		)
+		if err != nil {
+			logger.Infof("failed to reindex file index: %s", err)
+		}
+	}
+	deps.SetIFileIndex(fileIndex)
 
 	return deps
 }
