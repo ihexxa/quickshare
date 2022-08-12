@@ -51,6 +51,7 @@ type ServerCfg struct {
 	MaxHeaderBytes    int    `json:"maxHeaderBytes" yaml:"maxHeaderBytes"`
 	PublicPath        string `json:"publicPath" yaml:"publicPath"`
 	SearchResultLimit int    `json:"searchResultLimit" yaml:"searchResultLimit"`
+	InitFileIndex     bool   `json:"initFileIndex" yaml:"initFileIndex"`
 }
 
 type WorkerPoolCfg struct {
@@ -116,6 +117,7 @@ func DefaultConfigStruct() *Config {
 			MaxHeaderBytes:    512,
 			PublicPath:        "static/public",
 			SearchResultLimit: 16,
+			InitFileIndex:     true,
 		},
 		Workers: &WorkerPoolCfg{
 			QueueSize:   1024,
