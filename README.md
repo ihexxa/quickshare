@@ -17,9 +17,14 @@
   </a>
 <p>
 
+## Try it yourself
+
 This is a [demo on Heroku](https://hexxa-quickshare.herokuapp.com/).
 
 (User is `demo`, password is `Quicksh@re`, uploading/downloading speed is limited to around 100KB.)
+
+[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/ihexxa/quickshare)
+
 
 ![Quickshare on desktop](./docs/imgs/v0.5.4/screens.jpg)
 

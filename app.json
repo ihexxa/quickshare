@@ -1,0 +1,13 @@
+{
+    "name": "Quickshare",
+    "description": "Simple and self-hosted file sharing server",
+    "repository": "https://github.com/ihexxa/quickshare",
+    "logo": "",
+    "keywords": [
+        "file-sharing",
+        "file-server",
+        "golang",
+        "react",
+        "typescript"
+    ]
+}

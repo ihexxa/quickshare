@@ -17,11 +17,15 @@
   </a>
 <p>
 
+## 亲自尝试
 这是一个 [Heroku上的演示](https://hexxa-quickshare.herokuapp.com/).
 
 (用户名是 `demo`, 密码是 `Quicksh@re`, 上传/下载速度被限制在大约100KB.)
 
+[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/ihexxa/quickshare)
+
 ![Quickshare on desktop](./imgs/v0.5.4/screens.jpg)
+
 
 [English](../README.md) | 简体中文
 
