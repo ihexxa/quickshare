@@ -21,11 +21,7 @@
 
 (用户名是 `demo`, 密码是 `Quicksh@re`, 上传/下载速度被限制在大约 100KB.)
 
-<video controls width="1280">
-    <source src="./docs/imgs/v0.9.1/upload.webm"
-            type="video/webm">
-    Sorry, your browser doesn't support embedded videos.
-</video>
+<image src="./imgs/v0.9.1/quickshare_1920.gif" title="preview">
 
 [English](../README.md) | 简体中文
 
