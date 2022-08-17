@@ -21,7 +21,11 @@ This is a [demo on Heroku](https://hexxa-quickshare.herokuapp.com/).
 
 (User is `demo`, password is `Quicksh@re`, uploading/downloading speed is limited to around 100KB.)
 
-![Quickshare on desktop](./docs/imgs/v0.5.4/screens.jpg)
+<video controls width="1280">
+    <source src="./docs/imgs/v0.9.1/upload.webm"
+            type="video/webm">
+    Sorry, your browser doesn't support embedded videos.
+</video>
 
 English | [简体中文](./docs/README_zh-cn.md)
 
