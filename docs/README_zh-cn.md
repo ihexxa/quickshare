@@ -17,11 +17,15 @@
   </a>
 <p>
 
-这是一个 [Heroku上的演示](https://hexxa-quickshare.herokuapp.com/).
+这是一个 [Heroku 上的演示](https://hexxa-quickshare.herokuapp.com/).
 
-(用户名是 `demo`, 密码是 `Quicksh@re`, 上传/下载速度被限制在大约100KB.)
+(用户名是 `demo`, 密码是 `Quicksh@re`, 上传/下载速度被限制在大约 100KB.)
 
-![Quickshare on desktop](./imgs/v0.5.4/screens.jpg)
+<video controls width="1280">
+    <source src="./docs/imgs/v0.9.1/upload.webm"
+            type="video/webm">
+    Sorry, your browser doesn't support embedded videos.
+</video>
 
 [English](../README.md) | 简体中文
 
@@ -40,17 +44,18 @@
 - 用户管理
   - 支持多用户
   - 每个用户有个各自角色（user/admin）
-  - 用户home目录
+  - 用户 home 目录
   - 用户级别的上传下载速度限制
   - 用户级别的空间限制
 - 其他
-  - 自适应UI
+  - 自适应 UI
   - 多语言支持
   - 自定义壁纸支持
-  - 跨平台: 支持Linux, Mac and Windows
+  - 跨平台: 支持 Linux, Mac and Windows
+
 ## 快速开始
 
-### 通过Docker运行 (推荐)
+### 通过 Docker 运行 (推荐)
 
 下面会启动一个 `quickshare` docker 并监听 `8686` 端口.
 
