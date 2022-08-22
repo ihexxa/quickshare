@@ -12,9 +12,6 @@
   <a href="https://goreportcard.com/report/github.com/ihexxa/quickshare">
     <img src="https://goreportcard.com/badge/github.com/ihexxa/quickshare" />
   </a>
-  <a href="https://gitter.im/quickshare/Lobby?utm_source=share-link&utm_medium=link&utm_campaign=share-link">
-    <img src="https://badges.gitter.im/Join%20Chat.svg" />
-  </a>
 <p>
 
 This is a [demo on Heroku](https://hexxa-quickshare.herokuapp.com/).
