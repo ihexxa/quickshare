@@ -1,8 +1,6 @@
 package server
 
 import (
-	"errors"
-	"fmt"
 	"os"
 	"sync"
 	"testing"
@@ -31,7 +29,8 @@ func BenchmarkUploadAndDownload(b *testing.B) {
 			"host": "127.0.0.1"
 		},
 		"fs": {
-			"root": "tmpTestData"
+			"root": "tmpTestData",
+			"opensLimit": 1024
 		},
 		"db": {
 			"dbPath": "tmpTestData/quickshare"
@@ -61,77 +60,31 @@ func BenchmarkUploadAndDownload(b *testing.B) {
 	userCount := 5
 	userPwd := "1234"
 	users := addUsers(b, addr, userPwd, userCount, adminToken)
+	filesCount := 30
+	rounds := 1
 
-	getFilePath := func(name string, i int) string {
-		return fmt.Sprintf("%s/files/home_file_%d", name, i)
-	}
-
-	filesCount := 10
-	clientErrs := []error{}
-	mockClient := func(name, pwd string, wg *sync.WaitGroup) {
-		defer wg.Done()
-
-		userUsersCli := client.NewUsersClient(addr)
-		resp, _, errs := userUsersCli.Login(name, pwd)
-		if len(errs) > 0 {
-			clientErrs = append(clientErrs, errs...)
-			return
-		} else if resp.StatusCode != 200 {
-			clientErrs = append(clientErrs, fmt.Errorf("failed to login"))
-			return
-		}
-
-		files := map[string]string{}
-		content := "12345678"
-		for i := range make([]int, filesCount, filesCount) {
-			files[getFilePath(name, i)] = content
-		}
-
-		userToken := userUsersCli.Token()
-		for filePath, content := range files {
-			assertUploadOK(b, filePath, content, addr, userToken)
-			assertDownloadOK(b, filePath, content, addr, userToken)
-		}
-
-		filesCl := client.NewFilesClient(addr, userToken)
-		resp, lsResp, errs := filesCl.ListHome()
-		if len(errs) > 0 {
-			clientErrs = append(clientErrs, errs...)
-			return
-		} else if resp.StatusCode != 200 {
-			clientErrs = append(clientErrs, errors.New("failed to list home"))
-			return
-		}
-
-		if lsResp.Cwd != fmt.Sprintf("%s/files", name) {
-			clientErrs = append(clientErrs, fmt.Errorf("incorrct cwd (%s)", lsResp.Cwd))
-			return
-
-		} else if len(lsResp.Metadatas) != len(files) {
-			clientErrs = append(clientErrs, fmt.Errorf("incorrct metadata size (%d)", len(lsResp.Metadatas)))
-			return
-		}
-
-		resp, _, errs = filesCl.Delete(getFilePath(name, 0))
-		if len(errs) > 0 {
-			clientErrs = append(clientErrs, errs...)
-			return
-		} else if resp.StatusCode != 200 {
-			clientErrs = append(clientErrs, errors.New("failed to add user"))
-			return
-		}
-	}
-
+	clients := []*MockClient{}
 	for i := 0; i < b.N; i++ {
-		var wg sync.WaitGroup
-		for userName := range users {
-			wg.Add(1)
-			go mockClient(userName, userPwd, &wg)
-		}
+		for j := 0; j < rounds; j++ {
+			var wg sync.WaitGroup
+			for userName := range users {
+				client := &MockClient{errs: []error{}}
+				clients = append(clients, client)
+				wg.Add(1)
+				go client.uploadAndDownload(b, addr, userName, userPwd, filesCount, &wg)
+			}
 
-		wg.Wait()
-		if len(clientErrs) > 0 {
-			b.Fatal(joinErrs(clientErrs))
+			wg.Wait()
+
+			errs := []error{}
+			for _, client := range clients {
+				if len(client.errs) > 0 {
+					errs = append(errs, client.errs...)
+				}
+			}
+			if len(errs) > 0 {
+				b.Fatal(joinErrs(errs))
+			}
 		}
 	}
 }
