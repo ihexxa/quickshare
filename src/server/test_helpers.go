@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -119,12 +120,12 @@ func assertUploadOK(t testing.TB, filePath, content, addr string, token *http.Co
 	cl := client.NewFilesClient(addr, token)
 
 	fileSize := int64(len([]byte(content)))
-	res, _, errs := cl.Create(filePath, fileSize)
+	res, body, errs := cl.Create(filePath, fileSize)
 	if len(errs) > 0 {
 		t.Fatal(errs)
 		return false
 	} else if res.StatusCode != 200 {
-		t.Fatal(res.StatusCode)
+		t.Fatalf("unexpected code in upload(%d): %s", res.StatusCode, body)
 		return false
 	}
 
@@ -172,7 +173,7 @@ func assertDownloadOK(t testing.TB, filePath, content, addr string, token *http.
 		return false
 	}
 	if res.StatusCode != 200 && res.StatusCode != 206 {
-		t.Error(res.StatusCode)
+		t.Error(fmt.Errorf("error code is not 200 or 206 in download (%d): %s", res.StatusCode, body))
 		return false
 	}
 	if contentDispositionHeader != fmt.Sprintf(`attachment; filename="%s"`, fileName) {
@@ -244,4 +245,96 @@ func loginFilesClient(addr, user, pwd string) (*client.FilesClient, error) {
 
 	token := client.GetCookie(resp.Cookies(), q.TokenCookie)
 	return client.NewFilesClient(addr, token), nil
+}
+
+type MockClient struct {
+	errs []error
+}
+
+func (cl *MockClient) uploadAndDownload(tb testing.TB, addr, name, pwd string, filesCount int, wg *sync.WaitGroup) {
+	getFilePath := func(name string, i int) string {
+		return fmt.Sprintf("%s/files/home_file_%d", name, i)
+	}
+
+	defer wg.Done()
+
+	userUsersCli := client.NewUsersClient(addr)
+	resp, _, errs := userUsersCli.Login(name, pwd)
+	if len(errs) > 0 {
+		cl.errs = append(cl.errs, errs...)
+		return
+	} else if resp.StatusCode != 200 {
+		cl.errs = append(cl.errs, fmt.Errorf("failed to login"))
+		return
+	}
+
+	files := map[string]string{}
+	content := "12345678"
+	for i := range make([]int, filesCount, filesCount) {
+		files[getFilePath(name, i)] = content
+	}
+
+	userToken := userUsersCli.Token()
+	for filePath, content := range files {
+		assertUploadOK(tb, filePath, content, addr, userToken)
+		assertDownloadOK(tb, filePath, content, addr, userToken)
+	}
+
+	filesCl := client.NewFilesClient(addr, userToken)
+	resp, lsResp, errs := filesCl.ListHome()
+	if len(errs) > 0 {
+		cl.errs = append(cl.errs, errs...)
+		return
+	} else if resp.StatusCode != 200 {
+		cl.errs = append(cl.errs, errors.New("failed to list home"))
+		return
+	}
+
+	if lsResp.Cwd != fmt.Sprintf("%s/files", name) {
+		cl.errs = append(cl.errs, fmt.Errorf("incorrct cwd (%s)", lsResp.Cwd))
+		return
+
+	} else if len(lsResp.Metadatas) != len(files) {
+		cl.errs = append(cl.errs, fmt.Errorf("incorrct metadata size (%d)", len(lsResp.Metadatas)))
+		return
+	}
+
+	resp, selfResp, errs := userUsersCli.Self()
+	if len(errs) > 0 {
+		cl.errs = append(cl.errs, errs...)
+		return
+	} else if resp.StatusCode != 200 {
+		cl.errs = append(cl.errs, errors.New("failed to self"))
+		return
+	}
+	if selfResp.UsedSpace != int64(filesCount*len(content)) {
+		cl.errs = append(cl.errs, fmt.Errorf("usedSpace(%d) doesn't match (%d)", selfResp.UsedSpace, filesCount*len(content)))
+		return
+	}
+
+	resp, _, errs = filesCl.Delete(getFilePath(name, 0))
+	if len(errs) > 0 {
+		cl.errs = append(cl.errs, errs...)
+		return
+	} else if resp.StatusCode != 200 {
+		cl.errs = append(cl.errs, errors.New("failed to delete file"))
+		return
+	}
+
+	resp, selfResp, errs = userUsersCli.Self()
+	if len(errs) > 0 {
+		cl.errs = append(cl.errs, errs...)
+		return
+	} else if resp.StatusCode != 200 {
+		cl.errs = append(cl.errs, errors.New("failed to self"))
+		return
+	}
+	if selfResp.UsedSpace != int64((filesCount-1)*len(content)) {
+		cl.errs = append(cl.errs, fmt.Errorf(
+			"usedSpace(%d) doesn't match (%d)",
+			selfResp.UsedSpace,
+			int64((filesCount-1)*len(content)),
+		))
+		return
+	}
 }
