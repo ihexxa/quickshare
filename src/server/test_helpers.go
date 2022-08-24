@@ -44,7 +44,7 @@ func startTestServer(config string) *Server {
 	return srv
 }
 
-func setUpEnv(t *testing.T, rootPath string, adminName, adminPwd string) {
+func setUpEnv(t testing.TB, rootPath string, adminName, adminPwd string) {
 	os.Setenv("DEFAULTADMIN", adminName)
 	os.Setenv("DEFAULTADMINPWD", adminPwd)
 	os.RemoveAll(rootPath)
@@ -58,7 +58,7 @@ func getUserName(id int) string {
 	return fmt.Sprintf("user_%d", id)
 }
 
-func addUsers(t *testing.T, addr, userPwd string, userCount int, adminToken *http.Cookie) map[string]string {
+func addUsers(t testing.TB, addr, userPwd string, userCount int, adminToken *http.Cookie) map[string]string {
 	adminUsersCli := client.NewUsersClient(addr)
 	adminUsersCli.SetToken(adminToken)
 	users := map[string]string{}
@@ -115,7 +115,7 @@ func compareFileContent(fs fspkg.ISimpleFS, uid, filePath string, expectedConten
 	return string(gotContent) == expectedContent, nil
 }
 
-func assertUploadOK(t *testing.T, filePath, content, addr string, token *http.Cookie) bool {
+func assertUploadOK(t testing.TB, filePath, content, addr string, token *http.Cookie) bool {
 	cl := client.NewFilesClient(addr, token)
 
 	fileSize := int64(len([]byte(content)))
@@ -141,7 +141,7 @@ func assertUploadOK(t *testing.T, filePath, content, addr string, token *http.Co
 	return true
 }
 
-func assertDownloadOK(t *testing.T, filePath, content, addr string, token *http.Cookie) bool {
+func assertDownloadOK(t testing.TB, filePath, content, addr string, token *http.Cookie) bool {
 	var (
 		res      *http.Response
 		body     string
