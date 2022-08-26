@@ -56,31 +56,36 @@ func TestConcurrency(t *testing.T) {
 	}
 	adminToken := client.GetCookie(resp.Cookies(), q.TokenCookie)
 
-	userCount := 5
+	userCount := 2
 	userPwd := "1234"
 	users := addUsers(t, addr, userPwd, userCount, adminToken)
-	filesCount := 10
+	filesCount := 5
+	rounds := 2
 
-	var wg sync.WaitGroup
 	t.Run("Upload and download concurrently", func(t *testing.T) {
-		clients := []*MockClient{}
-		for userName := range users {
-			client := &MockClient{errs: []error{}}
-			clients = append(clients, client)
-			wg.Add(1)
-			go client.uploadAndDownload(t, addr, userName, userPwd, filesCount, &wg)
-		}
+		for i := 0; i < rounds; i++ {
+			clients := []*MockClient{}
+			var wg sync.WaitGroup
 
-		wg.Wait()
+			for userName := range users {
+				client := &MockClient{errs: []error{}}
+				clients = append(clients, client)
+				wg.Add(1)
+				go client.uploadAndDownload(t, addr, userName, userPwd, filesCount, &wg)
+			}
 
-		errs := []error{}
-		for _, client := range clients {
-			if len(client.errs) > 0 {
-				errs = append(errs, client.errs...)
+			wg.Wait()
+
+			errs := []error{}
+			for _, client := range clients {
+				if len(client.errs) > 0 {
+					errs = append(errs, client.errs...)
+				}
+			}
+			if len(errs) > 0 {
+				t.Fatal(joinErrs(errs))
 			}
 		}
-		if len(errs) > 0 {
-			t.Fatal(joinErrs(errs))
-		}
+
 	})
 }

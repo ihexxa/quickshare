@@ -337,4 +337,16 @@ func (cl *MockClient) uploadAndDownload(tb testing.TB, addr, name, pwd string, f
 		))
 		return
 	}
+
+	// truncate all files
+	for i := 1; i < filesCount; i++ {
+		resp, _, errs = filesCl.Delete(getFilePath(name, i))
+		if len(errs) > 0 {
+			cl.errs = append(cl.errs, errs...)
+			return
+		} else if resp.StatusCode != 200 {
+			cl.errs = append(cl.errs, errors.New("failed to delete file"))
+			return
+		}
+	}
 }
