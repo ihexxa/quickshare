@@ -8,6 +8,7 @@ import (
 	"github.com/ihexxa/quickshare/src/cryptoutil"
 	"github.com/ihexxa/quickshare/src/db/boltstore"
 	"github.com/ihexxa/quickshare/src/db/fileinfostore"
+	"github.com/ihexxa/quickshare/src/db/rdb"
 	"github.com/ihexxa/quickshare/src/db/sitestore"
 	"github.com/ihexxa/quickshare/src/db/userstore"
 	"github.com/ihexxa/quickshare/src/fs"
@@ -40,6 +41,7 @@ type Deps struct {
 	boltStore *boltstore.BoltStore
 	cron      cron.ICron
 	fileIndex fileindex.IFileIndex
+	db        rdb.IDB
 }
 
 func NewDeps(cfg gocfg.ICfg) *Deps {
@@ -146,6 +148,14 @@ func (deps *Deps) FileIndex() fileindex.IFileIndex {
 	return deps.fileIndex
 }
 
-func (deps *Deps) SetIFileIndex(index fileindex.IFileIndex) {
+func (deps *Deps) SetFileIndex(index fileindex.IFileIndex) {
 	deps.fileIndex = index
+}
+
+func (deps *Deps) DB() rdb.IDB {
+	return deps.db
+}
+
+func (deps *Deps) SetDB(db rdb.IDB) {
+	deps.db = db
 }

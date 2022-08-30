@@ -242,7 +242,7 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 			logger.Infof("failed to reindex file index: %s", err)
 		}
 	}
-	deps.SetIFileIndex(fileIndex)
+	deps.SetFileIndex(fileIndex)
 
 	return deps
 }
