@@ -50,3 +50,4 @@ site:
       align: "fixed"
 db:
   dbPath: "tmp/quickshare.db"
+  dbType: "rdb"

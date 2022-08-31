@@ -27,6 +27,7 @@ import (
 	"github.com/ihexxa/quickshare/src/db"
 	"github.com/ihexxa/quickshare/src/db/boltstore"
 	"github.com/ihexxa/quickshare/src/db/fileinfostore"
+	"github.com/ihexxa/quickshare/src/db/rdb/sqlite"
 	"github.com/ihexxa/quickshare/src/db/sitestore"
 	"github.com/ihexxa/quickshare/src/db/userstore"
 	"github.com/ihexxa/quickshare/src/depidx"
@@ -65,7 +66,7 @@ func NewServer(cfg gocfg.ICfg) (*Server, error) {
 
 	err = checkCompatibility(deps)
 	if err != nil {
-		return nil, fmt.Errorf("fail to check compatibility: %w", err)
+		return nil, fmt.Errorf("failed to check compatibility: %w", err)
 	}
 
 	port := cfg.GrabInt("Server.Port")
@@ -152,19 +153,33 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	kv := boltdbpvd.New(dbPath, 1024)
 	users, err := userstore.NewKVUserStore(kv)
 	if err != nil {
-		panic(fmt.Sprintf("fail to init user store: %s", err))
+		panic(fmt.Sprintf("failed to init user store: %s", err))
 	}
 	fileInfos, err := fileinfostore.NewFileInfoStore(kv)
 	if err != nil {
-		panic(fmt.Sprintf("fail to init file info store: %s", err))
+		panic(fmt.Sprintf("failed to init file info store: %s", err))
 	}
 	siteStore, err := sitestore.NewSiteStore(kv)
 	if err != nil {
-		panic(fmt.Sprintf("fail to init site config store: %s", err))
+		panic(fmt.Sprintf("failed to init site config store: %s", err))
 	}
 	boltDB, err := boltstore.NewBoltStore(kv.Bolt())
 	if err != nil {
-		panic(fmt.Sprintf("fail to init bolt store: %s", err))
+		panic(fmt.Sprintf("failed to init bolt store: %s", err))
+	}
+
+	rdbPath := cfg.GrabString("Db.RdbPath")
+	if rdbPath == "" {
+		panic("rdbPath is blank")
+	}
+	rdbDir := filepath.Dir(rdbPath)
+	if err = filesystem.MkdirAll(rdbDir); err != nil {
+		panic(fmt.Sprintf("failed to create path for rdb: %s", err))
+	}
+
+	rdb, err := sqlite.NewSQLite(rdbPath)
+	if err != nil {
+		panic(fmt.Sprintf("failed to open sqlite: %s", err))
 	}
 
 	err = siteStore.Init(&db.SiteConfig{
@@ -181,7 +196,7 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 		},
 	})
 	if err != nil {
-		panic(fmt.Sprintf("fail to init site config store: %s", err))
+		panic(fmt.Sprintf("failed to init site config store: %s", err))
 	}
 
 	limiterCap := cfg.IntOr("Users.LimiterCapacity", 10000)
@@ -199,6 +214,7 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	deps.SetID(ider)
 	deps.SetLog(logger)
 	deps.SetLimiter(limiter)
+	deps.SetDB(rdb)
 
 	queueSize := cfg.GrabInt("Workers.QueueSize")
 	sleepCyc := cfg.GrabInt("Workers.SleepCyc")

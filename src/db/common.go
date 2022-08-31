@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"reflect"
@@ -155,6 +156,25 @@ type UploadInfo struct {
 	RealFilePath string `json:"realFilePath" yaml:"realFilePath"`
 	Size         int64  `json:"size" yaml:"size"`
 	Uploaded     int64  `json:"uploaded" yaml:"uploaded"`
+}
+
+type IUserStore interface {
+	Init(ctx context.Context, rootName, rootPwd string) error
+	IsInited() bool
+	AddUser(ctx context.Context, user *User) error
+	DelUser(ctx context.Context, id uint64) error
+	GetUser(ctx context.Context, id uint64) (*User, error)
+	GetUserByName(ctx context.Context, name string) (*User, error)
+	SetInfo(ctx context.Context, id uint64, user *User) error
+	SetUsed(ctx context.Context, id uint64, incr bool, capacity int64) error
+	ResetUsed(ctx context.Context, id uint64, used int64) error
+	SetPwd(ctx context.Context, id uint64, pwd string) error
+	SetPreferences(ctx context.Context, id uint64, settings *Preferences) error
+	ListUsers(context.Context) ([]*User, error)
+	ListUserIDs(context.Context) (map[string]string, error)
+	AddRole(role string) error
+	DelRole(role string) error
+	ListRoles() (map[string]bool, error)
 }
 
 func ComparePreferences(p1, p2 *Preferences) bool {

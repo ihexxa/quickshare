@@ -10,7 +10,6 @@ import (
 	"github.com/ihexxa/quickshare/src/db/fileinfostore"
 	"github.com/ihexxa/quickshare/src/db/rdb"
 	"github.com/ihexxa/quickshare/src/db/sitestore"
-	"github.com/ihexxa/quickshare/src/db/userstore"
 	"github.com/ihexxa/quickshare/src/fs"
 	"github.com/ihexxa/quickshare/src/idgen"
 	"github.com/ihexxa/quickshare/src/iolimiter"
@@ -31,7 +30,7 @@ type Deps struct {
 	fs        fs.ISimpleFS
 	token     cryptoutil.ITokenEncDec
 	kv        kvstore.IKVStore
-	users     userstore.IUserStore
+	users     db.IUserStore
 	fileInfos fileinfostore.IFileInfoStore
 	siteStore sitestore.ISiteStore
 	id        idgen.IIDGen
@@ -88,11 +87,11 @@ func (deps *Deps) SetLog(logger *zap.SugaredLogger) {
 	deps.logger = logger
 }
 
-func (deps *Deps) Users() userstore.IUserStore {
+func (deps *Deps) Users() db.IUserStore {
 	return deps.users
 }
 
-func (deps *Deps) SetUsers(users userstore.IUserStore) {
+func (deps *Deps) SetUsers(users db.IUserStore) {
 	deps.users = users
 }
 
