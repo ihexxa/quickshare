@@ -1,6 +1,7 @@
 package userstore
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -24,25 +25,6 @@ var (
 	ErrNegtiveUsedSpace = errors.New("used space can not be negative")
 )
 
-type IUserStore interface {
-	Init(rootName, rootPwd string) error
-	IsInited() bool
-	AddUser(user *db.User) error
-	DelUser(id uint64) error
-	GetUser(id uint64) (*db.User, error)
-	GetUserByName(name string) (*db.User, error)
-	SetInfo(id uint64, user *db.User) error
-	SetUsed(id uint64, incr bool, capacity int64) error
-	ResetUsed(id uint64, used int64) error
-	SetPwd(id uint64, pwd string) error
-	SetPreferences(id uint64, settings *db.Preferences) error
-	ListUsers() ([]*db.User, error)
-	ListUserIDs() (map[string]string, error)
-	AddRole(role string) error
-	DelRole(role string) error
-	ListRoles() (map[string]bool, error)
-}
-
 type KVUserStore struct {
 	store kvstore.IKVStore
 	mtx   *sync.RWMutex
@@ -55,7 +37,7 @@ func NewKVUserStore(store kvstore.IKVStore) (*KVUserStore, error) {
 	}, nil
 }
 
-func (us *KVUserStore) Init(rootName, rootPwd string) error {
+func (us *KVUserStore) Init(ctx context.Context, rootName, rootPwd string) error {
 	var err error
 
 	for _, namespace := range []string{
@@ -99,7 +81,7 @@ func (us *KVUserStore) Init(rootName, rootPwd string) error {
 	}
 
 	for _, user := range []*db.User{admin, visitor} {
-		err = us.AddUser(user)
+		err = us.AddUser(context.TODO(), user)
 		if err != nil {
 			return err
 		}
@@ -181,14 +163,14 @@ func (us *KVUserStore) getUserByName(name string) (*db.User, error) {
 	return user, nil
 }
 
-func (us *KVUserStore) AddUser(user *db.User) error {
+func (us *KVUserStore) AddUser(ctx context.Context, user *db.User) error {
 	us.mtx.Lock()
 	defer us.mtx.Unlock()
 
 	return us.setUser(user)
 }
 
-func (us *KVUserStore) DelUser(id uint64) error {
+func (us *KVUserStore) DelUser(ctx context.Context, id uint64) error {
 	us.mtx.Lock()
 	defer us.mtx.Unlock()
 
@@ -206,21 +188,21 @@ func (us *KVUserStore) DelUser(id uint64) error {
 	return nil
 }
 
-func (us *KVUserStore) GetUser(id uint64) (*db.User, error) {
+func (us *KVUserStore) GetUser(ctx context.Context, id uint64) (*db.User, error) {
 	us.mtx.RLock()
 	defer us.mtx.RUnlock()
 
 	return us.getUser(id)
 }
 
-func (us *KVUserStore) GetUserByName(name string) (*db.User, error) {
+func (us *KVUserStore) GetUserByName(ctx context.Context, name string) (*db.User, error) {
 	us.mtx.RLock()
 	defer us.mtx.RUnlock()
 
 	return us.getUserByName(name)
 }
 
-func (us *KVUserStore) SetPwd(id uint64, pwd string) error {
+func (us *KVUserStore) SetPwd(ctx context.Context, id uint64, pwd string) error {
 	us.mtx.Lock()
 	defer us.mtx.Unlock()
 
@@ -233,7 +215,7 @@ func (us *KVUserStore) SetPwd(id uint64, pwd string) error {
 	return us.setUser(user)
 }
 
-func (us *KVUserStore) SetInfo(id uint64, user *db.User) error {
+func (us *KVUserStore) SetInfo(ctx context.Context, id uint64, user *db.User) error {
 	us.mtx.Lock()
 	defer us.mtx.Unlock()
 
@@ -248,7 +230,7 @@ func (us *KVUserStore) SetInfo(id uint64, user *db.User) error {
 	return us.setUser(gotUser)
 }
 
-func (us *KVUserStore) SetPreferences(id uint64, prefers *db.Preferences) error {
+func (us *KVUserStore) SetPreferences(ctx context.Context, id uint64, prefers *db.Preferences) error {
 	us.mtx.Lock()
 	defer us.mtx.Unlock()
 
@@ -261,7 +243,7 @@ func (us *KVUserStore) SetPreferences(id uint64, prefers *db.Preferences) error 
 	return us.setUser(user)
 }
 
-func (us *KVUserStore) SetUsed(id uint64, incr bool, capacity int64) error {
+func (us *KVUserStore) SetUsed(ctx context.Context, id uint64, incr bool, capacity int64) error {
 	us.mtx.Lock()
 	defer us.mtx.Unlock()
 
@@ -286,7 +268,7 @@ func (us *KVUserStore) SetUsed(id uint64, incr bool, capacity int64) error {
 	return us.setUser(gotUser)
 }
 
-func (us *KVUserStore) ResetUsed(id uint64, used int64) error {
+func (us *KVUserStore) ResetUsed(ctx context.Context, id uint64, used int64) error {
 	us.mtx.Lock()
 	defer us.mtx.Unlock()
 
@@ -299,7 +281,7 @@ func (us *KVUserStore) ResetUsed(id uint64, used int64) error {
 	return us.setUser(gotUser)
 }
 
-func (us *KVUserStore) ListUsers() ([]*db.User, error) {
+func (us *KVUserStore) ListUsers(ctx context.Context) ([]*db.User, error) {
 	us.mtx.RLock()
 	defer us.mtx.RUnlock()
 
@@ -355,7 +337,7 @@ func (us *KVUserStore) ListUsers() ([]*db.User, error) {
 	return users, nil
 }
 
-func (us *KVUserStore) ListUserIDs() (map[string]string, error) {
+func (us *KVUserStore) ListUserIDs(ctx context.Context) (map[string]string, error) {
 	us.mtx.RLock()
 	defer us.mtx.RUnlock()
 

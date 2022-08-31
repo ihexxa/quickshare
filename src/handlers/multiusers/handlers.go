@@ -157,7 +157,7 @@ func (h *MultiUsersSvc) Init(adminName, adminPwd string) (string, error) {
 	}
 
 	// TODO: return "" for being compatible with singleuser service, should remove this
-	err = h.deps.Users().Init(adminName, adminPwd)
+	err = h.deps.Users().Init(c, adminName, adminPwd)
 	if err != nil {
 		return "", err
 	}
@@ -205,7 +205,7 @@ func (h *MultiUsersSvc) Init(adminName, adminPwd string) (string, error) {
 				Preferences: &preferences,
 			}
 
-			err = h.deps.Users().AddUser(user)
+			err = h.deps.Users().AddUser(c, user)
 			if err != nil {
 				h.deps.Log().Warn("warning: failed to add user(%s): %s", user, err)
 				return "", err
@@ -243,7 +243,7 @@ func (h *MultiUsersSvc) Login(c *gin.Context) {
 		}
 	}
 
-	user, err := h.deps.Users().GetUserByName(req.User)
+	user, err := h.deps.Users().GetUserByName(c, req.User)
 	if err != nil {
 		if errors.Is(err, userstore.ErrUserNotFound) {
 			c.JSON(q.ErrResp(c, 403, err))
@@ -320,7 +320,7 @@ func (h *MultiUsersSvc) SetPwd(c *gin.Context) {
 		return
 	}
 
-	user, err := h.deps.Users().GetUser(uid)
+	user, err := h.deps.Users().GetUser(c, uid)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 402, err))
 		return
@@ -338,7 +338,7 @@ func (h *MultiUsersSvc) SetPwd(c *gin.Context) {
 		return
 	}
 
-	err = h.deps.Users().SetPwd(uid, string(newHash))
+	err = h.deps.Users().SetPwd(c, uid, string(newHash))
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -364,7 +364,7 @@ func (h *MultiUsersSvc) ForceSetPwd(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
-	targetUser, err := h.deps.Users().GetUser(targetUID)
+	targetUser, err := h.deps.Users().GetUser(c, targetUID)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -380,7 +380,7 @@ func (h *MultiUsersSvc) ForceSetPwd(c *gin.Context) {
 		return
 	}
 
-	err = h.deps.Users().SetPwd(targetUser.ID, string(newHash))
+	err = h.deps.Users().SetPwd(c, targetUser.ID, string(newHash))
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -437,7 +437,7 @@ func (h *MultiUsersSvc) AddUser(c *gin.Context) {
 	}
 
 	newPreferences := db.DefaultPreferences
-	err = h.deps.Users().AddUser(&db.User{
+	err = h.deps.Users().AddUser(c, &db.User{
 		ID:   uid,
 		Name: req.Name,
 		Pwd:  string(pwdHash),
@@ -483,7 +483,7 @@ func (h *MultiUsersSvc) DelUser(c *gin.Context) {
 	}
 
 	// TODO: try to make following atomic
-	err = h.deps.Users().DelUser(userID)
+	err = h.deps.Users().DelUser(c, userID)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -514,7 +514,7 @@ func (h *MultiUsersSvc) ListUsers(c *gin.Context) {
 	// 	}
 	// }
 
-	users, err := h.deps.Users().ListUsers()
+	users, err := h.deps.Users().ListUsers(c)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -651,7 +651,7 @@ func (h *MultiUsersSvc) Self(c *gin.Context) {
 		return
 	}
 
-	user, err := h.deps.Users().GetUserByName(claims[q.UserParam])
+	user, err := h.deps.Users().GetUserByName(c, claims[q.UserParam])
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -686,7 +686,7 @@ func (h *MultiUsersSvc) SetUser(c *gin.Context) {
 		return
 	}
 
-	err := h.deps.Users().SetInfo(req.ID, &db.User{
+	err := h.deps.Users().SetInfo(c, req.ID, &db.User{
 		Role:  req.Role,
 		Quota: req.Quota,
 	})
@@ -721,7 +721,7 @@ func (h *MultiUsersSvc) SetPreferences(c *gin.Context) {
 		req.Preferences.Bg = db.DefaultBgConfig
 	}
 
-	err = h.deps.Users().SetPreferences(uid, req.Preferences)
+	err = h.deps.Users().SetPreferences(c, uid, req.Preferences)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -740,7 +740,7 @@ func (h *MultiUsersSvc) ResetUsedSpace(c *gin.Context) {
 		return
 	}
 
-	userInfo, err := h.deps.Users().GetUser(req.UserID)
+	userInfo, err := h.deps.Users().GetUser(c, req.UserID)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
