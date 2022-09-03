@@ -34,4 +34,4 @@ users:
       pwd: "Quicksh@re"
       role: "user"
 db:
-  dbPath: "/quickshare/root/quickshare.db"
+  dbPath: "/quickshare/root/quickshare.sqlite"

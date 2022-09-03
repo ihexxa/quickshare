@@ -45,4 +45,4 @@ site:
       position: "center"
       align: "fixed"
 db:
-  dbPath: "/tmp/quickshare.db"
+  dbPath: "/tmp/quickshare.sqlite"
