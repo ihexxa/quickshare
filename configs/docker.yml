@@ -13,4 +13,4 @@ server:
   searchResultLimit: 16
   initFileIndex: true
 db:
-  dbPath: "/quickshare/root/quickshare.db"
+  dbPath: "/quickshare/root/quickshare.sqlite"

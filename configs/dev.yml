@@ -49,5 +49,4 @@ site:
       position: "center"
       align: "fixed"
 db:
-  dbPath: "tmp/quickshare.db"
-  dbType: "rdb"
+  dbPath: "tmp/quickshare.sqlite"
