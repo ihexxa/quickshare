@@ -1,6 +1,7 @@
 package fileinfostore
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 
@@ -36,7 +37,7 @@ func (fi *FileInfoStore) setUploadInfo(user, filePath string, info *db.UploadInf
 	return fi.store.SetStringIn(db.UploadNS(user), filePath, string(newInfoBytes))
 }
 
-func (fi *FileInfoStore) AddUploadInfo(user, filePath, tmpPath string, fileSize int64) error {
+func (fi *FileInfoStore) AddUploadInfo(ctx context.Context, user, filePath, tmpPath string, fileSize int64) error {
 	fi.mtx.Lock()
 	defer fi.mtx.Unlock()
 
@@ -58,7 +59,7 @@ func (fi *FileInfoStore) AddUploadInfo(user, filePath, tmpPath string, fileSize 
 	})
 }
 
-func (fi *FileInfoStore) SetUploadInfo(user, filePath string, newUploaded int64) error {
+func (fi *FileInfoStore) SetUploadInfo(ctx context.Context, user, filePath string, newUploaded int64) error {
 	fi.mtx.Lock()
 	defer fi.mtx.Unlock()
 
@@ -76,18 +77,18 @@ func (fi *FileInfoStore) SetUploadInfo(user, filePath string, newUploaded int64)
 	})
 }
 
-func (fi *FileInfoStore) GetUploadInfo(user, filePath string) (string, int64, int64, error) {
+func (fi *FileInfoStore) GetUploadInfo(ctx context.Context, user, filePath string) (string, int64, int64, error) {
 	fi.mtx.Lock()
 	defer fi.mtx.Unlock()
 
 	return fi.getUploadInfo(user, filePath)
 }
 
-func (fi *FileInfoStore) DelUploadInfo(user, filePath string) error {
+func (fi *FileInfoStore) DelUploadInfo(ctx context.Context, user, filePath string) error {
 	return fi.store.DelInt64In(db.UploadNS(user), filePath)
 }
 
-func (fi *FileInfoStore) ListUploadInfo(user string) ([]*db.UploadInfo, error) {
+func (fi *FileInfoStore) ListUploadInfo(ctx context.Context, user string) ([]*db.UploadInfo, error) {
 	ns := db.UploadNS(user)
 	if !fi.store.HasNamespace(ns) {
 		return nil, nil
