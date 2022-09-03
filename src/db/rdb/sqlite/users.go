@@ -5,97 +5,18 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	// "errors"
 	"fmt"
-	// "sync"
-	// "time"
+	"sync"
 
 	"github.com/ihexxa/quickshare/src/db"
-	"github.com/ihexxa/quickshare/src/db/rdb"
-	// "github.com/ihexxa/quickshare/src/kvstore"
 )
 
-// TODO: use sync.Pool instead
-
-const (
-	VisitorID   = uint64(1)
-	VisitorName = "visitor"
-)
-
-var (
-	ErrReachedLimit     = errors.New("reached space limit")
-	ErrUserNotFound     = errors.New("user not found")
-	ErrNegtiveUsedSpace = errors.New("used space can not be negative")
-)
-
-type SQLiteUsers struct {
-	db rdb.IDB
+type SQLiteStore struct {
+	db  db.IDB
+	mtx *sync.RWMutex
 }
 
-func NewSQLiteUsers(db rdb.IDB) (*SQLiteUsers, error) {
-	return &SQLiteUsers{db: db}, nil
-}
-
-func (u *SQLiteUsers) Init(ctx context.Context, rootName, rootPwd string) error {
-	_, err := u.db.ExecContext(
-		ctx,
-		`create table if not exists t_user (
-			id bigint not null,
-			name varchar not null,
-			pwd varchar not null,
-			role integer not null,
-			used_space bigint not null,
-			quota varchar not null,
-			preference varchar not null,
-			primary key(id)
-		)`,
-	)
-	if err != nil {
-		return err
-	}
-
-	admin := &db.User{
-		ID:   0,
-		Name: rootName,
-		Pwd:  rootPwd,
-		Role: db.AdminRole,
-		Quota: &db.Quota{
-			SpaceLimit:         db.DefaultSpaceLimit,
-			UploadSpeedLimit:   db.DefaultUploadSpeedLimit,
-			DownloadSpeedLimit: db.DefaultDownloadSpeedLimit,
-		},
-		Preferences: &db.DefaultPreferences,
-	}
-	visitor := &db.User{
-		ID:   VisitorID,
-		Name: VisitorName,
-		Pwd:  rootPwd,
-		Role: db.VisitorRole,
-		Quota: &db.Quota{
-			SpaceLimit:         0,
-			UploadSpeedLimit:   db.VisitorUploadSpeedLimit,
-			DownloadSpeedLimit: db.VisitorDownloadSpeedLimit,
-		},
-		Preferences: &db.DefaultPreferences,
-	}
-	for _, user := range []*db.User{admin, visitor} {
-		err = u.AddUser(ctx, user)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (u *SQLiteUsers) IsInited() bool {
-	// always try to init the db
-	return false
-}
-
-// t_users
-// id, name, pwd, role, used_space, config
-func (u *SQLiteUsers) setUser(ctx context.Context, tx *sql.Tx, user *db.User) error {
+func (st *SQLiteStore) setUser(ctx context.Context, user *db.User) error {
 	var err error
 	if err = db.CheckUser(user, false); err != nil {
 		return err
@@ -109,7 +30,7 @@ func (u *SQLiteUsers) setUser(ctx context.Context, tx *sql.Tx, user *db.User) er
 	if err != nil {
 		return err
 	}
-	_, err = tx.ExecContext(
+	_, err = st.db.ExecContext(
 		ctx,
 		`update t_user
 		set name=?, pwd=?, role=?, used_space=?, quota=?, preference=?
@@ -120,16 +41,15 @@ func (u *SQLiteUsers) setUser(ctx context.Context, tx *sql.Tx, user *db.User) er
 		user.UsedSpace,
 		quotaStr,
 		preferencesStr,
+		user.ID,
 	)
 	return err
 }
 
-func (u *SQLiteUsers) getUser(ctx context.Context, tx *sql.Tx, id uint64) (*db.User, error) {
-	var err error
-
+func (st *SQLiteStore) getUser(ctx context.Context, id uint64) (*db.User, error) {
 	user := &db.User{}
 	var quotaStr, preferenceStr string
-	err = tx.QueryRowContext(
+	err := st.db.QueryRowContext(
 		ctx,
 		`select id, name, pwd, role, used_space, quota, preference
 		from t_user
@@ -146,7 +66,7 @@ func (u *SQLiteUsers) getUser(ctx context.Context, tx *sql.Tx, id uint64) (*db.U
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrUserNotFound
+			return nil, db.ErrUserNotFound
 		}
 		return nil, err
 	}
@@ -162,7 +82,10 @@ func (u *SQLiteUsers) getUser(ctx context.Context, tx *sql.Tx, id uint64) (*db.U
 	return user, nil
 }
 
-func (u *SQLiteUsers) AddUser(ctx context.Context, user *db.User) error {
+func (st *SQLiteStore) AddUser(ctx context.Context, user *db.User) error {
+	st.Lock()
+	defer st.Unlock()
+
 	quotaStr, err := json.Marshal(user.Quota)
 	if err != nil {
 		return err
@@ -171,7 +94,7 @@ func (u *SQLiteUsers) AddUser(ctx context.Context, user *db.User) error {
 	if err != nil {
 		return err
 	}
-	_, err = u.db.ExecContext(
+	_, err = st.db.ExecContext(
 		ctx,
 		`insert into t_user (id, name, pwd, role, used_space, quota, preference) values (?, ?, ?, ?, ?, ?, ?)`,
 		user.ID,
@@ -185,8 +108,11 @@ func (u *SQLiteUsers) AddUser(ctx context.Context, user *db.User) error {
 	return err
 }
 
-func (u *SQLiteUsers) DelUser(ctx context.Context, id uint64) error {
-	_, err := u.db.ExecContext(
+func (st *SQLiteStore) DelUser(ctx context.Context, id uint64) error {
+	st.Lock()
+	defer st.Unlock()
+
+	_, err := st.db.ExecContext(
 		ctx,
 		`delete from t_user where id=?`,
 		id,
@@ -194,36 +120,34 @@ func (u *SQLiteUsers) DelUser(ctx context.Context, id uint64) error {
 	return err
 }
 
-func (u *SQLiteUsers) GetUser(ctx context.Context, id uint64) (*db.User, error) {
-	tx, err := u.db.BeginTx(ctx, &sql.TxOptions{})
+func (st *SQLiteStore) GetUser(ctx context.Context, id uint64) (*db.User, error) {
+	st.RLock()
+	defer st.RUnlock()
+
+	user, err := st.getUser(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	user, err := u.getUser(ctx, tx, id)
-	if err != nil {
-		return nil, err
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		return nil, err
-	}
 	return user, err
 }
 
-func (u *SQLiteUsers) GetUserByName(ctx context.Context, name string) (*db.User, error) {
+func (st *SQLiteStore) GetUserByName(ctx context.Context, name string) (*db.User, error) {
+	st.RLock()
+	defer st.RUnlock()
+
 	user := &db.User{}
 	var quotaStr, preferenceStr string
-	err := u.db.QueryRowContext(
+	err := st.db.QueryRowContext(
 		ctx,
-		`select id, name, role, used_space, quota, preference
+		`select id, name, pwd, role, used_space, quota, preference
 		from t_user
 		where name=?`,
 		name,
 	).Scan(
 		&user.ID,
 		&user.Name,
+		&user.Pwd,
 		&user.Role,
 		&user.UsedSpace,
 		&quotaStr,
@@ -231,7 +155,7 @@ func (u *SQLiteUsers) GetUserByName(ctx context.Context, name string) (*db.User,
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrUserNotFound
+			return nil, db.ErrUserNotFound
 		}
 		return nil, err
 	}
@@ -247,8 +171,11 @@ func (u *SQLiteUsers) GetUserByName(ctx context.Context, name string) (*db.User,
 	return user, nil
 }
 
-func (u *SQLiteUsers) SetPwd(ctx context.Context, id uint64, pwd string) error {
-	_, err := u.db.ExecContext(
+func (st *SQLiteStore) SetPwd(ctx context.Context, id uint64, pwd string) error {
+	st.Lock()
+	defer st.Unlock()
+
+	_, err := st.db.ExecContext(
 		ctx,
 		`update t_user
 		set pwd=?
@@ -260,13 +187,16 @@ func (u *SQLiteUsers) SetPwd(ctx context.Context, id uint64, pwd string) error {
 }
 
 // role + quota
-func (u *SQLiteUsers) SetInfo(ctx context.Context, id uint64, user *db.User) error {
+func (st *SQLiteStore) SetInfo(ctx context.Context, id uint64, user *db.User) error {
+	st.Lock()
+	defer st.Unlock()
+
 	quotaStr, err := json.Marshal(user.Quota)
 	if err != nil {
 		return err
 	}
 
-	_, err = u.db.ExecContext(
+	_, err = st.db.ExecContext(
 		ctx,
 		`update t_user
 		set role=?, quota=?
@@ -277,13 +207,16 @@ func (u *SQLiteUsers) SetInfo(ctx context.Context, id uint64, user *db.User) err
 	return err
 }
 
-func (u *SQLiteUsers) SetPreferences(ctx context.Context, id uint64, prefers *db.Preferences) error {
+func (st *SQLiteStore) SetPreferences(ctx context.Context, id uint64, prefers *db.Preferences) error {
+	st.Lock()
+	defer st.Unlock()
+
 	preferenceStr, err := json.Marshal(prefers)
 	if err != nil {
 		return err
 	}
 
-	_, err = u.db.ExecContext(
+	_, err = st.db.ExecContext(
 		ctx,
 		`update t_user
 		set preference=?
@@ -294,31 +227,32 @@ func (u *SQLiteUsers) SetPreferences(ctx context.Context, id uint64, prefers *db
 	return err
 }
 
-func (u *SQLiteUsers) SetUsed(ctx context.Context, id uint64, incr bool, capacity int64) error {
-	tx, err := u.db.BeginTx(ctx, &sql.TxOptions{})
-	if err != nil {
-		return err
-	}
+func (st *SQLiteStore) SetUsed(ctx context.Context, id uint64, incr bool, capacity int64) error {
+	st.Lock()
+	defer st.Unlock()
+	return st.setUsed(ctx, id, incr, capacity)
+}
 
-	gotUser, err := u.getUser(ctx, tx, id)
+func (st *SQLiteStore) setUsed(ctx context.Context, id uint64, incr bool, capacity int64) error {
+	gotUser, err := st.getUser(ctx, id)
 	if err != nil {
 		return err
 	}
 
 	if incr && gotUser.UsedSpace+capacity > int64(gotUser.Quota.SpaceLimit) {
-		return ErrReachedLimit
+		return db.ErrReachedLimit
 	}
 
 	if incr {
 		gotUser.UsedSpace = gotUser.UsedSpace + capacity
 	} else {
 		if gotUser.UsedSpace-capacity < 0 {
-			return ErrNegtiveUsedSpace
+			return db.ErrNegtiveUsedSpace
 		}
 		gotUser.UsedSpace = gotUser.UsedSpace - capacity
 	}
 
-	_, err = tx.ExecContext(
+	_, err = st.db.ExecContext(
 		ctx,
 		`update t_user
 		set used_space=?
@@ -330,11 +264,14 @@ func (u *SQLiteUsers) SetUsed(ctx context.Context, id uint64, incr bool, capacit
 		return err
 	}
 
-	return tx.Commit()
+	return nil
 }
 
-func (u *SQLiteUsers) ResetUsed(ctx context.Context, id uint64, used int64) error {
-	_, err := u.db.ExecContext(
+func (st *SQLiteStore) ResetUsed(ctx context.Context, id uint64, used int64) error {
+	st.Lock()
+	defer st.Unlock()
+
+	_, err := st.db.ExecContext(
 		ctx,
 		`update t_user
 		set used_space=?
@@ -345,16 +282,19 @@ func (u *SQLiteUsers) ResetUsed(ctx context.Context, id uint64, used int64) erro
 	return err
 }
 
-func (u *SQLiteUsers) ListUsers(ctx context.Context) ([]*db.User, error) {
+func (st *SQLiteStore) ListUsers(ctx context.Context) ([]*db.User, error) {
+	st.RLock()
+	defer st.RUnlock()
+
 	// TODO: support pagination
-	rows, err := u.db.QueryContext(
+	rows, err := st.db.QueryContext(
 		ctx,
 		`select id, name, role, used_space, quota, preference
 		from t_user`,
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrUserNotFound
+			return nil, db.ErrUserNotFound
 		}
 		return nil, err
 	}
@@ -389,8 +329,11 @@ func (u *SQLiteUsers) ListUsers(ctx context.Context) ([]*db.User, error) {
 	return users, nil
 }
 
-func (u *SQLiteUsers) ListUserIDs(ctx context.Context) (map[string]string, error) {
-	users, err := u.ListUsers(ctx)
+func (st *SQLiteStore) ListUserIDs(ctx context.Context) (map[string]string, error) {
+	st.RLock()
+	defer st.RUnlock()
+
+	users, err := st.ListUsers(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -402,17 +345,17 @@ func (u *SQLiteUsers) ListUserIDs(ctx context.Context) (map[string]string, error
 	return nameToId, nil
 }
 
-func (u *SQLiteUsers) AddRole(role string) error {
+func (st *SQLiteStore) AddRole(role string) error {
 	// TODO: implement this after adding grant/revoke
 	panic("not implemented")
 }
 
-func (u *SQLiteUsers) DelRole(role string) error {
+func (st *SQLiteStore) DelRole(role string) error {
 	// TODO: implement this after adding grant/revoke
 	panic("not implemented")
 }
 
-func (u *SQLiteUsers) ListRoles() (map[string]bool, error) {
+func (st *SQLiteStore) ListRoles() (map[string]bool, error) {
 	// TODO: implement this after adding grant/revoke
 	panic("not implemented")
 }

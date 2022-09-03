@@ -1,6 +1,7 @@
 package fileinfostore
 
 import (
+	"context"
 	"crypto/sha1"
 	"encoding/json"
 	"errors"
@@ -21,12 +22,12 @@ const (
 )
 
 var (
-	ErrEmpty           = errors.New("can not hash empty string")
-	ErrNotFound        = errors.New("file info not found")
-	ErrSharingNotFound = errors.New("sharing id not found")
-	ErrConflicted      = errors.New("conflict found in hashing")
-	ErrVerNotFound     = errors.New("file info schema version not found")
-	maxHashingTime     = 10
+	// db.ErrEmpty = errors.New("can not hash empty string")
+	// db.ErrFileInfoNotFound        = errors.New("file info not found")
+	// db.ErrSharingNotFound = errors.New("sharing id not found")
+	// db.ErrConflicted  = errors.New("conflict found in hashing")
+	// db.ErrVerNotFound = errors.New("file info schema version not found")
+	maxHashingTime = 10
 )
 
 type IFileInfoStore interface {
@@ -77,7 +78,7 @@ func NewFileInfoStore(store kvstore.IKVStore) (*FileInfoStore, error) {
 func (fi *FileInfoStore) getInfo(itemPath string) (*db.FileInfo, error) {
 	infoStr, ok := fi.store.GetStringIn(db.FileInfoNs, itemPath)
 	if !ok {
-		return nil, ErrNotFound
+		return nil, db.ErrFileInfoNotFound
 	}
 
 	info := &db.FileInfo{}
@@ -92,16 +93,16 @@ func (fi *FileInfoStore) getInfo(itemPath string) (*db.FileInfo, error) {
 	return info, nil
 }
 
-func (fi *FileInfoStore) GetInfo(itemPath string) (*db.FileInfo, error) {
+func (fi *FileInfoStore) GetFileInfo(ctx context.Context, itemPath string) (*db.FileInfo, error) {
 	return fi.getInfo(itemPath)
 }
 
-func (fi *FileInfoStore) GetInfos(itemPaths []string) (map[string]*db.FileInfo, error) {
+func (fi *FileInfoStore) ListFileInfos(ctx context.Context, itemPaths []string) (map[string]*db.FileInfo, error) {
 	infos := map[string]*db.FileInfo{}
 	for _, itemPath := range itemPaths {
 		info, err := fi.getInfo(itemPath)
 		if err != nil {
-			if !errors.Is(err, ErrNotFound) {
+			if !errors.Is(err, db.ErrFileInfoNotFound) {
 				// TODO: try to make info data consistent with fs
 				return nil, err
 			}
@@ -133,23 +134,23 @@ func (fi *FileInfoStore) setInfo(itemPath string, info *db.FileInfo) error {
 	return nil
 }
 
-func (fi *FileInfoStore) SetInfo(itemPath string, info *db.FileInfo) error {
+func (fi *FileInfoStore) SetFileInfo(ctx context.Context, itemPath string, info *db.FileInfo) error {
 	return fi.setInfo(itemPath, info)
 }
 
-func (fi *FileInfoStore) DelInfo(itemPath string) error {
+func (fi *FileInfoStore) DelFileInfo(ctx context.Context, itemPath string) error {
 	return fi.store.DelStringIn(db.FileInfoNs, itemPath)
 }
 
 // sharings
 
-func (fi *FileInfoStore) SetSha1(itemPath, sign string) error {
+func (fi *FileInfoStore) SetSha1(ctx context.Context, itemPath, sign string) error {
 	fi.mtx.Lock()
 	defer fi.mtx.Unlock()
 
 	info, err := fi.getInfo(itemPath)
 	if err != nil {
-		if !errors.Is(err, ErrNotFound) {
+		if !errors.Is(err, db.ErrFileInfoNotFound) {
 			return err
 		}
 		info = &db.FileInfo{
@@ -163,7 +164,7 @@ func (fi *FileInfoStore) SetSha1(itemPath, sign string) error {
 
 func (fi *FileInfoStore) getShareID(payload string) (string, error) {
 	if len(payload) == 0 {
-		return "", ErrEmpty
+		return "", db.ErrEmpty
 	}
 
 	for i := 0; i < maxHashingTime; i++ {
@@ -183,24 +184,24 @@ func (fi *FileInfoStore) getShareID(payload string) (string, error) {
 		}
 	}
 
-	return "", ErrConflicted
+	return "", db.ErrConflicted
 }
 
-func (fi *FileInfoStore) GetSharingDir(hashID string) (string, error) {
+func (fi *FileInfoStore) GetSharingDir(ctx context.Context, hashID string) (string, error) {
 	dirPath, ok := fi.store.GetStringIn(db.ShareIDNs, hashID)
 	if !ok {
-		return "", ErrSharingNotFound
+		return "", db.ErrSharingNotFound
 	}
 	return dirPath, nil
 }
 
-func (fi *FileInfoStore) AddSharing(dirPath string) error {
+func (fi *FileInfoStore) AddSharing(ctx context.Context, dirPath string) error {
 	fi.mtx.Lock()
 	defer fi.mtx.Unlock()
 
 	info, err := fi.getInfo(dirPath)
 	if err != nil {
-		if !errors.Is(err, ErrNotFound) {
+		if !errors.Is(err, db.ErrFileInfoNotFound) {
 			return err
 		}
 		info = &db.FileInfo{
@@ -223,7 +224,7 @@ func (fi *FileInfoStore) AddSharing(dirPath string) error {
 	return fi.setInfo(dirPath, info)
 }
 
-func (fi *FileInfoStore) DelSharing(dirPath string) error {
+func (fi *FileInfoStore) DelSharing(ctx context.Context, dirPath string) error {
 	fi.mtx.Lock()
 	defer fi.mtx.Unlock()
 
@@ -257,7 +258,7 @@ func (fi *FileInfoStore) DelSharing(dirPath string) error {
 	return fi.setInfo(dirPath, info)
 }
 
-func (fi *FileInfoStore) GetSharing(dirPath string) (bool, bool) {
+func (fi *FileInfoStore) GetSharing(ctx context.Context, dirPath string) (bool, bool) {
 	fi.mtx.Lock()
 	defer fi.mtx.Unlock()
 
@@ -269,7 +270,7 @@ func (fi *FileInfoStore) GetSharing(dirPath string) (bool, bool) {
 	return info.IsDir && info.Shared, true
 }
 
-func (fi *FileInfoStore) ListSharings(prefix string) (map[string]string, error) {
+func (fi *FileInfoStore) ListSharings(ctx context.Context, prefix string) (map[string]string, error) {
 	infoStrs, err := fi.store.ListStringsByPrefixIn(prefix, db.FileInfoNs)
 	if err != nil {
 		return nil, err

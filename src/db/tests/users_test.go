@@ -1,6 +1,7 @@
-package userstore
+package tests
 
 import (
+	"context"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -8,14 +9,19 @@ import (
 	"testing"
 
 	"github.com/ihexxa/quickshare/src/db"
-	"github.com/ihexxa/quickshare/src/kvstore/boltdbpvd"
+	"github.com/ihexxa/quickshare/src/db/rdb/sqlite"
+	// "github.com/ihexxa/quickshare/src/db/userstore"
+	// "github.com/ihexxa/quickshare/src/kvstore/boltdbpvd"
 )
 
-func TestUserStores(t *testing.T) {
+func TestUserStore(t *testing.T) {
 	rootName, rootPwd := "root", "rootPwd"
 
-	testUserMethods := func(t *testing.T, store IUserStore) {
-		root, err := store.GetUser(0)
+	testUserMethods := func(t *testing.T, store db.IUserDB) {
+		ctx := context.TODO()
+
+		// check root
+		root, err := store.GetUser(ctx, 0)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -23,7 +29,7 @@ func TestUserStores(t *testing.T) {
 			t.Fatal("root user not found")
 		}
 		if root.Pwd != rootPwd {
-			t.Fatalf("passwords not match %s", err)
+			t.Fatalf("passwords not match (%s) (%s)", root.Pwd, rootPwd)
 		}
 		if root.Role != db.AdminRole {
 			t.Fatalf("incorrect root role")
@@ -41,11 +47,12 @@ func TestUserStores(t *testing.T) {
 			t.Fatalf("incorrect preference %v %v", root.Preferences, db.DefaultPreferences)
 		}
 
-		visitor, err := store.GetUser(1)
+		// check visitor
+		visitor, err := store.GetUser(ctx, 1)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if visitor.Name != VisitorName {
+		if visitor.Name != db.VisitorName {
 			t.Fatal("visitor not found")
 		}
 		if visitor.Pwd != rootPwd {
@@ -67,13 +74,14 @@ func TestUserStores(t *testing.T) {
 			t.Fatalf("incorrect preference")
 		}
 
+		// add users
 		id, name1 := uint64(2), "test_user1"
 		pwd1, pwd2 := "666", "888"
 		role1, role2 := db.UserRole, db.AdminRole
 		spaceLimit1, upLimit1, downLimit1 := int64(17), 5, 7
 		spaceLimit2, upLimit2, downLimit2 := int64(19), 13, 17
 
-		err = store.AddUser(&db.User{
+		err = store.AddUser(ctx, &db.User{
 			ID:   id,
 			Name: name1,
 			Pwd:  pwd1,
@@ -89,7 +97,8 @@ func TestUserStores(t *testing.T) {
 			t.Fatal("there should be no error")
 		}
 
-		user, err := store.GetUser(id)
+		// compare users
+		user, err := store.GetUser(ctx, id)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -112,7 +121,8 @@ func TestUserStores(t *testing.T) {
 			t.Fatalf("down limit not matched %d %d", downLimit1, user.Quota.DownloadSpeedLimit)
 		}
 
-		users, err := store.ListUsers()
+		// check listing
+		users, err := store.ListUsers(ctx)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -135,11 +145,11 @@ func TestUserStores(t *testing.T) {
 			}
 		}
 
-		err = store.SetPwd(id, pwd2)
+		err = store.SetPwd(ctx, id, pwd2)
 		if err != nil {
 			t.Fatal(err)
 		}
-		store.SetInfo(id, &db.User{
+		store.SetInfo(ctx, id, &db.User{
 			ID:   id,
 			Role: role2,
 			Quota: &db.Quota{
@@ -150,27 +160,27 @@ func TestUserStores(t *testing.T) {
 		})
 
 		usedIncr, usedDecr := int64(spaceLimit2), int64(7)
-		err = store.SetUsed(id, true, usedIncr)
+		err = store.SetUsed(ctx, id, true, usedIncr)
 		if err != nil {
 			t.Fatal(err)
 		}
-		err = store.SetUsed(id, false, usedDecr)
+		err = store.SetUsed(ctx, id, false, usedDecr)
 		if err != nil {
 			t.Fatal(err)
 		}
-		err = store.SetUsed(id, true, int64(spaceLimit2)-(usedIncr-usedDecr)+1)
+		err = store.SetUsed(ctx, id, true, int64(spaceLimit2)-(usedIncr-usedDecr)+1)
 		if err == nil || !strings.Contains(err.Error(), "reached space limit") {
 			t.Fatal("should reject big file")
 		} else {
 			err = nil
 		}
 
-		user, err = store.GetUser(id)
+		user, err = store.GetUser(ctx, id)
 		if err != nil {
 			t.Fatal(err)
 		}
 		if user.Pwd != pwd2 {
-			t.Fatalf("passwords not match %s", err)
+			t.Fatalf("passwords not match %s %s", user.Pwd, pwd2)
 		}
 		if user.Role != role2 {
 			t.Fatalf("roles not matched %s %s", role2, user.Role)
@@ -203,12 +213,12 @@ func TestUserStores(t *testing.T) {
 			Avatar:     "/avatar",
 			Email:      "foo@gmail.com",
 		}
-		err = store.SetPreferences(id, newPrefer)
+		err = store.SetPreferences(ctx, id, newPrefer)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		user, err = store.GetUserByName(name1)
+		user, err = store.GetUserByName(ctx, name1)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -216,7 +226,7 @@ func TestUserStores(t *testing.T) {
 			t.Fatalf("ids not matched %d %d", id, user.ID)
 		}
 		if user.Pwd != pwd2 {
-			t.Fatalf("passwords not match %s", err)
+			t.Fatalf("passwords not match %s %s", user.Pwd, pwd2)
 		}
 		if user.Role != role2 {
 			t.Fatalf("roles not matched %s %s", role2, user.Role)
@@ -234,11 +244,11 @@ func TestUserStores(t *testing.T) {
 			t.Fatalf("preferences not matched %v %v", user.Preferences, newPrefer)
 		}
 
-		err = store.DelUser(id)
+		err = store.DelUser(ctx, id)
 		if err != nil {
 			t.Fatal(err)
 		}
-		users, err = store.ListUsers()
+		users, err = store.ListUsers(ctx)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -249,12 +259,12 @@ func TestUserStores(t *testing.T) {
 			if user.ID == 0 && user.Name != rootName && user.Role != db.AdminRole {
 				t.Fatalf("incorrect root info %v", user)
 			}
-			if user.ID == VisitorID && user.Name != VisitorName && user.Role != db.VisitorRole {
+			if user.ID == db.VisitorID && user.Name != db.VisitorName && user.Role != db.VisitorRole {
 				t.Fatalf("incorrect visitor info %v", user)
 			}
 		}
 
-		nameToID, err := store.ListUserIDs()
+		nameToID, err := store.ListUserIDs(ctx)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -263,67 +273,70 @@ func TestUserStores(t *testing.T) {
 		}
 	}
 
-	testRoleMethods := func(t *testing.T, store IUserStore) {
-		roles := []string{"role1", "role2"}
-		var err error
-		for _, role := range roles {
-			err = store.AddRole(role)
-			if err != nil {
-				t.Fatal(err)
-			}
-		}
+	// TODO: role functions are disabled temporarily
+	// testRoleMethods := func(t *testing.T, store db.IUserDB) {
+	// 	roles := []string{"role1", "role2"}
+	// 	var err error
+	// 	for _, role := range roles {
+	// 		err = store.AddRole(role)
+	// 		if err != nil {
+	// 			t.Fatal(err)
+	// 		}
+	// 	}
 
-		roleMap, err := store.ListRoles()
-		if err != nil {
-			t.Fatal(err)
-		}
+	// 	roleMap, err := store.ListRoles()
+	// 	if err != nil {
+	// 		t.Fatal(err)
+	// 	}
 
-		for _, role := range append(roles, []string{
-			db.AdminRole, db.UserRole, db.VisitorRole,
-		}...) {
-			if !roleMap[role] {
-				t.Fatalf("role(%s) not found", role)
-			}
-		}
+	// 	for _, role := range append(roles, []string{
+	// 		db.AdminRole, db.UserRole, db.VisitorRole,
+	// 	}...) {
+	// 		if !roleMap[role] {
+	// 			t.Fatalf("role(%s) not found", role)
+	// 		}
+	// 	}
 
-		for _, role := range roles {
-			err = store.DelRole(role)
-			if err != nil {
-				t.Fatal(err)
-			}
-		}
+	// 	for _, role := range roles {
+	// 		err = store.DelRole(role)
+	// 		if err != nil {
+	// 			t.Fatal(err)
+	// 		}
+	// 	}
 
-		roleMap, err = store.ListRoles()
-		if err != nil {
-			t.Fatal(err)
-		}
-		for _, role := range roles {
-			if roleMap[role] {
-				t.Fatalf("role(%s) should not exist", role)
-			}
-		}
-	}
+	// 	roleMap, err = store.ListRoles()
+	// 	if err != nil {
+	// 		t.Fatal(err)
+	// 	}
+	// 	for _, role := range roles {
+	// 		if roleMap[role] {
+	// 			t.Fatalf("role(%s) should not exist", role)
+	// 		}
+	// 	}
+	// }
 
-	t.Run("testing KVUserStore", func(t *testing.T) {
+	t.Run("user store crud - sqlite", func(t *testing.T) {
 		rootPath, err := ioutil.TempDir("./", "quickshare_userstore_test_")
 		if err != nil {
 			t.Fatal(err)
 		}
 		defer os.RemoveAll(rootPath)
 
-		dbPath := filepath.Join(rootPath, "quickshare.db")
-		kvstore := boltdbpvd.New(dbPath, 1024)
-		defer kvstore.Close()
-
-		store, err := NewKVUserStore(kvstore)
+		dbPath := filepath.Join(rootPath, "quickshare.sqlite")
+		sqliteDB, err := sqlite.NewSQLite(dbPath)
 		if err != nil {
-			t.Fatal("fail to new kvstore", err)
+			t.Fatal(err)
 		}
-		if err = store.Init(rootName, rootPwd); err != nil {
-			t.Fatal("fail to init kvstore", err)
+		defer sqliteDB.Close()
+
+		store, err := sqlite.NewSQLiteStore(sqliteDB)
+		if err != nil {
+			t.Fatal("fail to new user store", err)
+		}
+		if err = store.Init(context.TODO(), rootName, rootPwd, testSiteConfig); err != nil {
+			t.Fatal("fail to init user store", err)
 		}
 
 		testUserMethods(t, store)
-		testRoleMethods(t, store)
 	})
 }

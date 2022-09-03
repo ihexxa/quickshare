@@ -1,6 +1,7 @@
 package sitestore
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"sync"
@@ -79,7 +80,7 @@ func (st *SiteStore) setCfg(cfg *db.SiteConfig) error {
 	return st.store.SetStringIn(NsSite, KeySiteCfg, string(cfgBytes))
 }
 
-func (st *SiteStore) SetClientCfg(cfg *db.ClientConfig) error {
+func (st *SiteStore) SetClientCfg(ctx context.Context, cfg *db.ClientConfig) error {
 	st.mtx.Lock()
 	defer st.mtx.Unlock()
 
@@ -92,7 +93,7 @@ func (st *SiteStore) SetClientCfg(cfg *db.ClientConfig) error {
 	return st.setCfg(siteCfg)
 }
 
-func (st *SiteStore) GetCfg() (*db.SiteConfig, error) {
+func (st *SiteStore) GetCfg(ctx context.Context) (*db.SiteConfig, error) {
 	st.mtx.RLock()
 	defer st.mtx.RUnlock()
 

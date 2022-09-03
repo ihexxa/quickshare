@@ -23,18 +23,38 @@ const (
 	AdminRole   = "admin"
 	UserRole    = "user"
 	VisitorRole = "visitor"
+
+	VisitorID   = uint64(1)
+	VisitorName = "visitor"
 )
 
 var (
+	// users related errors
+	ErrReachedLimit       = errors.New("reached space limit")
+	ErrUserNotFound       = errors.New("user not found")
+	ErrNegtiveUsedSpace   = errors.New("used space can not be negative")
 	ErrInvalidFileInfo    = errors.New("invalid fileInfo")
 	ErrInvalidUser        = errors.New("invalid user")
 	ErrInvalidQuota       = errors.New("invalid quota")
 	ErrInvalidPreferences = errors.New("invalid preferences")
-	ErrBucketNotFound     = errors.New("bucket not found")
-	ErrKeyNotFound        = errors.New("key not found")
-	ErrKeyExisting        = errors.New("key is existing")
-	ErrCreateExisting     = errors.New("create upload info which already exists")
-	ErrQuota              = errors.New("quota limit reached")
+	// files related errors
+	ErrEmpty            = errors.New("can not hash empty string")
+	ErrFileInfoNotFound = errors.New("file info not found")
+	ErrSharingNotFound  = errors.New("sharing id not found")
+	ErrConflicted       = errors.New("conflict found in hashing")
+	ErrVerNotFound      = errors.New("file info schema version not found")
+	// uploadings
+	ErrGreaterThanSize = errors.New("uploaded is greater than file size")
+	ErrUploadNotFound  = errors.New("upload info not found")
+
+	// site
+	ErrConfigNotFound = errors.New("site config not found")
+
+	ErrBucketNotFound = errors.New("bucket not found")
+	ErrKeyNotFound    = errors.New("key not found")
+	ErrKeyExisting    = errors.New("key is existing")
+	ErrCreateExisting = errors.New("create upload info which already exists")
+	ErrQuota          = errors.New("quota limit reached")
 
 	DefaultSiteName = "Quickshare"
 	DefaultSiteDesc = "Quickshare"
@@ -93,11 +113,11 @@ var (
 )
 
 type FileInfo struct {
-	IsDir   bool   `json:"isDir" yaml:"isDir"`
-	Shared  bool   `json:"shared" yaml:"shared"`
-	ShareID string `json:"shareID" yaml:"shareID"`
+	IsDir   bool   `json:"isDir" yaml:"isDir"`     // deprecated
+	Shared  bool   `json:"shared" yaml:"shared"`   // deprecated
+	ShareID string `json:"shareID" yaml:"shareID"` // deprecated
 	Sha1    string `json:"sha1" yaml:"sha1"`
-	Size    int64  `json:"size" yaml:"size"`
+	Size    int64  `json:"size" yaml:"size"` // deprecated
 }
 
 type UserCfg struct {
@@ -175,6 +195,30 @@ type IUserStore interface {
 	AddRole(role string) error
 	DelRole(role string) error
 	ListRoles() (map[string]bool, error)
+}
+
+type IFileInfoStore interface {
+	AddSharing(ctx context.Context, dirPath string) error
+	DelSharing(ctx context.Context, dirPath string) error
+	GetSharing(ctx context.Context, dirPath string) (bool, bool)
+	ListSharings(ctx context.Context, prefix string) (map[string]string, error)
+	GetFileInfo(ctx context.Context, itemPath string) (*FileInfo, error)
+	SetFileInfo(ctx context.Context, itemPath string, info *FileInfo) error
+	DelFileInfo(ctx context.Context, itemPath string) error
+	ListFileInfos(ctx context.Context, itemPaths []string) (map[string]*FileInfo, error)
+	SetSha1(ctx context.Context, itemPath, sign string) error
+	GetSharingDir(ctx context.Context, hashID string) (string, error)
+	// upload info
+	AddUploadInfo(ctx context.Context, user, filePath, tmpPath string, fileSize int64) error
+	SetUploadInfo(ctx context.Context, user, filePath string, newUploaded int64) error
+	GetUploadInfo(ctx context.Context, user, filePath string) (string, int64, int64, error)
+	DelUploadInfo(ctx context.Context, user, filePath string) error
+	ListUploadInfo(ctx context.Context, user string) ([]*UploadInfo, error)
+}
+
+type ISiteStore interface {
+	SetClientCfg(ctx context.Context, cfg *ClientConfig) error
+	GetCfg(ctx context.Context) (*SiteConfig, error)
 }
 
 func ComparePreferences(p1, p2 *Preferences) bool {
