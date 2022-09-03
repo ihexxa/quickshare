@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -41,14 +42,16 @@ const (
 )
 
 type FileHandlers struct {
-	cfg  gocfg.ICfg
-	deps *depidx.Deps
+	cfg         gocfg.ICfg
+	deps        *depidx.Deps
+	lockedPaths *sync.Map
 }
 
 func NewFileHandlers(cfg gocfg.ICfg, deps *depidx.Deps) (*FileHandlers, error) {
 	handlers := &FileHandlers{
-		cfg:  cfg,
-		deps: deps,
+		cfg:         cfg,
+		deps:        deps,
+		lockedPaths: &sync.Map{},
 	}
 	deps.Workers().AddHandler(MsgTypeSha1, handlers.genSha1)
 	deps.Workers().AddHandler(MsgTypeIndexing, handlers.indexingItems)
@@ -56,43 +59,26 @@ func NewFileHandlers(cfg gocfg.ICfg, deps *depidx.Deps) (*FileHandlers, error) {
 	return handlers, nil
 }
 
-type AutoLocker struct {
-	h   *FileHandlers
-	c   *gin.Context
-	key string
-}
-
-func (h *FileHandlers) NewAutoLocker(c *gin.Context, key string) *AutoLocker {
-	return &AutoLocker{
-		h:   h,
-		c:   c,
-		key: key,
-	}
-}
-
-func (lk *AutoLocker) Exec(handler func()) error {
-	var err error
-	kv := lk.h.deps.KV()
-	locked := false
+func (h *FileHandlers) lock(key string, code *int, err *error, execution func() (int, error)) {
+	var loaded bool
 
 	defer func() {
 		if p := recover(); p != nil {
-			lk.h.deps.Log().Error(p)
+			h.deps.Log().Error(p)
+			*code, *err = 500, fmt.Errorf("%s", p)
 		}
-		if locked {
-			if err = kv.Unlock(lk.key); err != nil {
-				lk.h.deps.Log().Error(err)
-			}
+		if !loaded {
+			h.lockedPaths.Delete(key)
 		}
 	}()
 
-	if err = kv.TryLock(lk.key); err != nil {
-		return errors.New("fail to lock the file")
+	_, loaded = h.lockedPaths.LoadOrStore(key, true)
+	if loaded {
+		*code, *err = 429, fmt.Errorf("failed to lock: %s", key)
+		return
 	}
 
-	locked = true
-	handler()
-	return nil
+	*code, *err = execution()
 }
 
 // related elements: role, user, action(listing, downloading)/sharing
@@ -115,7 +101,10 @@ func (h *FileHandlers) canAccess(ctx context.Context, userId uint64, userName, r
 		return false
 	}
 
-	isSharing := h.deps.FileInfos().IsSharing(ctx, userId, sharedPath)
+	isSharing, err := h.deps.FileInfos().IsSharing(ctx, userId, sharedPath)
+	if err != nil {
+		return false // TODO: return error
+	}
 	return isSharing
 }
 
@@ -168,7 +157,7 @@ func (h *FileHandlers) Create(c *gin.Context) {
 			}
 			return
 		}
-		err = h.deps.FileInfos().MoveFileInfos(c, userID, tmpFilePath, fsFilePath, false)
+		err = h.deps.FileInfos().MoveUploadingInfos(c, userID, tmpFilePath, fsFilePath)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
@@ -233,35 +222,25 @@ func (h *FileHandlers) Create(c *gin.Context) {
 		return
 	}
 
-	var txErr error
-	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
-	lockErr := locker.Exec(func() {
-		err = h.deps.FS().Create(tmpFilePath)
+	var code int
+	h.lock(lockName(tmpFilePath), &code, &err, func() (int, error) {
+		err := h.deps.FS().Create(tmpFilePath)
 		if err != nil {
 			if os.IsExist(err) {
 				createErr := fmt.Errorf("file(%s) exists", tmpFilePath)
-				c.JSON(q.ErrResp(c, 304, createErr))
-				txErr = createErr
-			} else {
-				c.JSON(q.ErrResp(c, 500, err))
-				txErr = err
+				return 304, createErr
 			}
-			return
+			return 500, err
 		}
 
 		err = h.deps.FS().MkdirAll(filepath.Dir(req.Path))
 		if err != nil {
-			c.JSON(q.ErrResp(c, 500, err))
-			txErr = err
-			return
+			return 500, err
 		}
+		return 200, nil
 	})
-	if lockErr != nil {
-		c.JSON(q.ErrResp(c, 500, lockErr))
-		return
-	}
-	if txErr != nil {
-		c.JSON(q.ErrResp(c, 500, txErr))
+	if err != nil {
+		c.JSON(q.ErrResp(c, code, err))
 		return
 	}
 	c.JSON(q.Resp(200))
@@ -288,33 +267,28 @@ func (h *FileHandlers) Delete(c *gin.Context) {
 		return
 	}
 
-	var txErr error
-	locker := h.NewAutoLocker(c, lockName(filePath))
-	lockErr := locker.Exec(func() {
-		err = h.deps.FS().Remove(filePath)
+	// var txErr error
+	// locker := h.NewAutoLocker(c, lockName(filePath))
+	var code int
+	h.lock(lockName(filePath), &code, &err, func() (int, error) {
+		err := h.deps.FS().Remove(filePath)
 		if err != nil {
-			txErr = err
-			return
+			return 500, err
 		}
 
 		err = h.deps.FileInfos().DelFileInfo(c, userId, filePath)
 		if err != nil {
-			txErr = err
-			return
+			return 500, err
 		}
 
 		err = h.deps.FileIndex().DelPath(filePath)
 		if err != nil && !errors.Is(err, fsearch.ErrNotFound) {
-			txErr = err
-			return
+			return 500, err
 		}
+		return 200, nil
 	})
-	if lockErr != nil {
-		c.JSON(q.ErrResp(c, 500, lockErr))
-		return
-	}
-	if txErr != nil {
-		c.JSON(q.ErrResp(c, 500, txErr))
+	if err != nil {
+		c.JSON(q.ErrResp(c, code, err))
 		return
 	}
 	c.JSON(q.Resp(200))
@@ -510,53 +484,48 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 		return
 	}
 
-	var txErr error
-	var statusCode int
+	// var txErr error
+	// var statusCode int
+	// locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	tmpFilePath := q.UploadPath(userName, filePath)
-	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
+	var code int
 	fsFilePath, fileSize, uploaded, wrote := "", int64(0), int64(0), 0
-	lockErr := locker.Exec(func() {
+	h.lock(lockName(tmpFilePath), &code, &err, func() (int, error) {
+		// lockErr := locker.Exec(func() {
 		var err error
 
-		fsFilePath, fileSize, uploaded, err = h.deps.FileInfos().GetUploadInfo(c, userId, tmpFilePath)
+		fsFilePath, fileSize, uploaded, err = h.deps.FileInfos().GetUploadInfo(c, userId, filePath)
 		if err != nil {
-			txErr, statusCode = err, 500
-			return
+			return 500, err
 		} else if uploaded != req.Offset {
-			txErr, statusCode = errors.New("offset != uploaded"), 500
-			return
+			return 500, errors.New("offset != uploaded")
 		}
 
 		content, err := base64.StdEncoding.DecodeString(req.Content)
 		if err != nil {
-			txErr, statusCode = err, 500
-			return
+			return 500, err
 		}
 
 		wrote, err = h.deps.FS().WriteAt(tmpFilePath, []byte(content), req.Offset)
 		if err != nil {
-			txErr, statusCode = err, 500
-			return
+			return 500, err
 		}
 
-		err = h.deps.FileInfos().SetUploadInfo(c, userId, tmpFilePath, req.Offset+int64(wrote))
+		err = h.deps.FileInfos().SetUploadInfo(c, userId, filePath, req.Offset+int64(wrote))
 		if err != nil {
-			txErr, statusCode = err, 500
-			return
+			return 500, err
 		}
 
 		// move the file from uploading dir to uploaded dir
 		if uploaded+int64(wrote) == fileSize {
-			err = h.deps.FileInfos().MoveFileInfos(c, userId, tmpFilePath, fsFilePath, false)
+			err = h.deps.FileInfos().MoveUploadingInfos(c, userId, tmpFilePath, fsFilePath)
 			if err != nil {
-				txErr, statusCode = err, 500
-				return
+				return 500, err
 			}
 
 			err = h.deps.FS().Rename(tmpFilePath, fsFilePath)
 			if err != nil {
-				txErr, statusCode = fmt.Errorf("%s error: %w", fsFilePath, err), 500
-				return
+				return 500, fmt.Errorf("%s error: %w", fsFilePath, err)
 			}
 
 			msg, err := json.Marshal(Sha1Params{
@@ -564,8 +533,7 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 				FilePath: fsFilePath,
 			})
 			if err != nil {
-				txErr, statusCode = err, 500
-				return
+				return 500, err
 			}
 
 			err = h.deps.Workers().TryPut(
@@ -576,24 +544,21 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 				),
 			)
 			if err != nil {
-				txErr, statusCode = err, 500
-				return
+				return 500, err
 			}
 
 			err = h.deps.FileIndex().AddPath(fsFilePath)
 			if err != nil {
-				txErr, statusCode = err, 500
-				return
+				return 500, err
 			}
 		}
+		return 200, nil
 	})
-	if lockErr != nil {
-		c.JSON(q.ErrResp(c, 500, err))
-	}
-	if txErr != nil {
-		c.JSON(q.ErrResp(c, statusCode, txErr))
+	if err != nil {
+		c.JSON(q.ErrResp(c, code, err))
 		return
 	}
+
 	c.JSON(200, &UploadStatusResp{
 		Path:     fsFilePath,
 		IsDir:    false,
@@ -667,32 +632,28 @@ func (h *FileHandlers) UploadStatus(c *gin.Context) {
 		return
 	}
 
+	// locker := h.NewAutoLocker(c, lockName(tmpFilePath))
+	// var txErr error
 	tmpFilePath := q.UploadPath(userName, filePath)
-	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	fileSize, uploaded := int64(0), int64(0)
-	var txErr error
-	lockErr := locker.Exec(func() {
+	var code int
+	h.lock(lockName(tmpFilePath), &code, &err, func() (int, error) {
+		// lockErr := locker.Exec(func() {
 		var err error
-		_, fileSize, uploaded, err = h.deps.FileInfos().GetUploadInfo(c, userId, tmpFilePath)
+		_, fileSize, uploaded, err = h.deps.FileInfos().GetUploadInfo(c, userId, filePath)
 		if err != nil {
 			if os.IsNotExist(err) {
-				c.JSON(q.ErrResp(c, 404, err))
-				txErr = err
-			} else {
-				c.JSON(q.ErrResp(c, 500, err))
-				txErr = err
+				return 404, err
 			}
-			return
+			return 500, err
 		}
+		return 200, nil
 	})
-	if lockErr != nil {
-		c.JSON(q.ErrResp(c, 500, lockErr))
+	if err != nil {
+		c.JSON(q.ErrResp(c, code, err))
 		return
 	}
-	if txErr != nil {
-		c.JSON(q.ErrResp(c, 500, txErr))
-		return
-	}
+
 	c.JSON(200, &UploadStatusResp{
 		Path:     filePath,
 		IsDir:    false,
@@ -981,35 +942,32 @@ func (h *FileHandlers) DelUploading(c *gin.Context) {
 		return
 	}
 
-	var txErr error
-	var statusCode int
+	// var txErr error
+	// var statusCode int
 	tmpFilePath := q.UploadPath(userName, filePath)
-	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
-	lockErr := locker.Exec(func() {
+	// locker := h.NewAutoLocker(c, lockName(tmpFilePath))
+	// lockErr := locker.Exec(func() {
+	var code int
+	h.lock(lockName(tmpFilePath), &code, &err, func() (int, error) {
 		_, err = h.deps.FS().Stat(tmpFilePath)
 		if err != nil {
 			if os.IsNotExist(err) {
 				// no op
 			} else {
-				txErr, statusCode = err, 500
-				return
-			}
-		} else {
-			err = h.deps.FS().Remove(tmpFilePath)
-			if err != nil {
-				txErr, statusCode = err, 500
-				return
+				return 500, err
 			}
 		}
+		err = h.deps.FS().Remove(tmpFilePath)
+		if err != nil {
+			return 500, err
+		}
+		return 200, nil
 	})
-	if lockErr != nil {
-		c.JSON(q.ErrResp(c, 500, lockErr))
+	if err != nil {
+		c.JSON(q.ErrResp(c, code, err))
 		return
 	}
-	if txErr != nil {
-		c.JSON(q.ErrResp(c, statusCode, txErr))
-		return
-	}
+
 	err = h.deps.FileInfos().DelUploadingInfos(c, userId, filePath)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
@@ -1111,8 +1069,14 @@ func (h *FileHandlers) IsSharing(c *gin.Context) {
 		return
 	}
 
-	exist := h.deps.FileInfos().IsSharing(c, userId, dirPath)
-	if exist {
+	exist, err := h.deps.FileInfos().IsSharing(c, userId, dirPath)
+	if err != nil {
+		if errors.Is(err, db.ErrFileInfoNotFound) {
+			c.JSON(q.Resp(404))
+		} else {
+			c.JSON(q.Resp(500))
+		}
+	} else if exist {
 		c.JSON(q.Resp(200))
 	} else {
 		c.JSON(q.Resp(404))

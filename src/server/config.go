@@ -9,8 +9,7 @@ import (
 const fileIndexPath = "/fileindex.jsonl"
 
 type DbConfig struct {
-	DbPath  string `json:"dbPath" yaml:"dbPath"`
-	RdbPath string `json:"rdbPath" yaml:"rdbPath"` // valid values: rdb, kv
+	DbPath string `json:"dbPath" yaml:"dbPath"`
 }
 
 type FSConfig struct {
@@ -141,8 +140,7 @@ func DefaultConfigStruct() *Config {
 			},
 		},
 		Db: &DbConfig{
-			DbPath:  "quickshare.db",
-			RdbPath: "quickshare.sqlite",
+			DbPath: "quickshare.sqlite",
 		},
 	}
 }

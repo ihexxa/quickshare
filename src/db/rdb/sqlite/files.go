@@ -23,7 +23,7 @@ var (
 	maxHashingTime = 10
 )
 
-func (st *SQLiteStore) getFileInfo(ctx context.Context, userId uint64, itemPath string) (*db.FileInfo, error) {
+func (st *SQLiteStore) getFileInfo(ctx context.Context, itemPath string) (*db.FileInfo, error) {
 	var infoStr string
 	fInfo := &db.FileInfo{}
 	var isDir bool
@@ -33,10 +33,8 @@ func (st *SQLiteStore) getFileInfo(ctx context.Context, userId uint64, itemPath 
 		ctx,
 		`select is_dir, size, share_id, info
 		from t_file_info
-		where path=? and user=?
-		`,
+		where path=?`,
 		itemPath,
-		userId,
 	).Scan(
 		&isDir,
 		&size,
@@ -61,11 +59,11 @@ func (st *SQLiteStore) getFileInfo(ctx context.Context, userId uint64, itemPath 
 	return fInfo, nil
 }
 
-func (st *SQLiteStore) GetFileInfo(ctx context.Context, userId uint64, itemPath string) (*db.FileInfo, error) {
+func (st *SQLiteStore) GetFileInfo(ctx context.Context, itemPath string) (*db.FileInfo, error) {
 	st.RLock()
 	defer st.RUnlock()
 
-	return st.getFileInfo(ctx, userId, itemPath)
+	return st.getFileInfo(ctx, itemPath)
 }
 
 func (st *SQLiteStore) ListFileInfos(ctx context.Context, itemPaths []string) (map[string]*db.FileInfo, error) {
@@ -160,31 +158,22 @@ func (st *SQLiteStore) AddFileInfo(ctx context.Context, userId uint64, itemPath 
 	return st.setUsed(ctx, userId, true, info.Size)
 }
 
-func (st *SQLiteStore) delFileInfo(ctx context.Context, userId uint64, itemPath string) error {
+func (st *SQLiteStore) delFileInfo(ctx context.Context, itemPath string) error {
 	_, err := st.db.ExecContext(
 		ctx,
 		`delete from t_file_info
-		where path=? and user=?
+		where path=?
 		`,
 		itemPath,
-		userId,
 	)
 	return err
 }
 
-// func (st *SQLiteStore) DelFileInfo(ctx context.Context, itemPath string) error {
-// 	st.Lock()
-// 	defer st.Unlock()
-// 	return st.delFileInfo(ctx, itemPath)
-// }
-
-// sharings
-
-func (st *SQLiteStore) SetSha1(ctx context.Context, userId uint64, itemPath, sign string) error {
+func (st *SQLiteStore) SetSha1(ctx context.Context, itemPath, sign string) error {
 	st.Lock()
 	defer st.Unlock()
 
-	info, err := st.getFileInfo(ctx, userId, itemPath)
+	info, err := st.getFileInfo(ctx, itemPath)
 	if err != nil {
 		return err
 	}
@@ -199,10 +188,9 @@ func (st *SQLiteStore) SetSha1(ctx context.Context, userId uint64, itemPath, sig
 		ctx,
 		`update t_file_info
 		set info=?
-		where path=? and user=?`,
+		where path=?`,
 		infoStr,
 		itemPath,
-		userId,
 	)
 	return err
 }
@@ -264,11 +252,17 @@ func (st *SQLiteStore) MoveFileInfos(ctx context.Context, userId uint64, oldPath
 	st.Lock()
 	defer st.Unlock()
 
-	info, err := st.getFileInfo(ctx, userId, oldPath)
+	info, err := st.getFileInfo(ctx, oldPath)
 	if err != nil {
+		if errors.Is(err, db.ErrFileInfoNotFound) {
+			// info for file does not exist so no need to move it
+			// e.g. folder info is not created before
+			// TODO: but sometimes it could be a bug
+			return nil
+		}
 		return err
 	}
-	err = st.delFileInfo(ctx, userId, oldPath)
+	err = st.delFileInfo(ctx, oldPath)
 	if err != nil {
 		return err
 	}

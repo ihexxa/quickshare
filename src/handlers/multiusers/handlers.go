@@ -145,7 +145,7 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 	return handlers, nil
 }
 
-func (h *MultiUsersSvc) Init(ctx context.Context, adminName, adminPwd string) (string, error) {
+func (h *MultiUsersSvc) Init(ctx context.Context, adminName string) (string, error) {
 	var err error
 
 	fsPath := q.FsRootPath(adminName, "/")

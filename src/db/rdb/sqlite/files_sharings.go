@@ -29,16 +29,29 @@ func (st *SQLiteStore) generateShareID(payload string) (string, error) {
 	return fmt.Sprintf("%x", h.Sum(nil))[:7], nil
 }
 
-func (st *SQLiteStore) IsSharing(ctx context.Context, userId uint64, dirPath string) bool {
+func (st *SQLiteStore) IsSharing(ctx context.Context, userId uint64, dirPath string) (bool, error) {
 	st.RLock()
 	defer st.RUnlock()
 
-	// TODO: differentiate error and not exist
-	info, err := st.getFileInfo(ctx, userId, dirPath)
+	// TODO: userId is not used, becauser it is searcher's userId
+	var shareId string
+	err := st.db.QueryRowContext(
+		ctx,
+		`select share_id
+		from t_file_info
+		where path=?`,
+		dirPath,
+	).Scan(
+		&shareId,
+	)
 	if err != nil {
-		return false
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, db.ErrFileInfoNotFound
+		}
+		return false, err
 	}
-	return info.ShareID != ""
+
+	return shareId != "", nil
 }
 
 func (st *SQLiteStore) GetSharingDir(ctx context.Context, hashID string) (string, error) {
@@ -75,7 +88,7 @@ func (st *SQLiteStore) AddSharing(ctx context.Context, userId uint64, dirPath st
 		return err
 	}
 
-	_, err = st.getFileInfo(ctx, userId, dirPath)
+	_, err = st.getFileInfo(ctx, dirPath)
 	if err != nil && !errors.Is(err, db.ErrFileInfoNotFound) {
 		return err
 	}
@@ -102,8 +115,8 @@ func (st *SQLiteStore) AddSharing(ctx context.Context, userId uint64, dirPath st
 		ctx,
 		`update t_file_info
 		set share_id=?
-		where path=? and user=?`,
-		shareID, dirPath, userId,
+		where path=?`,
+		shareID, dirPath,
 	)
 	return err
 }
@@ -116,9 +129,8 @@ func (st *SQLiteStore) DelSharing(ctx context.Context, userId uint64, dirPath st
 		ctx,
 		`update t_file_info
 		set share_id=''
-		where path=? and user=?`,
+		where path=?`,
 		dirPath,
-		userId,
 	)
 	return err
 }

@@ -384,71 +384,71 @@ func TestUsersHandlers(t *testing.T) {
 		}
 	})
 
-	t.Run("test roles APIs: Login-AddRole-ListRoles-DelRole-ListRoles-Logout", func(t *testing.T) {
-		adminUsersCli := client.NewUsersClient(addr)
-		resp, _, errs := adminUsersCli.Login(adminName, adminNewPwd)
-		if len(errs) > 0 {
-			t.Fatal(errs)
-		} else if resp.StatusCode != 200 {
-			t.Fatal(resp.StatusCode)
-		}
+	// t.Run("test roles APIs: Login-AddRole-ListRoles-DelRole-ListRoles-Logout", func(t *testing.T) {
+	// 	adminUsersCli := client.NewUsersClient(addr)
+	// 	resp, _, errs := adminUsersCli.Login(adminName, adminNewPwd)
+	// 	if len(errs) > 0 {
+	// 		t.Fatal(errs)
+	// 	} else if resp.StatusCode != 200 {
+	// 		t.Fatal(resp.StatusCode)
+	// 	}
 
-		// token := client.GetCookie(resp.Cookies(), su.TokenCookie)
-		roles := []string{"role1", "role2"}
+	// 	// token := client.GetCookie(resp.Cookies(), su.TokenCookie)
+	// 	roles := []string{"role1", "role2"}
 
-		for _, role := range roles {
-			resp, _, errs := adminUsersCli.AddRole(role)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != 200 {
-				t.Fatal(resp.StatusCode)
-			}
-		}
+	// 	for _, role := range roles {
+	// 		resp, _, errs := adminUsersCli.AddRole(role)
+	// 		if len(errs) > 0 {
+	// 			t.Fatal(errs)
+	// 		} else if resp.StatusCode != 200 {
+	// 			t.Fatal(resp.StatusCode)
+	// 		}
+	// 	}
 
-		resp, lsResp, errs := adminUsersCli.ListRoles()
-		if len(errs) > 0 {
-			t.Fatal(errs)
-		} else if resp.StatusCode != 200 {
-			t.Fatal(resp.StatusCode)
-		}
-		for _, role := range append(roles, []string{
-			db.AdminRole,
-			db.UserRole,
-			db.VisitorRole,
-		}...) {
-			if !lsResp.Roles[role] {
-				t.Fatalf("role(%s) not found", role)
-			}
-		}
+	// 	resp, lsResp, errs := adminUsersCli.ListRoles()
+	// 	if len(errs) > 0 {
+	// 		t.Fatal(errs)
+	// 	} else if resp.StatusCode != 200 {
+	// 		t.Fatal(resp.StatusCode)
+	// 	}
+	// 	for _, role := range append(roles, []string{
+	// 		db.AdminRole,
+	// 		db.UserRole,
+	// 		db.VisitorRole,
+	// 	}...) {
+	// 		if !lsResp.Roles[role] {
+	// 			t.Fatalf("role(%s) not found", role)
+	// 		}
+	// 	}
 
-		for _, role := range roles {
-			resp, _, errs := adminUsersCli.DelRole(role)
-			if len(errs) > 0 {
-				t.Fatal(errs)
-			} else if resp.StatusCode != 200 {
-				t.Fatal(resp.StatusCode)
-			}
-		}
+	// 	for _, role := range roles {
+	// 		resp, _, errs := adminUsersCli.DelRole(role)
+	// 		if len(errs) > 0 {
+	// 			t.Fatal(errs)
+	// 		} else if resp.StatusCode != 200 {
+	// 			t.Fatal(resp.StatusCode)
+	// 		}
+	// 	}
 
-		resp, lsResp, errs = adminUsersCli.ListRoles()
-		if len(errs) > 0 {
-			t.Fatal(errs)
-		} else if resp.StatusCode != 200 {
-			t.Fatal(resp.StatusCode)
-		}
-		for _, role := range roles {
-			if lsResp.Roles[role] {
-				t.Fatalf("role(%s) should not exist", role)
-			}
-		}
+	// 	resp, lsResp, errs = adminUsersCli.ListRoles()
+	// 	if len(errs) > 0 {
+	// 		t.Fatal(errs)
+	// 	} else if resp.StatusCode != 200 {
+	// 		t.Fatal(resp.StatusCode)
+	// 	}
+	// 	for _, role := range roles {
+	// 		if lsResp.Roles[role] {
+	// 			t.Fatalf("role(%s) should not exist", role)
+	// 		}
+	// 	}
 
-		resp, _, errs = adminUsersCli.Logout()
-		if len(errs) > 0 {
-			t.Fatal(errs)
-		} else if resp.StatusCode != 200 {
-			t.Fatal(resp.StatusCode)
-		}
-	})
+	// 	resp, _, errs = adminUsersCli.Logout()
+	// 	if len(errs) > 0 {
+	// 		t.Fatal(errs)
+	// 	} else if resp.StatusCode != 200 {
+	// 		t.Fatal(resp.StatusCode)
+	// 	}
+	// })
 
 	t.Run("Login, SetPreferences, Self, Logout", func(t *testing.T) {
 		adminUsersCli := client.NewUsersClient(addr)
