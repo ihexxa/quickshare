@@ -1,6 +1,7 @@
 package multiusers
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -144,7 +145,7 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 	return handlers, nil
 }
 
-func (h *MultiUsersSvc) Init(adminName, adminPwd string) (string, error) {
+func (h *MultiUsersSvc) Init(ctx context.Context, adminName, adminPwd string) (string, error) {
 	var err error
 
 	fsPath := q.FsRootPath(adminName, "/")
@@ -153,12 +154,6 @@ func (h *MultiUsersSvc) Init(adminName, adminPwd string) (string, error) {
 	}
 	uploadFolder := q.UploadFolder(adminName)
 	if err = h.deps.FS().MkdirAll(uploadFolder); err != nil {
-		return "", err
-	}
-
-	// TODO: return "" for being compatible with singleuser service, should remove this
-	err = h.deps.Users().Init(c, adminName, adminPwd)
-	if err != nil {
 		return "", err
 	}
 
@@ -205,7 +200,7 @@ func (h *MultiUsersSvc) Init(adminName, adminPwd string) (string, error) {
 				Preferences: &preferences,
 			}
 
-			err = h.deps.Users().AddUser(c, user)
+			err = h.deps.Users().AddUser(ctx, user)
 			if err != nil {
 				h.deps.Log().Warn("warning: failed to add user(%s): %s", user, err)
 				return "", err
@@ -214,10 +209,6 @@ func (h *MultiUsersSvc) Init(adminName, adminPwd string) (string, error) {
 		}
 	}
 	return "", nil
-}
-
-func (h *MultiUsersSvc) IsInited() bool {
-	return h.deps.Users().IsInited()
 }
 
 type LoginReq struct {

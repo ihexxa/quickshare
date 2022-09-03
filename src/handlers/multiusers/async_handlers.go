@@ -1,6 +1,7 @@
 package multiusers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"path/filepath"
@@ -44,5 +45,5 @@ func (h *MultiUsersSvc) resetUsedSpace(msg worker.IMsg) error {
 		}
 	}
 
-	return h.deps.Users().ResetUsed(params.UserID, usedSpace)
+	return h.deps.Users().ResetUsed(context.TODO(), params.UserID, usedSpace) // TODO: use source context
 }

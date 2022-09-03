@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"reflect"
@@ -381,7 +382,7 @@ func TestLoadCfg(t *testing.T) {
 
 	testLoadCfg := func(t *testing.T) {
 		for i, args := range argsList {
-			gotCfg, err := LoadCfg(args)
+			gotCfg, err := LoadCfg(context.TODO(), args)
 			if err != nil {
 				t.Fatal(err)
 			}

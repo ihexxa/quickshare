@@ -14,14 +14,8 @@ import (
 	"github.com/ihexxa/quickshare/src/db/rdb/sqlite"
 )
 
-type IFilesFunctions interface {
-	db.IFileDB
-	db.IUploadDB
-	db.ISharingDB
-}
-
 func TestFileStore(t *testing.T) {
-	testSharingMethods := func(t *testing.T, store db.IDBFunctions) {
+	testSharingMethods := func(t *testing.T, store db.IDBQuickshare) {
 		dirPaths := []string{"admin/path1", "admin/path1/path2"}
 		var err error
 
@@ -125,7 +119,7 @@ func TestFileStore(t *testing.T) {
 		}
 	}
 
-	testFileInfoMethods := func(t *testing.T, store db.IDBFunctions) {
+	testFileInfoMethods := func(t *testing.T, store db.IDBQuickshare) {
 		pathInfos := map[string]*db.FileInfo{
 			"admin/origin/item1": &db.FileInfo{
 				// Shared:  false, // deprecated
@@ -274,7 +268,7 @@ func TestFileStore(t *testing.T) {
 		}
 	}
 
-	testUploadingMethods := func(t *testing.T, store db.IDBFunctions) {
+	testUploadingMethods := func(t *testing.T, store db.IDBQuickshare) {
 		pathInfos := map[string]*db.FileInfo{
 			"admin/origin/item1": &db.FileInfo{
 				// Shared:  false, // deprecated
