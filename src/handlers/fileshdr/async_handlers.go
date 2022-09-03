@@ -1,6 +1,7 @@
 package fileshdr
 
 import (
+	"context"
 	"crypto/sha1"
 	"encoding/json"
 	"fmt"
@@ -18,6 +19,7 @@ const (
 
 type Sha1Params struct {
 	FilePath string
+	UserId   uint64
 }
 
 func (h *FileHandlers) genSha1(msg worker.IMsg) error {
@@ -46,7 +48,8 @@ func (h *FileHandlers) genSha1(msg worker.IMsg) error {
 	}
 
 	sha1Sign := fmt.Sprintf("%x", hasher.Sum(nil))
-	err = h.deps.FileInfos().SetSha1(taskInputs.FilePath, sha1Sign)
+	err = h.deps.FileInfos().
+		SetSha1(context.TODO(), taskInputs.UserId, taskInputs.FilePath, sha1Sign) // TODO: use source context
 	if err != nil {
 		return fmt.Errorf("fail to set sha1: %s", err)
 	}

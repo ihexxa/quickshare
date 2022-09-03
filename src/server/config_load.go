@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -23,7 +24,7 @@ type Args struct {
 // LoadCfg loads the default config, the config in database, config files and arguments in order.
 // All config values will be merged into one, and the latter overwrites the former.
 // Each config can be part of the whole ServerCfg
-func LoadCfg(args *Args) (*gocfg.Cfg, error) {
+func LoadCfg(ctx context.Context, args *Args) (*gocfg.Cfg, error) {
 	defaultCfg, err := DefaultConfig()
 	if err != nil {
 		return nil, err
@@ -40,7 +41,7 @@ func LoadCfg(args *Args) (*gocfg.Cfg, error) {
 	}
 	_, err = os.Stat(dbPath)
 	if err == nil {
-		cfg, err = mergeDbConfig(cfg, dbPath)
+		cfg, err = mergeDbConfig(ctx, cfg, dbPath)
 		if err != nil {
 			return nil, err
 		}
@@ -52,7 +53,7 @@ func LoadCfg(args *Args) (*gocfg.Cfg, error) {
 		}
 	}
 
-	cfg, err = mergeConfigFiles(cfg, args.Configs)
+	cfg, err = mergeConfigFiles(ctx, cfg, args.Configs)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +61,7 @@ func LoadCfg(args *Args) (*gocfg.Cfg, error) {
 	return mergeArgs(cfg, args)
 }
 
-func mergeDbConfig(cfg *gocfg.Cfg, dbPath string) (*gocfg.Cfg, error) {
+func mergeDbConfig(ctx context.Context, cfg *gocfg.Cfg, dbPath string) (*gocfg.Cfg, error) {
 	kv := boltdbpvd.New(dbPath, 1024)
 	defer kv.Close()
 
@@ -69,7 +70,7 @@ func mergeDbConfig(cfg *gocfg.Cfg, dbPath string) (*gocfg.Cfg, error) {
 		return nil, fmt.Errorf("fail to new site config store: %s", err)
 	}
 
-	clientCfg, err := siteStore.GetCfg()
+	clientCfg, err := siteStore.GetCfg(ctx)
 	if err != nil {
 		if errors.Is(err, sitestore.ErrNotFound) {
 			return cfg, nil
@@ -111,7 +112,7 @@ func getDbPath(cfg *gocfg.Cfg, configPaths []string, argDbPath string) (string, 
 	return cfg.GrabString("Db.DbPath"), nil
 }
 
-func mergeConfigFiles(cfg *gocfg.Cfg, configPaths []string) (*gocfg.Cfg, error) {
+func mergeConfigFiles(ctx context.Context, cfg *gocfg.Cfg, configPaths []string) (*gocfg.Cfg, error) {
 	var err error
 
 	for _, configPath := range configPaths {

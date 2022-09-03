@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -17,7 +18,8 @@ func main() {
 		panic(err)
 	}
 
-	cfg, err := serverPkg.LoadCfg(args)
+	ctx := context.TODO()
+	cfg, err := serverPkg.LoadCfg(ctx, args)
 	if err != nil {
 		fmt.Printf("failed to load config: %s", err)
 		os.Exit(1)

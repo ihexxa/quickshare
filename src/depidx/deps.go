@@ -6,10 +6,10 @@ import (
 
 	"github.com/ihexxa/quickshare/src/cron"
 	"github.com/ihexxa/quickshare/src/cryptoutil"
-	"github.com/ihexxa/quickshare/src/db/boltstore"
-	"github.com/ihexxa/quickshare/src/db/fileinfostore"
-	"github.com/ihexxa/quickshare/src/db/rdb"
-	"github.com/ihexxa/quickshare/src/db/sitestore"
+	// "github.com/ihexxa/quickshare/src/db/boltstore"
+	// "github.com/ihexxa/quickshare/src/db/fileinfostore"
+	"github.com/ihexxa/quickshare/src/db"
+	// "github.com/ihexxa/quickshare/src/db/sitestore"
 	"github.com/ihexxa/quickshare/src/fs"
 	"github.com/ihexxa/quickshare/src/idgen"
 	"github.com/ihexxa/quickshare/src/iolimiter"
@@ -27,20 +27,20 @@ type IUploader interface {
 }
 
 type Deps struct {
-	fs        fs.ISimpleFS
-	token     cryptoutil.ITokenEncDec
-	kv        kvstore.IKVStore
-	users     db.IUserStore
-	fileInfos fileinfostore.IFileInfoStore
-	siteStore sitestore.ISiteStore
+	fs    fs.ISimpleFS
+	token cryptoutil.ITokenEncDec
+	kv    kvstore.IKVStore
+	// users     db.IUserDB
+	// fileInfos db.IFileDB
+	// siteStore db.IConfigDB
+	// boltStore *boltstore.BoltStore
 	id        idgen.IIDGen
 	logger    *zap.SugaredLogger
 	limiter   iolimiter.ILimiter
 	workers   worker.IWorkerPool
-	boltStore *boltstore.BoltStore
 	cron      cron.ICron
 	fileIndex fileindex.IFileIndex
-	db        rdb.IDB
+	db        db.IDBQuickshare
 }
 
 func NewDeps(cfg gocfg.ICfg) *Deps {
@@ -87,28 +87,16 @@ func (deps *Deps) SetLog(logger *zap.SugaredLogger) {
 	deps.logger = logger
 }
 
-func (deps *Deps) Users() db.IUserStore {
-	return deps.users
+func (deps *Deps) Users() db.IUserDB {
+	return deps.db
 }
 
-func (deps *Deps) SetUsers(users db.IUserStore) {
-	deps.users = users
+func (deps *Deps) FileInfos() db.IFilesFunctions {
+	return deps.db
 }
 
-func (deps *Deps) FileInfos() fileinfostore.IFileInfoStore {
-	return deps.fileInfos
-}
-
-func (deps *Deps) SetFileInfos(fileInfos fileinfostore.IFileInfoStore) {
-	deps.fileInfos = fileInfos
-}
-
-func (deps *Deps) SiteStore() sitestore.ISiteStore {
-	return deps.siteStore
-}
-
-func (deps *Deps) SetSiteStore(siteStore sitestore.ISiteStore) {
-	deps.siteStore = siteStore
+func (deps *Deps) SiteStore() db.IConfigDB {
+	return deps.db
 }
 
 func (deps *Deps) Limiter() iolimiter.ILimiter {
@@ -127,13 +115,13 @@ func (deps *Deps) SetWorkers(workers worker.IWorkerPool) {
 	deps.workers = workers
 }
 
-func (deps *Deps) BoltStore() *boltstore.BoltStore {
-	return deps.boltStore
-}
+// func (deps *Deps) BoltStore() *boltstore.BoltStore {
+// 	return deps.boltStore
+// }
 
-func (deps *Deps) SetBoltStore(boltStore *boltstore.BoltStore) {
-	deps.boltStore = boltStore
-}
+// func (deps *Deps) SetBoltStore(boltStore *boltstore.BoltStore) {
+// 	deps.boltStore = boltStore
+// }
 
 func (deps *Deps) Cron() cron.ICron {
 	return deps.cron
@@ -151,10 +139,10 @@ func (deps *Deps) SetFileIndex(index fileindex.IFileIndex) {
 	deps.fileIndex = index
 }
 
-func (deps *Deps) DB() rdb.IDB {
+func (deps *Deps) DB() db.IDBQuickshare {
 	return deps.db
 }
 
-func (deps *Deps) SetDB(db rdb.IDB) {
-	deps.db = db
+func (deps *Deps) SetDB(rdb db.IDBQuickshare) {
+	deps.db = rdb
 }

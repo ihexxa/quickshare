@@ -35,7 +35,7 @@ type ClientCfgMsg struct {
 
 func (h *SettingsSvc) GetClientCfg(c *gin.Context) {
 	// TODO: add cache
-	siteCfg, err := h.deps.SiteStore().GetCfg()
+	siteCfg, err := h.deps.SiteStore().GetCfg(c)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -74,7 +74,7 @@ func (h *SettingsSvc) SetClientCfg(c *gin.Context) {
 	h.cfg.SetBool("Site.ClientCfg.AllowSetBg", req.ClientCfg.AllowSetBg)
 	h.cfg.SetBool("Site.ClientCfg.AutoTheme", req.ClientCfg.AutoTheme)
 
-	err = h.deps.SiteStore().SetClientCfg(clientCfg)
+	err = h.deps.SiteStore().SetClientCfg(c, clientCfg)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return

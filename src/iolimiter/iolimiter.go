@@ -1,11 +1,11 @@
 package iolimiter
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
 	"github.com/ihexxa/quickshare/src/db"
-	"github.com/ihexxa/quickshare/src/db/userstore"
 	"github.com/ihexxa/quickshare/src/golimiter"
 )
 
@@ -20,11 +20,11 @@ type IOLimiter struct {
 	mtx             *sync.Mutex
 	UploadLimiter   *golimiter.Limiter
 	DownloadLimiter *golimiter.Limiter
-	users           userstore.IUserStore
+	users           db.IUserDB
 	quotaCache      map[uint64]*db.Quota
 }
 
-func NewIOLimiter(cap, cyc int, users userstore.IUserStore) *IOLimiter {
+func NewIOLimiter(cap, cyc int, users db.IUserDB) *IOLimiter {
 	return &IOLimiter{
 		mtx:             &sync.Mutex{},
 		UploadLimiter:   golimiter.New(cap, cyc),
@@ -40,7 +40,7 @@ func (lm *IOLimiter) CanWrite(id uint64, chunkSize int) (bool, error) {
 
 	quota, ok := lm.quotaCache[id]
 	if !ok {
-		user, err := lm.users.GetUser(id)
+		user, err := lm.users.GetUser(context.TODO(), id) // TODO: add context
 		if err != nil {
 			return false, err
 		}
@@ -64,7 +64,7 @@ func (lm *IOLimiter) CanRead(id uint64, chunkSize int) (bool, error) {
 
 	quota, ok := lm.quotaCache[id]
 	if !ok {
-		user, err := lm.users.GetUser(id)
+		user, err := lm.users.GetUser(context.TODO(), id) // TODO: add context
 		if err != nil {
 			return false, err
 		}

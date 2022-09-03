@@ -1,6 +1,7 @@
 package fileshdr
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -9,7 +10,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
@@ -96,7 +96,7 @@ func (lk *AutoLocker) Exec(handler func()) error {
 }
 
 // related elements: role, user, action(listing, downloading)/sharing
-func (h *FileHandlers) canAccess(userName, role, op, sharedPath string) bool {
+func (h *FileHandlers) canAccess(ctx context.Context, userId uint64, userName, role, op, sharedPath string) bool {
 	if role == db.AdminRole {
 		return true
 	}
@@ -115,8 +115,8 @@ func (h *FileHandlers) canAccess(userName, role, op, sharedPath string) bool {
 		return false
 	}
 
-	isSharing, ok := h.deps.FileInfos().GetSharing(sharedPath)
-	return isSharing && ok
+	isSharing := h.deps.FileInfos().IsSharing(ctx, userId, sharedPath)
+	return isSharing
 }
 
 type CreateReq struct {
@@ -131,9 +131,13 @@ func (h *FileHandlers) Create(c *gin.Context) {
 		return
 	}
 
-	userID := c.MustGet(q.UserIDParam).(string)
-	fsFilePath, err := h.getFSFilePath(userID, req.Path)
+	userID, err := q.GetUserId(c)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
 
+	fsFilePath, err := h.getFSFilePath(fmt.Sprint(userID), req.Path)
 	if err != nil {
 		if errors.Is(err, os.ErrExist) {
 			c.JSON(q.ErrResp(c, 400, err))
@@ -145,22 +149,15 @@ func (h *FileHandlers) Create(c *gin.Context) {
 
 	role := c.MustGet(q.RoleParam).(string)
 	userName := c.MustGet(q.UserParam).(string)
-	if !h.canAccess(userName, role, "create", fsFilePath) {
+	if !h.canAccess(c, userID, userName, role, "create", fsFilePath) {
 		c.JSON(q.ErrResp(c, 403, q.ErrAccessDenied))
 		return
 	}
 
-	userIDInt, err := strconv.ParseUint(userID, 10, 64)
-	if err != nil {
-		c.JSON(q.ErrResp(c, 500, err))
-		return
-	}
-
 	tmpFilePath := q.UploadPath(userName, fsFilePath)
-
 	if req.FileSize == 0 {
 		// TODO: limit the number of files with 0 byte
-		err = h.deps.BoltStore().AddUploadInfos(userIDInt, tmpFilePath, fsFilePath, &db.FileInfo{
+		err = h.deps.FileInfos().AddUploadInfos(c, userID, tmpFilePath, fsFilePath, &db.FileInfo{
 			Size: req.FileSize,
 		})
 		if err != nil {
@@ -171,7 +168,7 @@ func (h *FileHandlers) Create(c *gin.Context) {
 			}
 			return
 		}
-		err = h.deps.BoltStore().MoveUploadingInfos(userIDInt, tmpFilePath, fsFilePath)
+		err = h.deps.FileInfos().MoveFileInfos(c, userID, tmpFilePath, fsFilePath, false)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
@@ -194,6 +191,7 @@ func (h *FileHandlers) Create(c *gin.Context) {
 		}
 
 		msg, err := json.Marshal(Sha1Params{
+			UserId:   userID,
 			FilePath: fsFilePath,
 		})
 		if err != nil {
@@ -223,7 +221,7 @@ func (h *FileHandlers) Create(c *gin.Context) {
 		return
 	}
 
-	err = h.deps.BoltStore().AddUploadInfos(userIDInt, tmpFilePath, fsFilePath, &db.FileInfo{
+	err = h.deps.FileInfos().AddUploadInfos(c, userID, tmpFilePath, fsFilePath, &db.FileInfo{
 		Size: req.FileSize,
 	})
 	if err != nil {
@@ -277,17 +275,16 @@ func (h *FileHandlers) Delete(c *gin.Context) {
 		return
 	}
 
-	role := c.MustGet(q.RoleParam).(string)
-	userName := c.MustGet(q.UserParam).(string)
-	if !h.canAccess(userName, role, "delete", filePath) {
-		c.JSON(q.ErrResp(c, 403, q.ErrAccessDenied))
+	userId, err := q.GetUserId(c)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
 
-	userID := c.MustGet(q.UserIDParam).(string)
-	userIDInt, err := strconv.ParseUint(userID, 10, 64)
-	if err != nil {
-		c.JSON(q.ErrResp(c, 500, err))
+	role := c.MustGet(q.RoleParam).(string)
+	userName := c.MustGet(q.UserParam).(string)
+	if !h.canAccess(c, userId, userName, role, "delete", filePath) {
+		c.JSON(q.ErrResp(c, 403, q.ErrAccessDenied))
 		return
 	}
 
@@ -300,7 +297,7 @@ func (h *FileHandlers) Delete(c *gin.Context) {
 			return
 		}
 
-		err = h.deps.BoltStore().DelInfos(userIDInt, filePath)
+		err = h.deps.FileInfos().DelFileInfo(c, userId, filePath)
 		if err != nil {
 			txErr = err
 			return
@@ -338,9 +335,16 @@ func (h *FileHandlers) Metadata(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 400, errors.New("invalid file path")))
 		return
 	}
+
+	userId, err := q.GetUserId(c)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
 	role := c.MustGet(q.RoleParam).(string)
 	userName := c.MustGet(q.UserParam).(string)
-	if !h.canAccess(userName, role, "metadata", filePath) {
+	if !h.canAccess(c, userId, userName, role, "metadata", filePath) {
 		c.JSON(q.ErrResp(c, 403, q.ErrAccessDenied))
 		return
 	}
@@ -374,15 +378,21 @@ func (h *FileHandlers) Mkdir(c *gin.Context) {
 		return
 	}
 
+	userId, err := q.GetUserId(c)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
 	role := c.MustGet(q.RoleParam).(string)
 	userName := c.MustGet(q.UserParam).(string)
 	dirPath := filepath.Clean(req.Path)
-	if !h.canAccess(userName, role, "mkdir", dirPath) {
+	if !h.canAccess(c, userId, userName, role, "mkdir", dirPath) {
 		c.JSON(q.ErrResp(c, 403, q.ErrAccessDenied))
 		return
 	}
 
-	err := h.deps.FS().MkdirAll(dirPath)
+	err = h.deps.FS().MkdirAll(dirPath)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -407,19 +417,19 @@ func (h *FileHandlers) Move(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 400, err))
 		return
 	}
+	userId, err := q.GetUserId(c)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
 	role := c.MustGet(q.RoleParam).(string)
-	userID := c.MustGet(q.UserIDParam).(string)
 	userName := c.MustGet(q.UserParam).(string)
 
 	oldPath := filepath.Clean(req.OldPath)
 	newPath := filepath.Clean(req.NewPath)
-	if !h.canAccess(userName, role, "move", oldPath) || !h.canAccess(userName, role, "move", newPath) {
+	if !h.canAccess(c, userId, userName, role, "move", oldPath) ||
+		!h.canAccess(c, userId, userName, role, "move", newPath) {
 		c.JSON(q.ErrResp(c, 403, q.ErrAccessDenied))
-		return
-	}
-	userIDInt, err := strconv.ParseUint(userID, 10, 64)
-	if err != nil {
-		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
 
@@ -438,7 +448,7 @@ func (h *FileHandlers) Move(c *gin.Context) {
 		return
 	}
 
-	err = h.deps.BoltStore().MoveInfos(userIDInt, oldPath, newPath, itemInfo.IsDir())
+	err = h.deps.FileInfos().MoveFileInfos(c, userId, oldPath, newPath, itemInfo.IsDir())
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -477,22 +487,21 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
-	role := c.MustGet(q.RoleParam).(string)
-	userID := c.MustGet(q.UserIDParam).(string)
-	userName := c.MustGet(q.UserParam).(string)
-	filePath := filepath.Clean(req.Path)
-	if !h.canAccess(userName, role, "upload.chunk", filePath) {
-		c.JSON(q.ErrResp(c, 403, q.ErrAccessDenied))
-		return
-	}
 
-	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	userId, err := q.GetUserId(c)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
+	role := c.MustGet(q.RoleParam).(string)
+	userName := c.MustGet(q.UserParam).(string)
+	filePath := filepath.Clean(req.Path)
+	if !h.canAccess(c, userId, userName, role, "upload.chunk", filePath) {
+		c.JSON(q.ErrResp(c, 403, q.ErrAccessDenied))
+		return
+	}
 
-	ok, err := h.deps.Limiter().CanWrite(userIDInt, len([]byte(req.Content)))
+	ok, err := h.deps.Limiter().CanWrite(userId, len([]byte(req.Content)))
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -509,7 +518,7 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 	lockErr := locker.Exec(func() {
 		var err error
 
-		fsFilePath, fileSize, uploaded, err = h.deps.FileInfos().GetUploadInfo(userID, tmpFilePath)
+		fsFilePath, fileSize, uploaded, err = h.deps.FileInfos().GetUploadInfo(c, userId, tmpFilePath)
 		if err != nil {
 			txErr, statusCode = err, 500
 			return
@@ -530,7 +539,7 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 			return
 		}
 
-		err = h.deps.FileInfos().SetUploadInfo(userID, tmpFilePath, req.Offset+int64(wrote))
+		err = h.deps.FileInfos().SetUploadInfo(c, userId, tmpFilePath, req.Offset+int64(wrote))
 		if err != nil {
 			txErr, statusCode = err, 500
 			return
@@ -538,7 +547,7 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 
 		// move the file from uploading dir to uploaded dir
 		if uploaded+int64(wrote) == fileSize {
-			err = h.deps.BoltStore().MoveUploadingInfos(userIDInt, tmpFilePath, fsFilePath)
+			err = h.deps.FileInfos().MoveFileInfos(c, userId, tmpFilePath, fsFilePath, false)
 			if err != nil {
 				txErr, statusCode = err, 500
 				return
@@ -551,6 +560,7 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 			}
 
 			msg, err := json.Marshal(Sha1Params{
+				UserId:   userId,
 				FilePath: fsFilePath,
 			})
 			if err != nil {
@@ -643,21 +653,27 @@ func (h *FileHandlers) UploadStatus(c *gin.Context) {
 	if filePath == "" {
 		c.JSON(q.ErrResp(c, 400, errors.New("invalid file name")))
 	}
+
+	userId, err := q.GetUserId(c)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
 	role := c.MustGet(q.RoleParam).(string)
 	userName := c.MustGet(q.UserParam).(string)
-	if !h.canAccess(userName, role, "upload.status", filePath) {
+	if !h.canAccess(c, userId, userName, role, "upload.status", filePath) {
 		c.JSON(q.ErrResp(c, 403, q.ErrAccessDenied))
 		return
 	}
 
-	userID := c.MustGet(q.UserIDParam).(string)
 	tmpFilePath := q.UploadPath(userName, filePath)
 	locker := h.NewAutoLocker(c, lockName(tmpFilePath))
 	fileSize, uploaded := int64(0), int64(0)
 	var txErr error
 	lockErr := locker.Exec(func() {
 		var err error
-		_, fileSize, uploaded, err = h.deps.FileInfos().GetUploadInfo(userID, tmpFilePath)
+		_, fileSize, uploaded, err = h.deps.FileInfos().GetUploadInfo(c, userId, tmpFilePath)
 		if err != nil {
 			if os.IsNotExist(err) {
 				c.JSON(q.ErrResp(c, 404, err))
@@ -695,23 +711,24 @@ func (h *FileHandlers) Download(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 400, errors.New("invalid file name")))
 		return
 	}
+
 	role := c.MustGet(q.RoleParam).(string)
 	userName := c.MustGet(q.UserParam).(string)
 	dirPath := filepath.Dir(filePath)
-	if !h.canAccess(userName, role, "download", dirPath) {
-		c.JSON(q.ErrResp(c, 403, q.ErrAccessDenied))
-		return
-	}
 
 	var err error
-	userIDInt := userstore.VisitorID
+	userId := userstore.VisitorID
 	if role != db.VisitorRole {
-		userID := c.MustGet(q.UserIDParam).(string)
-		userIDInt, err = strconv.ParseUint(userID, 10, 64)
+		userId, err = q.GetUserId(c)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
 		}
+	}
+
+	if !h.canAccess(c, userId, userName, role, "download", dirPath) {
+		c.JSON(q.ErrResp(c, 403, q.ErrAccessDenied))
+		return
 	}
 
 	// TODO: when sharing is introduced, move following logics to a separeted method
@@ -757,7 +774,7 @@ func (h *FileHandlers) Download(c *gin.Context) {
 
 	// respond to normal requests
 	if ifRangeVal != "" || rangeVal == "" {
-		limitedReader, err := h.GetStreamReader(userIDInt, fd)
+		limitedReader, err := h.GetStreamReader(userId, fd)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
@@ -797,7 +814,7 @@ func (h *FileHandlers) Download(c *gin.Context) {
 	// TODO: reader will be closed by multipart response writer？
 	go mr.Start()
 
-	limitedReader, err := h.GetStreamReader(userIDInt, mr)
+	limitedReader, err := h.GetStreamReader(userId, mr)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -818,7 +835,7 @@ type ListResp struct {
 	Metadatas []*MetadataResp `json:"metadatas"`
 }
 
-func (h *FileHandlers) MergeFileInfos(dirPath string, infos []os.FileInfo) ([]*MetadataResp, error) {
+func (h *FileHandlers) MergeFileInfos(ctx *gin.Context, dirPath string, infos []os.FileInfo) ([]*MetadataResp, error) {
 	filePaths := []string{}
 	metadatas := []*MetadataResp{}
 	for _, info := range infos {
@@ -833,7 +850,7 @@ func (h *FileHandlers) MergeFileInfos(dirPath string, infos []os.FileInfo) ([]*M
 		})
 	}
 
-	dbInfos, err := h.deps.FileInfos().GetInfos(filePaths)
+	dbInfos, err := h.deps.FileInfos().ListFileInfos(ctx, filePaths)
 	if err != nil {
 		return nil, err
 	}
@@ -856,9 +873,15 @@ func (h *FileHandlers) List(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 400, errors.New("incorrect path name")))
 		return
 	}
+
+	userId, err := q.GetUserId(c)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
 	role := c.MustGet(q.RoleParam).(string)
 	userName := c.MustGet(q.UserParam).(string)
-	if !h.canAccess(userName, role, "list", dirPath) {
+	if !h.canAccess(c, userId, userName, role, "list", dirPath) {
 		c.JSON(q.ErrResp(c, 403, q.ErrAccessDenied))
 		return
 	}
@@ -869,7 +892,7 @@ func (h *FileHandlers) List(c *gin.Context) {
 		return
 	}
 
-	metadatas, err := h.MergeFileInfos(dirPath, infos)
+	metadatas, err := h.MergeFileInfos(c, dirPath, infos)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -891,7 +914,7 @@ func (h *FileHandlers) ListHome(c *gin.Context) {
 		return
 	}
 
-	metadatas, err := h.MergeFileInfos(fsPath, infos)
+	metadatas, err := h.MergeFileInfos(c, fsPath, infos)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -920,9 +943,13 @@ type ListUploadingsResp struct {
 }
 
 func (h *FileHandlers) ListUploadings(c *gin.Context) {
-	userID := c.MustGet(q.UserIDParam).(string)
+	userId, err := q.GetUserId(c)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
 
-	infos, err := h.deps.FileInfos().ListUploadInfo(userID)
+	infos, err := h.deps.FileInfos().ListUploadInfos(c, userId)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -941,18 +968,16 @@ func (h *FileHandlers) DelUploading(c *gin.Context) {
 		return
 	}
 
-	userID := c.MustGet(q.UserIDParam).(string)
+	userId, err := q.GetUserId(c)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
 	role := c.MustGet(q.RoleParam).(string)
 	userName := c.MustGet(q.UserParam).(string)
 	// op is empty, because users must be admin, or the path belongs to this user
-	if !h.canAccess(userName, role, "", filePath) {
+	if !h.canAccess(c, userId, userName, role, "", filePath) {
 		c.JSON(q.ErrResp(c, 403, errors.New("forbidden")))
-		return
-	}
-
-	userIDInt, err := strconv.ParseUint(userID, 10, 64)
-	if err != nil {
-		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
 
@@ -985,7 +1010,7 @@ func (h *FileHandlers) DelUploading(c *gin.Context) {
 		c.JSON(q.ErrResp(c, statusCode, txErr))
 		return
 	}
-	err = h.deps.BoltStore().DelUploadingInfos(userIDInt, tmpFilePath)
+	err = h.deps.FileInfos().DelUploadingInfos(c, userId, filePath)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -1004,12 +1029,18 @@ func (h *FileHandlers) AddSharing(c *gin.Context) {
 		return
 	}
 
+	userId, err := q.GetUserId(c)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
 	sharingPath := filepath.Clean(req.SharingPath)
 	// TODO: move canAccess to authedFS
 	role := c.MustGet(q.RoleParam).(string)
 	userName := c.MustGet(q.UserParam).(string)
 	// op is empty, because users must be admin, or the path belongs to this user
-	if !h.canAccess(userName, role, "", sharingPath) {
+	if !h.canAccess(c, userId, userName, role, "", sharingPath) {
 		c.JSON(q.ErrResp(c, 403, errors.New("forbidden")))
 		return
 	}
@@ -1028,7 +1059,7 @@ func (h *FileHandlers) AddSharing(c *gin.Context) {
 		return
 	}
 
-	err = h.deps.FileInfos().AddSharing(sharingPath)
+	err = h.deps.FileInfos().AddSharing(c, userId, sharingPath)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -1044,15 +1075,21 @@ func (h *FileHandlers) DelSharing(c *gin.Context) {
 		return
 	}
 
+	userId, err := q.GetUserId(c)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
 	// TODO: move canAccess to authedFS
 	userName := c.MustGet(q.UserParam).(string)
 	role := c.MustGet(q.RoleParam).(string)
-	if !h.canAccess(userName, role, "", dirPath) {
+	if !h.canAccess(c, userId, userName, role, "", dirPath) {
 		c.JSON(q.ErrResp(c, 403, errors.New("forbidden")))
 		return
 	}
 
-	err := h.deps.FileInfos().DelSharing(dirPath)
+	err = h.deps.FileInfos().DelSharing(c, userId, dirPath)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -1068,8 +1105,14 @@ func (h *FileHandlers) IsSharing(c *gin.Context) {
 		return
 	}
 
-	exist, ok := h.deps.FileInfos().GetSharing(dirPath)
-	if exist && ok {
+	userId, err := q.GetUserId(c)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
+	exist := h.deps.FileInfos().IsSharing(c, userId, dirPath)
+	if exist {
 		c.JSON(q.Resp(200))
 	} else {
 		c.JSON(q.Resp(404))
@@ -1083,9 +1126,13 @@ type SharingResp struct {
 // Deprecated: use ListSharingIDs instead
 func (h *FileHandlers) ListSharings(c *gin.Context) {
 	// TODO: move canAccess to authedFS
-	userName := c.MustGet(q.UserParam).(string)
+	userId, err := q.GetUserId(c)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
 
-	sharingDirs, err := h.deps.FileInfos().ListSharings(q.FsRootPath(userName, "/"))
+	sharingDirs, err := h.deps.FileInfos().ListUserSharings(c, userId)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -1103,10 +1150,13 @@ type SharingIDsResp struct {
 }
 
 func (h *FileHandlers) ListSharingIDs(c *gin.Context) {
-	// TODO: move canAccess to authedFS
-	userName := c.MustGet(q.UserParam).(string)
+	userId, err := q.GetUserId(c)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
 
-	dirToID, err := h.deps.FileInfos().ListSharings(q.FsRootPath(userName, "/"))
+	dirToID, err := h.deps.FileInfos().ListUserSharings(c, userId)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -1131,14 +1181,21 @@ func (h *FileHandlers) GenerateHash(c *gin.Context) {
 		return
 	}
 
+	userId, err := q.GetUserId(c)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
 	role := c.MustGet(q.RoleParam).(string)
 	userName := c.MustGet(q.UserParam).(string)
-	if !h.canAccess(userName, role, "hash.gen", filePath) {
+	if !h.canAccess(c, userId, userName, role, "hash.gen", filePath) {
 		c.JSON(q.ErrResp(c, 403, q.ErrAccessDenied))
 		return
 	}
 
 	msg, err := json.Marshal(Sha1Params{
+		UserId:   userId,
 		FilePath: filePath,
 	})
 	if err != nil {
@@ -1171,7 +1228,7 @@ func (h *FileHandlers) GetSharingDir(c *gin.Context) {
 		return
 	}
 
-	dirPath, err := h.deps.FileInfos().GetSharingDir(shareID)
+	dirPath, err := h.deps.FileInfos().GetSharingDir(c, shareID)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return

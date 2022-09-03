@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 
@@ -163,4 +164,13 @@ func GetUserInfo(tokenStr string, tokenEncDec cryptoutil.ITokenEncDec) (map[stri
 	}
 
 	return claims, nil
+}
+
+func GetUserId(ctx *gin.Context) (uint64, error) {
+	userID, ok := ctx.MustGet(UserIDParam).(string)
+	if !ok {
+		return 0, errors.New("user id not found")
+	}
+
+	return strconv.ParseUint(userID, 10, 64)
 }

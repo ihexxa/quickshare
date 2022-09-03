@@ -25,8 +25,11 @@ type IDB interface {
 	// Stats() DBStats
 }
 
-type IDBFunctions interface {
+type IDBQuickshare interface {
 	Init(ctx context.Context, adminName, adminPwd string, config *SiteConfig) error
+	InitUserTable(ctx context.Context, rootName, rootPwd string) error
+	InitFileTables(ctx context.Context) error
+	InitConfigTable(ctx context.Context, cfg *SiteConfig) error
 	IDBLockable
 	IUserDB
 	IFileDB
@@ -43,7 +46,6 @@ type IDBLockable interface {
 }
 
 type IUserDB interface {
-	IsInited() bool
 	AddUser(ctx context.Context, user *User) error
 	DelUser(ctx context.Context, id uint64) error
 	GetUser(ctx context.Context, id uint64) (*User, error)
@@ -60,9 +62,14 @@ type IUserDB interface {
 	ListRoles() (map[string]bool, error)
 }
 
+type IFilesFunctions interface {
+	IFileDB
+	IUploadDB
+	ISharingDB
+}
+
 type IFileDB interface {
 	AddFileInfo(ctx context.Context, userId uint64, itemPath string, info *FileInfo) error
-	// DelFileInfo(ctx context.Context, itemPath string) error
 	DelFileInfo(ctx context.Context, userId uint64, itemPath string) error
 	GetFileInfo(ctx context.Context, userId uint64, itemPath string) (*FileInfo, error)
 	SetSha1(ctx context.Context, userId uint64, itemPath, sign string) error
