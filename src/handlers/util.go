@@ -8,8 +8,8 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-
 	"github.com/ihexxa/quickshare/src/cryptoutil"
+	"github.com/ihexxa/quickshare/src/db"
 )
 
 var (
@@ -171,6 +171,8 @@ func GetUserId(ctx *gin.Context) (uint64, error) {
 	if !ok {
 		return 0, errors.New("user id not found")
 	}
-
+	if userID == "" {
+		return db.VisitorID, nil
+	}
 	return strconv.ParseUint(userID, 10, 64)
 }

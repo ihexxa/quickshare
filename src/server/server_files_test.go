@@ -452,6 +452,8 @@ func TestFileHandlers(t *testing.T) {
 				t.Fatal(errs)
 			} else if res.StatusCode != 200 {
 				t.Fatal(res.StatusCode)
+			} else if len(shRes.IDs) != len(sharedPaths) {
+				t.Fatal("shared size not match")
 			}
 			for dirPath, shareID := range shRes.IDs {
 				if !sharedPaths[dirPath] {
@@ -469,6 +471,7 @@ func TestFileHandlers(t *testing.T) {
 				}
 			}
 
+			fmt.Println("\n\n\n", shRes.IDs)
 			// check isSharing
 			for dirPath := range sharedPaths {
 				res, _, errs := userFilesCl.IsSharing(dirPath)
@@ -673,7 +676,7 @@ func TestFileHandlers(t *testing.T) {
 		} else if res.StatusCode != 200 {
 			t.Fatal(res.StatusCode)
 		} else if len(lResp.UploadInfos) != 0 {
-			t.Fatalf("info is not deleted, info len(%d)", len(lResp.UploadInfos))
+			t.Fatalf("info is not deleted, info len(%+v)", lResp.UploadInfos)
 		}
 	})
 
@@ -828,7 +831,7 @@ func TestFileHandlers(t *testing.T) {
 		res, _, errs = adminFilesClient.IsSharing(dstDir)
 		if len(errs) > 0 {
 			t.Fatal(errs)
-		} else if res.StatusCode != 404 { // should not be in sharing
+		} else if res.StatusCode != 200 { // should still be in sharing
 			t.Fatal(res.StatusCode)
 		}
 

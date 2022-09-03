@@ -57,9 +57,9 @@ func NewServer(cfg gocfg.ICfg) (*Server, error) {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	deps := initDeps(cfg)
+	deps, adminName := initDeps(cfg)
 	router := gin.Default()
-	router, err := initHandlers(router, cfg, deps)
+	router, err := initHandlers(router, adminName, cfg, deps)
 	if err != nil {
 		return nil, fmt.Errorf("init handlers error: %w", err)
 	}
@@ -104,7 +104,7 @@ func mkRoot(rootPath string) {
 	}
 }
 
-func initDeps(cfg gocfg.ICfg) *depidx.Deps {
+func initDeps(cfg gocfg.ICfg) (*depidx.Deps, string) {
 	var err error
 	logger := initLogger(cfg)
 
@@ -142,7 +142,7 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	// 	panic(fmt.Sprintf("failed to init bolt store: %s", err))
 	// }
 
-	quickshareDb, err := initDB(cfg, filesystem)
+	quickshareDb, adminName, err := initDB(cfg, filesystem)
 	if err != nil {
 		logger.Errorf("failed to init DB: %s", err)
 		os.Exit(1)
@@ -197,25 +197,25 @@ func initDeps(cfg gocfg.ICfg) *depidx.Deps {
 	logger.Infof("file index inited(%t)", indexInited)
 	deps.SetFileIndex(fileIndex)
 
-	return deps
+	return deps, adminName
 }
 
-func initDB(cfg gocfg.ICfg, filesystem fs.ISimpleFS) (db.IDBQuickshare, error) {
+func initDB(cfg gocfg.ICfg, filesystem fs.ISimpleFS) (db.IDBQuickshare, string, error) {
 	dbPath := cfg.GrabString("Db.DbPath")
 	dbDir := path.Dir(dbPath)
 
 	err := filesystem.MkdirAll(dbDir)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create path for db: %w", err)
+		return nil, "", fmt.Errorf("failed to create path for db: %w", err)
 	}
 
 	sqliteDB, err := sqlite.NewSQLite(dbPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create path for db: %w", err)
+		return nil, "", fmt.Errorf("failed to create path for db: %w", err)
 	}
 	dbQuickshare, err := sqlite.NewSQLiteStore(sqliteDB)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create quickshare db: %w", err)
+		return nil, "", fmt.Errorf("failed to create quickshare db: %w", err)
 	}
 
 	var ok bool
@@ -232,20 +232,20 @@ func initDB(cfg gocfg.ICfg, filesystem fs.ISimpleFS) (db.IDBQuickshare, error) {
 		if adminPwd == "" {
 			adminPwd, err = generatePwd()
 			if err != nil {
-				return nil, fmt.Errorf("generate password error: %w", err)
+				return nil, "", fmt.Errorf("generate password error: %w", err)
 			}
 			fmt.Printf("password is generated: %s, please update it immediately after login\n", adminPwd)
 		}
 
 		pwdHash, err = bcrypt.GenerateFromPassword([]byte(adminPwd), 10)
 		if err != nil {
-			return nil, fmt.Errorf("hashing password error: %w", err)
+			return nil, "", fmt.Errorf("hashing password error: %w", err)
 		}
 	}
 
 	err = dbQuickshare.InitUserTable(context.TODO(), adminName, string(pwdHash))
 	if err != nil {
-		return nil, fmt.Errorf("failed to init user table: %w", err)
+		return nil, "", fmt.Errorf("failed to init user table: %w", err)
 	}
 	err = dbQuickshare.InitConfigTable(
 		context.TODO(),
@@ -264,21 +264,26 @@ func initDB(cfg gocfg.ICfg, filesystem fs.ISimpleFS) (db.IDBQuickshare, error) {
 		},
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to init config table: %w", err)
+		return nil, "", fmt.Errorf("failed to init config table: %w", err)
 	}
 	err = dbQuickshare.InitFileTables(context.TODO())
 	if err != nil {
-		return nil, fmt.Errorf("failed to init files tables: %w", err)
+		return nil, "", fmt.Errorf("failed to init files tables: %w", err)
 	}
-	return dbQuickshare, nil
+	return dbQuickshare, adminName, nil
 }
 
-func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.Engine, error) {
+func initHandlers(router *gin.Engine, adminName string, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.Engine, error) {
 	// handlers
 	userHdrs, err := multiusers.NewMultiUsersSvc(cfg, deps)
 	if err != nil {
 		return nil, fmt.Errorf("new users svc error: %w", err)
 	}
+	_, err = userHdrs.Init(context.TODO(), adminName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to init user handlers: %w", err)
+	}
+
 	fileHdrs, err := fileshdr.NewFileHandlers(cfg, deps)
 	if err != nil {
 		return nil, fmt.Errorf("new files service error: %w", err)
@@ -323,10 +328,10 @@ func initHandlers(router *gin.Engine, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.E
 	usersAPI.PATCH("/preferences", userHdrs.SetPreferences)
 	usersAPI.PUT("/used-space", userHdrs.ResetUsedSpace)
 
-	rolesAPI := v1.Group("/roles")
-	rolesAPI.POST("/", userHdrs.AddRole)
-	rolesAPI.DELETE("/", userHdrs.DelRole)
-	rolesAPI.GET("/list", userHdrs.ListRoles)
+	// rolesAPI := v1.Group("/roles")
+	// rolesAPI.POST("/", userHdrs.AddRole)
+	// rolesAPI.DELETE("/", userHdrs.DelRole)
+	// rolesAPI.GET("/list", userHdrs.ListRoles)
 
 	captchaAPI := v1.Group("/captchas")
 	captchaAPI.GET("/", userHdrs.GetCaptchaID)

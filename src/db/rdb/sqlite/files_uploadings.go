@@ -8,7 +8,7 @@ import (
 	"github.com/ihexxa/quickshare/src/db"
 )
 
-func (st *SQLiteStore) addUploadInfoOnly(ctx context.Context, userId uint64, filePath, tmpPath string, fileSize int64) error {
+func (st *SQLiteStore) addUploadInfoOnly(ctx context.Context, userId uint64, tmpPath, filePath string, fileSize int64) error {
 	_, err := st.db.ExecContext(
 		ctx,
 		`insert into t_file_uploading
@@ -42,7 +42,7 @@ func (st *SQLiteStore) AddUploadInfos(ctx context.Context, userId uint64, tmpPat
 		return err
 	}
 
-	return st.addUploadInfoOnly(ctx, userId, filePath, tmpPath, info.Size)
+	return st.addUploadInfoOnly(ctx, userId, tmpPath, filePath, info.Size)
 }
 
 func (st *SQLiteStore) DelUploadingInfos(ctx context.Context, userId uint64, realPath string) error {
@@ -82,22 +82,22 @@ func (st *SQLiteStore) delUploadInfoOnly(ctx context.Context, userId uint64, fil
 	return err
 }
 
-// func (st *SQLiteStore) MoveUploadingInfos(ctx context.Context, userId uint64, uploadPath, itemPath string) error {
-// 	st.Lock()
-// 	defer st.Unlock()
+func (st *SQLiteStore) MoveUploadingInfos(ctx context.Context, userId uint64, uploadPath, itemPath string) error {
+	st.Lock()
+	defer st.Unlock()
 
-// 	_, size, _, err := st.getUploadInfo(ctx, userId, itemPath)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	err = st.delUploadInfoOnly(ctx, userId, itemPath)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return st.addFileInfo(ctx, userId, itemPath, &db.FileInfo{
-// 		Size: size,
-// 	})
-// }
+	_, size, _, err := st.getUploadInfo(ctx, userId, itemPath)
+	if err != nil {
+		return err
+	}
+	err = st.delUploadInfoOnly(ctx, userId, itemPath)
+	if err != nil {
+		return err
+	}
+	return st.addFileInfo(ctx, userId, itemPath, &db.FileInfo{
+		Size: size,
+	})
+}
 
 func (st *SQLiteStore) SetUploadInfo(ctx context.Context, userId uint64, filePath string, newUploaded int64) error {
 	st.Lock()

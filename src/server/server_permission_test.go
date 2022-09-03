@@ -112,7 +112,7 @@ func TestPermissions(t *testing.T) {
 			}
 			tmpUser, tmpPwd, tmpRole := "tmpUser", "1234", "user"
 			tmpAdmin, tmpAdminPwd := "tmpAdmin", "1234"
-			tmpNewRole := "tmpNewRole"
+			// tmpNewRole := "tmpNewRole"
 
 			cl := client.NewUsersClient(addr)
 			// token := &http.Cookie{}
@@ -204,14 +204,14 @@ func TestPermissions(t *testing.T) {
 			assertResp(t, resp, errs, expectedCodes["DelUserAdmin"], fmt.Sprintf("%s-%s", desc, "DelUserAdmin"))
 
 			// role management
-			resp, _, errs = cl.AddRole(tmpNewRole)
-			assertResp(t, resp, errs, expectedCodes["AddRole"], fmt.Sprintf("%s-%s", desc, "AddRole"))
+			// resp, _, errs = cl.AddRole(tmpNewRole)
+			// assertResp(t, resp, errs, expectedCodes["AddRole"], fmt.Sprintf("%s-%s", desc, "AddRole"))
 
-			resp, _, errs = cl.ListRoles()
-			assertResp(t, resp, errs, expectedCodes["ListRoles"], fmt.Sprintf("%s-%s", desc, "ListRoles"))
+			// resp, _, errs = cl.ListRoles()
+			// assertResp(t, resp, errs, expectedCodes["ListRoles"], fmt.Sprintf("%s-%s", desc, "ListRoles"))
 
-			resp, _, errs = cl.DelRole(tmpNewRole)
-			assertResp(t, resp, errs, expectedCodes["DelRole"], fmt.Sprintf("%s-%s", desc, "DelRole"))
+			// resp, _, errs = cl.DelRole(tmpNewRole)
+			// assertResp(t, resp, errs, expectedCodes["DelRole"], fmt.Sprintf("%s-%s", desc, "DelRole"))
 
 			if requireAuth {
 				resp, _, errs := cl.Logout()

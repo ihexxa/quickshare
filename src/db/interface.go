@@ -71,22 +71,22 @@ type IFilesFunctions interface {
 type IFileDB interface {
 	AddFileInfo(ctx context.Context, userId uint64, itemPath string, info *FileInfo) error
 	DelFileInfo(ctx context.Context, userId uint64, itemPath string) error
-	GetFileInfo(ctx context.Context, userId uint64, itemPath string) (*FileInfo, error)
-	SetSha1(ctx context.Context, userId uint64, itemPath, sign string) error
-	MoveFileInfos(ctx context.Context, userID uint64, oldPath, newPath string, isDir bool) error
+	GetFileInfo(ctx context.Context, itemPath string) (*FileInfo, error)
+	SetSha1(ctx context.Context, itemPath, sign string) error
+	MoveFileInfos(ctx context.Context, userId uint64, oldPath, newPath string, isDir bool) error
 	ListFileInfos(ctx context.Context, itemPaths []string) (map[string]*FileInfo, error)
 }
 type IUploadDB interface {
 	AddUploadInfos(ctx context.Context, userId uint64, tmpPath, filePath string, info *FileInfo) error
 	DelUploadingInfos(ctx context.Context, userId uint64, realPath string) error
-	// MoveUploadingInfos(ctx context.Context, userId uint64, uploadPath, itemPath string) error
+	MoveUploadingInfos(ctx context.Context, userId uint64, uploadPath, itemPath string) error
 	SetUploadInfo(ctx context.Context, user uint64, filePath string, newUploaded int64) error
 	GetUploadInfo(ctx context.Context, userId uint64, filePath string) (string, int64, int64, error)
 	ListUploadInfos(ctx context.Context, user uint64) ([]*UploadInfo, error)
 }
 
 type ISharingDB interface {
-	IsSharing(ctx context.Context, userId uint64, dirPath string) bool
+	IsSharing(ctx context.Context, userId uint64, dirPath string) (bool, error)
 	GetSharingDir(ctx context.Context, hashID string) (string, error)
 	AddSharing(ctx context.Context, userId uint64, dirPath string) error
 	DelSharing(ctx context.Context, userId uint64, dirPath string) error
