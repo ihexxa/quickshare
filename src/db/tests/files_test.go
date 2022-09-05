@@ -54,12 +54,14 @@ func TestFileStore(t *testing.T) {
 			if _, ok := dirToID[sharingDir]; !ok {
 				t.Fatalf("sharing(%s) not found", sharingDir)
 			}
-			mustTrue := store.IsSharing(ctx, adminId, sharingDir)
-			if !mustTrue {
+			mustTrue, err := store.IsSharing(ctx, adminId, sharingDir)
+			if err != nil {
+				t.Fatal(err)
+			} else if !mustTrue {
 				t.Fatalf("get sharing(%t) should exist", mustTrue)
 			}
 
-			info, err := store.GetFileInfo(ctx, adminId, sharingDir)
+			info, err := store.GetFileInfo(ctx, sharingDir)
 			if err != nil {
 				t.Fatal(err)
 			} else if len(info.ShareID) != 7 {
@@ -94,12 +96,14 @@ func TestFileStore(t *testing.T) {
 			if _, ok := dirToIDAfterDel[dirPath]; ok {
 				t.Fatalf("sharing(%s) should not exist", dirPath)
 			}
-			shared := store.IsSharing(ctx, adminId, dirPath)
-			if shared {
+			shared, err := store.IsSharing(ctx, adminId, dirPath)
+			if err != nil {
+				t.Fatal(err)
+			} else if shared {
 				t.Fatalf("get sharing(%t) should not shared but exist", shared)
 			}
 
-			info, err := store.GetFileInfo(ctx, adminId, dirPath)
+			info, err := store.GetFileInfo(ctx, dirPath)
 			if err != nil {
 				t.Fatal(err)
 			} else if len(info.ShareID) != 0 {
@@ -161,7 +165,7 @@ func TestFileStore(t *testing.T) {
 
 		// get infos
 		for itemPath, expected := range pathInfos {
-			info, err := store.GetFileInfo(ctx, adminId, itemPath)
+			info, err := store.GetFileInfo(ctx, itemPath)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -196,11 +200,11 @@ func TestFileStore(t *testing.T) {
 		// set sha1
 		testSha1 := "sha1"
 		for itemPath := range pathInfos {
-			err := store.SetSha1(ctx, adminId, itemPath, testSha1)
+			err := store.SetSha1(ctx, itemPath, testSha1)
 			if err != nil {
 				t.Fatal(err)
 			}
-			info, err := store.GetFileInfo(ctx, adminId, itemPath)
+			info, err := store.GetFileInfo(ctx, itemPath)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -261,7 +265,7 @@ func TestFileStore(t *testing.T) {
 		}
 
 		for itemPath := range pathInfos {
-			_, err := store.GetFileInfo(ctx, adminId, itemPath)
+			_, err := store.GetFileInfo(ctx, itemPath)
 			if !errors.Is(err, db.ErrFileInfoNotFound) {
 				t.Fatal(err)
 			}
