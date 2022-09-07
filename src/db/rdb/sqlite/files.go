@@ -128,19 +128,24 @@ func (st *SQLiteStore) addFileInfo(ctx context.Context, userId uint64, itemPath 
 		return err
 	}
 
+	location, err := getLocation(itemPath)
+	if err != nil {
+		return err
+	}
+
 	dirPath, itemName := path.Split(itemPath)
 	_, err = st.db.ExecContext(
 		ctx,
-		`insert into t_file_info
-		(path, user, parent, name, is_dir, size, share_id, info) values (?, ?, ?, ?, ?, ?, ?, ?)`,
-		itemPath,
-		userId,
-		dirPath,
-		itemName,
-		info.IsDir,
-		info.Size,
-		info.ShareID,
-		infoStr,
+		`insert into t_file_info (
+			path, user, location, parent, name,
+			is_dir, size, share_id, info
+		)
+		values (
+			?, ?, ?, ?, ?,
+			?, ?, ?, ?
+		)`,
+		itemPath, userId, location, dirPath, itemName,
+		info.IsDir, info.Size, info.ShareID, infoStr,
 	)
 	return err
 }
@@ -248,7 +253,7 @@ func (st *SQLiteStore) DelFileInfo(ctx context.Context, userID uint64, itemPath 
 	return err
 }
 
-func (st *SQLiteStore) MoveFileInfos(ctx context.Context, userId uint64, oldPath, newPath string, isDir bool) error {
+func (st *SQLiteStore) MoveFileInfo(ctx context.Context, userId uint64, oldPath, newPath string, isDir bool) error {
 	st.Lock()
 	defer st.Unlock()
 
@@ -267,4 +272,13 @@ func (st *SQLiteStore) MoveFileInfos(ctx context.Context, userId uint64, oldPath
 		return err
 	}
 	return st.addFileInfo(ctx, userId, newPath, info)
+}
+
+func getLocation(itemPath string) (string, error) {
+	// location is taken from item path
+	itemPathParts := strings.Split(itemPath, "/")
+	if len(itemPathParts) == 0 {
+		return "", fmt.Errorf("invalid item path '%s'", itemPath)
+	}
+	return itemPathParts[0], nil
 }

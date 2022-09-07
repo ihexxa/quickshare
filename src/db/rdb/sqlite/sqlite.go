@@ -129,6 +129,7 @@ func (st *SQLiteStore) InitFileTables(ctx context.Context) error {
 		`create table if not exists t_file_info (
 			path varchar not null,
 			user bigint not null,
+			location varchar not null,
 			parent varchar not null,
 			name varchar not null,
 			is_dir boolean not null,

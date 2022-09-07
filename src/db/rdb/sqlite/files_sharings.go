@@ -29,11 +29,10 @@ func (st *SQLiteStore) generateShareID(payload string) (string, error) {
 	return fmt.Sprintf("%x", h.Sum(nil))[:7], nil
 }
 
-func (st *SQLiteStore) IsSharing(ctx context.Context, userId uint64, dirPath string) (bool, error) {
+func (st *SQLiteStore) IsSharing(ctx context.Context, dirPath string) (bool, error) {
 	st.RLock()
 	defer st.RUnlock()
 
-	// TODO: userId is not used, becauser it is searcher's userId
 	var shareId string
 	err := st.db.QueryRowContext(
 		ctx,
@@ -88,6 +87,11 @@ func (st *SQLiteStore) AddSharing(ctx context.Context, userId uint64, dirPath st
 		return err
 	}
 
+	location, err := getLocation(dirPath)
+	if err != nil {
+		return err
+	}
+
 	_, err = st.getFileInfo(ctx, dirPath)
 	if err != nil && !errors.Is(err, db.ErrFileInfoNotFound) {
 		return err
@@ -104,9 +108,16 @@ func (st *SQLiteStore) AddSharing(ctx context.Context, userId uint64, dirPath st
 
 		_, err = st.db.ExecContext(
 			ctx,
-			`insert into t_file_info
-			(path, user, parent, name, is_dir, size, share_id, info) values (?, ?, ?, ?, ?, ?, ?, ?)`,
-			dirPath, userId, parentPath, name, true, 0, shareID, infoStr,
+			`insert into t_file_info (
+				path, user, location, parent, name,
+				is_dir, size, share_id, info
+			)
+			values (
+				?, ?, ?, ?, ?,
+				?, ?, ?, ?
+			)`,
+			dirPath, userId, location, parentPath, name,
+			true, 0, shareID, infoStr,
 		)
 		return err
 	}
@@ -135,7 +146,7 @@ func (st *SQLiteStore) DelSharing(ctx context.Context, userId uint64, dirPath st
 	return err
 }
 
-func (st *SQLiteStore) ListUserSharings(ctx context.Context, userId uint64) (map[string]string, error) {
+func (st *SQLiteStore) ListSharingsByLocation(ctx context.Context, location string) (map[string]string, error) {
 	st.RLock()
 	defer st.RUnlock()
 
@@ -143,8 +154,8 @@ func (st *SQLiteStore) ListUserSharings(ctx context.Context, userId uint64) (map
 		ctx,
 		`select path, share_id
 		from t_file_info
-		where user=? and share_id <> ''`,
-		userId,
+		where location=? and share_id<>''`,
+		location,
 	)
 	if err != nil {
 		return nil, err
