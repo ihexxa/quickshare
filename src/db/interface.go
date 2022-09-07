@@ -73,7 +73,7 @@ type IFileDB interface {
 	DelFileInfo(ctx context.Context, userId uint64, itemPath string) error
 	GetFileInfo(ctx context.Context, itemPath string) (*FileInfo, error)
 	SetSha1(ctx context.Context, itemPath, sign string) error
-	MoveFileInfos(ctx context.Context, userId uint64, oldPath, newPath string, isDir bool) error
+	MoveFileInfo(ctx context.Context, userId uint64, oldPath, newPath string, isDir bool) error
 	ListFileInfos(ctx context.Context, itemPaths []string) (map[string]*FileInfo, error)
 }
 type IUploadDB interface {
@@ -86,11 +86,11 @@ type IUploadDB interface {
 }
 
 type ISharingDB interface {
-	IsSharing(ctx context.Context, userId uint64, dirPath string) (bool, error)
+	IsSharing(ctx context.Context, dirPath string) (bool, error)
 	GetSharingDir(ctx context.Context, hashID string) (string, error)
 	AddSharing(ctx context.Context, userId uint64, dirPath string) error
 	DelSharing(ctx context.Context, userId uint64, dirPath string) error
-	ListUserSharings(ctx context.Context, userId uint64) (map[string]string, error)
+	ListSharingsByLocation(ctx context.Context, location string) (map[string]string, error)
 }
 
 type IConfigDB interface {

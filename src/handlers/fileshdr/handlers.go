@@ -101,7 +101,7 @@ func (h *FileHandlers) canAccess(ctx context.Context, userId uint64, userName, r
 		return false
 	}
 
-	isSharing, err := h.deps.FileInfos().IsSharing(ctx, userId, sharedPath)
+	isSharing, err := h.deps.FileInfos().IsSharing(ctx, sharedPath)
 	if err != nil {
 		return false // TODO: return error
 	}
@@ -157,6 +157,7 @@ func (h *FileHandlers) Create(c *gin.Context) {
 			}
 			return
 		}
+
 		err = h.deps.FileInfos().MoveUploadingInfos(c, userID, tmpFilePath, fsFilePath)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
@@ -422,7 +423,7 @@ func (h *FileHandlers) Move(c *gin.Context) {
 		return
 	}
 
-	err = h.deps.FileInfos().MoveFileInfos(c, userId, oldPath, newPath, itemInfo.IsDir())
+	err = h.deps.FileInfos().MoveFileInfo(c, userId, oldPath, newPath, itemInfo.IsDir())
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -1063,13 +1064,7 @@ func (h *FileHandlers) IsSharing(c *gin.Context) {
 		return
 	}
 
-	userId, err := q.GetUserId(c)
-	if err != nil {
-		c.JSON(q.ErrResp(c, 500, err))
-		return
-	}
-
-	exist, err := h.deps.FileInfos().IsSharing(c, userId, dirPath)
+	exist, err := h.deps.FileInfos().IsSharing(c, dirPath)
 	if err != nil {
 		if errors.Is(err, db.ErrFileInfoNotFound) {
 			c.JSON(q.Resp(404))
@@ -1090,13 +1085,8 @@ type SharingResp struct {
 // Deprecated: use ListSharingIDs instead
 func (h *FileHandlers) ListSharings(c *gin.Context) {
 	// TODO: move canAccess to authedFS
-	userId, err := q.GetUserId(c)
-	if err != nil {
-		c.JSON(q.ErrResp(c, 500, err))
-		return
-	}
-
-	sharingDirs, err := h.deps.FileInfos().ListUserSharings(c, userId)
+	userName := c.MustGet(q.UserParam).(string)
+	sharingDirs, err := h.deps.FileInfos().ListSharingsByLocation(c, userName)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
@@ -1114,13 +1104,8 @@ type SharingIDsResp struct {
 }
 
 func (h *FileHandlers) ListSharingIDs(c *gin.Context) {
-	userId, err := q.GetUserId(c)
-	if err != nil {
-		c.JSON(q.ErrResp(c, 500, err))
-		return
-	}
-
-	dirToID, err := h.deps.FileInfos().ListUserSharings(c, userId)
+	userName := c.MustGet(q.UserParam).(string)
+	dirToID, err := h.deps.FileInfos().ListSharingsByLocation(c, userName)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return

@@ -11,8 +11,12 @@ import (
 func (st *SQLiteStore) addUploadInfoOnly(ctx context.Context, userId uint64, tmpPath, filePath string, fileSize int64) error {
 	_, err := st.db.ExecContext(
 		ctx,
-		`insert into t_file_uploading
-		(real_path, tmp_path, user, size, uploaded) values (?, ?, ?, ?, ?)`,
+		`insert into t_file_uploading (
+			real_path, tmp_path, user, size, uploaded
+		)
+		values (
+			?, ?, ?, ?, ?
+		)`,
 		filePath, tmpPath, userId, fileSize, 0,
 	)
 	return err

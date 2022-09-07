@@ -18,6 +18,7 @@ func TestFileStore(t *testing.T) {
 	testSharingMethods := func(t *testing.T, store db.IDBQuickshare) {
 		dirPaths := []string{"admin/path1", "admin/path1/path2"}
 		var err error
+		location := "admin"
 
 		ctx := context.TODO()
 		adminId := uint64(0)
@@ -43,7 +44,7 @@ func TestFileStore(t *testing.T) {
 		}
 
 		// list sharings
-		dirToID, err := store.ListUserSharings(ctx, adminId)
+		dirToID, err := store.ListSharingsByLocation(ctx, location)
 		if err != nil {
 			t.Fatal(err)
 		} else if len(dirToID) != len(dirPaths) {
@@ -54,7 +55,7 @@ func TestFileStore(t *testing.T) {
 			if _, ok := dirToID[sharingDir]; !ok {
 				t.Fatalf("sharing(%s) not found", sharingDir)
 			}
-			mustTrue, err := store.IsSharing(ctx, adminId, sharingDir)
+			mustTrue, err := store.IsSharing(ctx, sharingDir)
 			if err != nil {
 				t.Fatal(err)
 			} else if !mustTrue {
@@ -85,7 +86,7 @@ func TestFileStore(t *testing.T) {
 		}
 
 		// list sharings
-		dirToIDAfterDel, err := store.ListUserSharings(ctx, adminId)
+		dirToIDAfterDel, err := store.ListSharingsByLocation(ctx, location)
 		if err != nil {
 			t.Fatal(err)
 		} else if len(dirToIDAfterDel) != 0 {
@@ -96,7 +97,7 @@ func TestFileStore(t *testing.T) {
 			if _, ok := dirToIDAfterDel[dirPath]; ok {
 				t.Fatalf("sharing(%s) should not exist", dirPath)
 			}
-			shared, err := store.IsSharing(ctx, adminId, dirPath)
+			shared, err := store.IsSharing(ctx, dirPath)
 			if err != nil {
 				t.Fatal(err)
 			} else if shared {
@@ -217,7 +218,7 @@ func TestFileStore(t *testing.T) {
 		newPaths := []string{}
 		for itemPath, info := range pathInfos {
 			newItemPath := strings.ReplaceAll(itemPath, "origin", "new")
-			err = store.MoveFileInfos(ctx, adminId, itemPath, newItemPath, info.IsDir)
+			err = store.MoveFileInfo(ctx, adminId, itemPath, newItemPath, info.IsDir)
 			if err != nil {
 				t.Fatal(err)
 			}

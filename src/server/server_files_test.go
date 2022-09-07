@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"path"
 	"path/filepath"
 	"sync"
 	"testing"
@@ -72,6 +73,16 @@ func TestFileHandlers(t *testing.T) {
 	}
 	token := client.GetCookie(resp.Cookies(), q.TokenCookie)
 	adminFilesClient := client.NewFilesClient(addr, token)
+
+	userUsersCl := client.NewUsersClient(addr)
+	resp, _, errs = userUsersCl.Login("demo", "Quicksh@re")
+	if len(errs) > 0 {
+		t.Fatal(errs)
+	} else if resp.StatusCode != 200 {
+		t.Fatal(resp.StatusCode)
+	}
+	userUsersToken := client.GetCookie(resp.Cookies(), q.TokenCookie)
+	userFilesCl := client.NewFilesClient(addr, userUsersToken)
 
 	var err error
 	// TODO: remove all files under home folder before testing
@@ -406,16 +417,6 @@ func TestFileHandlers(t *testing.T) {
 			}
 		}
 
-		userUsersCl := client.NewUsersClient(addr)
-		resp, _, errs := userUsersCl.Login("demo", "Quicksh@re")
-		if len(errs) > 0 {
-			t.Fatal(errs)
-		} else if resp.StatusCode != 200 {
-			t.Fatal(resp.StatusCode)
-		}
-		userUsersToken := client.GetCookie(resp.Cookies(), q.TokenCookie)
-		userFilesCl := client.NewFilesClient(addr, userUsersToken)
-
 		for i := 0; i < 2; i++ {
 			// add sharings
 			sharedPaths := map[string]bool{}
@@ -471,7 +472,6 @@ func TestFileHandlers(t *testing.T) {
 				}
 			}
 
-			fmt.Println("\n\n\n", shRes.IDs)
 			// check isSharing
 			for dirPath := range sharedPaths {
 				res, _, errs := userFilesCl.IsSharing(dirPath)
@@ -850,6 +850,54 @@ func TestFileHandlers(t *testing.T) {
 				t.Fatalf("%s not found", metadata.Name)
 			} else if int64(len(content)) != metadata.Size {
 				t.Fatalf("size not match %d %d \n", len(content), metadata.Size)
+			}
+		}
+	})
+
+	t.Run("test sharing for users: AddSharing(admin)-IsSharing(demo)-ListSharing(demo)", func(t *testing.T) {
+		files := map[string]string{
+			"demo/files/share_for/f1.md": "111",
+			"demo/files/share_for/f2.md": "22222",
+		}
+
+		for filePath, content := range files {
+			// uploaded by user
+			assertUploadOK(t, filePath, content, addr, userUsersToken)
+
+			// shared by admin
+			fileDir := path.Dir(filePath)
+			res, _, errs := adminFilesClient.AddSharing(fileDir)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if res.StatusCode != 200 {
+				t.Fatal(res.StatusCode)
+			}
+
+			res, _, errs = userFilesCl.IsSharing(fileDir)
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			} else if res.StatusCode != 200 { // should still be in sharing
+				t.Fatal(res.StatusCode)
+			}
+
+			err = fs.Sync()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			_, lResp, errs := userFilesCl.ListSharings()
+			if len(errs) > 0 {
+				t.Fatal(errs)
+			}
+			found := false
+			for _, gotPath := range lResp.SharingDirs {
+				if fileDir == gotPath {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Fatalf("%s not found", filePath)
 			}
 		}
 	})
