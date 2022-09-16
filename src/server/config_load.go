@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,9 +10,7 @@ import (
 	"strings"
 
 	"github.com/ihexxa/gocfg"
-
-	"github.com/ihexxa/quickshare/src/db/sitestore"
-	"github.com/ihexxa/quickshare/src/kvstore/boltdbpvd"
+	"github.com/ihexxa/quickshare/src/db/rdb/sqlite"
 )
 
 type Args struct {
@@ -62,20 +61,25 @@ func LoadCfg(ctx context.Context, args *Args) (*gocfg.Cfg, error) {
 }
 
 func mergeDbConfig(ctx context.Context, cfg *gocfg.Cfg, dbPath string) (*gocfg.Cfg, error) {
-	kv := boltdbpvd.New(dbPath, 1024)
-	defer kv.Close()
-
-	siteStore, err := sitestore.NewSiteStore(kv)
-	if err != nil {
-		return nil, fmt.Errorf("fail to new site config store: %s", err)
+	if dbPath == "" {
+		return cfg, nil
 	}
 
-	clientCfg, err := siteStore.GetCfg(ctx)
+	sqliteDB, err := sqlite.NewSQLite(dbPath)
 	if err != nil {
-		if errors.Is(err, sitestore.ErrNotFound) {
+		return nil, fmt.Errorf("failed to init sqlite db(%s): %w", dbPath, err)
+	}
+	dbQuickshare, err := sqlite.NewSQLiteStore(sqliteDB)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create quickshare db(%s): %w", dbPath, err)
+	}
+
+	clientCfg, err := dbQuickshare.GetCfg(ctx)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
 			return cfg, nil
 		}
-		return nil, err
+		return nil, fmt.Errorf("get db config error(%s): %w", dbPath, err)
 	}
 
 	clientCfgBytes, err := json.Marshal(clientCfg)

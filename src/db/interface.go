@@ -30,6 +30,7 @@ type IDBQuickshare interface {
 	InitUserTable(ctx context.Context, rootName, rootPwd string) error
 	InitFileTables(ctx context.Context) error
 	InitConfigTable(ctx context.Context, cfg *SiteConfig) error
+	Close() error
 	IDBLockable
 	IUserDB
 	IFileDB

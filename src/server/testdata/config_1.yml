@@ -48,5 +48,5 @@ workers:
 #       align: "1"
 #       bgColor: "1"
 db:
-  dbPath: "testdata/test_quickshare.db"
+  dbPath: "testdata/quickshare.sqlite"
 

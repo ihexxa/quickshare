@@ -37,6 +37,10 @@ func NewSQLiteStore(db db.IDB) (*SQLiteStore, error) {
 	}, nil
 }
 
+func (st *SQLiteStore) Close() error {
+	return st.db.Close()
+}
+
 func (st *SQLiteStore) Lock() {
 	st.mtx.Lock()
 }

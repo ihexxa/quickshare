@@ -571,13 +571,13 @@ type ListRolesResp struct {
 }
 
 func (h *MultiUsersSvc) ListRoles(c *gin.Context) {
-	roles, err := h.deps.Users().ListRoles()
-	if err != nil {
-		c.JSON(q.ErrResp(c, 500, err))
-		return
-	}
-
-	c.JSON(200, &ListRolesResp{Roles: roles})
+	// TODO: currently roles are hardcoded
+	c.JSON(200, &ListRolesResp{
+		Roles: map[string]bool{
+			db.AdminRole:   true,
+			db.UserRole:    true,
+			db.VisitorRole: true,
+		}})
 }
 
 func (h *MultiUsersSvc) getUserInfo(c *gin.Context) (map[string]string, error) {
