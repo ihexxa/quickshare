@@ -170,6 +170,18 @@ func (h *MultiUsersSvc) Init(ctx context.Context, adminName string) (string, err
 			return "", fmt.Errorf("predefined user is invalid: %s", err)
 		}
 		for _, userCfg := range userCfgs {
+			_, err := h.deps.Users().GetUserByName(ctx, userCfg.Name)
+			if err != nil {
+				if errors.Is(err, db.ErrUserNotFound) {
+					// no op, need initing
+				} else {
+					return "", err
+				}
+			} else {
+				h.deps.Log().Warn("warning: users exists, skip initing(%s)", userCfg.Name)
+				continue
+			}
+
 			// TODO: following operations must be atomic
 			// TODO: check if the folders already exists
 			fsRootFolder := q.FsRootPath(userCfg.Name, "/")
