@@ -12,17 +12,6 @@ import (
 	"github.com/ihexxa/quickshare/src/db"
 )
 
-const (
-	InitNs       = "Init"
-	InitTimeKey  = "initTime"
-	SchemaVerKey = "SchemaVersion"
-	SchemaV1     = "v1"
-)
-
-var (
-	maxHashingTime = 10
-)
-
 func (st *SQLiteStore) getFileInfo(ctx context.Context, itemPath string) (*db.FileInfo, error) {
 	var infoStr string
 	fInfo := &db.FileInfo{}

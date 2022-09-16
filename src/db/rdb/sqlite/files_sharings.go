@@ -154,7 +154,7 @@ func (st *SQLiteStore) ListSharingsByLocation(ctx context.Context, location stri
 		ctx,
 		`select path, share_id
 		from t_file_info
-		where location=? and share_id<>''`,
+		where share_id<>'' and location=?`,
 		location,
 	)
 	if err != nil {

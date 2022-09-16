@@ -137,8 +137,8 @@ func (st *SQLiteStore) getUploadInfo(ctx context.Context, userId uint64, filePat
 		ctx,
 		`select size, uploaded
 		from t_file_uploading
-		where user=? and real_path=?`,
-		userId, filePath,
+		where real_path=? and user=?`,
+		filePath, userId,
 	).Scan(&size, &uploaded)
 	if err != nil {
 		return "", 0, 0, err

@@ -76,7 +76,7 @@ func (st *SQLiteStore) InitUserTable(ctx context.Context, rootName, rootPwd stri
 		ctx,
 		`create table if not exists t_user (
 			id bigint not null,
-			name varchar not null,
+			name varchar not null unique,
 			pwd varchar not null,
 			role integer not null,
 			used_space bigint not null,
@@ -84,6 +84,14 @@ func (st *SQLiteStore) InitUserTable(ctx context.Context, rootName, rootPwd stri
 			preference varchar not null,
 			primary key(id)
 		)`,
+	)
+	if err != nil {
+		return err
+	}
+
+	_, err = st.db.ExecContext(
+		ctx,
+		`create index i_user_name on t_user (name)`,
 	)
 	if err != nil {
 		return err
@@ -145,14 +153,38 @@ func (st *SQLiteStore) InitFileTables(ctx context.Context) error {
 
 	_, err = st.db.ExecContext(
 		ctx,
+		`create index t_file_share on t_file_info (share_id, location)`,
+	)
+	if err != nil {
+		return err
+	}
+
+	_, err = st.db.ExecContext(
+		ctx,
 		`create table if not exists t_file_uploading (
 			real_path varchar not null,
-			tmp_path varchar not null,
+			tmp_path varchar not null unique,
 			user bigint not null,
 			size bigint not null,
 			uploaded bigint not null,
 			primary key(real_path)
 		)`,
+	)
+	if err != nil {
+		return err
+	}
+
+	_, err = st.db.ExecContext(
+		ctx,
+		`create index t_file_uploading_path on t_file_uploading (real_path, user)`,
+	)
+	if err != nil {
+		return err
+	}
+
+	_, err = st.db.ExecContext(
+		ctx,
+		`create index t_file_uploading_user on t_file_uploading (user)`,
 	)
 	return err
 }
