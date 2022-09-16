@@ -95,7 +95,7 @@ func (st *SQLiteStore) InitUserTable(ctx context.Context, rootName, rootPwd stri
 
 	_, err = st.db.ExecContext(
 		ctx,
-		`create index i_user_name on t_user (name)`,
+		`create index if not exists i_user_name on t_user (name)`,
 	)
 	if err != nil {
 		return err
@@ -157,7 +157,7 @@ func (st *SQLiteStore) InitFileTables(ctx context.Context) error {
 
 	_, err = st.db.ExecContext(
 		ctx,
-		`create index t_file_share on t_file_info (share_id, location)`,
+		`create index if not exists t_file_share on t_file_info (share_id, location)`,
 	)
 	if err != nil {
 		return err
@@ -180,7 +180,7 @@ func (st *SQLiteStore) InitFileTables(ctx context.Context) error {
 
 	_, err = st.db.ExecContext(
 		ctx,
-		`create index t_file_uploading_path on t_file_uploading (real_path, user)`,
+		`create index if not exists t_file_uploading_path on t_file_uploading (real_path, user)`,
 	)
 	if err != nil {
 		return err
@@ -188,7 +188,7 @@ func (st *SQLiteStore) InitFileTables(ctx context.Context) error {
 
 	_, err = st.db.ExecContext(
 		ctx,
-		`create index t_file_uploading_user on t_file_uploading (user)`,
+		`create index if not exists t_file_uploading_user on t_file_uploading (user)`,
 	)
 	return err
 }

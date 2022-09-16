@@ -49,4 +49,4 @@ site:
       position: "center"
       align: "fixed"
 db:
-  dbPath: "tmp/quickshare.sqlite"
+  dbPath: "quickshare.sqlite"

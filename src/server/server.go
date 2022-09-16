@@ -179,7 +179,17 @@ func initDB(cfg gocfg.ICfg, filesystem fs.ISimpleFS) (db.IDBQuickshare, string, 
 		return nil, "", fmt.Errorf("failed to create path for db: %w", err)
 	}
 
-	sqliteDB, err := sqlite.NewSQLite(dbPath)
+	inited := true
+	_, err = filesystem.Stat(dbPath)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			inited = false
+		} else {
+			return nil, "", fmt.Errorf("failed to stat db: %w", err)
+		}
+	}
+
+	sqliteDB, err := sqlite.NewSQLite(path.Join(filesystem.Root(), dbPath))
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to create path for db: %w", err)
 	}
@@ -191,7 +201,7 @@ func initDB(cfg gocfg.ICfg, filesystem fs.ISimpleFS) (db.IDBQuickshare, string, 
 	var ok bool
 	var adminName string
 	var pwdHash []byte
-	if cfg.BoolOr("Users.EnableAuth", true) {
+	if !inited && cfg.BoolOr("Users.EnableAuth", true) {
 		adminName, ok = cfg.String("ENV.DEFAULTADMIN")
 		if !ok || adminName == "" {
 			fmt.Println("Please input admin name: ")
@@ -213,13 +223,8 @@ func initDB(cfg gocfg.ICfg, filesystem fs.ISimpleFS) (db.IDBQuickshare, string, 
 		}
 	}
 
-	err = dbQuickshare.InitUserTable(context.TODO(), adminName, string(pwdHash))
-	if err != nil {
-		return nil, "", fmt.Errorf("failed to init user table: %w", err)
-	}
-	err = dbQuickshare.InitConfigTable(
-		context.TODO(),
-		&db.SiteConfig{
+	if !inited {
+		siteCfg := &db.SiteConfig{
 			ClientCfg: &db.ClientConfig{
 				SiteName: cfg.StringOr("Site.ClientCfg.SiteName", "Quickshare"),
 				SiteDesc: cfg.StringOr("Site.ClientCfg.SiteDesc", "Quick and simple file sharing"),
@@ -231,15 +236,13 @@ func initDB(cfg gocfg.ICfg, filesystem fs.ISimpleFS) (db.IDBQuickshare, string, 
 					BgColor:  cfg.StringOr("Site.ClientCfg.Bg.BgColor", ""),
 				},
 			},
-		},
-	)
-	if err != nil {
-		return nil, "", fmt.Errorf("failed to init config table: %w", err)
+		}
+		err = dbQuickshare.Init(context.TODO(), adminName, string(pwdHash), siteCfg)
+		if err != nil {
+			return nil, "", fmt.Errorf("failed to init tables: %w %s", err, dbPath)
+		}
 	}
-	err = dbQuickshare.InitFileTables(context.TODO())
-	if err != nil {
-		return nil, "", fmt.Errorf("failed to init files tables: %w", err)
-	}
+
 	return dbQuickshare, adminName, nil
 }
 
