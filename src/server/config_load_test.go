@@ -25,7 +25,7 @@ func TestLoadCfg(t *testing.T) {
 		&Args{
 			Host:    "",
 			Port:    0,
-			DbPath:  "testdata/test_quickshare.db",
+			DbPath:  "testdata/quickshare.sqlite",
 			Configs: []string{},
 		},
 		// default config + db + config_1 (dbPath is from config_1)
@@ -39,7 +39,7 @@ func TestLoadCfg(t *testing.T) {
 		&Args{
 			Host:    "",
 			Port:    0,
-			DbPath:  "testdata/test_quickshare.db",
+			DbPath:  "testdata/quickshare.sqlite",
 			Configs: []string{"testdata/config_1.yml"},
 		},
 		// default config + db + config_1 + config_4
@@ -61,11 +61,11 @@ func TestLoadCfg(t *testing.T) {
 				"testdata/config_partial_db.yml",
 			},
 		},
-		// default config + db + config_1 + config_4 + config_partial_users.yml + config_partial_db.yml + args(db)
+		// // default config + db + config_1 + config_4 + config_partial_users.yml + config_partial_db.yml + args(db)
 		&Args{
 			Host:   "",
 			Port:   0,
-			DbPath: "testdata/test_quickshare.db",
+			DbPath: "testdata/quickshare.sqlite",
 			Configs: []string{
 				"testdata/config_1.yml",
 				"testdata/config_4.yml",
@@ -81,13 +81,13 @@ func TestLoadCfg(t *testing.T) {
 	cfgDBOnly.Site = &db.SiteConfig{
 		ClientCfg: &db.ClientConfig{
 			SiteName: "Quickshare",
-			SiteDesc: "quick and simple file sharing",
+			SiteDesc: "Quick and simple file sharing",
 			Bg: &db.BgConfig{
-				Url:      "/static/img/textured_paper.png",
+				Url:      "",
 				Repeat:   "repeat",
 				Position: "center",
 				Align:    "fixed",
-				BgColor:  "#ccc",
+				BgColor:  "",
 			},
 		},
 	}
@@ -145,18 +145,18 @@ func TestLoadCfg(t *testing.T) {
 		Site: &db.SiteConfig{
 			ClientCfg: &db.ClientConfig{
 				SiteName: "Quickshare",
-				SiteDesc: "quick and simple file sharing",
+				SiteDesc: "Quick and simple file sharing",
 				Bg: &db.BgConfig{
-					Url:      "/static/img/textured_paper.png",
+					Url:      "",
 					Repeat:   "repeat",
 					Position: "center",
 					Align:    "fixed",
-					BgColor:  "#ccc",
+					BgColor:  "",
 				},
 			},
 		},
 		Db: &DbConfig{
-			DbPath: "testdata/test_quickshare.db",
+			DbPath: "testdata/quickshare.sqlite",
 		},
 	}
 

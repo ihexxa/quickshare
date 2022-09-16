@@ -6,10 +6,7 @@ import (
 
 	"github.com/ihexxa/quickshare/src/cron"
 	"github.com/ihexxa/quickshare/src/cryptoutil"
-	// "github.com/ihexxa/quickshare/src/db/boltstore"
-	// "github.com/ihexxa/quickshare/src/db/fileinfostore"
 	"github.com/ihexxa/quickshare/src/db"
-	// "github.com/ihexxa/quickshare/src/db/sitestore"
 	"github.com/ihexxa/quickshare/src/fs"
 	"github.com/ihexxa/quickshare/src/idgen"
 	"github.com/ihexxa/quickshare/src/iolimiter"
@@ -27,13 +24,9 @@ type IUploader interface {
 }
 
 type Deps struct {
-	fs    fs.ISimpleFS
-	token cryptoutil.ITokenEncDec
-	kv    kvstore.IKVStore
-	// users     db.IUserDB
-	// fileInfos db.IFileDB
-	// siteStore db.IConfigDB
-	// boltStore *boltstore.BoltStore
+	fs        fs.ISimpleFS
+	token     cryptoutil.ITokenEncDec
+	kv        kvstore.IKVStore
 	id        idgen.IIDGen
 	logger    *zap.SugaredLogger
 	limiter   iolimiter.ILimiter
@@ -114,14 +107,6 @@ func (deps *Deps) Workers() worker.IWorkerPool {
 func (deps *Deps) SetWorkers(workers worker.IWorkerPool) {
 	deps.workers = workers
 }
-
-// func (deps *Deps) BoltStore() *boltstore.BoltStore {
-// 	return deps.boltStore
-// }
-
-// func (deps *Deps) SetBoltStore(boltStore *boltstore.BoltStore) {
-// 	deps.boltStore = boltStore
-// }
 
 func (deps *Deps) Cron() cron.ICron {
 	return deps.cron

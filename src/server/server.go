@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/sha1"
-	// "encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -25,11 +24,7 @@ import (
 
 	"github.com/ihexxa/quickshare/src/cryptoutil/jwt"
 	"github.com/ihexxa/quickshare/src/db"
-	// "github.com/ihexxa/quickshare/src/db/boltstore"
-	// "github.com/ihexxa/quickshare/src/db/fileinfostore"
 	"github.com/ihexxa/quickshare/src/db/rdb/sqlite"
-	// "github.com/ihexxa/quickshare/src/db/sitestore"
-	// "github.com/ihexxa/quickshare/src/db/userstore"
 	"github.com/ihexxa/quickshare/src/depidx"
 	"github.com/ihexxa/quickshare/src/fs"
 	"github.com/ihexxa/quickshare/src/fs/local"
@@ -39,7 +34,6 @@ import (
 	"github.com/ihexxa/quickshare/src/idgen/simpleidgen"
 	"github.com/ihexxa/quickshare/src/iolimiter"
 	"github.com/ihexxa/quickshare/src/kvstore"
-	// "github.com/ihexxa/quickshare/src/kvstore/boltdbpvd"
 	"github.com/ihexxa/quickshare/src/search/fileindex"
 	"github.com/ihexxa/quickshare/src/worker/localworker"
 	qsstatic "github.com/ihexxa/quickshare/static"
@@ -124,24 +118,6 @@ func initDeps(cfg gocfg.ICfg) (*depidx.Deps, string) {
 	filesystem := local.NewLocalFS(rootPath, 0660, opensLimit, openTTL, readerTTL, ider)
 	jwtEncDec := jwt.NewJWTEncDec(secret)
 
-	// kv := boltdbpvd.New(dbPath, 1024)
-	// users, err := userstore.NewKVUserStore(kv)
-	// if err != nil {
-	// 	panic(fmt.Sprintf("failed to init user store: %s", err))
-	// }
-	// fileInfos, err := fileinfostore.NewFileInfoStore(kv)
-	// if err != nil {
-	// 	panic(fmt.Sprintf("failed to init file info store: %s", err))
-	// }
-	// siteStore, err := sitestore.NewSiteStore(kv)
-	// if err != nil {
-	// 	panic(fmt.Sprintf("failed to init site config store: %s", err))
-	// }
-	// boltDB, err := boltstore.NewBoltStore(kv.Bolt())
-	// if err != nil {
-	// 	panic(fmt.Sprintf("failed to init bolt store: %s", err))
-	// }
-
 	quickshareDb, adminName, err := initDB(cfg, filesystem)
 	if err != nil {
 		logger.Errorf("failed to init DB: %s", err)
@@ -156,11 +132,6 @@ func initDeps(cfg gocfg.ICfg) (*depidx.Deps, string) {
 	deps.SetDB(quickshareDb)
 	deps.SetFS(filesystem)
 	deps.SetToken(jwtEncDec)
-	// deps.SetKV(kv)
-	// deps.SetUsers(users)
-	// deps.SetFileInfos(fileInfos)
-	// deps.SetSiteStore(siteStore)
-	// deps.SetBoltStore(boltDB)
 	deps.SetID(ider)
 	deps.SetLog(logger)
 	deps.SetLimiter(limiter)
@@ -174,7 +145,6 @@ func initDeps(cfg gocfg.ICfg) (*depidx.Deps, string) {
 	deps.SetWorkers(workers)
 
 	searchResultLimit := cfg.GrabInt("Server.SearchResultLimit")
-	// initFileIndex := cfg.GrabBool("Server.InitFileIndex")
 	fileIndex := fileindex.NewFileTreeIndex(filesystem, "/", searchResultLimit)
 	indexInfo, err := filesystem.Stat(fileIndexPath)
 	indexInited := false
@@ -293,7 +263,7 @@ func initHandlers(router *gin.Engine, adminName string, cfg gocfg.ICfg, deps *de
 		return nil, fmt.Errorf("new setting service error: %w", err)
 	}
 
-	// middleware
+	// middlewares
 	router.Use(userHdrs.AuthN())
 	router.Use(userHdrs.APIAccessControl())
 
@@ -311,7 +281,7 @@ func initHandlers(router *gin.Engine, adminName string, cfg gocfg.ICfg, deps *de
 		router.Use(static.Serve("/", esFS))
 	}
 
-	// handler
+	// handlers
 	v1 := router.Group("/v1")
 
 	usersAPI := v1.Group("/users")
@@ -328,10 +298,10 @@ func initHandlers(router *gin.Engine, adminName string, cfg gocfg.ICfg, deps *de
 	usersAPI.PATCH("/preferences", userHdrs.SetPreferences)
 	usersAPI.PUT("/used-space", userHdrs.ResetUsedSpace)
 
-	// rolesAPI := v1.Group("/roles")
+	rolesAPI := v1.Group("/roles")
 	// rolesAPI.POST("/", userHdrs.AddRole)
 	// rolesAPI.DELETE("/", userHdrs.DelRole)
-	// rolesAPI.GET("/list", userHdrs.ListRoles)
+	rolesAPI.GET("/list", userHdrs.ListRoles)
 
 	captchaAPI := v1.Group("/captchas")
 	captchaAPI.GET("/", userHdrs.GetCaptchaID)
@@ -433,9 +403,21 @@ func (s *Server) Shutdown() error {
 		s.deps.Log().Errorf("failed to persist file index: %s", err)
 	}
 	s.deps.Workers().Stop()
-	s.deps.FS().Close()
+	err = s.deps.FS().Close()
+	if err != nil {
+		s.deps.Log().Errorf("failed to close file system: %s", err)
+	}
+	err = s.deps.DB().Close()
+	if err != nil {
+		s.deps.Log().Errorf("failed to close database: %s", err)
+	}
+	err = s.server.Shutdown(context.Background())
+	if err != nil {
+		s.deps.Log().Errorf("failed to shutdown server: %s", err)
+	}
+
 	s.deps.Log().Sync()
-	return s.server.Shutdown(context.Background())
+	return nil
 }
 
 func (s *Server) depsFS() fs.ISimpleFS {
