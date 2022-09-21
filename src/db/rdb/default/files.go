@@ -12,13 +12,13 @@ import (
 	"github.com/ihexxa/quickshare/src/db"
 )
 
-func (st *SQLiteStore) getFileInfo(ctx context.Context, itemPath string) (*db.FileInfo, error) {
+func (st *SQLiteStore) getFileInfo(ctx context.Context, tx *sql.Tx, itemPath string) (*db.FileInfo, error) {
 	var infoStr string
 	fInfo := &db.FileInfo{}
 	var isDir bool
 	var size int64
 	var shareId string
-	err := st.db.QueryRowContext(
+	err := tx.QueryRowContext(
 		ctx,
 		`select is_dir, size, share_id, info
 		from t_file_info
@@ -49,15 +49,21 @@ func (st *SQLiteStore) getFileInfo(ctx context.Context, itemPath string) (*db.Fi
 }
 
 func (st *SQLiteStore) GetFileInfo(ctx context.Context, itemPath string) (*db.FileInfo, error) {
-	st.RLock()
-	defer st.RUnlock()
+	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
 
-	return st.getFileInfo(ctx, itemPath)
+	return st.getFileInfo(ctx, tx, itemPath)
 }
 
 func (st *SQLiteStore) ListFileInfos(ctx context.Context, itemPaths []string) (map[string]*db.FileInfo, error) {
-	st.RLock()
-	defer st.RUnlock()
+	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
 
 	// TODO: add pagination
 	placeholders := []string{}
@@ -66,7 +72,7 @@ func (st *SQLiteStore) ListFileInfos(ctx context.Context, itemPaths []string) (m
 		placeholders = append(placeholders, "?")
 		values = append(values, itemPaths[i])
 	}
-	rows, err := st.db.QueryContext(
+	rows, err := tx.QueryContext(
 		ctx,
 		fmt.Sprintf(
 			`select path, is_dir, size, share_id, info
@@ -88,7 +94,6 @@ func (st *SQLiteStore) ListFileInfos(ctx context.Context, itemPaths []string) (m
 	fInfos := map[string]*db.FileInfo{}
 	for rows.Next() {
 		fInfo := &db.FileInfo{}
-
 		err = rows.Scan(&itemPath, &isDir, &size, &shareId, &fInfoStr)
 		if err != nil {
 			return nil, err
@@ -111,7 +116,7 @@ func (st *SQLiteStore) ListFileInfos(ctx context.Context, itemPaths []string) (m
 	return fInfos, nil
 }
 
-func (st *SQLiteStore) addFileInfo(ctx context.Context, userId uint64, itemPath string, info *db.FileInfo) error {
+func (st *SQLiteStore) addFileInfo(ctx context.Context, tx *sql.Tx, userId uint64, itemPath string, info *db.FileInfo) error {
 	infoStr, err := json.Marshal(info)
 	if err != nil {
 		return err
@@ -123,7 +128,7 @@ func (st *SQLiteStore) addFileInfo(ctx context.Context, userId uint64, itemPath 
 	}
 
 	dirPath, itemName := path.Split(itemPath)
-	_, err = st.db.ExecContext(
+	_, err = tx.ExecContext(
 		ctx,
 		`insert into t_file_info (
 			path, user, location, parent, name,
@@ -140,20 +145,27 @@ func (st *SQLiteStore) addFileInfo(ctx context.Context, userId uint64, itemPath 
 }
 
 func (st *SQLiteStore) AddFileInfo(ctx context.Context, userId uint64, itemPath string, info *db.FileInfo) error {
-	st.Lock()
-	defer st.Unlock()
+	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
 
-	err := st.addFileInfo(ctx, userId, itemPath, info)
+	err = st.addFileInfo(ctx, tx, userId, itemPath, info)
+	if err != nil {
+		return err
+	}
+	// increase used space
+	err = st.setUsed(ctx, tx, userId, true, info.Size)
 	if err != nil {
 		return err
 	}
 
-	// increase used space
-	return st.setUsed(ctx, userId, true, info.Size)
+	return tx.Commit()
 }
 
-func (st *SQLiteStore) delFileInfo(ctx context.Context, itemPath string) error {
-	_, err := st.db.ExecContext(
+func (st *SQLiteStore) delFileInfo(ctx context.Context, tx *sql.Tx, itemPath string) error {
+	_, err := tx.ExecContext(
 		ctx,
 		`delete from t_file_info
 		where path=?
@@ -164,10 +176,13 @@ func (st *SQLiteStore) delFileInfo(ctx context.Context, itemPath string) error {
 }
 
 func (st *SQLiteStore) SetSha1(ctx context.Context, itemPath, sign string) error {
-	st.Lock()
-	defer st.Unlock()
+	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
 
-	info, err := st.getFileInfo(ctx, itemPath)
+	info, err := st.getFileInfo(ctx, tx, itemPath)
 	if err != nil {
 		return err
 	}
@@ -178,7 +193,7 @@ func (st *SQLiteStore) SetSha1(ctx context.Context, itemPath, sign string) error
 		return err
 	}
 
-	_, err = st.db.ExecContext(
+	_, err = tx.ExecContext(
 		ctx,
 		`update t_file_info
 		set info=?
@@ -186,15 +201,21 @@ func (st *SQLiteStore) SetSha1(ctx context.Context, itemPath, sign string) error
 		infoStr,
 		itemPath,
 	)
-	return err
+	if err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 func (st *SQLiteStore) DelFileInfo(ctx context.Context, userID uint64, itemPath string) error {
-	st.Lock()
-	defer st.Unlock()
+	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
 
 	// get all children and size
-	rows, err := st.db.QueryContext(
+	rows, err := tx.QueryContext(
 		ctx,
 		`select path, size
 		from t_file_info
@@ -224,13 +245,13 @@ func (st *SQLiteStore) DelFileInfo(ctx context.Context, userID uint64, itemPath 
 	}
 
 	// decrease used space
-	err = st.setUsed(ctx, userID, false, decrSize)
+	err = st.setUsed(ctx, tx, userID, false, decrSize)
 	if err != nil {
 		return err
 	}
 
 	// delete file info entries
-	_, err = st.db.ExecContext(
+	_, err = tx.ExecContext(
 		ctx,
 		fmt.Sprintf(
 			`delete from t_file_info
@@ -239,14 +260,20 @@ func (st *SQLiteStore) DelFileInfo(ctx context.Context, userID uint64, itemPath 
 		),
 		values...,
 	)
-	return err
+	if err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 func (st *SQLiteStore) MoveFileInfo(ctx context.Context, userId uint64, oldPath, newPath string, isDir bool) error {
-	st.Lock()
-	defer st.Unlock()
+	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
 
-	info, err := st.getFileInfo(ctx, oldPath)
+	info, err := st.getFileInfo(ctx, tx, oldPath)
 	if err != nil {
 		if errors.Is(err, db.ErrFileInfoNotFound) {
 			// info for file does not exist so no need to move it
@@ -256,11 +283,18 @@ func (st *SQLiteStore) MoveFileInfo(ctx context.Context, userId uint64, oldPath,
 		}
 		return err
 	}
-	err = st.delFileInfo(ctx, oldPath)
+
+	err = st.delFileInfo(ctx, tx, oldPath)
 	if err != nil {
 		return err
 	}
-	return st.addFileInfo(ctx, userId, newPath, info)
+
+	err = st.addFileInfo(ctx, tx, userId, newPath, info)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 func getLocation(itemPath string) (string, error) {

@@ -30,11 +30,14 @@ func (st *SQLiteStore) generateShareID(payload string) (string, error) {
 }
 
 func (st *SQLiteStore) IsSharing(ctx context.Context, dirPath string) (bool, error) {
-	st.RLock()
-	defer st.RUnlock()
+	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return false, err
+	}
+	defer tx.Rollback()
 
 	var shareId string
-	err := st.db.QueryRowContext(
+	err = tx.QueryRowContext(
 		ctx,
 		`select share_id
 		from t_file_info
@@ -54,11 +57,14 @@ func (st *SQLiteStore) IsSharing(ctx context.Context, dirPath string) (bool, err
 }
 
 func (st *SQLiteStore) GetSharingDir(ctx context.Context, hashID string) (string, error) {
-	st.RLock()
-	defer st.RUnlock()
+	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return "", err
+	}
+	defer tx.Rollback()
 
 	var sharedPath string
-	err := st.db.QueryRowContext(
+	err = tx.QueryRowContext(
 		ctx,
 		`select path
 		from t_file_info
@@ -79,8 +85,11 @@ func (st *SQLiteStore) GetSharingDir(ctx context.Context, hashID string) (string
 }
 
 func (st *SQLiteStore) AddSharing(ctx context.Context, userId uint64, dirPath string) error {
-	st.Lock()
-	defer st.Unlock()
+	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
 
 	shareID, err := st.generateShareID(dirPath)
 	if err != nil {
@@ -92,7 +101,7 @@ func (st *SQLiteStore) AddSharing(ctx context.Context, userId uint64, dirPath st
 		return err
 	}
 
-	_, err = st.getFileInfo(ctx, dirPath)
+	_, err = st.getFileInfo(ctx, tx, dirPath)
 	if err != nil && !errors.Is(err, db.ErrFileInfoNotFound) {
 		return err
 	}
@@ -106,7 +115,7 @@ func (st *SQLiteStore) AddSharing(ctx context.Context, userId uint64, dirPath st
 			return err
 		}
 
-		_, err = st.db.ExecContext(
+		_, err = tx.ExecContext(
 			ctx,
 			`insert into t_file_info (
 				path, user, location, parent, name,
@@ -119,38 +128,53 @@ func (st *SQLiteStore) AddSharing(ctx context.Context, userId uint64, dirPath st
 			dirPath, userId, location, parentPath, name,
 			true, 0, shareID, infoStr,
 		)
-		return err
+		if err != nil {
+			return err
+		}
+	} else {
+		_, err = tx.ExecContext(
+			ctx,
+			`update t_file_info
+			set share_id=?
+			where path=?`,
+			shareID, dirPath,
+		)
+		if err != nil {
+			return err
+		}
 	}
 
-	_, err = st.db.ExecContext(
-		ctx,
-		`update t_file_info
-		set share_id=?
-		where path=?`,
-		shareID, dirPath,
-	)
-	return err
+	return tx.Commit()
 }
 
 func (st *SQLiteStore) DelSharing(ctx context.Context, userId uint64, dirPath string) error {
-	st.Lock()
-	defer st.Unlock()
+	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
 
-	_, err := st.db.ExecContext(
+	_, err = tx.ExecContext(
 		ctx,
 		`update t_file_info
 		set share_id=''
 		where path=?`,
 		dirPath,
 	)
-	return err
+	if err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 func (st *SQLiteStore) ListSharingsByLocation(ctx context.Context, location string) (map[string]string, error) {
-	st.RLock()
-	defer st.RUnlock()
+	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
 
-	rows, err := st.db.QueryContext(
+	rows, err := tx.QueryContext(
 		ctx,
 		`select path, share_id
 		from t_file_info

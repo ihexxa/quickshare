@@ -2,14 +2,15 @@ package sqlite
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 
 	"github.com/ihexxa/quickshare/src/db"
 )
 
-func (st *SQLiteStore) getCfg(ctx context.Context) (*db.SiteConfig, error) {
+func (st *SQLiteStore) getCfg(ctx context.Context, tx *sql.Tx) (*db.SiteConfig, error) {
 	var configStr string
-	err := st.db.QueryRowContext(
+	err := tx.QueryRowContext(
 		ctx,
 		`select config
 		from t_config
@@ -31,7 +32,7 @@ func (st *SQLiteStore) getCfg(ctx context.Context) (*db.SiteConfig, error) {
 	return config, nil
 }
 
-func (st *SQLiteStore) setCfg(ctx context.Context, cfg *db.SiteConfig) error {
+func (st *SQLiteStore) setCfg(ctx context.Context, tx *sql.Tx, cfg *db.SiteConfig) error {
 	if err := db.CheckSiteCfg(cfg, false); err != nil {
 		return err
 	}
@@ -41,7 +42,7 @@ func (st *SQLiteStore) setCfg(ctx context.Context, cfg *db.SiteConfig) error {
 		return err
 	}
 
-	_, err = st.db.ExecContext(
+	_, err = tx.ExecContext(
 		ctx,
 		`update t_config
 		set config=?
@@ -52,21 +53,32 @@ func (st *SQLiteStore) setCfg(ctx context.Context, cfg *db.SiteConfig) error {
 }
 
 func (st *SQLiteStore) SetClientCfg(ctx context.Context, cfg *db.ClientConfig) error {
-	st.Lock()
-	defer st.Unlock()
+	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
 
-	siteCfg, err := st.getCfg(ctx)
+	siteCfg, err := st.getCfg(ctx, tx)
 	if err != nil {
 		return err
 	}
 	siteCfg.ClientCfg = cfg
 
-	return st.setCfg(ctx, siteCfg)
+	err = st.setCfg(ctx, tx, siteCfg)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 func (st *SQLiteStore) GetCfg(ctx context.Context) (*db.SiteConfig, error) {
-	st.RLock()
-	defer st.RUnlock()
+	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
 
-	return st.getCfg(ctx)
+	return st.getCfg(ctx, tx)
 }

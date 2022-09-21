@@ -8,8 +8,8 @@ import (
 	"github.com/ihexxa/quickshare/src/db"
 )
 
-func (st *SQLiteStore) addUploadInfoOnly(ctx context.Context, userId uint64, tmpPath, filePath string, fileSize int64) error {
-	_, err := st.db.ExecContext(
+func (st *SQLiteStore) addUploadInfoOnly(ctx context.Context, tx *sql.Tx, userId uint64, tmpPath, filePath string, fileSize int64) error {
+	_, err := tx.ExecContext(
 		ctx,
 		`insert into t_file_uploading (
 			real_path, tmp_path, user, size, uploaded
@@ -23,17 +23,20 @@ func (st *SQLiteStore) addUploadInfoOnly(ctx context.Context, userId uint64, tmp
 }
 
 func (st *SQLiteStore) AddUploadInfos(ctx context.Context, userId uint64, tmpPath, filePath string, info *db.FileInfo) error {
-	st.Lock()
-	defer st.Unlock()
+	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
 
-	userInfo, err := st.getUser(ctx, userId)
+	userInfo, err := st.getUser(ctx, tx, userId)
 	if err != nil {
 		return err
 	} else if userInfo.UsedSpace+info.Size > int64(userInfo.Quota.SpaceLimit) {
 		return db.ErrQuota
 	}
 
-	_, _, _, err = st.getUploadInfo(ctx, userId, filePath)
+	_, _, _, err = st.getUploadInfo(ctx, tx, userId, filePath)
 	if err == nil {
 		return db.ErrKeyExisting
 	} else if err != nil && !errors.Is(err, sql.ErrNoRows) {
@@ -41,43 +44,56 @@ func (st *SQLiteStore) AddUploadInfos(ctx context.Context, userId uint64, tmpPat
 	}
 
 	userInfo.UsedSpace += info.Size
-	err = st.setUser(ctx, userInfo)
+	err = st.setUser(ctx, tx, userInfo)
 	if err != nil {
 		return err
 	}
 
-	return st.addUploadInfoOnly(ctx, userId, tmpPath, filePath, info.Size)
+	err = st.addUploadInfoOnly(ctx, tx, userId, tmpPath, filePath, info.Size)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 func (st *SQLiteStore) DelUploadingInfos(ctx context.Context, userId uint64, realPath string) error {
-	st.Lock()
-	defer st.Unlock()
+	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
 
-	return st.delUploadingInfos(ctx, userId, realPath)
+	err = st.delUploadingInfos(ctx, tx, userId, realPath)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
-func (st *SQLiteStore) delUploadingInfos(ctx context.Context, userId uint64, realPath string) error {
-	_, size, _, err := st.getUploadInfo(ctx, userId, realPath)
+func (st *SQLiteStore) delUploadingInfos(ctx context.Context, tx *sql.Tx, userId uint64, realPath string) error {
+	_, size, _, err := st.getUploadInfo(ctx, tx, userId, realPath)
 	if err != nil {
 		// info may not exist
 		return err
 	}
 
-	err = st.delUploadInfoOnly(ctx, userId, realPath)
+	err = st.delUploadInfoOnly(ctx, tx, userId, realPath)
 	if err != nil {
 		return err
 	}
 
-	userInfo, err := st.getUser(ctx, userId)
+	userInfo, err := st.getUser(ctx, tx, userId)
 	if err != nil {
 		return err
 	}
 	userInfo.UsedSpace -= size
-	return st.setUser(ctx, userInfo)
+	return st.setUser(ctx, tx, userInfo)
 }
 
-func (st *SQLiteStore) delUploadInfoOnly(ctx context.Context, userId uint64, filePath string) error {
-	_, err := st.db.ExecContext(
+func (st *SQLiteStore) delUploadInfoOnly(ctx context.Context, tx *sql.Tx, userId uint64, filePath string) error {
+	_, err := tx.ExecContext(
 		ctx,
 		`delete from t_file_uploading
 		where real_path=? and user=?`,
@@ -87,28 +103,39 @@ func (st *SQLiteStore) delUploadInfoOnly(ctx context.Context, userId uint64, fil
 }
 
 func (st *SQLiteStore) MoveUploadingInfos(ctx context.Context, userId uint64, uploadPath, itemPath string) error {
-	st.Lock()
-	defer st.Unlock()
+	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
 
-	_, size, _, err := st.getUploadInfo(ctx, userId, itemPath)
+	_, size, _, err := st.getUploadInfo(ctx, tx, userId, itemPath)
 	if err != nil {
 		return err
 	}
-	err = st.delUploadInfoOnly(ctx, userId, itemPath)
+	err = st.delUploadInfoOnly(ctx, tx, userId, itemPath)
 	if err != nil {
 		return err
 	}
-	return st.addFileInfo(ctx, userId, itemPath, &db.FileInfo{
+	err = st.addFileInfo(ctx, tx, userId, itemPath, &db.FileInfo{
 		Size: size,
 	})
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 func (st *SQLiteStore) SetUploadInfo(ctx context.Context, userId uint64, filePath string, newUploaded int64) error {
-	st.Lock()
-	defer st.Unlock()
+	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
 
 	var size, uploaded int64
-	err := st.db.QueryRowContext(
+	err = tx.QueryRowContext(
 		ctx,
 		`select size, uploaded
 		from t_file_uploading
@@ -121,19 +148,24 @@ func (st *SQLiteStore) SetUploadInfo(ctx context.Context, userId uint64, filePat
 		return db.ErrGreaterThanSize
 	}
 
-	_, err = st.db.ExecContext(
+	_, err = tx.ExecContext(
 		ctx,
 		`update t_file_uploading
 		set uploaded=?
 		where real_path=? and user=?`,
 		newUploaded, filePath, userId,
 	)
-	return err
+	if err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
-func (st *SQLiteStore) getUploadInfo(ctx context.Context, userId uint64, filePath string) (string, int64, int64, error) {
+func (st *SQLiteStore) getUploadInfo(
+	ctx context.Context, tx *sql.Tx, userId uint64, filePath string,
+) (string, int64, int64, error) {
 	var size, uploaded int64
-	err := st.db.QueryRowContext(
+	err := tx.QueryRowContext(
 		ctx,
 		`select size, uploaded
 		from t_file_uploading
@@ -148,16 +180,23 @@ func (st *SQLiteStore) getUploadInfo(ctx context.Context, userId uint64, filePat
 }
 
 func (st *SQLiteStore) GetUploadInfo(ctx context.Context, userId uint64, filePath string) (string, int64, int64, error) {
-	st.RLock()
-	defer st.RUnlock()
-	return st.getUploadInfo(ctx, userId, filePath)
+	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return "", 0, 0, err
+	}
+	defer tx.Rollback()
+
+	return st.getUploadInfo(ctx, tx, userId, filePath)
 }
 
 func (st *SQLiteStore) ListUploadInfos(ctx context.Context, userId uint64) ([]*db.UploadInfo, error) {
-	st.RLock()
-	defer st.RUnlock()
+	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
 
-	rows, err := st.db.QueryContext(
+	rows, err := tx.QueryContext(
 		ctx,
 		`select real_path, size, uploaded
 		from t_file_uploading
