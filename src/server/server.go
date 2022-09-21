@@ -3,13 +3,11 @@ package server
 import (
 	"context"
 	"crypto/rand"
-	"crypto/sha1"
 	"errors"
 	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
-	"path"
 	"strconv"
 	"syscall"
 	"time"
@@ -17,25 +15,13 @@ import (
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/ihexxa/gocfg"
-	"github.com/natefinch/lumberjack"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
-	"golang.org/x/crypto/bcrypt"
 
-	"github.com/ihexxa/quickshare/src/cryptoutil/jwt"
-	"github.com/ihexxa/quickshare/src/db"
-	"github.com/ihexxa/quickshare/src/db/rdb/sqlite"
 	"github.com/ihexxa/quickshare/src/depidx"
 	"github.com/ihexxa/quickshare/src/fs"
-	"github.com/ihexxa/quickshare/src/fs/local"
 	"github.com/ihexxa/quickshare/src/handlers/fileshdr"
 	"github.com/ihexxa/quickshare/src/handlers/multiusers"
 	"github.com/ihexxa/quickshare/src/handlers/settings"
-	"github.com/ihexxa/quickshare/src/idgen/simpleidgen"
-	"github.com/ihexxa/quickshare/src/iolimiter"
 	"github.com/ihexxa/quickshare/src/kvstore"
-	"github.com/ihexxa/quickshare/src/search/fileindex"
-	"github.com/ihexxa/quickshare/src/worker/localworker"
 	qsstatic "github.com/ihexxa/quickshare/static"
 )
 
@@ -51,8 +37,9 @@ func NewServer(cfg gocfg.ICfg) (*Server, error) {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	deps, adminName := initDeps(cfg)
+	deps := initDeps(cfg)
 	router := gin.Default()
+	adminName := cfg.GrabString("ENV.DEFAULTADMIN")
 	router, err := initHandlers(router, adminName, cfg, deps)
 	if err != nil {
 		return nil, fmt.Errorf("init handlers error: %w", err)
@@ -82,176 +69,13 @@ func NewServer(cfg gocfg.ICfg) (*Server, error) {
 	}, nil
 }
 
-func mkRoot(rootPath string) {
-	info, err := os.Stat(rootPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			err = os.MkdirAll(rootPath, 0760)
-			if err != nil {
-				panic(fmt.Sprintf("mk root path error: %s", err))
-			}
-		} else {
-			panic(fmt.Sprintf("stat root Path error: %s", err))
-		}
-	} else if !info.IsDir() {
-		panic(fmt.Sprintf("can not create %s folder: there is a file with same name", rootPath))
-	}
-}
-
-func initDeps(cfg gocfg.ICfg) (*depidx.Deps, string) {
-	var err error
-	logger := initLogger(cfg)
-
-	secret, ok := cfg.String("ENV.TOKENSECRET")
-	if !ok {
-		secret = makeRandToken()
-		logger.Info("warning: TOKENSECRET is not set, will generate token")
-	}
-
-	rootPath := cfg.GrabString("Fs.Root")
-	mkRoot(rootPath)
-	opensLimit := cfg.GrabInt("Fs.OpensLimit")
-	openTTL := cfg.GrabInt("Fs.OpenTTL")
-	readerTTL := cfg.GrabInt("Server.WriteTimeout") / 1000 // millisecond -> second
-
-	ider := simpleidgen.New()
-	filesystem := local.NewLocalFS(rootPath, 0660, opensLimit, openTTL, readerTTL, ider)
-	jwtEncDec := jwt.NewJWTEncDec(secret)
-
-	quickshareDb, adminName, err := initDB(cfg, filesystem)
-	if err != nil {
-		logger.Errorf("failed to init DB: %s", err)
-		os.Exit(1)
-	}
-
-	limiterCap := cfg.IntOr("Users.LimiterCapacity", 10000)
-	limiterCyc := cfg.IntOr("Users.LimiterCyc", 1000)
-	limiter := iolimiter.NewIOLimiter(limiterCap, limiterCyc, quickshareDb)
-
-	deps := depidx.NewDeps(cfg)
-	deps.SetDB(quickshareDb)
-	deps.SetFS(filesystem)
-	deps.SetToken(jwtEncDec)
-	deps.SetID(ider)
-	deps.SetLog(logger)
-	deps.SetLimiter(limiter)
-
-	queueSize := cfg.GrabInt("Workers.QueueSize")
-	sleepCyc := cfg.GrabInt("Workers.SleepCyc")
-	workerCount := cfg.GrabInt("Workers.WorkerCount")
-
-	workers := localworker.NewWorkerPool(queueSize, sleepCyc, workerCount, logger)
-	workers.Start()
-	deps.SetWorkers(workers)
-
-	searchResultLimit := cfg.GrabInt("Server.SearchResultLimit")
-	fileIndex := fileindex.NewFileTreeIndex(filesystem, "/", searchResultLimit)
-	indexInfo, err := filesystem.Stat(fileIndexPath)
-	indexInited := false
-	if err != nil {
-		if !os.IsNotExist(err) {
-			logger.Warnf("failed to detect file index: %s", err)
-		} else {
-			logger.Warnf("no file index found")
-		}
-	} else if indexInfo.IsDir() {
-		logger.Warnf("file index is folder, not file: %s", fileIndexPath)
-	} else {
-		err = fileIndex.ReadFrom(fileIndexPath)
-		if err != nil {
-			logger.Infof("failed to load file index: %s", err)
-		} else {
-			indexInited = true
-		}
-	}
-	logger.Infof("file index inited(%t)", indexInited)
-	deps.SetFileIndex(fileIndex)
-
-	return deps, adminName
-}
-
-func initDB(cfg gocfg.ICfg, filesystem fs.ISimpleFS) (db.IDBQuickshare, string, error) {
-	dbPath := cfg.GrabString("Db.DbPath")
-	dbDir := path.Dir(dbPath)
-
-	err := filesystem.MkdirAll(dbDir)
-	if err != nil {
-		return nil, "", fmt.Errorf("failed to create path for db: %w", err)
-	}
-
-	inited := true
-	_, err = filesystem.Stat(dbPath)
-	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			inited = false
-		} else {
-			return nil, "", fmt.Errorf("failed to stat db: %w", err)
-		}
-	}
-
-	sqliteDB, err := sqlite.NewSQLite(path.Join(filesystem.Root(), dbPath))
-	if err != nil {
-		return nil, "", fmt.Errorf("failed to create path for db: %w", err)
-	}
-	dbQuickshare, err := sqlite.NewSQLiteStore(sqliteDB)
-	if err != nil {
-		return nil, "", fmt.Errorf("failed to create quickshare db: %w", err)
-	}
-
-	var ok bool
-	var adminName string
-	var pwdHash []byte
-	if !inited && cfg.BoolOr("Users.EnableAuth", true) {
-		adminName, ok = cfg.String("ENV.DEFAULTADMIN")
-		if !ok || adminName == "" {
-			fmt.Println("Please input admin name: ")
-			fmt.Scanf("%s", &adminName)
-		}
-
-		adminPwd, _ := cfg.String("ENV.DEFAULTADMINPWD")
-		if adminPwd == "" {
-			adminPwd, err = generatePwd()
-			if err != nil {
-				return nil, "", fmt.Errorf("generate password error: %w", err)
-			}
-			fmt.Printf("password is generated: %s, please update it immediately after login\n", adminPwd)
-		}
-
-		pwdHash, err = bcrypt.GenerateFromPassword([]byte(adminPwd), 10)
-		if err != nil {
-			return nil, "", fmt.Errorf("hashing password error: %w", err)
-		}
-	}
-
-	if !inited {
-		siteCfg := &db.SiteConfig{
-			ClientCfg: &db.ClientConfig{
-				SiteName: cfg.StringOr("Site.ClientCfg.SiteName", "Quickshare"),
-				SiteDesc: cfg.StringOr("Site.ClientCfg.SiteDesc", "Quick and simple file sharing"),
-				Bg: &db.BgConfig{
-					Url:      cfg.StringOr("Site.ClientCfg.Bg.Url", ""),
-					Repeat:   cfg.StringOr("Site.ClientCfg.Bg.Repeat", "repeat"),
-					Position: cfg.StringOr("Site.ClientCfg.Bg.Position", "center"),
-					Align:    cfg.StringOr("Site.ClientCfg.Bg.Align", "fixed"),
-					BgColor:  cfg.StringOr("Site.ClientCfg.Bg.BgColor", ""),
-				},
-			},
-		}
-		err = dbQuickshare.Init(context.TODO(), adminName, string(pwdHash), siteCfg)
-		if err != nil {
-			return nil, "", fmt.Errorf("failed to init tables: %w %s", err, dbPath)
-		}
-	}
-
-	return dbQuickshare, adminName, nil
-}
-
 func initHandlers(router *gin.Engine, adminName string, cfg gocfg.ICfg, deps *depidx.Deps) (*gin.Engine, error) {
 	// handlers
 	userHdrs, err := multiusers.NewMultiUsersSvc(cfg, deps)
 	if err != nil {
 		return nil, fmt.Errorf("new users svc error: %w", err)
 	}
+
 	_, err = userHdrs.Init(context.TODO(), adminName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to init user handlers: %w", err)
@@ -277,11 +101,11 @@ func initHandlers(router *gin.Engine, adminName string, cfg gocfg.ICfg, deps *de
 	if cfg.BoolOr("Server.Debug", false) {
 		router.Use(static.Serve("/", static.LocalFile(publicPath, false)))
 	} else {
-		esFS, err := qsstatic.NewEmbedStaticFS()
+		embedFs, err := qsstatic.NewEmbedStaticFS()
 		if err != nil {
 			return nil, err
 		}
-		router.Use(static.Serve("/", esFS))
+		router.Use(static.Serve("/", embedFs))
 	}
 
 	// handlers
@@ -350,25 +174,6 @@ func initHandlers(router *gin.Engine, adminName string, cfg gocfg.ICfg, deps *de
 	return router, nil
 }
 
-func initLogger(cfg gocfg.ICfg) *zap.SugaredLogger {
-	fileWriter := zapcore.AddSync(&lumberjack.Logger{
-		Filename:   path.Join(cfg.GrabString("Fs.Root"), "quickshare.log"),
-		MaxSize:    cfg.IntOr("Log.MaxSize", 50), // megabytes
-		MaxBackups: cfg.IntOr("Log.MaxBackups", 2),
-		MaxAge:     cfg.IntOr("Log.MaxAge", 31), // days
-	})
-	stdoutWriter := zapcore.AddSync(os.Stdout)
-
-	multiWriter := zapcore.NewMultiWriteSyncer(fileWriter, stdoutWriter)
-	gin.DefaultWriter = multiWriter
-	core := zapcore.NewCore(
-		zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
-		multiWriter,
-		zap.InfoLevel,
-	)
-	return zap.New(core).Sugar()
-}
-
 func (s *Server) Start() error {
 	s.signalChan = make(chan os.Signal, 4)
 	signal.Notify(s.signalChan, syscall.SIGINT, syscall.SIGTERM)
@@ -429,24 +234,4 @@ func (s *Server) depsFS() fs.ISimpleFS {
 
 func (s *Server) depsKVStore() kvstore.IKVStore {
 	return s.deps.KV()
-}
-
-func makeRandToken() string {
-	b := make([]byte, 32)
-	_, err := rand.Read(b)
-	if err != nil {
-		panic(fmt.Sprintf("make rand token error: %s", err))
-	}
-	return string(b)
-}
-
-func generatePwd() (string, error) {
-	size := 10
-	buf := make([]byte, size)
-	size, err := rand.Read(buf)
-	if err != nil {
-		return "", fmt.Errorf("generate pwd error: %w", err)
-	}
-
-	return fmt.Sprintf("%x", sha1.Sum(buf[:size]))[:6], nil
 }

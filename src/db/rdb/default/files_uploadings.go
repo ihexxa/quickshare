@@ -1,4 +1,4 @@
-package sqlite
+package default
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/ihexxa/quickshare/src/db"
 )
 
-func (st *SQLiteStore) addUploadInfoOnly(ctx context.Context, tx *sql.Tx, userId uint64, tmpPath, filePath string, fileSize int64) error {
+func (st *DefaultStore) addUploadInfoOnly(ctx context.Context, tx *sql.Tx, userId uint64, tmpPath, filePath string, fileSize int64) error {
 	_, err := tx.ExecContext(
 		ctx,
 		`insert into t_file_uploading (
@@ -22,7 +22,7 @@ func (st *SQLiteStore) addUploadInfoOnly(ctx context.Context, tx *sql.Tx, userId
 	return err
 }
 
-func (st *SQLiteStore) AddUploadInfos(ctx context.Context, userId uint64, tmpPath, filePath string, info *db.FileInfo) error {
+func (st *DefaultStore) AddUploadInfos(ctx context.Context, userId uint64, tmpPath, filePath string, info *db.FileInfo) error {
 	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return err
@@ -57,7 +57,7 @@ func (st *SQLiteStore) AddUploadInfos(ctx context.Context, userId uint64, tmpPat
 	return tx.Commit()
 }
 
-func (st *SQLiteStore) DelUploadingInfos(ctx context.Context, userId uint64, realPath string) error {
+func (st *DefaultStore) DelUploadingInfos(ctx context.Context, userId uint64, realPath string) error {
 	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return err
@@ -72,7 +72,7 @@ func (st *SQLiteStore) DelUploadingInfos(ctx context.Context, userId uint64, rea
 	return tx.Commit()
 }
 
-func (st *SQLiteStore) delUploadingInfos(ctx context.Context, tx *sql.Tx, userId uint64, realPath string) error {
+func (st *DefaultStore) delUploadingInfos(ctx context.Context, tx *sql.Tx, userId uint64, realPath string) error {
 	_, size, _, err := st.getUploadInfo(ctx, tx, userId, realPath)
 	if err != nil {
 		// info may not exist
@@ -92,7 +92,7 @@ func (st *SQLiteStore) delUploadingInfos(ctx context.Context, tx *sql.Tx, userId
 	return st.setUser(ctx, tx, userInfo)
 }
 
-func (st *SQLiteStore) delUploadInfoOnly(ctx context.Context, tx *sql.Tx, userId uint64, filePath string) error {
+func (st *DefaultStore) delUploadInfoOnly(ctx context.Context, tx *sql.Tx, userId uint64, filePath string) error {
 	_, err := tx.ExecContext(
 		ctx,
 		`delete from t_file_uploading
@@ -102,7 +102,7 @@ func (st *SQLiteStore) delUploadInfoOnly(ctx context.Context, tx *sql.Tx, userId
 	return err
 }
 
-func (st *SQLiteStore) MoveUploadingInfos(ctx context.Context, userId uint64, uploadPath, itemPath string) error {
+func (st *DefaultStore) MoveUploadingInfos(ctx context.Context, userId uint64, uploadPath, itemPath string) error {
 	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return err
@@ -127,7 +127,7 @@ func (st *SQLiteStore) MoveUploadingInfos(ctx context.Context, userId uint64, up
 	return tx.Commit()
 }
 
-func (st *SQLiteStore) SetUploadInfo(ctx context.Context, userId uint64, filePath string, newUploaded int64) error {
+func (st *DefaultStore) SetUploadInfo(ctx context.Context, userId uint64, filePath string, newUploaded int64) error {
 	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return err
@@ -161,7 +161,7 @@ func (st *SQLiteStore) SetUploadInfo(ctx context.Context, userId uint64, filePat
 	return tx.Commit()
 }
 
-func (st *SQLiteStore) getUploadInfo(
+func (st *DefaultStore) getUploadInfo(
 	ctx context.Context, tx *sql.Tx, userId uint64, filePath string,
 ) (string, int64, int64, error) {
 	var size, uploaded int64
@@ -179,7 +179,7 @@ func (st *SQLiteStore) getUploadInfo(
 	return filePath, size, uploaded, nil
 }
 
-func (st *SQLiteStore) GetUploadInfo(ctx context.Context, userId uint64, filePath string) (string, int64, int64, error) {
+func (st *DefaultStore) GetUploadInfo(ctx context.Context, userId uint64, filePath string) (string, int64, int64, error) {
 	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return "", 0, 0, err
@@ -189,7 +189,7 @@ func (st *SQLiteStore) GetUploadInfo(ctx context.Context, userId uint64, filePat
 	return st.getUploadInfo(ctx, tx, userId, filePath)
 }
 
-func (st *SQLiteStore) ListUploadInfos(ctx context.Context, userId uint64) ([]*db.UploadInfo, error) {
+func (st *DefaultStore) ListUploadInfos(ctx context.Context, userId uint64) ([]*db.UploadInfo, error) {
 	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return nil, err
