@@ -1,4 +1,4 @@
-package sqlite
+package default
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/ihexxa/quickshare/src/db"
 )
 
-func (st *SQLiteStore) getCfg(ctx context.Context, tx *sql.Tx) (*db.SiteConfig, error) {
+func (st *DefaultStore) getCfg(ctx context.Context, tx *sql.Tx) (*db.SiteConfig, error) {
 	var configStr string
 	err := tx.QueryRowContext(
 		ctx,
@@ -32,7 +32,7 @@ func (st *SQLiteStore) getCfg(ctx context.Context, tx *sql.Tx) (*db.SiteConfig, 
 	return config, nil
 }
 
-func (st *SQLiteStore) setCfg(ctx context.Context, tx *sql.Tx, cfg *db.SiteConfig) error {
+func (st *DefaultStore) setCfg(ctx context.Context, tx *sql.Tx, cfg *db.SiteConfig) error {
 	if err := db.CheckSiteCfg(cfg, false); err != nil {
 		return err
 	}
@@ -52,7 +52,7 @@ func (st *SQLiteStore) setCfg(ctx context.Context, tx *sql.Tx, cfg *db.SiteConfi
 	return err
 }
 
-func (st *SQLiteStore) SetClientCfg(ctx context.Context, cfg *db.ClientConfig) error {
+func (st *DefaultStore) SetClientCfg(ctx context.Context, cfg *db.ClientConfig) error {
 	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return err
@@ -73,7 +73,7 @@ func (st *SQLiteStore) SetClientCfg(ctx context.Context, cfg *db.ClientConfig) e
 	return tx.Commit()
 }
 
-func (st *SQLiteStore) GetCfg(ctx context.Context) (*db.SiteConfig, error) {
+func (st *DefaultStore) GetCfg(ctx context.Context) (*db.SiteConfig, error) {
 	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return nil, err

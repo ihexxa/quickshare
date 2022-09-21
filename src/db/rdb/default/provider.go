@@ -1,4 +1,4 @@
-package sqlite
+package default
 
 import (
 	"context"
@@ -12,57 +12,59 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type SQLite struct {
+type DefaultDB struct {
 	db.IDB
 	dbPath string
-	mtx    *sync.RWMutex
 }
 
-func NewSQLite(dbPath string) (*SQLite, error) {
-	db, err := sql.Open("sqlite3", fmt.Sprintf("%s?_synchronous=FULL", dbPath))
+func NewDefaultDB(driverName, dbPath string) (*DefaultDB, error) {
+	db, err := sql.Open(driverName, dbPath)
 	if err != nil {
 		return nil, err
 	}
 
-	return &SQLite{
+	return &DefaultDB{
 		IDB:    db,
 		dbPath: dbPath,
 	}, nil
 }
 
-func NewSQLiteStore(db db.IDB) (*SQLiteStore, error) {
-	return &SQLiteStore{
+type DefaultStore struct {
+	db  db.IDB
+}
+
+func NewDefaultStore(db db.IDB) (*DefaultStore, error) {
+	return &DefaultStore{
 		db:  db,
-		mtx: &sync.RWMutex{},
 	}, nil
 }
 
-func (st *SQLiteStore) Close() error {
+func (st *DefaultStore) Close() error {
 	return st.db.Close()
 }
 
-func (st *SQLiteStore) Lock() {
+func (st *DefaultStore) Lock() {
 	st.mtx.Lock()
 }
 
-func (st *SQLiteStore) Unlock() {
+func (st *DefaultStore) Unlock() {
 	st.mtx.Unlock()
 }
 
-func (st *SQLiteStore) RLock() {
+func (st *DefaultStore) RLock() {
 	st.mtx.RLock()
 }
 
-func (st *SQLiteStore) RUnlock() {
+func (st *DefaultStore) RUnlock() {
 	st.mtx.RUnlock()
 }
 
-func (st *SQLiteStore) IsInited() bool {
+func (st *DefaultStore) IsInited() bool {
 	// always try to init the db
 	return false
 }
 
-func (st *SQLiteStore) Init(ctx context.Context, rootName, rootPwd string, cfg *db.SiteConfig) error {
+func (st *DefaultStore) Init(ctx context.Context, rootName, rootPwd string, cfg *db.SiteConfig) error {
 	err := st.InitUserTable(ctx, rootName, rootPwd)
 	if err != nil {
 		return err
@@ -75,7 +77,7 @@ func (st *SQLiteStore) Init(ctx context.Context, rootName, rootPwd string, cfg *
 	return st.InitConfigTable(ctx, cfg)
 }
 
-func (st *SQLiteStore) InitUserTable(ctx context.Context, rootName, rootPwd string) error {
+func (st *DefaultStore) InitUserTable(ctx context.Context, rootName, rootPwd string) error {
 	_, err := st.db.ExecContext(
 		ctx,
 		`create table if not exists t_user (
@@ -135,7 +137,7 @@ func (st *SQLiteStore) InitUserTable(ctx context.Context, rootName, rootPwd stri
 	return nil
 }
 
-func (st *SQLiteStore) InitFileTables(ctx context.Context) error {
+func (st *DefaultStore) InitFileTables(ctx context.Context) error {
 	_, err := st.db.ExecContext(
 		ctx,
 		`create table if not exists t_file_info (
@@ -193,7 +195,7 @@ func (st *SQLiteStore) InitFileTables(ctx context.Context) error {
 	return err
 }
 
-func (st *SQLiteStore) InitConfigTable(ctx context.Context, cfg *db.SiteConfig) error {
+func (st *DefaultStore) InitConfigTable(ctx context.Context, cfg *db.SiteConfig) error {
 	st.Lock()
 	defer st.Unlock()
 
