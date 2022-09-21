@@ -1,4 +1,4 @@
-package default
+package sqlite
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 	"github.com/ihexxa/quickshare/src/db"
 )
 
-func (st *DefaultStore) generateShareID(payload string) (string, error) {
+func (st *SQLiteStore) generateShareID(payload string) (string, error) {
 	if len(payload) == 0 {
 		return "", db.ErrEmpty
 	}
@@ -29,15 +29,12 @@ func (st *DefaultStore) generateShareID(payload string) (string, error) {
 	return fmt.Sprintf("%x", h.Sum(nil))[:7], nil
 }
 
-func (st *DefaultStore) IsSharing(ctx context.Context, dirPath string) (bool, error) {
-	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
-	if err != nil {
-		return false, err
-	}
-	defer tx.Rollback()
+func (st *SQLiteStore) IsSharing(ctx context.Context, dirPath string) (bool, error) {
+	st.RLock()
+	defer st.RUnlock()
 
 	var shareId string
-	err = tx.QueryRowContext(
+	err := st.db.QueryRowContext(
 		ctx,
 		`select share_id
 		from t_file_info
@@ -56,15 +53,12 @@ func (st *DefaultStore) IsSharing(ctx context.Context, dirPath string) (bool, er
 	return shareId != "", nil
 }
 
-func (st *DefaultStore) GetSharingDir(ctx context.Context, hashID string) (string, error) {
-	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
-	if err != nil {
-		return "", err
-	}
-	defer tx.Rollback()
+func (st *SQLiteStore) GetSharingDir(ctx context.Context, hashID string) (string, error) {
+	st.RLock()
+	defer st.RUnlock()
 
 	var sharedPath string
-	err = tx.QueryRowContext(
+	err := st.db.QueryRowContext(
 		ctx,
 		`select path
 		from t_file_info
@@ -84,12 +78,9 @@ func (st *DefaultStore) GetSharingDir(ctx context.Context, hashID string) (strin
 	return sharedPath, nil
 }
 
-func (st *DefaultStore) AddSharing(ctx context.Context, userId uint64, dirPath string) error {
-	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
+func (st *SQLiteStore) AddSharing(ctx context.Context, userId uint64, dirPath string) error {
+	st.Lock()
+	defer st.Unlock()
 
 	shareID, err := st.generateShareID(dirPath)
 	if err != nil {
@@ -101,7 +92,7 @@ func (st *DefaultStore) AddSharing(ctx context.Context, userId uint64, dirPath s
 		return err
 	}
 
-	_, err = st.getFileInfo(ctx, tx, dirPath)
+	_, err = st.getFileInfo(ctx, dirPath)
 	if err != nil && !errors.Is(err, db.ErrFileInfoNotFound) {
 		return err
 	}
@@ -115,7 +106,7 @@ func (st *DefaultStore) AddSharing(ctx context.Context, userId uint64, dirPath s
 			return err
 		}
 
-		_, err = tx.ExecContext(
+		_, err = st.db.ExecContext(
 			ctx,
 			`insert into t_file_info (
 				path, user, location, parent, name,
@@ -128,53 +119,38 @@ func (st *DefaultStore) AddSharing(ctx context.Context, userId uint64, dirPath s
 			dirPath, userId, location, parentPath, name,
 			true, 0, shareID, infoStr,
 		)
-		if err != nil {
-			return err
-		}
-	} else {
-		_, err = tx.ExecContext(
-			ctx,
-			`update t_file_info
-			set share_id=?
-			where path=?`,
-			shareID, dirPath,
-		)
-		if err != nil {
-			return err
-		}
-	}
-
-	return tx.Commit()
-}
-
-func (st *DefaultStore) DelSharing(ctx context.Context, userId uint64, dirPath string) error {
-	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
-	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
 
-	_, err = tx.ExecContext(
+	_, err = st.db.ExecContext(
+		ctx,
+		`update t_file_info
+		set share_id=?
+		where path=?`,
+		shareID, dirPath,
+	)
+	return err
+}
+
+func (st *SQLiteStore) DelSharing(ctx context.Context, userId uint64, dirPath string) error {
+	st.Lock()
+	defer st.Unlock()
+
+	_, err := st.db.ExecContext(
 		ctx,
 		`update t_file_info
 		set share_id=''
 		where path=?`,
 		dirPath,
 	)
-	if err != nil {
-		return err
-	}
-	return tx.Commit()
+	return err
 }
 
-func (st *DefaultStore) ListSharingsByLocation(ctx context.Context, location string) (map[string]string, error) {
-	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
-	if err != nil {
-		return nil, err
-	}
-	defer tx.Rollback()
+func (st *SQLiteStore) ListSharingsByLocation(ctx context.Context, location string) (map[string]string, error) {
+	st.RLock()
+	defer st.RUnlock()
 
-	rows, err := tx.QueryContext(
+	rows, err := st.db.QueryContext(
 		ctx,
 		`select path, share_id
 		from t_file_info

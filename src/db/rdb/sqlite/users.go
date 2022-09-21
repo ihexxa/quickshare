@@ -1,4 +1,4 @@
-package default
+package sqlite
 
 import (
 	"context"
@@ -11,7 +11,12 @@ import (
 	"github.com/ihexxa/quickshare/src/db"
 )
 
-func (st *DefaultStore) setUser(ctx context.Context, tx *sql.Tx, user *db.User) error {
+type SQLiteStore struct {
+	db  db.IDB
+	mtx *sync.RWMutex
+}
+
+func (st *SQLiteStore) setUser(ctx context.Context, user *db.User) error {
 	var err error
 	if err = db.CheckUser(user, false); err != nil {
 		return err
@@ -25,7 +30,7 @@ func (st *DefaultStore) setUser(ctx context.Context, tx *sql.Tx, user *db.User) 
 	if err != nil {
 		return err
 	}
-	_, err = tx.ExecContext(
+	_, err = st.db.ExecContext(
 		ctx,
 		`update t_user
 		set name=?, pwd=?, role=?, used_space=?, quota=?, preference=?
@@ -41,10 +46,10 @@ func (st *DefaultStore) setUser(ctx context.Context, tx *sql.Tx, user *db.User) 
 	return err
 }
 
-func (st *DefaultStore) getUser(ctx context.Context, tx *sql.Tx, id uint64) (*db.User, error) {
+func (st *SQLiteStore) getUser(ctx context.Context, id uint64) (*db.User, error) {
 	user := &db.User{}
 	var quotaStr, preferenceStr string
-	err := tx.QueryRowContext(
+	err := st.db.QueryRowContext(
 		ctx,
 		`select id, name, pwd, role, used_space, quota, preference
 		from t_user
@@ -77,12 +82,9 @@ func (st *DefaultStore) getUser(ctx context.Context, tx *sql.Tx, id uint64) (*db
 	return user, nil
 }
 
-func (st *DefaultStore) AddUser(ctx context.Context, user *db.User) error {
-	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
+func (st *SQLiteStore) AddUser(ctx context.Context, user *db.User) error {
+	st.Lock()
+	defer st.Unlock()
 
 	quotaStr, err := json.Marshal(user.Quota)
 	if err != nil {
@@ -92,7 +94,7 @@ func (st *DefaultStore) AddUser(ctx context.Context, user *db.User) error {
 	if err != nil {
 		return err
 	}
-	_, err = tx.ExecContext(
+	_, err = st.db.ExecContext(
 		ctx,
 		`insert into t_user (id, name, pwd, role, used_space, quota, preference) values (?, ?, ?, ?, ?, ?, ?)`,
 		user.ID,
@@ -103,40 +105,26 @@ func (st *DefaultStore) AddUser(ctx context.Context, user *db.User) error {
 		quotaStr,
 		preferenceStr,
 	)
-	if err != nil {
-		return err
-	}
-
-	return tx.Commit()
+	return err
 }
 
-func (st *DefaultStore) DelUser(ctx context.Context, id uint64) error {
-	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
+func (st *SQLiteStore) DelUser(ctx context.Context, id uint64) error {
+	st.Lock()
+	defer st.Unlock()
 
-	_, err = tx.ExecContext(
+	_, err := st.db.ExecContext(
 		ctx,
 		`delete from t_user where id=?`,
 		id,
 	)
-	if err != nil {
-		return err
-	}
-
-	return tx.Commit()
+	return err
 }
 
-func (st *DefaultStore) GetUser(ctx context.Context, id uint64) (*db.User, error) {
-	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
-	if err != nil {
-		return nil, err
-	}
-	defer tx.Rollback()
+func (st *SQLiteStore) GetUser(ctx context.Context, id uint64) (*db.User, error) {
+	st.RLock()
+	defer st.RUnlock()
 
-	user, err := st.getUser(ctx, tx, id)
+	user, err := st.getUser(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -144,16 +132,13 @@ func (st *DefaultStore) GetUser(ctx context.Context, id uint64) (*db.User, error
 	return user, err
 }
 
-func (st *DefaultStore) GetUserByName(ctx context.Context, name string) (*db.User, error) {
-	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
-	if err != nil {
-		return nil, err
-	}
-	defer tx.Rollback()
+func (st *SQLiteStore) GetUserByName(ctx context.Context, name string) (*db.User, error) {
+	st.RLock()
+	defer st.RUnlock()
 
 	user := &db.User{}
 	var quotaStr, preferenceStr string
-	err = tx.QueryRowContext(
+	err := st.db.QueryRowContext(
 		ctx,
 		`select id, name, pwd, role, used_space, quota, preference
 		from t_user
@@ -186,14 +171,11 @@ func (st *DefaultStore) GetUserByName(ctx context.Context, name string) (*db.Use
 	return user, nil
 }
 
-func (st *DefaultStore) SetPwd(ctx context.Context, id uint64, pwd string) error {
-	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
+func (st *SQLiteStore) SetPwd(ctx context.Context, id uint64, pwd string) error {
+	st.Lock()
+	defer st.Unlock()
 
-	_, err = tx.ExecContext(
+	_, err := st.db.ExecContext(
 		ctx,
 		`update t_user
 		set pwd=?
@@ -201,27 +183,20 @@ func (st *DefaultStore) SetPwd(ctx context.Context, id uint64, pwd string) error
 		pwd,
 		id,
 	)
-	if err != nil {
-		return err
-	}
-
-	return tx.Commit()
+	return err
 }
 
 // role + quota
-func (st *DefaultStore) SetInfo(ctx context.Context, id uint64, user *db.User) error {
-	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
+func (st *SQLiteStore) SetInfo(ctx context.Context, id uint64, user *db.User) error {
+	st.Lock()
+	defer st.Unlock()
 
 	quotaStr, err := json.Marshal(user.Quota)
 	if err != nil {
 		return err
 	}
 
-	_, err = tx.ExecContext(
+	_, err = st.db.ExecContext(
 		ctx,
 		`update t_user
 		set role=?, quota=?
@@ -229,26 +204,19 @@ func (st *DefaultStore) SetInfo(ctx context.Context, id uint64, user *db.User) e
 		user.Role, quotaStr,
 		id,
 	)
-	if err != nil {
-		return err
-	}
-
-	return tx.Commit()
+	return err
 }
 
-func (st *DefaultStore) SetPreferences(ctx context.Context, id uint64, prefers *db.Preferences) error {
-	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
+func (st *SQLiteStore) SetPreferences(ctx context.Context, id uint64, prefers *db.Preferences) error {
+	st.Lock()
+	defer st.Unlock()
 
 	preferenceStr, err := json.Marshal(prefers)
 	if err != nil {
 		return err
 	}
 
-	_, err = tx.ExecContext(
+	_, err = st.db.ExecContext(
 		ctx,
 		`update t_user
 		set preference=?
@@ -256,29 +224,17 @@ func (st *DefaultStore) SetPreferences(ctx context.Context, id uint64, prefers *
 		preferenceStr,
 		id,
 	)
-	if err != nil {
-		return err
-	}
-
-	return tx.Commit()
+	return err
 }
 
-func (st *DefaultStore) SetUsed(ctx context.Context, id uint64, incr bool, capacity int64) error {
-	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
-
-	err = st.setUsed(ctx, tx, id, incr, capacity)
-	if err != nil {
-		return err
-	}
-	return tx.Commit()
+func (st *SQLiteStore) SetUsed(ctx context.Context, id uint64, incr bool, capacity int64) error {
+	st.Lock()
+	defer st.Unlock()
+	return st.setUsed(ctx, id, incr, capacity)
 }
 
-func (st *DefaultStore) setUsed(ctx context.Context, tx *sql.Tx, id uint64, incr bool, capacity int64) error {
-	gotUser, err := st.getUser(ctx, tx, id)
+func (st *SQLiteStore) setUsed(ctx context.Context, id uint64, incr bool, capacity int64) error {
+	gotUser, err := st.getUser(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -296,7 +252,7 @@ func (st *DefaultStore) setUsed(ctx context.Context, tx *sql.Tx, id uint64, incr
 		gotUser.UsedSpace = gotUser.UsedSpace - capacity
 	}
 
-	_, err = tx.ExecContext(
+	_, err = st.db.ExecContext(
 		ctx,
 		`update t_user
 		set used_space=?
@@ -304,17 +260,18 @@ func (st *DefaultStore) setUsed(ctx context.Context, tx *sql.Tx, id uint64, incr
 		gotUser.UsedSpace,
 		gotUser.ID,
 	)
-	return err
-}
-
-func (st *DefaultStore) ResetUsed(ctx context.Context, id uint64, used int64) error {
-	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
 
-	_, err = tx.ExecContext(
+	return nil
+}
+
+func (st *SQLiteStore) ResetUsed(ctx context.Context, id uint64, used int64) error {
+	st.Lock()
+	defer st.Unlock()
+
+	_, err := st.db.ExecContext(
 		ctx,
 		`update t_user
 		set used_space=?
@@ -322,16 +279,15 @@ func (st *DefaultStore) ResetUsed(ctx context.Context, id uint64, used int64) er
 		used,
 		id,
 	)
-	if err != nil {
-		return err
-	}
-
-	return tx.Commit()
+	return err
 }
 
-func (st *DefaultStore) listUsers(ctx context.Context, tx *sql.Tx) ([]*db.User, error) {
+func (st *SQLiteStore) ListUsers(ctx context.Context) ([]*db.User, error) {
+	st.RLock()
+	defer st.RUnlock()
+
 	// TODO: support pagination
-	rows, err := tx.QueryContext(
+	rows, err := st.db.QueryContext(
 		ctx,
 		`select id, name, role, used_space, quota, preference
 		from t_user`,
@@ -373,24 +329,11 @@ func (st *DefaultStore) listUsers(ctx context.Context, tx *sql.Tx) ([]*db.User, 
 	return users, nil
 }
 
-func (st *DefaultStore) ListUsers(ctx context.Context) ([]*db.User, error) {
-	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
-	if err != nil {
-		return nil, err
-	}
-	defer tx.Rollback()
+func (st *SQLiteStore) ListUserIDs(ctx context.Context) (map[string]string, error) {
+	st.RLock()
+	defer st.RUnlock()
 
-	return st.listUsers(ctx, tx)
-}
-
-func (st *DefaultStore) ListUserIDs(ctx context.Context) (map[string]string, error) {
-	tx, err := st.db.BeginTx(ctx, &sql.TxOptions{})
-	if err != nil {
-		return nil, err
-	}
-	defer tx.Rollback()
-
-	users, err := st.listUsers(ctx, tx)
+	users, err := st.ListUsers(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -402,17 +345,17 @@ func (st *DefaultStore) ListUserIDs(ctx context.Context) (map[string]string, err
 	return nameToId, nil
 }
 
-func (st *DefaultStore) AddRole(role string) error {
+func (st *SQLiteStore) AddRole(role string) error {
 	// TODO: implement this after adding grant/revoke
 	panic("not implemented")
 }
 
-func (st *DefaultStore) DelRole(role string) error {
+func (st *SQLiteStore) DelRole(role string) error {
 	// TODO: implement this after adding grant/revoke
 	panic("not implemented")
 }
 
-func (st *DefaultStore) ListRoles() (map[string]bool, error) {
+func (st *SQLiteStore) ListRoles() (map[string]bool, error) {
 	// TODO: implement this after adding grant/revoke
 	panic("not implemented")
 }
