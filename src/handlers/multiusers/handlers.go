@@ -15,7 +15,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/ihexxa/quickshare/src/db"
-	"github.com/ihexxa/quickshare/src/db/userstore"
 	"github.com/ihexxa/quickshare/src/depidx"
 	q "github.com/ihexxa/quickshare/src/handlers"
 	"github.com/ihexxa/quickshare/src/worker/localworker"
@@ -248,7 +247,7 @@ func (h *MultiUsersSvc) Login(c *gin.Context) {
 
 	user, err := h.deps.Users().GetUserByName(c, req.User)
 	if err != nil {
-		if errors.Is(err, userstore.ErrUserNotFound) {
+		if errors.Is(err, db.ErrUserNotFound) {
 			c.JSON(q.ErrResp(c, 403, err))
 			return
 		}
