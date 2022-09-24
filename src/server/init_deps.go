@@ -12,30 +12,52 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/ihexxa/gocfg"
 	"github.com/ihexxa/quickshare/src/db/rdb/sqlite"
+	"github.com/ihexxa/quickshare/src/worker"
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/ihexxa/quickshare/src/cryptoutil"
 	"github.com/ihexxa/quickshare/src/cryptoutil/jwt"
 	"github.com/ihexxa/quickshare/src/db"
 	"github.com/ihexxa/quickshare/src/depidx"
 	"github.com/ihexxa/quickshare/src/fs"
 	"github.com/ihexxa/quickshare/src/fs/local"
+	"github.com/ihexxa/quickshare/src/idgen"
 	"github.com/ihexxa/quickshare/src/idgen/simpleidgen"
 	"github.com/ihexxa/quickshare/src/iolimiter"
 	"github.com/ihexxa/quickshare/src/search/fileindex"
 	"github.com/ihexxa/quickshare/src/worker/localworker"
 )
 
-func InitCfg(cfg gocfg.ICfg, logger *zap.SugaredLogger) (gocfg.ICfg, error) {
-	_, ok := cfg.String("ENV.TOKENSECRET")
-	if !ok {
-		cfg.SetString("ENV.TOKENSECRET", makeRandToken())
-		logger.Info("warning: TOKENSECRET is not set, generated a random token")
+func initDeps(cfg gocfg.ICfg) *depidx.Deps {
+	ider := simpleidgen.New()
+	logger := initLogger(cfg)
+	jwtEncDec := initJWT(cfg, logger)
+	workers := initWorkerPool(cfg, logger)
+	filesystem, err := initFs(cfg, ider, logger)
+	if err != nil {
+		logger.Fatalf("failed to init DB: %s", err)
 	}
+	quickshareDb, err := initDb(cfg, filesystem)
+	if err != nil {
+		logger.Fatalf("failed to init DB: %s", err)
+	}
+	rateLimiter := initRateLimiter(cfg, quickshareDb)
+	fileIndex := initSearchIndex(cfg, filesystem, logger)
 
-	return cfg, nil
+	deps := depidx.NewDeps(cfg)
+	deps.SetDB(quickshareDb)
+	deps.SetFS(filesystem)
+	deps.SetToken(jwtEncDec)
+	deps.SetID(ider)
+	deps.SetLog(logger)
+	deps.SetLimiter(rateLimiter)
+	deps.SetWorkers(workers)
+	deps.SetFileIndex(fileIndex)
+
+	return deps
 }
 
 func initLogger(cfg gocfg.ICfg) *zap.SugaredLogger {
@@ -57,16 +79,70 @@ func initLogger(cfg gocfg.ICfg) *zap.SugaredLogger {
 	return zap.New(core).Sugar()
 }
 
-func makeRandToken() string {
-	b := make([]byte, 32)
-	_, err := rand.Read(b)
-	if err != nil {
-		panic(fmt.Sprintf("make rand token error: %s", err))
+func initJWT(cfg gocfg.ICfg, logger *zap.SugaredLogger) cryptoutil.ITokenEncDec {
+	secret, ok := cfg.String("ENV.TOKENSECRET")
+	if !ok {
+		b := make([]byte, 32)
+		_, err := rand.Read(b)
+		if err != nil {
+			panic(fmt.Sprintf("make rand token error: %s", err))
+		}
+		secret = string(b)
+		logger.Info("warning: TOKENSECRET is not set, a random token is generated")
 	}
-	return string(b)
+
+	return jwt.NewJWTEncDec(secret)
 }
 
-func mkRoot(rootPath string, logger *zap.SugaredLogger) {
+func initRateLimiter(cfg gocfg.ICfg, quickshareDb db.IDBQuickshare) iolimiter.ILimiter {
+	limiterCap := cfg.IntOr("Users.LimiterCapacity", 10000)
+	limiterCyc := cfg.IntOr("Users.LimiterCyc", 1000)
+	return iolimiter.NewIOLimiter(limiterCap, limiterCyc, quickshareDb)
+}
+
+func initWorkerPool(cfg gocfg.ICfg, logger *zap.SugaredLogger) worker.IWorkerPool {
+	queueSize := cfg.GrabInt("Workers.QueueSize")
+	sleepCyc := cfg.GrabInt("Workers.SleepCyc")
+	workerCount := cfg.GrabInt("Workers.WorkerCount")
+
+	workers := localworker.NewWorkerPool(queueSize, sleepCyc, workerCount, logger)
+	workers.Start()
+	return workers
+}
+
+func initSearchIndex(cfg gocfg.ICfg, filesystem fs.ISimpleFS, logger *zap.SugaredLogger) fileindex.IFileIndex {
+	searchResultLimit := cfg.GrabInt("Server.SearchResultLimit")
+	fileIndex := fileindex.NewFileTreeIndex(filesystem, "/", searchResultLimit)
+
+	indexInited := false
+	indexInfo, err := filesystem.Stat(fileIndexPath)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			logger.Warnf("detect index file error: %s", err)
+		} else {
+			logger.Warnf("index file not found")
+		}
+	} else if indexInfo.IsDir() {
+		logger.Warnf("file index is a folder, not a file: %s", fileIndexPath)
+	} else {
+		err = fileIndex.ReadFrom(fileIndexPath)
+		if err != nil {
+			logger.Warnf("failed to load file index: %s", err)
+		} else {
+			indexInited = true
+		}
+	}
+
+	logger.Infof("file index inited(%t)", indexInited)
+	return fileIndex
+}
+
+func initFs(cfg gocfg.ICfg, idGenerator idgen.IIDGen, logger *zap.SugaredLogger) (fs.ISimpleFS, error) {
+	rootPath := cfg.GrabString("Fs.Root")
+	opensLimit := cfg.GrabInt("Fs.OpensLimit")
+	openTTL := cfg.GrabInt("Fs.OpenTTL")
+	readerTTL := cfg.GrabInt("Server.WriteTimeout") / 1000 // millisecond -> second
+
 	info, err := os.Stat(rootPath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -80,76 +156,11 @@ func mkRoot(rootPath string, logger *zap.SugaredLogger) {
 	} else if !info.IsDir() {
 		logger.Fatalf("can not create %s folder: there is a file with same name", rootPath)
 	}
+
+	return local.NewLocalFS(rootPath, 0660, opensLimit, openTTL, readerTTL, idGenerator), nil
 }
 
-func initDeps(cfg gocfg.ICfg) *depidx.Deps {
-	var err error
-	logger := initLogger(cfg)
-
-	rootPath := cfg.GrabString("Fs.Root")
-	mkRoot(rootPath, logger)
-	opensLimit := cfg.GrabInt("Fs.OpensLimit")
-	openTTL := cfg.GrabInt("Fs.OpenTTL")
-	readerTTL := cfg.GrabInt("Server.WriteTimeout") / 1000 // millisecond -> second
-	ider := simpleidgen.New()
-	filesystem := local.NewLocalFS(rootPath, 0660, opensLimit, openTTL, readerTTL, ider)
-
-	secret, _ := cfg.String("ENV.TOKENSECRET")
-	jwtEncDec := jwt.NewJWTEncDec(secret)
-
-	quickshareDb, err := initDB(cfg, filesystem)
-	if err != nil {
-		logger.Errorf("failed to init DB: %s", err)
-		os.Exit(1)
-	}
-
-	limiterCap := cfg.IntOr("Users.LimiterCapacity", 10000)
-	limiterCyc := cfg.IntOr("Users.LimiterCyc", 1000)
-	limiter := iolimiter.NewIOLimiter(limiterCap, limiterCyc, quickshareDb)
-
-	deps := depidx.NewDeps(cfg)
-	deps.SetDB(quickshareDb)
-	deps.SetFS(filesystem)
-	deps.SetToken(jwtEncDec)
-	deps.SetID(ider)
-	deps.SetLog(logger)
-	deps.SetLimiter(limiter)
-
-	queueSize := cfg.GrabInt("Workers.QueueSize")
-	sleepCyc := cfg.GrabInt("Workers.SleepCyc")
-	workerCount := cfg.GrabInt("Workers.WorkerCount")
-
-	workers := localworker.NewWorkerPool(queueSize, sleepCyc, workerCount, logger)
-	workers.Start()
-	deps.SetWorkers(workers)
-
-	searchResultLimit := cfg.GrabInt("Server.SearchResultLimit")
-	fileIndex := fileindex.NewFileTreeIndex(filesystem, "/", searchResultLimit)
-	indexInfo, err := filesystem.Stat(fileIndexPath)
-	indexInited := false
-	if err != nil {
-		if !os.IsNotExist(err) {
-			logger.Warnf("failed to detect file index: %s", err)
-		} else {
-			logger.Warnf("no file index found")
-		}
-	} else if indexInfo.IsDir() {
-		logger.Warnf("file index is folder, not file: %s", fileIndexPath)
-	} else {
-		err = fileIndex.ReadFrom(fileIndexPath)
-		if err != nil {
-			logger.Infof("failed to load file index: %s", err)
-		} else {
-			indexInited = true
-		}
-	}
-	logger.Infof("file index inited(%t)", indexInited)
-	deps.SetFileIndex(fileIndex)
-
-	return deps
-}
-
-func initDB(cfg gocfg.ICfg, filesystem fs.ISimpleFS) (db.IDBQuickshare, error) {
+func initDb(cfg gocfg.ICfg, filesystem fs.ISimpleFS) (db.IDBQuickshare, error) {
 	dbPath := cfg.GrabString("Db.DbPath")
 	dbDir := path.Dir(dbPath)
 
