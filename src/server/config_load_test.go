@@ -89,6 +89,8 @@ func TestLoadCfg(t *testing.T) {
 				Align:    "fixed",
 				BgColor:  "",
 			},
+			AllowSetBg: false,
+			AutoTheme:  true,
 		},
 	}
 
@@ -153,6 +155,8 @@ func TestLoadCfg(t *testing.T) {
 					Align:    "fixed",
 					BgColor:  "",
 				},
+				AllowSetBg: false,
+				AutoTheme:  true,
 			},
 		},
 		Db: &DbConfig{
