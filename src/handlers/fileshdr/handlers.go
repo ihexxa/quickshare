@@ -20,7 +20,6 @@ import (
 
 	"github.com/ihexxa/fsearch"
 	"github.com/ihexxa/quickshare/src/db"
-	"github.com/ihexxa/quickshare/src/db/userstore"
 	"github.com/ihexxa/quickshare/src/depidx"
 	q "github.com/ihexxa/quickshare/src/handlers"
 	"github.com/ihexxa/quickshare/src/worker/localworker"
@@ -679,7 +678,7 @@ func (h *FileHandlers) Download(c *gin.Context) {
 	dirPath := filepath.Dir(filePath)
 
 	var err error
-	userId := userstore.VisitorID
+	userId := db.VisitorID
 	if role != db.VisitorRole {
 		userId, err = q.GetUserId(c)
 		if err != nil {
