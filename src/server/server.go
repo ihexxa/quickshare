@@ -31,8 +31,9 @@ func NewServer(cfg gocfg.ICfg) (*Server, error) {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	deps := initDeps(cfg)
-	router, err := initHandlers(cfg, deps)
+	initer := NewIniter(cfg)
+	deps := initer.InitDeps()
+	router, err := initer.InitHandlers(deps)
 	if err != nil {
 		return nil, fmt.Errorf("init handlers error: %w", err)
 	}
