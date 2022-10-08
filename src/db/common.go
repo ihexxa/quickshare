@@ -113,11 +113,12 @@ var (
 )
 
 type FileInfo struct {
-	IsDir   bool   `json:"isDir" yaml:"isDir"`     // deprecated
-	Shared  bool   `json:"shared" yaml:"shared"`   // deprecated
-	ShareID string `json:"shareID" yaml:"shareID"` // deprecated
+	Id      uint64 `json:"id" yaml:"id"`
+	IsDir   bool   `json:"isDir" yaml:"isDir"`
+	Shared  bool   `json:"shared" yaml:"shared"`
+	ShareID string `json:"shareID" yaml:"shareID"`
 	Sha1    string `json:"sha1" yaml:"sha1"`
-	Size    int64  `json:"size" yaml:"size"` // deprecated
+	Size    int64  `json:"size" yaml:"size"`
 }
 
 type UserCfg struct {

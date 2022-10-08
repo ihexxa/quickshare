@@ -53,7 +53,8 @@ func testSharingMethods(t *testing.T, store db.IDBQuickshare) {
 	adminId := uint64(0)
 
 	// add some of paths...
-	err = store.AddFileInfo(ctx, adminId, "admin/path1", &db.FileInfo{
+	infoId := uint64(0)
+	err = store.AddFileInfo(ctx, adminId, infoId, "admin/path1", &db.FileInfo{
 		// Shared:  false, // deprecated
 		IsDir:   false,
 		Size:    int64(0),
@@ -65,8 +66,9 @@ func testSharingMethods(t *testing.T, store db.IDBQuickshare) {
 	}
 
 	// add sharings
-	for _, dirPath := range dirPaths {
-		err = store.AddSharing(ctx, adminId, dirPath)
+	for i, dirPath := range dirPaths {
+		infoId := uint64(i)
+		err = store.AddSharing(ctx, infoId, adminId, dirPath)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -80,7 +82,7 @@ func testSharingMethods(t *testing.T, store db.IDBQuickshare) {
 		t.Fatalf("share size not match %d %d", len(dirToID), len(dirPaths))
 	}
 
-	for _, sharingDir := range dirPaths {
+	for i, sharingDir := range dirPaths {
 		if _, ok := dirToID[sharingDir]; !ok {
 			t.Fatalf("sharing(%s) not found", sharingDir)
 		}
@@ -96,6 +98,8 @@ func testSharingMethods(t *testing.T, store db.IDBQuickshare) {
 			t.Fatal(err)
 		} else if len(info.ShareID) != 7 {
 			t.Fatalf("incorrect ShareID %s", info.ShareID)
+		} else if info.Id != uint64(i) {
+			t.Fatalf("incorrect file info ID %d", info.Id)
 		}
 
 		gotSharingDir, err := store.GetSharingDir(ctx, info.ShareID)
@@ -178,6 +182,10 @@ func testUploadingMethods(t *testing.T, store db.IDBQuickshare) {
 		},
 	}
 	var err error
+	pathnames := []string{}
+	for pathname := range pathInfos {
+		pathnames = append(pathnames, pathname)
+	}
 
 	adminId := uint64(0)
 	ctx := context.TODO()
@@ -187,10 +195,12 @@ func testUploadingMethods(t *testing.T, store db.IDBQuickshare) {
 	usedSpaceAfterDeleting := int64(0)
 	itemPaths := []string{}
 	pathToTmpPath := map[string]string{}
-	for itemPath, info := range pathInfos {
+	for i, itemPath := range pathnames {
+		infoId := uint64(i)
+		info := pathInfos[itemPath]
 		tmpPath := strings.ReplaceAll(itemPath, "origin", "uploads")
 		pathToTmpPath[itemPath] = tmpPath
-		err = store.AddUploadInfos(ctx, adminId, tmpPath, itemPath, info)
+		err = store.AddUploadInfos(ctx, infoId, adminId, tmpPath, itemPath, info)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -299,6 +309,7 @@ func testFileInfoMethods(t *testing.T, store db.IDBQuickshare) {
 	pathInfos := map[string]*db.FileInfo{
 		"admin/origin/item1": &db.FileInfo{
 			// Shared:  false, // deprecated
+			Id:      100,
 			IsDir:   false,
 			Size:    int64(7),
 			ShareID: "",
@@ -306,6 +317,7 @@ func testFileInfoMethods(t *testing.T, store db.IDBQuickshare) {
 		},
 		"admin/origin/item2": &db.FileInfo{
 			// Shared:  false, // deprecated
+			Id:      101,
 			IsDir:   false,
 			Size:    int64(3),
 			ShareID: "",
@@ -313,6 +325,7 @@ func testFileInfoMethods(t *testing.T, store db.IDBQuickshare) {
 		},
 		"admin/origin/dir": &db.FileInfo{
 			// Shared:  true, // deprecated
+			Id:      102,
 			IsDir:   true,
 			Size:    int64(0),
 			ShareID: "mockedShareID",
@@ -323,11 +336,12 @@ func testFileInfoMethods(t *testing.T, store db.IDBQuickshare) {
 
 	adminId := uint64(0)
 	ctx := context.TODO()
+
 	// add infos
 	usedSpace := int64(0)
 	itemPaths := []string{}
 	for itemPath, info := range pathInfos {
-		err = store.AddFileInfo(ctx, adminId, itemPath, info)
+		err = store.AddFileInfo(ctx, info.Id, adminId, itemPath, info)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -344,7 +358,8 @@ func testFileInfoMethods(t *testing.T, store db.IDBQuickshare) {
 		if info.ShareID != expected.ShareID ||
 			info.IsDir != expected.IsDir ||
 			info.Sha1 != expected.Sha1 ||
-			info.Size != expected.Size {
+			info.Size != expected.Size ||
+			info.Id != expected.Id {
 			t.Fatalf("info not equaled (%v) (%v)", expected, info)
 		}
 	}
@@ -356,15 +371,18 @@ func testFileInfoMethods(t *testing.T, store db.IDBQuickshare) {
 	} else if len(pathToInfo) != len(pathInfos) {
 		t.Fatalf("list result size not match (%v) (%d)", pathToInfo, len(pathInfos))
 	}
+
 	for pathname, info := range pathInfos {
 		gotInfo, ok := pathToInfo[pathname]
+
 		if !ok {
 			t.Fatalf("path not found (%s)", pathname)
 		}
 		if info.ShareID != gotInfo.ShareID ||
 			info.IsDir != gotInfo.IsDir ||
 			info.Sha1 != gotInfo.Sha1 ||
-			info.Size != gotInfo.Size {
+			info.Size != gotInfo.Size ||
+			info.Id != gotInfo.Id {
 			t.Fatalf("info not equaled (%v) (%v)", gotInfo, info)
 		}
 	}
@@ -386,22 +404,39 @@ func testFileInfoMethods(t *testing.T, store db.IDBQuickshare) {
 	}
 
 	// move paths
-	newPaths := []string{}
+	newPaths := map[string]string{}
+	newPathsList := []string{}
 	for itemPath, info := range pathInfos {
 		newItemPath := strings.ReplaceAll(itemPath, "origin", "new")
 		err = store.MoveFileInfo(ctx, adminId, itemPath, newItemPath, info.IsDir)
 		if err != nil {
 			t.Fatal(err)
 		}
-		newPaths = append(newPaths, newItemPath)
+		newPaths[newItemPath] = itemPath
+		newPathsList = append(newPathsList, newItemPath)
 	}
 
 	// list infos
-	pathToInfo, err = store.ListFileInfos(ctx, newPaths)
+	pathToInfo, err = store.ListFileInfos(ctx, newPathsList)
 	if err != nil {
 		t.Fatal(err)
 	} else if len(pathToInfo) != len(pathInfos) {
 		t.Fatalf("list result size not match (%v) (%d)", pathToInfo, len(pathInfos))
+	}
+	for newPathname, oldPathname := range newPaths {
+		info := pathInfos[oldPathname]
+		gotInfo, ok := pathToInfo[newPathname]
+
+		if !ok {
+			t.Fatalf("path not found (%s)", newPathname)
+		}
+		if info.ShareID != gotInfo.ShareID ||
+			info.IsDir != gotInfo.IsDir ||
+			testSha1 != gotInfo.Sha1 || // sha is already updated
+			info.Size != gotInfo.Size ||
+			info.Id != gotInfo.Id {
+			t.Fatalf("info not equaled (%v) (%v)", gotInfo, info)
+		}
 	}
 
 	// check used space
@@ -413,7 +448,7 @@ func testFileInfoMethods(t *testing.T, store db.IDBQuickshare) {
 	}
 
 	// del info
-	for _, itemPath := range newPaths {
+	for itemPath := range newPaths {
 		err = store.DelFileInfo(ctx, adminId, itemPath)
 		if err != nil {
 			t.Fatal(err)
