@@ -27,9 +27,9 @@ type IDB interface {
 
 type IDBQuickshare interface {
 	Init(ctx context.Context, adminName, adminPwd string, config *SiteConfig) error
-	InitUserTable(ctx context.Context, rootName, rootPwd string) error
-	InitFileTables(ctx context.Context) error
-	InitConfigTable(ctx context.Context, cfg *SiteConfig) error
+	InitUserTable(ctx context.Context, tx *sql.Tx, rootName, rootPwd string) error
+	InitFileTables(ctx context.Context, tx *sql.Tx) error
+	InitConfigTable(ctx context.Context, tx *sql.Tx, cfg *SiteConfig) error
 	Close() error
 	IDBLockable
 	IUserDB
