@@ -20,7 +20,7 @@ type SQLite struct {
 }
 
 func NewSQLite(dbPath string) (*SQLite, error) {
-	db, err := sql.Open("sqlite3", fmt.Sprintf("%s?_sync=FULL&_locking=EXCLUSIVE", dbPath))
+	db, err := sql.Open("sqlite3", fmt.Sprintf("%s?_sync=FULL&_vacuum=incremental", dbPath))
 	if err != nil {
 		return nil, err
 	}
