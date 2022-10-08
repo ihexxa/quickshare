@@ -142,10 +142,11 @@ func (h *FileHandlers) Create(c *gin.Context) {
 		return
 	}
 
+	infoId := h.deps.ID().Gen()
 	tmpFilePath := q.UploadPath(userName, fsFilePath)
 	if req.FileSize == 0 {
 		// TODO: limit the number of files with 0 byte
-		err = h.deps.FileInfos().AddUploadInfos(c, userID, tmpFilePath, fsFilePath, &db.FileInfo{
+		err = h.deps.FileInfos().AddUploadInfos(c, infoId, userID, tmpFilePath, fsFilePath, &db.FileInfo{
 			Size: req.FileSize,
 		})
 		if err != nil {
@@ -157,7 +158,9 @@ func (h *FileHandlers) Create(c *gin.Context) {
 			return
 		}
 
-		err = h.deps.FileInfos().MoveUploadingInfos(c, userID, tmpFilePath, fsFilePath)
+		// it is ok to use same info ID here
+		// because the upload info is just moved to the right place after creating.
+		err = h.deps.FileInfos().MoveUploadingInfos(c, infoId, userID, tmpFilePath, fsFilePath)
 		if err != nil {
 			c.JSON(q.ErrResp(c, 500, err))
 			return
@@ -210,7 +213,7 @@ func (h *FileHandlers) Create(c *gin.Context) {
 		return
 	}
 
-	err = h.deps.FileInfos().AddUploadInfos(c, userID, tmpFilePath, fsFilePath, &db.FileInfo{
+	err = h.deps.FileInfos().AddUploadInfos(c, infoId, userID, tmpFilePath, fsFilePath, &db.FileInfo{
 		Size: req.FileSize,
 	})
 	if err != nil {
@@ -517,8 +520,9 @@ func (h *FileHandlers) UploadChunk(c *gin.Context) {
 		}
 
 		// move the file from uploading dir to uploaded dir
+		infoId := h.deps.ID().Gen()
 		if uploaded+int64(wrote) == fileSize {
-			err = h.deps.FileInfos().MoveUploadingInfos(c, userId, tmpFilePath, fsFilePath)
+			err = h.deps.FileInfos().MoveUploadingInfos(c, infoId, userId, tmpFilePath, fsFilePath)
 			if err != nil {
 				return 500, err
 			}
@@ -1017,7 +1021,8 @@ func (h *FileHandlers) AddSharing(c *gin.Context) {
 		return
 	}
 
-	err = h.deps.FileInfos().AddSharing(c, userId, sharingPath)
+	infoId := h.deps.ID().Gen()
+	err = h.deps.FileInfos().AddSharing(c, infoId, userId, sharingPath)
 	if err != nil {
 		c.JSON(q.ErrResp(c, 500, err))
 		return

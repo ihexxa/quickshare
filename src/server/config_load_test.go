@@ -90,7 +90,7 @@ func TestLoadCfg(t *testing.T) {
 				BgColor:  "",
 			},
 			AllowSetBg: false,
-			AutoTheme:  true,
+			AutoTheme:  false,
 		},
 	}
 
@@ -156,7 +156,7 @@ func TestLoadCfg(t *testing.T) {
 					BgColor:  "",
 				},
 				AllowSetBg: false,
-				AutoTheme:  true,
+				AutoTheme:  false,
 			},
 		},
 		Db: &DbConfig{
