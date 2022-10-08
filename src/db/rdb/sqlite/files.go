@@ -15,16 +15,18 @@ import (
 func (st *SQLiteStore) getFileInfo(ctx context.Context, itemPath string) (*db.FileInfo, error) {
 	var infoStr string
 	fInfo := &db.FileInfo{}
+	var id uint64
 	var isDir bool
 	var size int64
 	var shareId string
 	err := st.db.QueryRowContext(
 		ctx,
-		`select is_dir, size, share_id, info
+		`select id, is_dir, size, share_id, info
 		from t_file_info
 		where path=?`,
 		itemPath,
 	).Scan(
+		&id,
 		&isDir,
 		&size,
 		&shareId,
@@ -41,6 +43,7 @@ func (st *SQLiteStore) getFileInfo(ctx context.Context, itemPath string) (*db.Fi
 	if err != nil {
 		return nil, err
 	}
+	fInfo.Id = id
 	fInfo.IsDir = isDir
 	fInfo.Size = size
 	fInfo.ShareID = shareId
@@ -69,7 +72,7 @@ func (st *SQLiteStore) ListFileInfos(ctx context.Context, itemPaths []string) (m
 	rows, err := st.db.QueryContext(
 		ctx,
 		fmt.Sprintf(
-			`select path, is_dir, size, share_id, info
+			`select id, path, is_dir, size, share_id, info
 			from t_file_info
 			where path in (%s)
 			`,
@@ -85,11 +88,12 @@ func (st *SQLiteStore) ListFileInfos(ctx context.Context, itemPaths []string) (m
 	var fInfoStr, itemPath, shareId string
 	var isDir bool
 	var size int64
+	var id uint64
 	fInfos := map[string]*db.FileInfo{}
 	for rows.Next() {
 		fInfo := &db.FileInfo{}
 
-		err = rows.Scan(&itemPath, &isDir, &size, &shareId, &fInfoStr)
+		err = rows.Scan(&id, &itemPath, &isDir, &size, &shareId, &fInfoStr)
 		if err != nil {
 			return nil, err
 		}
@@ -98,6 +102,7 @@ func (st *SQLiteStore) ListFileInfos(ctx context.Context, itemPaths []string) (m
 		if err != nil {
 			return nil, err
 		}
+		fInfo.Id = id
 		fInfo.IsDir = isDir
 		fInfo.Size = size
 		fInfo.ShareID = shareId
@@ -111,7 +116,7 @@ func (st *SQLiteStore) ListFileInfos(ctx context.Context, itemPaths []string) (m
 	return fInfos, nil
 }
 
-func (st *SQLiteStore) addFileInfo(ctx context.Context, userId uint64, itemPath string, info *db.FileInfo) error {
+func (st *SQLiteStore) addFileInfo(ctx context.Context, infoId, userId uint64, itemPath string, info *db.FileInfo) error {
 	infoStr, err := json.Marshal(info)
 	if err != nil {
 		return err
@@ -126,24 +131,24 @@ func (st *SQLiteStore) addFileInfo(ctx context.Context, userId uint64, itemPath 
 	_, err = st.db.ExecContext(
 		ctx,
 		`insert into t_file_info (
-			path, user, location, parent, name,
+			id, path, user, location, parent, name,
 			is_dir, size, share_id, info
 		)
 		values (
-			?, ?, ?, ?, ?,
+			?, ?, ?, ?, ?, ?,
 			?, ?, ?, ?
 		)`,
-		itemPath, userId, location, dirPath, itemName,
+		infoId, itemPath, userId, location, dirPath, itemName,
 		info.IsDir, info.Size, info.ShareID, infoStr,
 	)
 	return err
 }
 
-func (st *SQLiteStore) AddFileInfo(ctx context.Context, userId uint64, itemPath string, info *db.FileInfo) error {
+func (st *SQLiteStore) AddFileInfo(ctx context.Context, infoId, userId uint64, itemPath string, info *db.FileInfo) error {
 	st.Lock()
 	defer st.Unlock()
 
-	err := st.addFileInfo(ctx, userId, itemPath, info)
+	err := st.addFileInfo(ctx, infoId, userId, itemPath, info)
 	if err != nil {
 		return err
 	}
@@ -260,7 +265,7 @@ func (st *SQLiteStore) MoveFileInfo(ctx context.Context, userId uint64, oldPath,
 	if err != nil {
 		return err
 	}
-	return st.addFileInfo(ctx, userId, newPath, info)
+	return st.addFileInfo(ctx, info.Id, userId, newPath, info)
 }
 
 func getLocation(itemPath string) (string, error) {

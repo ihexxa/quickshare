@@ -8,21 +8,21 @@ import (
 	"github.com/ihexxa/quickshare/src/db"
 )
 
-func (st *SQLiteStore) addUploadInfoOnly(ctx context.Context, userId uint64, tmpPath, filePath string, fileSize int64) error {
+func (st *SQLiteStore) addUploadInfoOnly(ctx context.Context, uploadId, userId uint64, tmpPath, filePath string, fileSize int64) error {
 	_, err := st.db.ExecContext(
 		ctx,
 		`insert into t_file_uploading (
-			real_path, tmp_path, user, size, uploaded
+			id, real_path, tmp_path, user, size, uploaded
 		)
 		values (
-			?, ?, ?, ?, ?
+			?, ?, ?, ?, ?, ?
 		)`,
-		filePath, tmpPath, userId, fileSize, 0,
+		uploadId, filePath, tmpPath, userId, fileSize, 0,
 	)
 	return err
 }
 
-func (st *SQLiteStore) AddUploadInfos(ctx context.Context, userId uint64, tmpPath, filePath string, info *db.FileInfo) error {
+func (st *SQLiteStore) AddUploadInfos(ctx context.Context, uploadId, userId uint64, tmpPath, filePath string, info *db.FileInfo) error {
 	st.Lock()
 	defer st.Unlock()
 
@@ -46,7 +46,7 @@ func (st *SQLiteStore) AddUploadInfos(ctx context.Context, userId uint64, tmpPat
 		return err
 	}
 
-	return st.addUploadInfoOnly(ctx, userId, tmpPath, filePath, info.Size)
+	return st.addUploadInfoOnly(ctx, uploadId, userId, tmpPath, filePath, info.Size)
 }
 
 func (st *SQLiteStore) DelUploadingInfos(ctx context.Context, userId uint64, realPath string) error {
@@ -86,7 +86,7 @@ func (st *SQLiteStore) delUploadInfoOnly(ctx context.Context, userId uint64, fil
 	return err
 }
 
-func (st *SQLiteStore) MoveUploadingInfos(ctx context.Context, userId uint64, uploadPath, itemPath string) error {
+func (st *SQLiteStore) MoveUploadingInfos(ctx context.Context, infoId, userId uint64, uploadPath, itemPath string) error {
 	st.Lock()
 	defer st.Unlock()
 
@@ -98,7 +98,7 @@ func (st *SQLiteStore) MoveUploadingInfos(ctx context.Context, userId uint64, up
 	if err != nil {
 		return err
 	}
-	return st.addFileInfo(ctx, userId, itemPath, &db.FileInfo{
+	return st.addFileInfo(ctx, infoId, userId, itemPath, &db.FileInfo{
 		Size: size,
 	})
 }

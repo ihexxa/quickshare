@@ -20,7 +20,7 @@ type SQLite struct {
 }
 
 func NewSQLite(dbPath string) (*SQLite, error) {
-	db, err := sql.Open("sqlite3", fmt.Sprintf("%s?_synchronous=FULL", dbPath))
+	db, err := sql.Open("sqlite3", fmt.Sprintf("%s?_sync=FULL&_locking=EXCLUSIVE", dbPath))
 	if err != nil {
 		return nil, err
 	}
@@ -148,6 +148,7 @@ func (st *SQLiteStore) InitFileTables(ctx context.Context) error {
 	_, err := st.db.ExecContext(
 		ctx,
 		`create table if not exists t_file_info (
+			id bigint not null,
 			path varchar not null,
 			user bigint not null,
 			location varchar not null,
@@ -157,8 +158,16 @@ func (st *SQLiteStore) InitFileTables(ctx context.Context) error {
 			size bigint not null,
 			share_id varchar not null,
 			info varchar not null,
-			primary key(path)
+			primary key(id)
 		)`,
+	)
+	if err != nil {
+		return err
+	}
+
+	_, err = st.db.ExecContext(
+		ctx,
+		`create index if not exists t_file_path on t_file_info (path, location)`,
 	)
 	if err != nil {
 		return err
@@ -175,12 +184,13 @@ func (st *SQLiteStore) InitFileTables(ctx context.Context) error {
 	_, err = st.db.ExecContext(
 		ctx,
 		`create table if not exists t_file_uploading (
+			id bigint not null,
 			real_path varchar not null,
 			tmp_path varchar not null unique,
 			user bigint not null,
 			size bigint not null,
 			uploaded bigint not null,
-			primary key(real_path)
+			primary key(id)
 		)`,
 	)
 	if err != nil {

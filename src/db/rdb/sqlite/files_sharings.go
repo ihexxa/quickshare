@@ -78,7 +78,7 @@ func (st *SQLiteStore) GetSharingDir(ctx context.Context, hashID string) (string
 	return sharedPath, nil
 }
 
-func (st *SQLiteStore) AddSharing(ctx context.Context, userId uint64, dirPath string) error {
+func (st *SQLiteStore) AddSharing(ctx context.Context, infoId, userId uint64, dirPath string) error {
 	st.Lock()
 	defer st.Unlock()
 
@@ -109,14 +109,17 @@ func (st *SQLiteStore) AddSharing(ctx context.Context, userId uint64, dirPath st
 		_, err = st.db.ExecContext(
 			ctx,
 			`insert into t_file_info (
-				path, user, location, parent, name,
+				id, path, user,
+				location, parent, name,
 				is_dir, size, share_id, info
 			)
 			values (
-				?, ?, ?, ?, ?,
+				?, ?, ?,
+				?, ?, ?,
 				?, ?, ?, ?
 			)`,
-			dirPath, userId, location, parentPath, name,
+			infoId, dirPath, userId,
+			location, parentPath, name,
 			true, 0, shareID, infoStr,
 		)
 		return err
