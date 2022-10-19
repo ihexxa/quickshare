@@ -1,6 +1,10 @@
 package kvstore
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/boltdb/bolt"
+)
 
 var ErrLocked = errors.New("already locked")
 var ErrNoLock = errors.New("no lock to unlock")
@@ -41,4 +45,6 @@ type IKVStore interface {
 	ListStringsByPrefixIn(prefix, ns string) (map[string]string, error)
 	TryLock(key string) error
 	Unlock(key string) error
+	Close() error
+	Bolt() *bolt.DB
 }
