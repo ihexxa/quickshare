@@ -5,6 +5,7 @@ import "errors"
 var ErrLocked = errors.New("already locked")
 var ErrNoLock = errors.New("no lock to unlock")
 
+// Deprecated: no longer supported
 type IKVStore interface {
 	AddNamespace(nsName string) error
 	DelNamespace(nsName string) error
