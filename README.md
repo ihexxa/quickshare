@@ -14,10 +14,6 @@
   </a>
 <p>
 
-This is a [demo on Heroku](https://hexxa-quickshare.herokuapp.com/).
-
-(User is `demo`, password is `Quicksh@re`, uploading/downloading speed is limited to around 100KB.)
-
 <image src="./docs/imgs/v0.9.1/quickshare_1920.gif" title="preview">
 
 
