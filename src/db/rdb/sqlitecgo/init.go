@@ -1,9 +1,8 @@
-package sqlite
+package sqlitecgo
 
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"sync"
 
 	"github.com/ihexxa/quickshare/src/db"
@@ -17,7 +16,7 @@ type SQLite struct {
 }
 
 func NewSQLite(dbPath string) (*SQLite, error) {
-	db, err := sql.Open("sqlite3", fmt.Sprintf("%s?_sync=FULL&_vacuum=incremental", dbPath))
+	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		return nil, err
 	}
