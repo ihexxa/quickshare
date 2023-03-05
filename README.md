@@ -19,6 +19,8 @@
 
 English | [简体中文](./docs/README_zh-cn.md)
 
+> Quickshare is still under active development, please keep in mind that full backward compatibility is not guaranteed.
+
 ## Features
 
 - File Management
