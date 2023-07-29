@@ -34,6 +34,9 @@ var (
 
 	ErrAccessDenied = errors.New("access denied")
 	ErrUnauthorized = errors.New("unauthorized")
+	// limits for HTTP statuscodes
+	statusMessageMin = 100
+	statusMessageMax = 511
 )
 
 var statusCodes = map[int]string{
@@ -105,32 +108,26 @@ type MsgResp struct {
 	Msg string `json:"msg"`
 }
 
-func NewMsgResp(code int, msg string) (int, interface{}) {
-	_, ok := statusCodes[code]
-	if !ok {
+// Check if the status code is valid, panic if not.
+func CheckStatusCode(code int){
+	if code < statusMessageMin || code > statusMessageMax {
 		panic(fmt.Sprintf("status code not found %d", code))
 	}
+}
+func NewMsgResp(code int, msg string) (int, interface{}) {
+	CheckStatusCode(code)
 	return code, &MsgResp{Msg: msg}
-
 }
 
 func Resp(code int) (int, interface{}) {
-	msg, ok := statusCodes[code]
-	if !ok {
-		panic(fmt.Sprintf("status code not found %d", code))
-	}
-	return code, &MsgResp{Msg: msg}
-
+	CheckStatusCode(code)
+	return code, &MsgResp{Msg: statusCodes[code]}
 }
 
 func ErrResp(c *gin.Context, code int, err error) (int, interface{}) {
-	_, ok := statusCodes[code]
-	if !ok {
-		panic(fmt.Sprintf("status code not found %d", code))
-	}
+	CheckStatusCode(code)
 	gErr := c.Error(err)
 	return code, gErr.JSON()
-
 }
 
 func FsRootPath(userName, relFilePath string) string {
