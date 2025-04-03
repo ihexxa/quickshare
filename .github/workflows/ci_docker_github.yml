@@ -29,8 +29,8 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ihexxa
           password: ${{ secrets.GHCR_PWD }}
-      # - name: Set version
-      #   run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      - name: Set version
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
@@ -43,15 +43,20 @@ jobs:
           platforms: linux/amd64, linux/arm64
           file: ./Dockerfile_default
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ghcr.io/ihexxa/quickshare:${{ env.RELEASE_VERSION }}
           labels: ${{ steps.meta.outputs.labels }}
-      - name: Debug
-        run: echo ${{ steps.meta.outputs.tags }}
-      # - name: Build and push to Docker Hub with latest tag
-      #   uses: docker/build-push-action@v2
+      - name: Build and push to Docker Hub with version tag
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64, linux/arm64
+          file: ./Dockerfile_default
+          push: true
+          tags: ghcr.io/ihexxa/quickshare:latest
+          labels: ${{ steps.meta.outputs.labels }}
+      # - name: Generate artifact attestation
+      #   uses: actions/attest-build-provenance@v2
       #   with:
-      #     context: .
-      #     platforms: linux/amd64, linux/arm64
-      #     file: ./Dockerfile_default
-      #     push: true
-      #     tags: imvicx/quickshare:latest
+      #     subject-name: ghcr.io/ihexxa/quickshare:${{ env.RELEASE_VERSION }}
+      #     subject-digest: ${{ steps.push.outputs.digest }}
+      #     push-to-registry: true
