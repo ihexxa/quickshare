@@ -1,6 +1,8 @@
 module github.com/ihexxa/quickshare
 
-go 1.18
+go 1.23.0
+
+toolchain go1.23.8
 
 require (
 	github.com/boltdb/bolt v1.3.1
