@@ -9,7 +9,7 @@ WORKDIR /quickshare
 ARG TARGETOS TARGETARCH
 RUN GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o /quickshare/dist/quickshare/start /quickshare/cmd/start
 
-FROM --platform=$BUILDPLATFORM debian:stable-slim
+FROM --platform=$BUILDPLATFORM debian:stable-slim AS base-$BUILDPLATFORM
 RUN groupadd -g 8686 quickshare
 RUN useradd quickshare -u 8686 -g 8686 -m -s /bin/bash
 RUN usermod -a -G quickshare root
@@ -18,4 +18,6 @@ ADD configs/docker.yml /quickshare
 RUN mkdir -p /quickshare/root
 RUN chgrp -R quickshare /quickshare
 RUN chmod -R 0770 /quickshare
+
+FROM base-$BUILDPLATFORM
 CMD ["/quickshare/start", "-c", "/quickshare/docker.yml"]

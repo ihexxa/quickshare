@@ -1,9 +1,9 @@
 name: ci-docker-test
 
 on:
-  release:
-    types: [published]
-  workflow_dispatch: {}
+  # release:
+  #   types: [published]
+  # workflow_dispatch: {}
   push:
     branches:
       - "dev-docker"
