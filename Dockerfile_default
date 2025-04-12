@@ -1,12 +1,12 @@
-FROM node:lts as build-fe
+FROM node:lts AS build-fe
 ADD . /quickshare
 WORKDIR /quickshare
 RUN yarn run build:fe
 
-FROM golang:1.18 as build-be
+FROM golang:1.23 AS build-be
 COPY --from=build-fe /quickshare /quickshare
 WORKDIR /quickshare
-RUN /quickshare/scripts/build_exec.sh
+RUN `which go` build -o /quickshare/dist/quickshare/start /quickshare/cmd/start
 
 FROM debian:stable-slim
 RUN groupadd -g 8686 quickshare
