@@ -6,8 +6,7 @@ RUN yarn run build:fe
 FROM golang:1.18 AS build-be
 COPY --from=build-fe /quickshare /quickshare
 WORKDIR /quickshare
-ARG TARGETOS TARGETARCH
-RUN GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o /quickshare/dist/quickshare/start /quickshare/cmd/start
+RUN go build -o /quickshare/dist/quickshare/start /quickshare/cmd/start
 
 FROM debian:stable-slim
 RUN groupadd -g 8686 quickshare
