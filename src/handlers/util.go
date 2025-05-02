@@ -4,6 +4,7 @@ import (
 	"crypto/sha1"
 	"errors"
 	"fmt"
+	"path"
 	"path/filepath"
 	"strconv"
 
@@ -109,7 +110,7 @@ type MsgResp struct {
 }
 
 // Check if the status code is valid, panic if not.
-func CheckStatusCode(code int){
+func CheckStatusCode(code int) {
 	if code < statusMessageMin || code > statusMessageMax {
 		panic(fmt.Sprintf("status code not found %d", code))
 	}
@@ -132,16 +133,16 @@ func ErrResp(c *gin.Context, code int, err error) (int, interface{}) {
 
 func FsRootPath(userName, relFilePath string) string {
 	relFilePath = filepath.Clean(relFilePath)
-	return filepath.Join(userName, FsRootDir, relFilePath)
+	return path.Join(userName, FsRootDir, relFilePath)
 }
 
 func UploadPath(userName, relFilePath string) string {
 	relFilePath = filepath.Clean(relFilePath)
-	return filepath.Join(UploadFolder(userName), fmt.Sprintf("%x", sha1.Sum([]byte(relFilePath))))
+	return path.Join(UploadFolder(userName), fmt.Sprintf("%x", sha1.Sum([]byte(relFilePath))))
 }
 
 func UploadFolder(userName string) string {
-	return filepath.Join(userName, UploadDir)
+	return path.Join(userName, UploadDir)
 }
 
 func GetUserInfo(tokenStr string, tokenEncDec cryptoutil.ITokenEncDec) (map[string]string, error) {
