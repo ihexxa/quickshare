@@ -147,7 +147,7 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 func (h *MultiUsersSvc) Init(ctx context.Context, adminName string) (string, error) {
 	var err error
 
-	fsPath := q.FsRootPath(adminName, "/")
+	fsPath := q.FsRootPath(adminName, "")
 	if err = h.deps.FS().MkdirAll(fsPath); err != nil {
 		return "", err
 	}
@@ -183,7 +183,7 @@ func (h *MultiUsersSvc) Init(ctx context.Context, adminName string) (string, err
 
 			// TODO: following operations must be atomic
 			// TODO: check if the folders already exists
-			fsRootFolder := q.FsRootPath(userCfg.Name, "/")
+			fsRootFolder := q.FsRootPath(userCfg.Name, "")
 			if err = h.deps.FS().MkdirAll(fsRootFolder); err != nil {
 				return "", err
 			}
