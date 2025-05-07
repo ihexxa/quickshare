@@ -33,9 +33,10 @@ import (
 )
 
 type Initer struct {
-	cfg    gocfg.ICfg
-	input  io.Reader
-	output io.Writer
+	cfg          gocfg.ICfg
+	input        io.Reader
+	output       io.Writer
+	onStartHooks []func(cfg gocfg.ICfg) error
 }
 
 func NewIniter(cfg gocfg.ICfg) *Initer {

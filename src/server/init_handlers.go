@@ -24,16 +24,16 @@ func (it *Initer) InitHandlers(deps *depidx.Deps) (*gin.Engine, error) {
 		return nil, fmt.Errorf("new users svc error: %w", err)
 	}
 
-	adminName := it.cfg.GrabString("ENV.DEFAULTADMIN")
-	_, err = userHdrs.Init(context.TODO(), adminName)
-	if err != nil {
-		return nil, fmt.Errorf("failed to init user handlers: %w", err)
-	}
-
 	fileHdrs, err := fileshdr.NewFileHandlers(it.cfg, deps)
 	if err != nil {
 		return nil, fmt.Errorf("new files service error: %w", err)
 	}
+	adminName := it.cfg.GrabString("ENV.DEFAULTADMIN")
+	_, err = fileHdrs.Init(context.TODO(), adminName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to init user handlers: %w", err)
+	}
+
 	settingsSvc, err := settings.NewSettingsSvc(it.cfg, deps)
 	if err != nil {
 		return nil, fmt.Errorf("new setting service error: %w", err)
