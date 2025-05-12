@@ -78,7 +78,7 @@ func TestLoadCfg(t *testing.T) {
 	cfgDefault := DefaultConfigStruct()
 
 	cfgDBOnly := *cfgDefault
-	cfgDBOnly.Site = &db.SiteConfig{
+	cfgDBOnly.Server.Dynamic = &db.SiteConfig{
 		ClientCfg: &db.ClientConfig{
 			SiteName: "Quickshare",
 			SiteDesc: "Quick and simple file sharing",
@@ -138,26 +138,26 @@ func TestLoadCfg(t *testing.T) {
 			ReadTimeout:    1,
 			WriteTimeout:   1,
 			MaxHeaderBytes: 1,
+			Dynamic: &db.SiteConfig{
+				ClientCfg: &db.ClientConfig{
+					SiteName: "Quickshare",
+					SiteDesc: "Quick and simple file sharing",
+					Bg: &db.BgConfig{
+						Url:      "",
+						Repeat:   "repeat",
+						Position: "center",
+						Align:    "fixed",
+						BgColor:  "",
+					},
+					AllowSetBg: false,
+					AutoTheme:  false,
+				},
+			},
 		},
 		Workers: &WorkerPoolCfg{
 			QueueSize:   1,
 			SleepCyc:    1,
 			WorkerCount: 1,
-		},
-		Site: &db.SiteConfig{
-			ClientCfg: &db.ClientConfig{
-				SiteName: "Quickshare",
-				SiteDesc: "Quick and simple file sharing",
-				Bg: &db.BgConfig{
-					Url:      "",
-					Repeat:   "repeat",
-					Position: "center",
-					Align:    "fixed",
-					BgColor:  "",
-				},
-				AllowSetBg: false,
-				AutoTheme:  false,
-			},
 		},
 		Db: &DbConfig{
 			DbPath: "testdata/quickshare.sqlite",
@@ -208,26 +208,26 @@ func TestLoadCfg(t *testing.T) {
 			ReadTimeout:    4,
 			WriteTimeout:   4,
 			MaxHeaderBytes: 4,
+			Dynamic: &db.SiteConfig{
+				ClientCfg: &db.ClientConfig{
+					SiteName: "4",
+					SiteDesc: "4",
+					Bg: &db.BgConfig{
+						Url:      "4",
+						Repeat:   "4",
+						Position: "4",
+						Align:    "4",
+						BgColor:  "4",
+					},
+					AllowSetBg: true,
+					AutoTheme:  true,
+				},
+			},
 		},
 		Workers: &WorkerPoolCfg{
 			QueueSize:   4,
 			SleepCyc:    4,
 			WorkerCount: 4,
-		},
-		Site: &db.SiteConfig{
-			ClientCfg: &db.ClientConfig{
-				SiteName: "4",
-				SiteDesc: "4",
-				Bg: &db.BgConfig{
-					Url:      "4",
-					Repeat:   "4",
-					Position: "4",
-					Align:    "4",
-					BgColor:  "4",
-				},
-				AllowSetBg: true,
-				AutoTheme:  true,
-			},
 		},
 		Db: &DbConfig{
 			DbPath: "4",
@@ -278,26 +278,26 @@ func TestLoadCfg(t *testing.T) {
 			ReadTimeout:    4,
 			WriteTimeout:   4,
 			MaxHeaderBytes: 4,
+			Dynamic: &db.SiteConfig{
+				ClientCfg: &db.ClientConfig{
+					SiteName: "4",
+					SiteDesc: "4",
+					Bg: &db.BgConfig{
+						Url:      "4",
+						Repeat:   "4",
+						Position: "4",
+						Align:    "4",
+						BgColor:  "4",
+					},
+					AllowSetBg: true,
+					AutoTheme:  true,
+				},
+			},
 		},
 		Workers: &WorkerPoolCfg{
 			QueueSize:   4,
 			SleepCyc:    4,
 			WorkerCount: 4,
-		},
-		Site: &db.SiteConfig{
-			ClientCfg: &db.ClientConfig{
-				SiteName: "4",
-				SiteDesc: "4",
-				Bg: &db.BgConfig{
-					Url:      "4",
-					Repeat:   "4",
-					Position: "4",
-					Align:    "4",
-					BgColor:  "4",
-				},
-				AllowSetBg: true,
-				AutoTheme:  true,
-			},
 		},
 		Db: &DbConfig{
 			DbPath: "5",
@@ -348,26 +348,26 @@ func TestLoadCfg(t *testing.T) {
 			ReadTimeout:    4,
 			WriteTimeout:   4,
 			MaxHeaderBytes: 4,
+			Dynamic: &db.SiteConfig{
+				ClientCfg: &db.ClientConfig{
+					SiteName: "4",
+					SiteDesc: "4",
+					Bg: &db.BgConfig{
+						Url:      "4",
+						Repeat:   "4",
+						Position: "4",
+						Align:    "4",
+						BgColor:  "4",
+					},
+					AllowSetBg: true,
+					AutoTheme:  true,
+				},
+			},
 		},
 		Workers: &WorkerPoolCfg{
 			QueueSize:   4,
 			SleepCyc:    4,
 			WorkerCount: 4,
-		},
-		Site: &db.SiteConfig{
-			ClientCfg: &db.ClientConfig{
-				SiteName: "4",
-				SiteDesc: "4",
-				Bg: &db.BgConfig{
-					Url:      "4",
-					Repeat:   "4",
-					Position: "4",
-					Align:    "4",
-					BgColor:  "4",
-				},
-				AllowSetBg: true,
-				AutoTheme:  true,
-			},
 		},
 		Db: &DbConfig{
 			DbPath: "5",

@@ -238,14 +238,14 @@ func (it *Initer) initDb(filesystem fs.ISimpleFS) (db.IDBQuickshare, error) {
 
 		siteCfg := &db.SiteConfig{
 			ClientCfg: &db.ClientConfig{
-				SiteName: it.cfg.StringOr("Site.ClientCfg.SiteName", "Quickshare"),
-				SiteDesc: it.cfg.StringOr("Site.ClientCfg.SiteDesc", "Quick and simple file sharing"),
+				SiteName: it.cfg.StringOr("Server.Dynamic.ClientCfg.SiteName", "Quickshare"),
+				SiteDesc: it.cfg.StringOr("Server.Dynamic.ClientCfg.SiteDesc", "Quick and simple file sharing"),
 				Bg: &db.BgConfig{
-					Url:      it.cfg.StringOr("Site.ClientCfg.Bg.Url", ""),
-					Repeat:   it.cfg.StringOr("Site.ClientCfg.Bg.Repeat", "repeat"),
-					Position: it.cfg.StringOr("Site.ClientCfg.Bg.Position", "center"),
-					Align:    it.cfg.StringOr("Site.ClientCfg.Bg.Align", "fixed"),
-					BgColor:  it.cfg.StringOr("Site.ClientCfg.Bg.BgColor", ""),
+					Url:      it.cfg.StringOr("Server.Dynamic.ClientCfg.Bg.Url", ""),
+					Repeat:   it.cfg.StringOr("Server.Dynamic.ClientCfg.Bg.Repeat", "repeat"),
+					Position: it.cfg.StringOr("Server.Dynamic.ClientCfg.Bg.Position", "center"),
+					Align:    it.cfg.StringOr("Server.Dynamic.ClientCfg.Bg.Align", "fixed"),
+					BgColor:  it.cfg.StringOr("Server.Dynamic.ClientCfg.Bg.BgColor", ""),
 				},
 			},
 		}

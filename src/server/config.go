@@ -46,12 +46,13 @@ type Secrets struct {
 }
 
 type ServerCfg struct {
-	Debug          bool   `json:"debug" yaml:"debug"`
-	Host           string `json:"host" yaml:"host"`
-	Port           int    `json:"port" yaml:"port" cfg:"env"`
-	ReadTimeout    int    `json:"readTimeout" yaml:"readTimeout"`
-	WriteTimeout   int    `json:"writeTimeout" yaml:"writeTimeout"`
-	MaxHeaderBytes int    `json:"maxHeaderBytes" yaml:"maxHeaderBytes"`
+	Debug          bool           `json:"debug" yaml:"debug"`
+	Host           string         `json:"host" yaml:"host"`
+	Port           int            `json:"port" yaml:"port" cfg:"env"`
+	ReadTimeout    int            `json:"readTimeout" yaml:"readTimeout"`
+	WriteTimeout   int            `json:"writeTimeout" yaml:"writeTimeout"`
+	MaxHeaderBytes int            `json:"maxHeaderBytes" yaml:"maxHeaderBytes"`
+	Dynamic        *db.SiteConfig `json:"dynamic" yaml:"dynamic"`
 }
 
 type WorkerPoolCfg struct {
@@ -61,13 +62,12 @@ type WorkerPoolCfg struct {
 }
 
 type Config struct {
+	Users   *UsersCfg      `json:"users" yaml:"users"`
 	Fs      *FSConfig      `json:"fs" yaml:"fs"`
 	Secrets *Secrets       `json:"secrets" yaml:"secrets"`
-	Server  *ServerCfg     `json:"server" yaml:"server"`
-	Users   *UsersCfg      `json:"users" yaml:"users"`
 	Workers *WorkerPoolCfg `json:"workers" yaml:"workers"`
-	Site    *db.SiteConfig `json:"site" yaml:"site"`
 	Db      *DbConfig      `json:"db" yaml:"db"`
+	Server  *ServerCfg     `json:"server" yaml:"server"`
 }
 
 func NewConfig() *Config {
@@ -118,26 +118,26 @@ func DefaultConfigStruct() *Config {
 			ReadTimeout:    2000,
 			WriteTimeout:   1000 * 3600 * 24, // 1 day
 			MaxHeaderBytes: 512,
+			Dynamic: &db.SiteConfig{
+				ClientCfg: &db.ClientConfig{
+					SiteName: "Quickshare",
+					SiteDesc: "Quick and simple file sharing",
+					Bg: &db.BgConfig{
+						Url:      "",
+						Repeat:   "repeat",
+						Position: "center",
+						Align:    "fixed",
+						BgColor:  "",
+					},
+					AllowSetBg: false,
+					AutoTheme:  true,
+				},
+			},
 		},
 		Workers: &WorkerPoolCfg{
 			QueueSize:   1024,
 			SleepCyc:    1,
 			WorkerCount: 2,
-		},
-		Site: &db.SiteConfig{
-			ClientCfg: &db.ClientConfig{
-				SiteName: "Quickshare",
-				SiteDesc: "Quick and simple file sharing",
-				Bg: &db.BgConfig{
-					Url:      "",
-					Repeat:   "repeat",
-					Position: "center",
-					Align:    "fixed",
-					BgColor:  "",
-				},
-				AllowSetBg: false,
-				AutoTheme:  true,
-			},
 		},
 		Db: &DbConfig{
 			DbPath: "quickshare.sqlite",

@@ -37,28 +37,28 @@ func TestUsersHandlers(t *testing.T) {
 		},
 		"server": {
 			"debug": true,
-			"host": "127.0.0.1"
+			"host": "127.0.0.1",
+			"dynamic": {
+				"clientCfg": {
+					"siteName": "Quickshare",
+					"siteDesc": "Quick and simple file sharing",
+					"bg": {
+						"url":      "/static/img/textured_paper.png",
+						"repeat":   "repeat",
+						"position": "center",
+						"align":    "fixed",
+						"bgColor":  "#ccc"
+					},
+					"allowSetBg": true,
+					"autoTheme":  true
+				}
+			}
 		},
 		"fs": {
 			"root": "tmpTestData"
 		},
 		"db": {
 			"dbPath": "tmpTestData/quickshare"
-		},
-		"site": {
-			"clientCfg": {
-				"siteName": "Quickshare",
-				"siteDesc": "Quick and simple file sharing",
-				"bg": {
-					"url":      "/static/img/textured_paper.png",
-					"repeat":   "repeat",
-					"position": "center",
-					"align":    "fixed",
-					"bgColor":  "#ccc"
-				},
-				"allowSetBg": true,
-				"autoTheme":  true
-			}
 		}
 	}`
 	adminName := "qs"
@@ -384,6 +384,7 @@ func TestUsersHandlers(t *testing.T) {
 		}
 	})
 
+	// deprecated
 	// t.Run("test roles APIs: Login-AddRole-ListRoles-DelRole-ListRoles-Logout", func(t *testing.T) {
 	// 	adminUsersCli := client.NewUsersClient(addr)
 	// 	resp, _, errs := adminUsersCli.Login(adminName, adminNewPwd)

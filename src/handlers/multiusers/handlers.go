@@ -580,7 +580,7 @@ func (h *MultiUsersSvc) Self(c *gin.Context) {
 		return
 	}
 
-	allowSetBg := h.cfg.BoolOr("Site.ClientCfg.AllowSetBg", false)
+	allowSetBg := h.cfg.BoolOr("Server.Dynamic.ClientCfg.AllowSetBg", false)
 	if !allowSetBg {
 		user.Preferences.Bg = db.DefaultBgConfig
 	}
@@ -639,7 +639,7 @@ func (h *MultiUsersSvc) SetPreferences(c *gin.Context) {
 		return
 	}
 
-	allowSetBg := h.cfg.BoolOr("Site.ClientCfg.AllowSetBg", false)
+	allowSetBg := h.cfg.BoolOr("Server.Dynamic.ClientCfg.AllowSetBg", false)
 	if !allowSetBg {
 		req.Preferences.Bg = db.DefaultBgConfig
 	}

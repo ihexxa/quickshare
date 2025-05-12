@@ -12,6 +12,18 @@ server:
   readTimeout: 4
   writeTimeout: 4
   maxHeaderBytes: 4
+  dynamic:
+    clientCfg:
+      siteName: "4"
+      siteDesc: "4"
+      bg:
+        url: "4"
+        repeat: "4"
+        position: "4"
+        align: "4"
+        bgColor: "4"
+      allowSetBg: true
+      autoTheme: true
 users:
   enableAuth: false
   defaultAdmin: "4"
@@ -37,17 +49,5 @@ workers:
   queueSize: 4
   sleepCyc: 4
   workerCount: 4
-site:
-  clientCfg:
-    siteName: "4"
-    siteDesc: "4"
-    bg:
-      url: "4"
-      repeat: "4"
-      position: "4"
-      align: "4"
-      bgColor: "4"
-    allowSetBg: true
-    autoTheme: true
 db:
   dbPath: "4"
