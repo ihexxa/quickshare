@@ -2,6 +2,9 @@ fs:
   root: "tmp"
   opensLimit: 1024
   openTTL: 60 # 1 min
+  publicPath: "static/public"
+  searchResultLimit: 16
+  initFileIndex: true
 secrets:
   tokenSecret: ""
 server:
@@ -11,9 +14,6 @@ server:
   readTimeout: 2000
   writeTimeout: 86400000 # 1 day
   maxHeaderBytes: 512
-  publicPath: "static/public"
-  searchResultLimit: 16
-  initFileIndex: true
 users:
   enableAuth: true
   defaultAdmin: ""

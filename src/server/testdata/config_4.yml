@@ -2,6 +2,7 @@ fs:
   root: "4"
   opensLimit: 4
   openTTL: 4
+  publicPath: "4"
 secrets:
   tokenSecret: "4"
 server:
@@ -11,7 +12,6 @@ server:
   readTimeout: 4
   writeTimeout: 4
   maxHeaderBytes: 4
-  publicPath: "4"
 users:
   enableAuth: false
   defaultAdmin: "4"

@@ -31,7 +31,7 @@ type MultiUsersSvc struct {
 }
 
 func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error) {
-	publicPath := filepath.Join("/", cfg.GrabString("Server.PublicPath"))
+	publicPath := filepath.Join("/", cfg.GrabString("Fs.PublicPath"))
 
 	apiACRules := map[string]bool{
 		// TODO: make these configurable

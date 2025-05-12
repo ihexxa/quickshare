@@ -96,9 +96,12 @@ func TestLoadCfg(t *testing.T) {
 
 	cfg1 := &Config{
 		Fs: &FSConfig{
-			Root:       "1",
-			OpensLimit: 1,
-			OpenTTL:    1,
+			Root:              "1",
+			OpensLimit:        1,
+			OpenTTL:           1,
+			PublicPath:        "1",
+			SearchResultLimit: 16,
+			InitFileIndex:     true,
 		},
 		Users: &UsersCfg{
 			EnableAuth:         true,
@@ -129,15 +132,12 @@ func TestLoadCfg(t *testing.T) {
 			TokenSecret: "1",
 		},
 		Server: &ServerCfg{
-			Debug:             true,
-			Host:              "1",
-			Port:              1,
-			ReadTimeout:       1,
-			WriteTimeout:      1,
-			MaxHeaderBytes:    1,
-			PublicPath:        "1",
-			SearchResultLimit: 16,
-			InitFileIndex:     true,
+			Debug:          true,
+			Host:           "1",
+			Port:           1,
+			ReadTimeout:    1,
+			WriteTimeout:   1,
+			MaxHeaderBytes: 1,
 		},
 		Workers: &WorkerPoolCfg{
 			QueueSize:   1,
@@ -166,9 +166,12 @@ func TestLoadCfg(t *testing.T) {
 
 	cfg4 := &Config{
 		Fs: &FSConfig{
-			Root:       "4",
-			OpensLimit: 4,
-			OpenTTL:    4,
+			Root:              "4",
+			OpensLimit:        4,
+			OpenTTL:           4,
+			PublicPath:        "4",
+			SearchResultLimit: 16,
+			InitFileIndex:     true,
 		},
 		Users: &UsersCfg{
 			EnableAuth:         false,
@@ -199,15 +202,12 @@ func TestLoadCfg(t *testing.T) {
 			TokenSecret: "4",
 		},
 		Server: &ServerCfg{
-			Debug:             false,
-			Host:              "4",
-			Port:              4,
-			ReadTimeout:       4,
-			WriteTimeout:      4,
-			MaxHeaderBytes:    4,
-			PublicPath:        "4",
-			SearchResultLimit: 16,
-			InitFileIndex:     true,
+			Debug:          false,
+			Host:           "4",
+			Port:           4,
+			ReadTimeout:    4,
+			WriteTimeout:   4,
+			MaxHeaderBytes: 4,
 		},
 		Workers: &WorkerPoolCfg{
 			QueueSize:   4,
@@ -236,9 +236,12 @@ func TestLoadCfg(t *testing.T) {
 
 	cfg5 := &Config{
 		Fs: &FSConfig{
-			Root:       "4",
-			OpensLimit: 4,
-			OpenTTL:    4,
+			Root:              "4",
+			OpensLimit:        4,
+			OpenTTL:           4,
+			PublicPath:        "4",
+			SearchResultLimit: 16,
+			InitFileIndex:     true,
 		},
 		Users: &UsersCfg{
 			EnableAuth:         true,
@@ -269,15 +272,12 @@ func TestLoadCfg(t *testing.T) {
 			TokenSecret: "4",
 		},
 		Server: &ServerCfg{
-			Debug:             false,
-			Host:              "4",
-			Port:              4,
-			ReadTimeout:       4,
-			WriteTimeout:      4,
-			MaxHeaderBytes:    4,
-			PublicPath:        "4",
-			SearchResultLimit: 16,
-			InitFileIndex:     true,
+			Debug:          false,
+			Host:           "4",
+			Port:           4,
+			ReadTimeout:    4,
+			WriteTimeout:   4,
+			MaxHeaderBytes: 4,
 		},
 		Workers: &WorkerPoolCfg{
 			QueueSize:   4,
@@ -306,9 +306,12 @@ func TestLoadCfg(t *testing.T) {
 
 	cfgWithPartialCfg := &Config{
 		Fs: &FSConfig{
-			Root:       "4",
-			OpensLimit: 4,
-			OpenTTL:    4,
+			Root:              "4",
+			OpensLimit:        4,
+			OpenTTL:           4,
+			PublicPath:        "4",
+			SearchResultLimit: 16,
+			InitFileIndex:     true,
 		},
 		Users: &UsersCfg{
 			EnableAuth:         true,
@@ -339,15 +342,12 @@ func TestLoadCfg(t *testing.T) {
 			TokenSecret: "4",
 		},
 		Server: &ServerCfg{
-			Debug:             false,
-			Host:              "4",
-			Port:              4,
-			ReadTimeout:       4,
-			WriteTimeout:      4,
-			MaxHeaderBytes:    4,
-			PublicPath:        "4",
-			SearchResultLimit: 16,
-			InitFileIndex:     true,
+			Debug:          false,
+			Host:           "4",
+			Port:           4,
+			ReadTimeout:    4,
+			WriteTimeout:   4,
+			MaxHeaderBytes: 4,
 		},
 		Workers: &WorkerPoolCfg{
 			QueueSize:   4,

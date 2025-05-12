@@ -43,7 +43,7 @@ func (it *Initer) InitHandlers(deps *depidx.Deps) (*gin.Engine, error) {
 	router.Use(userHdrs.AuthN())
 	router.Use(userHdrs.APIAccessControl())
 
-	publicPath, ok := it.cfg.String("Server.PublicPath")
+	publicPath, ok := it.cfg.String("Fs.PublicPath")
 	if !ok || publicPath == "" {
 		return nil, errors.New("publicPath not found or empty")
 	}
