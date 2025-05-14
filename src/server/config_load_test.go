@@ -90,7 +90,7 @@ func TestLoadCfg(t *testing.T) {
 				BgColor:  "",
 			},
 			AllowSetBg: false,
-			AutoTheme:  false,
+			AutoTheme:  true,
 		},
 	}
 
@@ -150,7 +150,7 @@ func TestLoadCfg(t *testing.T) {
 						BgColor:  "",
 					},
 					AllowSetBg: false,
-					AutoTheme:  false,
+					AutoTheme:  true,
 				},
 			},
 		},
@@ -405,6 +405,7 @@ func TestLoadCfg(t *testing.T) {
 			if !reflect.DeepEqual(gotCfg.Template(), expectCfg.Template()) {
 				gotJSON, _ := gotCfg.JSON()
 				expectJSON, _ := expectCfg.JSON()
+				fmt.Printf("\ntestcase\n%d\n", i)
 				fmt.Printf("\ngot\n%s\n", gotJSON)
 				fmt.Printf("\nexpected\n%s\n", expectJSON)
 				t.Fatalf("%d, cfgs are not identical", i)
