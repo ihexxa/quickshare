@@ -24,16 +24,6 @@ func (it *Initer) InitHandlers(deps *depidx.Deps) (*gin.Engine, error) {
 		return nil, fmt.Errorf("new users svc error: %w", err)
 	}
 
-	fileHdrs, err := fileshdr.NewFileHandlers(it.cfg, deps)
-	if err != nil {
-		return nil, fmt.Errorf("new files service error: %w", err)
-	}
-	adminName := it.cfg.GrabString("ENV.DEFAULTADMIN")
-	_, err = fileHdrs.Init(context.TODO(), adminName)
-	if err != nil {
-		return nil, fmt.Errorf("failed to init user handlers: %w", err)
-	}
-
 	settingsSvc, err := settings.NewSettingsSvc(it.cfg, deps)
 	if err != nil {
 		return nil, fmt.Errorf("new setting service error: %w", err)
@@ -83,35 +73,47 @@ func (it *Initer) InitHandlers(deps *depidx.Deps) (*gin.Engine, error) {
 	captchaAPI.GET("/", userHdrs.GetCaptchaID)
 	captchaAPI.GET("/imgs", userHdrs.GetCaptchaImg)
 
-	filesAPI := v1.Group("/fs")
-	filesAPI.POST("/files", fileHdrs.Create)
-	filesAPI.DELETE("/files", fileHdrs.Delete)
-	filesAPI.GET("/files", fileHdrs.Download)
-	filesAPI.PATCH("/files/chunks", fileHdrs.UploadChunk)
-	filesAPI.GET("/files/chunks", fileHdrs.UploadStatus)
-	filesAPI.PATCH("/files/copy", fileHdrs.Copy)
-	filesAPI.PATCH("/files/move", fileHdrs.Move)
+	if it.cfg.BoolOr("Fs.Enabled", true) {
+		fileHdrs, err := fileshdr.NewFileHandlers(it.cfg, deps)
+		if err != nil {
+			return nil, fmt.Errorf("new files service error: %w", err)
+		}
+		adminName := it.cfg.GrabString("ENV.DEFAULTADMIN")
+		_, err = fileHdrs.Init(context.TODO(), adminName)
+		if err != nil {
+			return nil, fmt.Errorf("failed to init user handlers: %w", err)
+		}
 
-	filesAPI.GET("/dirs", fileHdrs.List)
-	filesAPI.GET("/dirs/home", fileHdrs.ListHome)
-	filesAPI.POST("/dirs", fileHdrs.Mkdir)
-	// files.POST("/dirs/copy", fileHdrs.CopyDir)
+		filesAPI := v1.Group("/fs")
+		filesAPI.POST("/files", fileHdrs.Create)
+		filesAPI.DELETE("/files", fileHdrs.Delete)
+		filesAPI.GET("/files", fileHdrs.Download)
+		filesAPI.PATCH("/files/chunks", fileHdrs.UploadChunk)
+		filesAPI.GET("/files/chunks", fileHdrs.UploadStatus)
+		filesAPI.PATCH("/files/copy", fileHdrs.Copy)
+		filesAPI.PATCH("/files/move", fileHdrs.Move)
 
-	filesAPI.GET("/uploadings", fileHdrs.ListUploadings)
-	filesAPI.DELETE("/uploadings", fileHdrs.DelUploading)
+		filesAPI.GET("/dirs", fileHdrs.List)
+		filesAPI.GET("/dirs/home", fileHdrs.ListHome)
+		filesAPI.POST("/dirs", fileHdrs.Mkdir)
+		// files.POST("/dirs/copy", fileHdrs.CopyDir)
 
-	filesAPI.POST("/sharings", fileHdrs.AddSharing)
-	filesAPI.DELETE("/sharings", fileHdrs.DelSharing)
-	filesAPI.GET("/sharings", fileHdrs.ListSharings)
-	filesAPI.GET("/sharings/ids", fileHdrs.ListSharingIDs)
-	filesAPI.GET("/sharings/exist", fileHdrs.IsSharing)
-	filesAPI.GET("/sharings/dirs", fileHdrs.GetSharingDir)
+		filesAPI.GET("/uploadings", fileHdrs.ListUploadings)
+		filesAPI.DELETE("/uploadings", fileHdrs.DelUploading)
 
-	filesAPI.GET("/metadata", fileHdrs.Metadata)
-	filesAPI.GET("/search", fileHdrs.SearchItems)
-	filesAPI.PUT("/reindex", fileHdrs.Reindex)
+		filesAPI.POST("/sharings", fileHdrs.AddSharing)
+		filesAPI.DELETE("/sharings", fileHdrs.DelSharing)
+		filesAPI.GET("/sharings", fileHdrs.ListSharings)
+		filesAPI.GET("/sharings/ids", fileHdrs.ListSharingIDs)
+		filesAPI.GET("/sharings/exist", fileHdrs.IsSharing)
+		filesAPI.GET("/sharings/dirs", fileHdrs.GetSharingDir)
 
-	filesAPI.POST("/hashes/sha1", fileHdrs.GenerateHash)
+		filesAPI.GET("/metadata", fileHdrs.Metadata)
+		filesAPI.GET("/search", fileHdrs.SearchItems)
+		filesAPI.PUT("/reindex", fileHdrs.Reindex)
+
+		filesAPI.POST("/hashes/sha1", fileHdrs.GenerateHash)
+	}
 
 	settingsAPI := v1.Group("/settings")
 	settingsAPI.OPTIONS("/health", settingsSvc.Health)
