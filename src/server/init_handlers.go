@@ -62,7 +62,6 @@ func (it *Initer) InitHandlers(deps *depidx.Deps) (*gin.Engine, error) {
 	usersAPI.GET("/self", userHdrs.Self)
 	usersAPI.PATCH("/", userHdrs.SetUser)
 	usersAPI.PATCH("/preferences", userHdrs.SetPreferences)
-	usersAPI.PUT("/used-space", userHdrs.ResetUsedSpace)
 
 	rolesAPI := v1.Group("/roles")
 	// rolesAPI.POST("/", userHdrs.AddRole)
@@ -113,6 +112,7 @@ func (it *Initer) InitHandlers(deps *depidx.Deps) (*gin.Engine, error) {
 		filesAPI.PUT("/reindex", fileHdrs.Reindex)
 
 		filesAPI.POST("/hashes/sha1", fileHdrs.GenerateHash)
+		filesAPI.PUT("/used-space", fileHdrs.ResetUsedSpace)
 	}
 
 	settingsAPI := v1.Group("/settings")

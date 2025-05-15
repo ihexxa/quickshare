@@ -275,3 +275,12 @@ func (cl *FilesClient) Reindex() (*http.Response, string, []error) {
 		AddCookie(cl.token).
 		End()
 }
+
+func (cl *FilesClient) ResetUsedSpace(userID uint64) (*http.Response, string, []error) {
+	return cl.r.Put(cl.url("/v1/fs/used-space")).
+		Send(fileshdr.ResetUsedSpaceReq{
+			UserID: userID,
+		}).
+		AddCookie(cl.token).
+		End()
+}

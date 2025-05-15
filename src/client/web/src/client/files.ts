@@ -259,4 +259,14 @@ export class FilesClient extends BaseClient {
       data: {},
     });
   };
+
+  resetUsedSpace = (userID: string): Promise<Response> => {
+    return this.do({
+      method: "put",
+      url: `${this.url}/v1/fs/used-space`,
+      data: {
+        userID,
+      },
+    });
+  };
 }
