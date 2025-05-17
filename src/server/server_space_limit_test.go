@@ -256,7 +256,9 @@ func TestSpaceLimit(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		resp, _, errs = usersCli.ResetUsedSpace(uidInt)
+
+		userFilesClient := client.NewFilesClient(addr, userToken)
+		resp, _, errs = userFilesClient.ResetUsedSpace(uidInt)
 		if len(errs) > 0 {
 			t.Fatal(errs)
 		} else if resp.StatusCode != 200 {

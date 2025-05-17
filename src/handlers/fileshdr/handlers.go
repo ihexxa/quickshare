@@ -54,6 +54,7 @@ func NewFileHandlers(cfg gocfg.ICfg, deps *depidx.Deps) (*FileHandlers, error) {
 	}
 	deps.Workers().AddHandler(MsgTypeSha1, handlers.genSha1)
 	deps.Workers().AddHandler(MsgTypeIndexing, handlers.indexingItems)
+	deps.Workers().AddHandler(MsgTypeResetUsedSpace, handlers.resetUsedSpace)
 
 	return handlers, nil
 }
@@ -1281,4 +1282,44 @@ func (h *FileHandlers) GetStreamReader(userID uint64, fd io.Reader) (io.ReadClos
 	}()
 
 	return pr, nil
+}
+
+type ResetUsedSpaceReq struct {
+	UserID uint64 `json:"userID,string"`
+}
+
+func (h *FileHandlers) ResetUsedSpace(c *gin.Context) {
+	req := &ResetUsedSpaceReq{}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(q.ErrResp(c, 400, err))
+		return
+	}
+
+	userInfo, err := h.deps.Users().GetUser(c, req.UserID)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+	msg, err := json.Marshal(UsedSpaceParams{
+		UserID:       req.UserID,
+		UserHomePath: userInfo.Name,
+	})
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
+	err = h.deps.Workers().TryPut(
+		localworker.NewMsg(
+			h.deps.ID().Gen(),
+			map[string]string{localworker.MsgTypeKey: MsgTypeResetUsedSpace},
+			string(msg),
+		),
+	)
+	if err != nil {
+		c.JSON(q.ErrResp(c, 500, err))
+		return
+	}
+
+	c.JSON(q.Resp(200))
 }

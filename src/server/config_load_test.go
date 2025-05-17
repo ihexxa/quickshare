@@ -78,7 +78,7 @@ func TestLoadCfg(t *testing.T) {
 	cfgDefault := DefaultConfigStruct()
 
 	cfgDBOnly := *cfgDefault
-	cfgDBOnly.Site = &db.SiteConfig{
+	cfgDBOnly.Server.Dynamic = &db.SiteConfig{
 		ClientCfg: &db.ClientConfig{
 			SiteName: "Quickshare",
 			SiteDesc: "Quick and simple file sharing",
@@ -90,15 +90,18 @@ func TestLoadCfg(t *testing.T) {
 				BgColor:  "",
 			},
 			AllowSetBg: false,
-			AutoTheme:  false,
+			AutoTheme:  true,
 		},
 	}
 
 	cfg1 := &Config{
 		Fs: &FSConfig{
-			Root:       "1",
-			OpensLimit: 1,
-			OpenTTL:    1,
+			Root:              "1",
+			OpensLimit:        1,
+			OpenTTL:           1,
+			PublicPath:        "1",
+			SearchResultLimit: 16,
+			InitFileIndex:     true,
 		},
 		Users: &UsersCfg{
 			EnableAuth:         true,
@@ -129,35 +132,32 @@ func TestLoadCfg(t *testing.T) {
 			TokenSecret: "1",
 		},
 		Server: &ServerCfg{
-			Debug:             true,
-			Host:              "1",
-			Port:              1,
-			ReadTimeout:       1,
-			WriteTimeout:      1,
-			MaxHeaderBytes:    1,
-			PublicPath:        "1",
-			SearchResultLimit: 16,
-			InitFileIndex:     true,
+			Debug:          true,
+			Host:           "1",
+			Port:           1,
+			ReadTimeout:    1,
+			WriteTimeout:   1,
+			MaxHeaderBytes: 1,
+			Dynamic: &db.SiteConfig{
+				ClientCfg: &db.ClientConfig{
+					SiteName: "Quickshare",
+					SiteDesc: "Quick and simple file sharing",
+					Bg: &db.BgConfig{
+						Url:      "",
+						Repeat:   "repeat",
+						Position: "center",
+						Align:    "fixed",
+						BgColor:  "",
+					},
+					AllowSetBg: false,
+					AutoTheme:  true,
+				},
+			},
 		},
 		Workers: &WorkerPoolCfg{
 			QueueSize:   1,
 			SleepCyc:    1,
 			WorkerCount: 1,
-		},
-		Site: &db.SiteConfig{
-			ClientCfg: &db.ClientConfig{
-				SiteName: "Quickshare",
-				SiteDesc: "Quick and simple file sharing",
-				Bg: &db.BgConfig{
-					Url:      "",
-					Repeat:   "repeat",
-					Position: "center",
-					Align:    "fixed",
-					BgColor:  "",
-				},
-				AllowSetBg: false,
-				AutoTheme:  false,
-			},
 		},
 		Db: &DbConfig{
 			DbPath: "testdata/quickshare.sqlite",
@@ -166,9 +166,12 @@ func TestLoadCfg(t *testing.T) {
 
 	cfg4 := &Config{
 		Fs: &FSConfig{
-			Root:       "4",
-			OpensLimit: 4,
-			OpenTTL:    4,
+			Root:              "4",
+			OpensLimit:        4,
+			OpenTTL:           4,
+			PublicPath:        "4",
+			SearchResultLimit: 16,
+			InitFileIndex:     true,
 		},
 		Users: &UsersCfg{
 			EnableAuth:         false,
@@ -199,35 +202,32 @@ func TestLoadCfg(t *testing.T) {
 			TokenSecret: "4",
 		},
 		Server: &ServerCfg{
-			Debug:             false,
-			Host:              "4",
-			Port:              4,
-			ReadTimeout:       4,
-			WriteTimeout:      4,
-			MaxHeaderBytes:    4,
-			PublicPath:        "4",
-			SearchResultLimit: 16,
-			InitFileIndex:     true,
+			Debug:          false,
+			Host:           "4",
+			Port:           4,
+			ReadTimeout:    4,
+			WriteTimeout:   4,
+			MaxHeaderBytes: 4,
+			Dynamic: &db.SiteConfig{
+				ClientCfg: &db.ClientConfig{
+					SiteName: "4",
+					SiteDesc: "4",
+					Bg: &db.BgConfig{
+						Url:      "4",
+						Repeat:   "4",
+						Position: "4",
+						Align:    "4",
+						BgColor:  "4",
+					},
+					AllowSetBg: true,
+					AutoTheme:  true,
+				},
+			},
 		},
 		Workers: &WorkerPoolCfg{
 			QueueSize:   4,
 			SleepCyc:    4,
 			WorkerCount: 4,
-		},
-		Site: &db.SiteConfig{
-			ClientCfg: &db.ClientConfig{
-				SiteName: "4",
-				SiteDesc: "4",
-				Bg: &db.BgConfig{
-					Url:      "4",
-					Repeat:   "4",
-					Position: "4",
-					Align:    "4",
-					BgColor:  "4",
-				},
-				AllowSetBg: true,
-				AutoTheme:  true,
-			},
 		},
 		Db: &DbConfig{
 			DbPath: "4",
@@ -236,9 +236,12 @@ func TestLoadCfg(t *testing.T) {
 
 	cfg5 := &Config{
 		Fs: &FSConfig{
-			Root:       "4",
-			OpensLimit: 4,
-			OpenTTL:    4,
+			Root:              "4",
+			OpensLimit:        4,
+			OpenTTL:           4,
+			PublicPath:        "4",
+			SearchResultLimit: 16,
+			InitFileIndex:     true,
 		},
 		Users: &UsersCfg{
 			EnableAuth:         true,
@@ -269,35 +272,32 @@ func TestLoadCfg(t *testing.T) {
 			TokenSecret: "4",
 		},
 		Server: &ServerCfg{
-			Debug:             false,
-			Host:              "4",
-			Port:              4,
-			ReadTimeout:       4,
-			WriteTimeout:      4,
-			MaxHeaderBytes:    4,
-			PublicPath:        "4",
-			SearchResultLimit: 16,
-			InitFileIndex:     true,
+			Debug:          false,
+			Host:           "4",
+			Port:           4,
+			ReadTimeout:    4,
+			WriteTimeout:   4,
+			MaxHeaderBytes: 4,
+			Dynamic: &db.SiteConfig{
+				ClientCfg: &db.ClientConfig{
+					SiteName: "4",
+					SiteDesc: "4",
+					Bg: &db.BgConfig{
+						Url:      "4",
+						Repeat:   "4",
+						Position: "4",
+						Align:    "4",
+						BgColor:  "4",
+					},
+					AllowSetBg: true,
+					AutoTheme:  true,
+				},
+			},
 		},
 		Workers: &WorkerPoolCfg{
 			QueueSize:   4,
 			SleepCyc:    4,
 			WorkerCount: 4,
-		},
-		Site: &db.SiteConfig{
-			ClientCfg: &db.ClientConfig{
-				SiteName: "4",
-				SiteDesc: "4",
-				Bg: &db.BgConfig{
-					Url:      "4",
-					Repeat:   "4",
-					Position: "4",
-					Align:    "4",
-					BgColor:  "4",
-				},
-				AllowSetBg: true,
-				AutoTheme:  true,
-			},
 		},
 		Db: &DbConfig{
 			DbPath: "5",
@@ -306,9 +306,12 @@ func TestLoadCfg(t *testing.T) {
 
 	cfgWithPartialCfg := &Config{
 		Fs: &FSConfig{
-			Root:       "4",
-			OpensLimit: 4,
-			OpenTTL:    4,
+			Root:              "4",
+			OpensLimit:        4,
+			OpenTTL:           4,
+			PublicPath:        "4",
+			SearchResultLimit: 16,
+			InitFileIndex:     true,
 		},
 		Users: &UsersCfg{
 			EnableAuth:         true,
@@ -339,35 +342,32 @@ func TestLoadCfg(t *testing.T) {
 			TokenSecret: "4",
 		},
 		Server: &ServerCfg{
-			Debug:             false,
-			Host:              "4",
-			Port:              4,
-			ReadTimeout:       4,
-			WriteTimeout:      4,
-			MaxHeaderBytes:    4,
-			PublicPath:        "4",
-			SearchResultLimit: 16,
-			InitFileIndex:     true,
+			Debug:          false,
+			Host:           "4",
+			Port:           4,
+			ReadTimeout:    4,
+			WriteTimeout:   4,
+			MaxHeaderBytes: 4,
+			Dynamic: &db.SiteConfig{
+				ClientCfg: &db.ClientConfig{
+					SiteName: "4",
+					SiteDesc: "4",
+					Bg: &db.BgConfig{
+						Url:      "4",
+						Repeat:   "4",
+						Position: "4",
+						Align:    "4",
+						BgColor:  "4",
+					},
+					AllowSetBg: true,
+					AutoTheme:  true,
+				},
+			},
 		},
 		Workers: &WorkerPoolCfg{
 			QueueSize:   4,
 			SleepCyc:    4,
 			WorkerCount: 4,
-		},
-		Site: &db.SiteConfig{
-			ClientCfg: &db.ClientConfig{
-				SiteName: "4",
-				SiteDesc: "4",
-				Bg: &db.BgConfig{
-					Url:      "4",
-					Repeat:   "4",
-					Position: "4",
-					Align:    "4",
-					BgColor:  "4",
-				},
-				AllowSetBg: true,
-				AutoTheme:  true,
-			},
 		},
 		Db: &DbConfig{
 			DbPath: "5",
@@ -405,6 +405,7 @@ func TestLoadCfg(t *testing.T) {
 			if !reflect.DeepEqual(gotCfg.Template(), expectCfg.Template()) {
 				gotJSON, _ := gotCfg.JSON()
 				expectJSON, _ := expectCfg.JSON()
+				fmt.Printf("\ntestcase\n%d\n", i)
 				fmt.Printf("\ngot\n%s\n", gotJSON)
 				fmt.Printf("\nexpected\n%s\n", expectJSON)
 				t.Fatalf("%d, cfgs are not identical", i)

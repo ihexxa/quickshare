@@ -16,7 +16,6 @@ import (
 
 	"github.com/ihexxa/quickshare/src/depidx"
 	"github.com/ihexxa/quickshare/src/fs"
-	"github.com/ihexxa/quickshare/src/kvstore"
 )
 
 type Server struct {
@@ -119,8 +118,4 @@ func (s *Server) Shutdown() error {
 
 func (s *Server) depsFS() fs.ISimpleFS {
 	return s.deps.FS()
-}
-
-func (s *Server) depsKVStore() kvstore.IKVStore {
-	return s.deps.KV()
 }

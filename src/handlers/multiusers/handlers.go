@@ -1,8 +1,6 @@
 package multiusers
 
 import (
-	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"path/filepath"
@@ -17,7 +15,6 @@ import (
 	"github.com/ihexxa/quickshare/src/db"
 	"github.com/ihexxa/quickshare/src/depidx"
 	q "github.com/ihexxa/quickshare/src/handlers"
-	"github.com/ihexxa/quickshare/src/worker/localworker"
 )
 
 var (
@@ -32,7 +29,7 @@ type MultiUsersSvc struct {
 }
 
 func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error) {
-	publicPath := filepath.Join("/", cfg.GrabString("Server.PublicPath"))
+	publicPath := filepath.Join("/", cfg.GrabString("Fs.PublicPath"))
 
 	apiACRules := map[string]bool{
 		// TODO: make these configurable
@@ -50,7 +47,7 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(db.AdminRole, "GET", "/v1/users/list"):                 true,
 		apiRuleCname(db.AdminRole, "GET", "/v1/users/self"):                 true,
 		apiRuleCname(db.AdminRole, "PATCH", "/v1/users/preferences"):        true,
-		apiRuleCname(db.AdminRole, "PUT", "/v1/users/used-space"):           true,
+		apiRuleCname(db.AdminRole, "PUT", "/v1/fs/used-space"):              true,
 		apiRuleCname(db.AdminRole, "POST", "/v1/roles/"):                    true,
 		apiRuleCname(db.AdminRole, "DELETE", "/v1/roles/"):                  true,
 		apiRuleCname(db.AdminRole, "GET", "/v1/roles/list"):                 true,
@@ -139,87 +136,8 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		deps:       deps,
 		apiACRules: apiACRules,
 	}
-	deps.Workers().AddHandler(MsgTypeResetUsedSpace, handlers.resetUsedSpace)
 
 	return handlers, nil
-}
-
-func (h *MultiUsersSvc) Init(ctx context.Context, adminName string) (string, error) {
-	var err error
-
-	fsPath := q.FsRootPath(adminName, "")
-	if err = h.deps.FS().MkdirAll(fsPath); err != nil {
-		return "", err
-	}
-	uploadFolder := q.UploadFolder(adminName)
-	if err = h.deps.FS().MkdirAll(uploadFolder); err != nil {
-		return "", err
-	}
-
-	usersInterface, ok := h.cfg.Slice("Users.PredefinedUsers")
-	spaceLimit := int64(h.cfg.IntOr("Users.SpaceLimit", 100*1024*1024))
-	uploadSpeedLimit := h.cfg.IntOr("Users.UploadSpeedLimit", 100*1024)
-	downloadSpeedLimit := h.cfg.IntOr("Users.DownloadSpeedLimit", 100*1024)
-	if downloadSpeedLimit < q.DownloadChunkSize {
-		return "", fmt.Errorf("download speed limit can not be lower than chunk size: %d", q.DownloadChunkSize)
-	}
-	if ok {
-		userCfgs, ok := usersInterface.([]*db.UserCfg)
-		if !ok {
-			return "", fmt.Errorf("predefined user is invalid: %s", err)
-		}
-		for _, userCfg := range userCfgs {
-			_, err := h.deps.Users().GetUserByName(ctx, userCfg.Name)
-			if err != nil {
-				if errors.Is(err, db.ErrUserNotFound) {
-					// no op, need initing
-				} else {
-					return "", err
-				}
-			} else {
-				h.deps.Log().Warn("warning: users exists, skip initing(%s)", userCfg.Name)
-				continue
-			}
-
-			// TODO: following operations must be atomic
-			// TODO: check if the folders already exists
-			fsRootFolder := q.FsRootPath(userCfg.Name, "")
-			if err = h.deps.FS().MkdirAll(fsRootFolder); err != nil {
-				return "", err
-			}
-			uploadFolder := q.UploadFolder(userCfg.Name)
-			if err = h.deps.FS().MkdirAll(uploadFolder); err != nil {
-				return "", err
-			}
-
-			pwdHash, err := bcrypt.GenerateFromPassword([]byte(userCfg.Pwd), 10)
-			if err != nil {
-				return "", err
-			}
-
-			preferences := db.DefaultPreferences
-			user := &db.User{
-				ID:   h.deps.ID().Gen(),
-				Name: userCfg.Name,
-				Pwd:  string(pwdHash),
-				Role: userCfg.Role,
-				Quota: &db.Quota{
-					SpaceLimit:         spaceLimit,
-					UploadSpeedLimit:   uploadSpeedLimit,
-					DownloadSpeedLimit: downloadSpeedLimit,
-				},
-				Preferences: &preferences,
-			}
-
-			err = h.deps.Users().AddUser(ctx, user)
-			if err != nil {
-				h.deps.Log().Warn("warning: failed to add user(%s): %s", user, err)
-				return "", err
-			}
-			h.deps.Log().Infof("user(%s) is added", user.Name)
-		}
-	}
-	return "", nil
 }
 
 type LoginReq struct {
@@ -659,7 +577,7 @@ func (h *MultiUsersSvc) Self(c *gin.Context) {
 		return
 	}
 
-	allowSetBg := h.cfg.BoolOr("Site.ClientCfg.AllowSetBg", false)
+	allowSetBg := h.cfg.BoolOr("Server.Dynamic.ClientCfg.AllowSetBg", false)
 	if !allowSetBg {
 		user.Preferences.Bg = db.DefaultBgConfig
 	}
@@ -718,7 +636,7 @@ func (h *MultiUsersSvc) SetPreferences(c *gin.Context) {
 		return
 	}
 
-	allowSetBg := h.cfg.BoolOr("Site.ClientCfg.AllowSetBg", false)
+	allowSetBg := h.cfg.BoolOr("Server.Dynamic.ClientCfg.AllowSetBg", false)
 	if !allowSetBg {
 		req.Preferences.Bg = db.DefaultBgConfig
 	}
@@ -728,45 +646,5 @@ func (h *MultiUsersSvc) SetPreferences(c *gin.Context) {
 		c.JSON(q.ErrResp(c, 500, err))
 		return
 	}
-	c.JSON(q.Resp(200))
-}
-
-type ResetUsedSpaceReq struct {
-	UserID uint64 `json:"userID,string"`
-}
-
-func (h *MultiUsersSvc) ResetUsedSpace(c *gin.Context) {
-	req := &ResetUsedSpaceReq{}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(q.ErrResp(c, 400, err))
-		return
-	}
-
-	userInfo, err := h.deps.Users().GetUser(c, req.UserID)
-	if err != nil {
-		c.JSON(q.ErrResp(c, 500, err))
-		return
-	}
-	msg, err := json.Marshal(UsedSpaceParams{
-		UserID:       req.UserID,
-		UserHomePath: userInfo.Name,
-	})
-	if err != nil {
-		c.JSON(q.ErrResp(c, 500, err))
-		return
-	}
-
-	err = h.deps.Workers().TryPut(
-		localworker.NewMsg(
-			h.deps.ID().Gen(),
-			map[string]string{localworker.MsgTypeKey: MsgTypeResetUsedSpace},
-			string(msg),
-		),
-	)
-	if err != nil {
-		c.JSON(q.ErrResp(c, 500, err))
-		return
-	}
-
 	c.JSON(q.Resp(200))
 }

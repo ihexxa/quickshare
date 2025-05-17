@@ -13,9 +13,12 @@ type DbConfig struct {
 }
 
 type FSConfig struct {
-	Root       string `json:"root" yaml:"root"`
-	OpensLimit int    `json:"opensLimit" yaml:"opensLimit"`
-	OpenTTL    int    `json:"openTTL" yaml:"openTTL"`
+	Root              string `json:"root" yaml:"root"`
+	OpensLimit        int    `json:"opensLimit" yaml:"opensLimit"`
+	OpenTTL           int    `json:"openTTL" yaml:"openTTL"`
+	PublicPath        string `json:"publicPath" yaml:"publicPath"`
+	SearchResultLimit int    `json:"searchResultLimit" yaml:"searchResultLimit"`
+	InitFileIndex     bool   `json:"initFileIndex" yaml:"initFileIndex"`
 }
 
 type UsersCfg struct {
@@ -43,15 +46,13 @@ type Secrets struct {
 }
 
 type ServerCfg struct {
-	Debug             bool   `json:"debug" yaml:"debug"`
-	Host              string `json:"host" yaml:"host"`
-	Port              int    `json:"port" yaml:"port" cfg:"env"`
-	ReadTimeout       int    `json:"readTimeout" yaml:"readTimeout"`
-	WriteTimeout      int    `json:"writeTimeout" yaml:"writeTimeout"`
-	MaxHeaderBytes    int    `json:"maxHeaderBytes" yaml:"maxHeaderBytes"`
-	PublicPath        string `json:"publicPath" yaml:"publicPath"`
-	SearchResultLimit int    `json:"searchResultLimit" yaml:"searchResultLimit"`
-	InitFileIndex     bool   `json:"initFileIndex" yaml:"initFileIndex"`
+	Debug          bool           `json:"debug" yaml:"debug"`
+	Host           string         `json:"host" yaml:"host"`
+	Port           int            `json:"port" yaml:"port" cfg:"env"`
+	ReadTimeout    int            `json:"readTimeout" yaml:"readTimeout"`
+	WriteTimeout   int            `json:"writeTimeout" yaml:"writeTimeout"`
+	MaxHeaderBytes int            `json:"maxHeaderBytes" yaml:"maxHeaderBytes"`
+	Dynamic        *db.SiteConfig `json:"dynamic" yaml:"dynamic"`
 }
 
 type WorkerPoolCfg struct {
@@ -61,13 +62,12 @@ type WorkerPoolCfg struct {
 }
 
 type Config struct {
+	Users   *UsersCfg      `json:"users" yaml:"users"`
 	Fs      *FSConfig      `json:"fs" yaml:"fs"`
 	Secrets *Secrets       `json:"secrets" yaml:"secrets"`
-	Server  *ServerCfg     `json:"server" yaml:"server"`
-	Users   *UsersCfg      `json:"users" yaml:"users"`
 	Workers *WorkerPoolCfg `json:"workers" yaml:"workers"`
-	Site    *db.SiteConfig `json:"site" yaml:"site"`
 	Db      *DbConfig      `json:"db" yaml:"db"`
+	Server  *ServerCfg     `json:"server" yaml:"server"`
 }
 
 func NewConfig() *Config {
@@ -82,9 +82,12 @@ func DefaultConfig() (string, error) {
 func DefaultConfigStruct() *Config {
 	return &Config{
 		Fs: &FSConfig{
-			Root:       "quickshare",
-			OpensLimit: 1024,
-			OpenTTL:    60, // 1 min
+			Root:              "quickshare",
+			OpensLimit:        1024,
+			OpenTTL:           60, // 1 min
+			PublicPath:        "static/public",
+			SearchResultLimit: 16,
+			InitFileIndex:     true,
 		},
 		Users: &UsersCfg{
 			EnableAuth:         true,
@@ -109,35 +112,32 @@ func DefaultConfigStruct() *Config {
 			TokenSecret: "", // it will auto generated if it is left as empty
 		},
 		Server: &ServerCfg{
-			Debug:             false,
-			Host:              "0.0.0.0",
-			Port:              8686,
-			ReadTimeout:       2000,
-			WriteTimeout:      1000 * 3600 * 24, // 1 day
-			MaxHeaderBytes:    512,
-			PublicPath:        "static/public",
-			SearchResultLimit: 16,
-			InitFileIndex:     true,
+			Debug:          false,
+			Host:           "0.0.0.0",
+			Port:           8686,
+			ReadTimeout:    2000,
+			WriteTimeout:   1000 * 3600 * 24, // 1 day
+			MaxHeaderBytes: 512,
+			Dynamic: &db.SiteConfig{
+				ClientCfg: &db.ClientConfig{
+					SiteName: "Quickshare",
+					SiteDesc: "Quick and simple file sharing",
+					Bg: &db.BgConfig{
+						Url:      "",
+						Repeat:   "repeat",
+						Position: "center",
+						Align:    "fixed",
+						BgColor:  "",
+					},
+					AllowSetBg: false,
+					AutoTheme:  true,
+				},
+			},
 		},
 		Workers: &WorkerPoolCfg{
 			QueueSize:   1024,
 			SleepCyc:    1,
 			WorkerCount: 2,
-		},
-		Site: &db.SiteConfig{
-			ClientCfg: &db.ClientConfig{
-				SiteName: "Quickshare",
-				SiteDesc: "Quick and simple file sharing",
-				Bg: &db.BgConfig{
-					Url:      "",
-					Repeat:   "repeat",
-					Position: "center",
-					Align:    "fixed",
-					BgColor:  "",
-				},
-				AllowSetBg: false,
-				AutoTheme:  true,
-			},
 		},
 		Db: &DbConfig{
 			DbPath: "quickshare.sqlite",

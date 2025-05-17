@@ -1016,7 +1016,7 @@ export class Updater {
   };
 
   resetUsedSpace = async (userID: string): Promise<string> => {
-    const resp = await this.usersClient.resetUsedSpace(userID);
+    const resp = await this.filesClient.resetUsedSpace(userID);
     return resp.status == 200 ? "" : errServer;
   };
 

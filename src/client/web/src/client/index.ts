@@ -136,7 +136,6 @@ export interface IUsersClient {
   listRoles: () => Promise<Response>;
   getCaptchaID: () => Promise<Response>;
   setPreferences: (prefers: Preferences) => Promise<Response>;
-  resetUsedSpace: (userID: string) => Promise<Response>;
 }
 
 export interface IFilesClient {
@@ -165,6 +164,7 @@ export interface IFilesClient {
   download: (url: string) => Promise<Response>;
   search: (keywords: string[]) => Promise<Response<SearchItemsResp>>;
   reindex: () => Promise<Response>;
+  resetUsedSpace: (userID: string) => Promise<Response>;
 }
 
 export interface ISettingsClient {
