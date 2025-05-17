@@ -11,21 +11,21 @@ export class SettingsClient extends BaseClient {
   health = (): Promise<Response> => {
     return this.do({
       method: "get",
-      url: `${this.url}/v1/settings/health`,
+      url: `${this.url}/v2/public/settings/health`,
     });
   };
 
   getClientCfg = (): Promise<Response> => {
     return this.do({
       method: "get",
-      url: `${this.url}/v1/settings/client`,
+      url: `${this.url}/v2/public/settings/client`,
     });
   };
 
   setClientCfg = (cfg: ClientConfigMsg): Promise<Response> => {
     return this.do({
       method: "patch",
-      url: `${this.url}/v1/settings/client`,
+      url: `${this.url}/v2/admin/client`,
       data: cfg,
     });
   };
@@ -33,7 +33,7 @@ export class SettingsClient extends BaseClient {
   reportErrors = (reports: List<ClientErrorReport>): Promise<Response> => {
     return this.do({
       method: "post",
-      url: `${this.url}/v1/settings/errors`,
+      url: `${this.url}/v2/my/errors`,
       data: {
         reports: reports.toArray(),
       },

@@ -46,7 +46,7 @@ export class FilesClient extends BaseClient {
   create = (filePath: string, fileSize: number): Promise<Response> => {
     return this.do({
       method: "post",
-      url: `${this.url}/v1/fs/files`,
+      url: `${this.url}/v2/my/fs/files`,
       data: {
         path: filePath,
         fileSize: fileSize,
@@ -57,7 +57,7 @@ export class FilesClient extends BaseClient {
   delete = (filePath: string): Promise<Response> => {
     return this.do({
       method: "delete",
-      url: `${this.url}/v1/fs/files`,
+      url: `${this.url}/v2/my/fs/files`,
       params: {
         [filePathQuery]: filePath,
       },
@@ -67,7 +67,7 @@ export class FilesClient extends BaseClient {
   metadata = (filePath: string): Promise<Response> => {
     return this.do({
       method: "get",
-      url: `${this.url}/v1/fs/metadata`,
+      url: `${this.url}/v2/my/fs/metadata`,
       params: {
         [filePathQuery]: filePath,
       },
@@ -77,7 +77,7 @@ export class FilesClient extends BaseClient {
   mkdir = (dirpath: string): Promise<Response> => {
     return this.do({
       method: "post",
-      url: `${this.url}/v1/fs/dirs`,
+      url: `${this.url}/v2/my/fs/dirs`,
       data: {
         path: dirpath,
       },
@@ -87,7 +87,7 @@ export class FilesClient extends BaseClient {
   move = (oldPath: string, newPath: string): Promise<Response> => {
     return this.do({
       method: "patch",
-      url: `${this.url}/v1/fs/files/move`,
+      url: `${this.url}/v2/my/fs/files/move`,
       data: {
         oldPath,
         newPath,
@@ -102,7 +102,7 @@ export class FilesClient extends BaseClient {
   ): Promise<Response<UploadStatusResp>> => {
     return this.do({
       method: "patch",
-      url: `${this.url}/v1/fs/files/chunks`,
+      url: `${this.url}/v2/my/fs/files/chunks`,
       data: {
         path: filePath,
         content,
@@ -120,7 +120,7 @@ export class FilesClient extends BaseClient {
   uploadStatus = (filePath: string): Promise<Response<UploadStatusResp>> => {
     return this.do({
       method: "get",
-      url: `${this.url}/v1/fs/files/chunks`,
+      url: `${this.url}/v2/my/fs/files/chunks`,
       params: {
         [filePathQuery]: filePath,
       },
@@ -136,7 +136,7 @@ export class FilesClient extends BaseClient {
   list = (dirPath: string): Promise<Response<ListResp>> => {
     return this.do({
       method: "get",
-      url: `${this.url}/v1/fs/dirs`,
+      url: `${this.url}/v2/my/fs/dirs`,
       params: {
         [listDirQuery]: dirPath,
       },
@@ -146,7 +146,7 @@ export class FilesClient extends BaseClient {
   listHome = (): Promise<Response<ListResp>> => {
     return this.do({
       method: "get",
-      url: `${this.url}/v1/fs/dirs/home`,
+      url: `${this.url}/v2/my/fs/dirs/home`,
       params: {},
     });
   };
@@ -154,14 +154,14 @@ export class FilesClient extends BaseClient {
   listUploadings = (): Promise<Response<ListUploadingsResp>> => {
     return this.do({
       method: "get",
-      url: `${this.url}/v1/fs/uploadings`,
+      url: `${this.url}/v2/my/fs/uploadings`,
     });
   };
 
   deleteUploading = (filePath: string): Promise<Response> => {
     return this.do({
       method: "delete",
-      url: `${this.url}/v1/fs/uploadings`,
+      url: `${this.url}/v2/my/fs/uploadings`,
       params: {
         [filePathQuery]: filePath,
       },
@@ -171,7 +171,7 @@ export class FilesClient extends BaseClient {
   addSharing = (dirPath: string): Promise<Response> => {
     return this.do({
       method: "post",
-      url: `${this.url}/v1/fs/sharings`,
+      url: `${this.url}/v2/my/fs/sharings`,
       data: {
         SharingPath: dirPath,
       },
@@ -181,7 +181,7 @@ export class FilesClient extends BaseClient {
   deleteSharing = (dirPath: string): Promise<Response> => {
     return this.do({
       method: "delete",
-      url: `${this.url}/v1/fs/sharings`,
+      url: `${this.url}/v2/my/fs/sharings`,
       params: {
         [filePathQuery]: dirPath,
       },
@@ -191,7 +191,7 @@ export class FilesClient extends BaseClient {
   isSharing = (dirPath: string): Promise<Response> => {
     return this.do({
       method: "get",
-      url: `${this.url}/v1/fs/sharings/exist`,
+      url: `${this.url}/v2/public/sharings/exist`,
       params: {
         [filePathQuery]: dirPath,
       },
@@ -201,21 +201,21 @@ export class FilesClient extends BaseClient {
   listSharings = (): Promise<Response<ListSharingsResp>> => {
     return this.do({
       method: "get",
-      url: `${this.url}/v1/fs/sharings`,
+      url: `${this.url}/v2/my/fs/sharings`,
     });
   };
 
   listSharingIDs = (): Promise<Response<ListSharingIDsResp>> => {
     return this.do({
       method: "get",
-      url: `${this.url}/v1/fs/sharings/ids`,
+      url: `${this.url}/v2/my/fs/sharings/ids`,
     });
   };
 
   getSharingDir = (shareID: string): Promise<Response<GetSharingDirResp>> => {
     return this.do({
       method: "get",
-      url: `${this.url}/v1/fs/sharings/dirs`,
+      url: `${this.url}/v2/public/sharings/dirs`,
       params: {
         [shareIDQuery]: shareID,
       },
@@ -225,7 +225,7 @@ export class FilesClient extends BaseClient {
   generateHash = (filePath: string): Promise<Response> => {
     return this.do({
       method: "post",
-      url: `${this.url}/v1/fs/hashes/sha1`,
+      url: `${this.url}/v2/my/fs/hashes/sha1`,
       data: {
         filePath: filePath,
       },
@@ -235,7 +235,7 @@ export class FilesClient extends BaseClient {
   download = (url: string): Promise<Response> => {
     return this.do({
       method: "get",
-      url,
+      url: `${this.url}/v2/my/fs/files`,
     });
   };
 
@@ -247,7 +247,7 @@ export class FilesClient extends BaseClient {
 
     return this.do({
       method: "get",
-      url: `${this.url}/v1/fs/search`,
+      url: `${this.url}/v2/my/fs/search`,
       params,
     });
   };
@@ -255,7 +255,7 @@ export class FilesClient extends BaseClient {
   reindex = (): Promise<Response> => {
     return this.do({
       method: "put",
-      url: `${this.url}/v1/fs/reindex`,
+      url: `${this.url}/v2/my/fs/reindex`,
       data: {},
     });
   };
