@@ -37,6 +37,7 @@ export interface FilesClientResps {
   downloadMockResp: Response;
   searchMockResp: Response<SearchItemsResp>;
   reindexMockResp: Response;
+  resetUsedSpaceMockResp?: Response;
 }
 
 const sharingIDs = new Map<string, string>();
@@ -178,6 +179,11 @@ export const resps = {
     statusText: "",
     data: {},
   },
+  resetUsedSpaceMockResp: {
+    status: 200,
+    statusText: "",
+    data: {}
+  }
 };
 
 export class MockFilesClient {
@@ -286,6 +292,10 @@ export class MockFilesClient {
   reindex = (): Promise<Response> => {
     return this.wrapPromise(this.resps.reindexMockResp);
   };
+
+  resetUsedSpace = (userID: string): Promise<Response> => {
+    return this.wrapPromise(this.resps.resetUsedSpaceMockResp);
+  }
 }
 
 // JestFilesClient supports jest function mockings
@@ -334,6 +344,9 @@ export class JestFilesClient {
   download = jest.fn().mockReturnValue(makePromise(resps.downloadMockResp));
   search = jest.fn().mockReturnValue(makePromise(resps.searchMockResp));
   reindex = jest.fn().mockReturnValue(makePromise(resps.reindexMockResp));
+  resetUsedSpace = jest
+    .fn()
+    .mockReturnValue(makePromise(resps.resetUsedSpaceMockResp));
 }
 
 export const NewMockFilesClient = (url: string): IFilesClient => {
