@@ -23,6 +23,7 @@ const (
 	AdminRole   = "admin"
 	UserRole    = "user"
 	VisitorRole = "visitor"
+	BannedRole  = "banned"
 
 	VisitorID   = uint64(1)
 	VisitorName = "visitor"

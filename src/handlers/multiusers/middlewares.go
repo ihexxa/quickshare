@@ -76,7 +76,23 @@ func (h *MultiUsersSvc) APIAccessControl() gin.HandlerFunc {
 		method := c.Request.Method
 		accessPath := c.Request.URL.Path
 
-		// we don't lock the map because we only read it
+		// v2 ac control
+		matches := h.routeRules.GetAllPrefixMatches(accessPath)
+		key := fmt.Sprintf("%s:%s", role, method)
+		matched := false
+		for _, matchedRules := range matches {
+			matchedRuleMap := matchedRules.(map[string]bool)
+			if matchedRuleMap[key] {
+				matched = true
+				break
+			}
+		}
+
+		if matched {
+			c.Next()
+			return
+		}
+
 		if h.apiACRules[apiRuleCname(role, method, accessPath)] {
 			c.Next()
 			return

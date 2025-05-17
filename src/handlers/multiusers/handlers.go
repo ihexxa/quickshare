@@ -10,6 +10,7 @@ import (
 	"github.com/dchest/captcha"
 	"github.com/gin-gonic/gin"
 	"github.com/ihexxa/gocfg"
+	qradix "github.com/ihexxa/q-radix/v3"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/ihexxa/quickshare/src/db"
@@ -26,6 +27,7 @@ type MultiUsersSvc struct {
 	cfg        gocfg.ICfg
 	deps       *depidx.Deps
 	apiACRules map[string]bool
+	routeRules *qradix.RTree
 }
 
 func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error) {
@@ -131,10 +133,42 @@ func NewMultiUsersSvc(cfg gocfg.ICfg, deps *depidx.Deps) (*MultiUsersSvc, error)
 		apiRuleCname(db.VisitorRole, "GET", "/v1/fs/sharings/dirs"):    true,
 	}
 
+	prefixRules := map[string]map[string]bool{
+		"/v2/": {
+			fmt.Sprintf("%s:GET", db.AdminRole):     true,
+			fmt.Sprintf("%s:POST", db.AdminRole):    true,
+			fmt.Sprintf("%s:PATCH", db.AdminRole):   true,
+			fmt.Sprintf("%s:PUT", db.AdminRole):     true,
+			fmt.Sprintf("%s:DELETE", db.AdminRole):  true,
+			fmt.Sprintf("%s:OPTIONS", db.AdminRole): true,
+		},
+		"/v2/my/": {
+			fmt.Sprintf("%s:GET", db.UserRole):    true,
+			fmt.Sprintf("%s:POST", db.UserRole):   true,
+			fmt.Sprintf("%s:PATCH", db.UserRole):  true,
+			fmt.Sprintf("%s:DELETE", db.UserRole): true,
+		},
+		"/v2/public/": {
+			fmt.Sprintf("%s:GET", db.UserRole):     true,
+			fmt.Sprintf("%s:POST", db.UserRole):    true,
+			fmt.Sprintf("%s:OPTIONS", db.UserRole): true,
+
+			fmt.Sprintf("%s:GET", db.VisitorRole):     true,
+			fmt.Sprintf("%s:POST", db.VisitorRole):    true,
+			fmt.Sprintf("%s:OPTIONS", db.VisitorRole): true,
+		},
+	}
+
+	routeRulesTree := qradix.NewRTree()
+	for prefix, rules := range prefixRules {
+		routeRulesTree.Insert(prefix, rules)
+	}
+
 	handlers := &MultiUsersSvc{
 		cfg:        cfg,
 		deps:       deps,
 		apiACRules: apiACRules,
+		routeRules: routeRulesTree,
 	}
 
 	return handlers, nil
