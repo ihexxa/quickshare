@@ -72,11 +72,11 @@ func (it *Initer) InitHandlers(deps *depidx.Deps) (*gin.Engine, error) {
 	captchaAPI.GET("/", userHdrs.GetCaptchaID)
 	captchaAPI.GET("/imgs", userHdrs.GetCaptchaImg)
 
+	fileHdrs, err := fileshdr.NewFileHandlers(it.cfg, deps)
+	if err != nil {
+		return nil, fmt.Errorf("new files service error: %w", err)
+	}
 	if it.cfg.BoolOr("Fs.Enabled", true) {
-		fileHdrs, err := fileshdr.NewFileHandlers(it.cfg, deps)
-		if err != nil {
-			return nil, fmt.Errorf("new files service error: %w", err)
-		}
 		adminName := it.cfg.GrabString("ENV.DEFAULTADMIN")
 		_, err = fileHdrs.Init(context.TODO(), adminName)
 		if err != nil {
@@ -136,7 +136,6 @@ func (it *Initer) InitHandlers(deps *depidx.Deps) (*gin.Engine, error) {
 	adminUsersAPI.GET("/list", userHdrs.ListUsers)
 	adminUsersAPI.PATCH("/", userHdrs.SetUser)
 	adminUsersAPI.PATCH("/pwd/force-set", userHdrs.ForceSetPwd)
-	adminUsersAPI.PUT("/used-space", userHdrs.ResetUsedSpace)
 
 	adminRolesAPI := adminAPI.Group("/roles")
 	// rolesAPI.POST("/", userHdrs.AddRole)
@@ -153,42 +152,10 @@ func (it *Initer) InitHandlers(deps *depidx.Deps) (*gin.Engine, error) {
 	userAPI.GET("/isauthed", userHdrs.IsAuthed)
 	userAPI.POST("/logout", userHdrs.Logout)
 
-	userFilesAPI := userAPI.Group("/fs")
-	userFilesAPI.POST("/files", fileHdrs.Create)
-	userFilesAPI.DELETE("/files", fileHdrs.Delete)
-	userFilesAPI.GET("/files", fileHdrs.Download)
-	userFilesAPI.PATCH("/files/chunks", fileHdrs.UploadChunk)
-	userFilesAPI.GET("/files/chunks", fileHdrs.UploadStatus)
-	userFilesAPI.PATCH("/files/copy", fileHdrs.Copy)
-	userFilesAPI.PATCH("/files/move", fileHdrs.Move)
-
-	userFilesAPI.GET("/dirs", fileHdrs.List)
-	userFilesAPI.GET("/dirs/home", fileHdrs.ListHome)
-	userFilesAPI.POST("/dirs", fileHdrs.Mkdir)
-	// files.POST("/dirs/copy", fileHdrs.CopyDir)
-
-	userFilesAPI.GET("/uploadings", fileHdrs.ListUploadings)
-	userFilesAPI.DELETE("/uploadings", fileHdrs.DelUploading)
-
-	userFilesAPI.POST("/sharings", fileHdrs.AddSharing)
-	userFilesAPI.DELETE("/sharings", fileHdrs.DelSharing)
-	userFilesAPI.GET("/sharings", fileHdrs.ListSharings)
-	userFilesAPI.GET("/sharings/ids", fileHdrs.ListSharingIDs)
-
-	userFilesAPI.GET("/metadata", fileHdrs.Metadata)
-	userFilesAPI.GET("/search", fileHdrs.SearchItems)
-	userFilesAPI.PUT("/reindex", fileHdrs.Reindex)
-
-	userFilesAPI.POST("/hashes/sha1", fileHdrs.GenerateHash)
-
 	// public
 	publicAPI := v2.Group("/public")
 
 	publicAPI.POST("/login", userHdrs.Login)
-
-	publicSharingsAPI := publicAPI.Group("/sharings")
-	publicSharingsAPI.GET("/exist", fileHdrs.IsSharing)
-	publicSharingsAPI.GET("/dirs", fileHdrs.GetSharingDir)
 
 	publicCaptchaAPI2 := publicAPI.Group("/captchas")
 	publicCaptchaAPI2.GET("/", userHdrs.GetCaptchaID)
@@ -197,6 +164,42 @@ func (it *Initer) InitHandlers(deps *depidx.Deps) (*gin.Engine, error) {
 	publicSettingsAPI := publicAPI.Group("/settings")
 	publicSettingsAPI.OPTIONS("/health", settingsSvc.Health)
 	publicSettingsAPI.GET("/client", settingsSvc.GetClientCfg)
+
+	if it.cfg.BoolOr("Fs.Enabled", true) {
+		adminUsersAPI.PUT("/used-space", fileHdrs.ResetUsedSpace)
+
+		userFilesAPI := userAPI.Group("/fs")
+		userFilesAPI.POST("/files", fileHdrs.Create)
+		userFilesAPI.DELETE("/files", fileHdrs.Delete)
+		userFilesAPI.GET("/files", fileHdrs.Download)
+		userFilesAPI.PATCH("/files/chunks", fileHdrs.UploadChunk)
+		userFilesAPI.GET("/files/chunks", fileHdrs.UploadStatus)
+		userFilesAPI.PATCH("/files/copy", fileHdrs.Copy)
+		userFilesAPI.PATCH("/files/move", fileHdrs.Move)
+
+		userFilesAPI.GET("/dirs", fileHdrs.List)
+		userFilesAPI.GET("/dirs/home", fileHdrs.ListHome)
+		userFilesAPI.POST("/dirs", fileHdrs.Mkdir)
+		// files.POST("/dirs/copy", fileHdrs.CopyDir)
+
+		userFilesAPI.GET("/uploadings", fileHdrs.ListUploadings)
+		userFilesAPI.DELETE("/uploadings", fileHdrs.DelUploading)
+
+		userFilesAPI.POST("/sharings", fileHdrs.AddSharing)
+		userFilesAPI.DELETE("/sharings", fileHdrs.DelSharing)
+		userFilesAPI.GET("/sharings", fileHdrs.ListSharings)
+		userFilesAPI.GET("/sharings/ids", fileHdrs.ListSharingIDs)
+
+		userFilesAPI.GET("/metadata", fileHdrs.Metadata)
+		userFilesAPI.GET("/search", fileHdrs.SearchItems)
+		userFilesAPI.PUT("/reindex", fileHdrs.Reindex)
+
+		userFilesAPI.POST("/hashes/sha1", fileHdrs.GenerateHash)
+
+		publicSharingsAPI := publicAPI.Group("/sharings")
+		publicSharingsAPI.GET("/exist", fileHdrs.IsSharing)
+		publicSharingsAPI.GET("/dirs", fileHdrs.GetSharingDir)
+	}
 
 	return router, nil
 }
