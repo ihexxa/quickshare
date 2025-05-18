@@ -102,21 +102,23 @@ export class UsersClient extends BaseClient {
     });
   };
 
-  // addRole = (role: string): Promise<Response> => {
-  //   return this.do({
-  //     method: "post",
-  //     url: `${this.url}/v1/roles/`,
-  //     data: { role },
-  //   });
-  // };
+  // deprecated
+  addRole = (role: string): Promise<Response> => {
+    return this.do({
+      method: "post",
+      url: `${this.url}/v1/roles/`,
+      data: { role },
+    });
+  };
 
-  // delRole = (role: string): Promise<Response> => {
-  //   return this.do({
-  //     method: "delete",
-  //     url: `${this.url}/v1/roles/`,
-  //     data: { role },
-  //   });
-  // };
+  // deprecated
+  delRole = (role: string): Promise<Response> => {
+    return this.do({
+      method: "delete",
+      url: `${this.url}/v1/roles/`,
+      data: { role },
+    });
+  };
 
   listRoles = (): Promise<Response> => {
     return this.do({

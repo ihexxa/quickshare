@@ -82,13 +82,13 @@ func (h *FileHandlers) lock(key string, code *int, err *error, execution func() 
 }
 
 // related elements: role, user, action(listing, downloading)/sharing
-func (h *FileHandlers) canAccess(ctx context.Context, userId uint64, userName, role, op, sharedPath string) bool {
+func (h *FileHandlers) canAccess(ctx context.Context, userId uint64, userName, role, op, accessingPath string) bool {
 	if role == db.AdminRole {
 		return true
 	}
 
 	// the file path must start with userName: <userName>/...
-	parts := strings.Split(sharedPath, "/")
+	parts := strings.Split(accessingPath, "/")
 	if len(parts) < 2 { // the path must be longer than <userName>/files
 		return false
 	} else if parts[0] == userName && userName != "" && parts[1] != "" {
@@ -101,7 +101,7 @@ func (h *FileHandlers) canAccess(ctx context.Context, userId uint64, userName, r
 		return false
 	}
 
-	isSharing, err := h.deps.FileInfos().IsSharing(ctx, sharedPath)
+	isSharing, err := h.deps.FileInfos().IsSharing(ctx, accessingPath)
 	if err != nil {
 		return false // TODO: return error
 	}

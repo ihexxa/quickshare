@@ -38,7 +38,7 @@ func (it *Initer) InitHandlers(deps *depidx.Deps) (*gin.Engine, error) {
 		return nil, errors.New("publicPath not found or empty")
 	}
 	if it.cfg.BoolOr("Server.Debug", false) {
-		router.Use(static.Serve("/public/", static.LocalFile(publicPath, false)))
+		router.Use(static.Serve("/", static.LocalFile(publicPath, false)))
 	} else {
 		embedFs, err := qsstatic.NewEmbedStaticFS()
 		if err != nil {
