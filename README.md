@@ -31,9 +31,9 @@ English | [简体中文](./docs/README_zh-cn.md)
 
 - File Management
   - Support uploading, downloading, creating, deleting and moving files and folders
+  - Support fuzzy searching files and folders in seconds
   - Resumable uploading and downloading
   - Manage files and folders in browser
-  - Search files and folders with multiple keywords in seconds
   - Share directories to others, including anonymous
   - Scan QR codes to visit sharing folders
   - Upload hundreds of files at once
