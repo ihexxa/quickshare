@@ -76,6 +76,10 @@ func (h *MultiUsersSvc) APIAccessControl() gin.HandlerFunc {
 		method := c.Request.Method
 		accessPath := c.Request.URL.Path
 
+		if role == db.BannedRole {
+			c.AbortWithStatusJSON(q.ErrResp(c, 403, q.ErrAccessDenied))
+		}
+
 		// v2 ac control
 		matches := h.routeRules.GetAllPrefixMatches(accessPath)
 		key := fmt.Sprintf("%s:%s", role, method)
