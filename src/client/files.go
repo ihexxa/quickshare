@@ -30,7 +30,7 @@ func (cl *FilesClient) url(urlpath string) string {
 }
 
 func (cl *FilesClient) Create(filepath string, size int64) (*http.Response, string, []error) {
-	return cl.r.Post(cl.url("/v1/fs/files")).
+	return cl.r.Post(cl.url("/v2/my/fs/files")).
 		AddCookie(cl.token).
 		Send(fileshdr.CreateReq{
 			Path:     filepath,
@@ -40,14 +40,14 @@ func (cl *FilesClient) Create(filepath string, size int64) (*http.Response, stri
 }
 
 func (cl *FilesClient) Delete(filepath string) (*http.Response, string, []error) {
-	return cl.r.Delete(cl.url("/v1/fs/files")).
+	return cl.r.Delete(cl.url("/v2/my/fs/files")).
 		AddCookie(cl.token).
 		Param(fileshdr.FilePathQuery, filepath).
 		End()
 }
 
 func (cl *FilesClient) Metadata(filepath string) (*http.Response, *fileshdr.MetadataResp, []error) {
-	resp, body, errs := cl.r.Get(cl.url("/v1/fs/metadata")).
+	resp, body, errs := cl.r.Get(cl.url("/v2/my/fs/metadata")).
 		AddCookie(cl.token).
 		Param(fileshdr.FilePathQuery, filepath).
 		End()
@@ -62,14 +62,14 @@ func (cl *FilesClient) Metadata(filepath string) (*http.Response, *fileshdr.Meta
 }
 
 func (cl *FilesClient) Mkdir(dirpath string) (*http.Response, string, []error) {
-	return cl.r.Post(cl.url("/v1/fs/dirs")).
+	return cl.r.Post(cl.url("/v2/my/fs/dirs")).
 		AddCookie(cl.token).
 		Send(fileshdr.MkdirReq{Path: dirpath}).
 		End()
 }
 
 func (cl *FilesClient) Move(oldpath, newpath string) (*http.Response, string, []error) {
-	return cl.r.Patch(cl.url("/v1/fs/files/move")).
+	return cl.r.Patch(cl.url("/v2/my/fs/files/move")).
 		AddCookie(cl.token).
 		Send(fileshdr.MoveReq{
 			OldPath: oldpath,
@@ -79,7 +79,7 @@ func (cl *FilesClient) Move(oldpath, newpath string) (*http.Response, string, []
 }
 
 func (cl *FilesClient) UploadChunk(filepath string, content string, offset int64) (*http.Response, string, []error) {
-	return cl.r.Patch(cl.url("/v1/fs/files/chunks")).
+	return cl.r.Patch(cl.url("/v2/my/fs/files/chunks")).
 		AddCookie(cl.token).
 		Send(fileshdr.UploadChunkReq{
 			Path:    filepath,
@@ -90,7 +90,7 @@ func (cl *FilesClient) UploadChunk(filepath string, content string, offset int64
 }
 
 func (cl *FilesClient) UploadStatus(filepath string) (*http.Response, *fileshdr.UploadStatusResp, []error) {
-	resp, body, errs := cl.r.Get(cl.url("/v1/fs/files/chunks")).
+	resp, body, errs := cl.r.Get(cl.url("/v2/my/fs/files/chunks")).
 		AddCookie(cl.token).
 		Param(fileshdr.FilePathQuery, filepath).
 		End()
@@ -105,7 +105,7 @@ func (cl *FilesClient) UploadStatus(filepath string) (*http.Response, *fileshdr.
 }
 
 func (cl *FilesClient) Download(filepath string, headers map[string]string) (*http.Response, string, []error) {
-	r := cl.r.Get(cl.url("/v1/fs/files")).
+	r := cl.r.Get(cl.url("/v2/my/fs/files")).
 		AddCookie(cl.token).
 		Param(fileshdr.FilePathQuery, filepath)
 	for key, val := range headers {
@@ -115,7 +115,7 @@ func (cl *FilesClient) Download(filepath string, headers map[string]string) (*ht
 }
 
 func (cl *FilesClient) List(dirPath string) (*http.Response, *fileshdr.ListResp, []error) {
-	resp, body, errs := cl.r.Get(cl.url("/v1/fs/dirs")).
+	resp, body, errs := cl.r.Get(cl.url("/v2/my/fs/dirs")).
 		AddCookie(cl.token).
 		Param(fileshdr.ListDirQuery, dirPath).
 		End()
@@ -132,7 +132,7 @@ func (cl *FilesClient) List(dirPath string) (*http.Response, *fileshdr.ListResp,
 }
 
 func (cl *FilesClient) ListHome() (*http.Response, *fileshdr.ListResp, []error) {
-	resp, body, errs := cl.r.Get(cl.url("/v1/fs/dirs/home")).
+	resp, body, errs := cl.r.Get(cl.url("/v2/my/fs/dirs/home")).
 		AddCookie(cl.token).
 		End()
 	if len(errs) > 0 {
@@ -148,7 +148,7 @@ func (cl *FilesClient) ListHome() (*http.Response, *fileshdr.ListResp, []error) 
 }
 
 func (cl *FilesClient) ListUploadings() (*http.Response, *fileshdr.ListUploadingsResp, []error) {
-	resp, body, errs := cl.r.Get(cl.url("/v1/fs/uploadings")).
+	resp, body, errs := cl.r.Get(cl.url("/v2/my/fs/uploadings")).
 		AddCookie(cl.token).
 		End()
 	if len(errs) > 0 {
@@ -164,28 +164,28 @@ func (cl *FilesClient) ListUploadings() (*http.Response, *fileshdr.ListUploading
 }
 
 func (cl *FilesClient) DelUploading(filepath string) (*http.Response, string, []error) {
-	return cl.r.Delete(cl.url("/v1/fs/uploadings")).
+	return cl.r.Delete(cl.url("/v2/my/fs/uploadings")).
 		AddCookie(cl.token).
 		Param(fileshdr.FilePathQuery, filepath).
 		End()
 }
 
 func (cl *FilesClient) AddSharing(dirpath string) (*http.Response, string, []error) {
-	return cl.r.Post(cl.url("/v1/fs/sharings")).
+	return cl.r.Post(cl.url("/v2/my/fs/sharings")).
 		AddCookie(cl.token).
 		Send(fileshdr.SharingReq{SharingPath: dirpath}).
 		End()
 }
 
 func (cl *FilesClient) DelSharing(dirpath string) (*http.Response, string, []error) {
-	return cl.r.Delete(cl.url("/v1/fs/sharings")).
+	return cl.r.Delete(cl.url("/v2/my/fs/sharings")).
 		AddCookie(cl.token).
 		Param(fileshdr.FilePathQuery, dirpath).
 		End()
 }
 
 func (cl *FilesClient) IsSharing(dirpath string) (*http.Response, string, []error) {
-	return cl.r.Get(cl.url("/v1/fs/sharings/exist")).
+	return cl.r.Get(cl.url("/v2/public/sharings/exist")).
 		AddCookie(cl.token).
 		Param(fileshdr.FilePathQuery, dirpath).
 		End()
@@ -193,7 +193,7 @@ func (cl *FilesClient) IsSharing(dirpath string) (*http.Response, string, []erro
 
 // Deprecated: use ListSharingIDs intead
 func (cl *FilesClient) ListSharings() (*http.Response, *fileshdr.SharingResp, []error) {
-	resp, body, errs := cl.r.Get(cl.url("/v1/fs/sharings")).
+	resp, body, errs := cl.r.Get(cl.url("/v2/my/fs/sharings")).
 		AddCookie(cl.token).
 		End()
 	if len(errs) > 0 {
@@ -209,7 +209,7 @@ func (cl *FilesClient) ListSharings() (*http.Response, *fileshdr.SharingResp, []
 }
 
 func (cl *FilesClient) ListSharingIDs() (*http.Response, *fileshdr.SharingIDsResp, []error) {
-	resp, body, errs := cl.r.Get(cl.url("/v1/fs/sharings/ids")).
+	resp, body, errs := cl.r.Get(cl.url("/v2/my/fs/sharings/ids")).
 		AddCookie(cl.token).
 		End()
 	if len(errs) > 0 {
@@ -225,7 +225,7 @@ func (cl *FilesClient) ListSharingIDs() (*http.Response, *fileshdr.SharingIDsRes
 }
 
 func (cl *FilesClient) GenerateHash(filepath string) (*http.Response, string, []error) {
-	return cl.r.Post(cl.url("/v1/fs/hashes/sha1")).
+	return cl.r.Post(cl.url("/v2/my/fs/hashes/sha1")).
 		AddCookie(cl.token).
 		Send(fileshdr.GenerateHashReq{
 			FilePath: filepath,
@@ -234,7 +234,7 @@ func (cl *FilesClient) GenerateHash(filepath string) (*http.Response, string, []
 }
 
 func (cl *FilesClient) GetSharingDir(shareID string) (*http.Response, string, []error) {
-	resp, body, errs := cl.r.Get(cl.url("/v1/fs/sharings/dirs")).
+	resp, body, errs := cl.r.Get(cl.url("/v2/public/sharings/dirs")).
 		AddCookie(cl.token).
 		Param(fileshdr.ShareIDQuery, shareID).
 		End()
@@ -256,7 +256,7 @@ func (cl *FilesClient) SearchItems(keywords []string) (*http.Response, *fileshdr
 		values.Add(fileshdr.Keyword, keyword)
 	}
 
-	resp, body, errs := cl.r.Get(cl.url("/v1/fs/search")).
+	resp, body, errs := cl.r.Get(cl.url("/v2/my/fs/search")).
 		AddCookie(cl.token).
 		Query(values.Encode()).
 		End()
@@ -271,7 +271,7 @@ func (cl *FilesClient) SearchItems(keywords []string) (*http.Response, *fileshdr
 }
 
 func (cl *FilesClient) Reindex() (*http.Response, string, []error) {
-	return cl.r.Put(cl.url("/v1/fs/reindex")).
+	return cl.r.Put(cl.url("/v2/my/fs/reindex")).
 		AddCookie(cl.token).
 		End()
 }

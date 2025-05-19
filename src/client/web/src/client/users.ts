@@ -13,7 +13,7 @@ export class UsersClient extends BaseClient {
   ): Promise<Response> => {
     return this.do({
       method: "post",
-      url: `${this.url}/v1/users/login`,
+      url: `${this.url}/v2/public/login`,
       data: {
         user,
         pwd,
@@ -26,21 +26,21 @@ export class UsersClient extends BaseClient {
   logout = (): Promise<Response> => {
     return this.do({
       method: "post",
-      url: `${this.url}/v1/users/logout`,
+      url: `${this.url}/v2/my/logout`,
     });
   };
 
   isAuthed = (): Promise<Response> => {
     return this.do({
       method: "get",
-      url: `${this.url}/v1/users/isauthed`,
+      url: `${this.url}/v2/my/isauthed`,
     });
   };
 
   setPwd = (oldPwd: string, newPwd: string): Promise<Response> => {
     return this.do({
       method: "patch",
-      url: `${this.url}/v1/users/pwd`,
+      url: `${this.url}/v2/my/pwd`,
       data: {
         oldPwd,
         newPwd,
@@ -51,7 +51,7 @@ export class UsersClient extends BaseClient {
   setUser = (id: string, role: string, quota: Quota): Promise<Response> => {
     return this.do({
       method: "patch",
-      url: `${this.url}/v1/users/`,
+      url: `${this.url}/v2/admin/users/`,
       data: {
         id,
         role,
@@ -63,7 +63,7 @@ export class UsersClient extends BaseClient {
   forceSetPwd = (userID: string, newPwd: string): Promise<Response> => {
     return this.do({
       method: "patch",
-      url: `${this.url}/v1/users/pwd/force-set`,
+      url: `${this.url}/v2/admin/users/pwd/force-set`,
       data: {
         id: userID,
         newPwd,
@@ -75,7 +75,7 @@ export class UsersClient extends BaseClient {
   addUser = (name: string, pwd: string, role: string): Promise<Response> => {
     return this.do({
       method: "post",
-      url: `${this.url}/v1/users/`,
+      url: `${this.url}/v2/admin/users/`,
       data: {
         name,
         pwd,
@@ -87,7 +87,7 @@ export class UsersClient extends BaseClient {
   delUser = (userID: string): Promise<Response> => {
     return this.do({
       method: "delete",
-      url: `${this.url}/v1/users/`,
+      url: `${this.url}/v2/admin/users/`,
       params: {
         [userIDParam]: userID,
       },
@@ -97,11 +97,12 @@ export class UsersClient extends BaseClient {
   listUsers = (): Promise<Response> => {
     return this.do({
       method: "get",
-      url: `${this.url}/v1/users/list`,
+      url: `${this.url}/v2/admin/users/list`,
       params: {},
     });
   };
 
+  // deprecated
   addRole = (role: string): Promise<Response> => {
     return this.do({
       method: "post",
@@ -110,6 +111,7 @@ export class UsersClient extends BaseClient {
     });
   };
 
+  // deprecated
   delRole = (role: string): Promise<Response> => {
     return this.do({
       method: "delete",
@@ -121,7 +123,7 @@ export class UsersClient extends BaseClient {
   listRoles = (): Promise<Response> => {
     return this.do({
       method: "get",
-      url: `${this.url}/v1/roles/list`,
+      url: `${this.url}/v2/admin/roles/list`,
       params: {},
     });
   };
@@ -129,7 +131,7 @@ export class UsersClient extends BaseClient {
   self = (): Promise<Response> => {
     return this.do({
       method: "get",
-      url: `${this.url}/v1/users/self`,
+      url: `${this.url}/v2/my/self`,
       params: {},
     });
   };
@@ -137,7 +139,7 @@ export class UsersClient extends BaseClient {
   getCaptchaID = (): Promise<Response> => {
     return this.do({
       method: "get",
-      url: `${this.url}/v1/captchas/`,
+      url: `${this.url}/v2/public/captchas`,
       params: {},
     });
   };
@@ -145,7 +147,7 @@ export class UsersClient extends BaseClient {
   setPreferences = (prefers: Preferences): Promise<Response> => {
     return this.do({
       method: "patch",
-      url: `${this.url}/v1/users/preferences`,
+      url: `${this.url}/v2/my/preferences`,
       data: {
         preferences: prefers,
       },

@@ -7,7 +7,13 @@
 </p>
 <p align="center">
   <a href="https://github.com/ihexxa/quickshare/actions">
-    <img src="https://github.com/ihexxa/quickshare/workflows/quickshare-ci/badge.svg" />
+    <img src="https://github.com/ihexxa/quickshare/actions/workflows/ci_build.yml/badge.svg" />
+  </a>
+  <a href="https://github.com/ihexxa/quickshare/actions">
+    <img src="https://github.com/ihexxa/quickshare/actions/workflows/ci_docker.yml/badge.svg" />
+  </a>
+  <a href="https://github.com/ihexxa/quickshare/actions">
+    <img src="https://github.com/ihexxa/quickshare/actions/workflows/ci_github_binary.yml/badge.svg" />
   </a>
   <a href="https://goreportcard.com/report/github.com/ihexxa/quickshare">
     <img src="https://goreportcard.com/badge/github.com/ihexxa/quickshare" />
@@ -25,9 +31,9 @@ English | [简体中文](./docs/README_zh-cn.md)
 
 - File Management
   - Support uploading, downloading, creating, deleting and moving files and folders
+  - Support fuzzy searching files and folders in seconds
   - Resumable uploading and downloading
   - Manage files and folders in browser
-  - Search files and folders with multiple keywords in seconds
   - Share directories to others, including anonymous
   - Scan QR codes to visit sharing folders
   - Upload hundreds of files at once

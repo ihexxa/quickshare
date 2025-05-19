@@ -38,7 +38,7 @@ func (cl *UsersClient) Token() *http.Cookie {
 }
 
 func (cl *UsersClient) Login(user, pwd string) (*http.Response, string, []error) {
-	resp, body, errs := cl.r.Post(cl.url("/v1/users/login")).
+	resp, body, errs := cl.r.Post(cl.url("/v2/public/login")).
 		Send(multiusers.LoginReq{
 			User: user,
 			Pwd:  pwd,
@@ -56,13 +56,13 @@ func (cl *UsersClient) Login(user, pwd string) (*http.Response, string, []error)
 }
 
 func (cl *UsersClient) Logout() (*http.Response, string, []error) {
-	return cl.r.Post(cl.url("/v1/users/logout")).
+	return cl.r.Post(cl.url("/v2/my/logout")).
 		AddCookie(cl.token).
 		End()
 }
 
 func (cl *UsersClient) SetPwd(oldPwd, newPwd string) (*http.Response, string, []error) {
-	return cl.r.Patch(cl.url("/v1/users/pwd")).
+	return cl.r.Patch(cl.url("/v2/my/pwd")).
 		Send(multiusers.SetPwdReq{
 			OldPwd: oldPwd,
 			NewPwd: newPwd,
@@ -72,7 +72,7 @@ func (cl *UsersClient) SetPwd(oldPwd, newPwd string) (*http.Response, string, []
 }
 
 func (cl *UsersClient) ForceSetPwd(userID, newPwd string) (*http.Response, string, []error) {
-	return cl.r.Patch(cl.url("/v1/users/pwd/force-set")).
+	return cl.r.Patch(cl.url("/v2/admin/users/pwd/force-set")).
 		Send(multiusers.ForceSetPwdReq{
 			ID:     userID,
 			NewPwd: newPwd,
@@ -82,7 +82,7 @@ func (cl *UsersClient) ForceSetPwd(userID, newPwd string) (*http.Response, strin
 }
 
 func (cl *UsersClient) SetUser(ID uint64, role string, quota *db.Quota) (*http.Response, string, []error) {
-	return cl.r.Patch(cl.url("/v1/users/")).
+	return cl.r.Patch(cl.url("/v2/admin/users/")).
 		Send(multiusers.SetUserReq{
 			ID:    ID,
 			Role:  role,
@@ -93,7 +93,7 @@ func (cl *UsersClient) SetUser(ID uint64, role string, quota *db.Quota) (*http.R
 }
 
 func (cl *UsersClient) AddUser(name, pwd, role string) (*http.Response, *multiusers.AddUserResp, []error) {
-	resp, body, errs := cl.r.Post(cl.url("/v1/users/")).
+	resp, body, errs := cl.r.Post(cl.url("/v2/admin/users/")).
 		AddCookie(cl.token).
 		Send(multiusers.AddUserReq{
 			Name: name,
@@ -116,14 +116,14 @@ func (cl *UsersClient) AddUser(name, pwd, role string) (*http.Response, *multius
 }
 
 func (cl *UsersClient) DelUser(id string) (*http.Response, string, []error) {
-	return cl.r.Delete(cl.url("/v1/users/")).
+	return cl.r.Delete(cl.url("/v2/admin/users/")).
 		AddCookie(cl.token).
 		Param(handlers.UserIDParam, id).
 		End()
 }
 
 func (cl *UsersClient) ListUsers() (*http.Response, *multiusers.ListUsersResp, []error) {
-	resp, body, errs := cl.r.Get(cl.url("/v1/users/list")).
+	resp, body, errs := cl.r.Get(cl.url("/v2/admin/users/list")).
 		AddCookie(cl.token).
 		End()
 	if len(errs) > 0 {
@@ -139,26 +139,26 @@ func (cl *UsersClient) ListUsers() (*http.Response, *multiusers.ListUsersResp, [
 	return resp, lsResp, errs
 }
 
-func (cl *UsersClient) AddRole(role string) (*http.Response, string, []error) {
-	return cl.r.Post(cl.url("/v1/roles/")).
-		AddCookie(cl.token).
-		Send(multiusers.AddRoleReq{
-			Role: role,
-		}).
-		End()
-}
+// func (cl *UsersClient) AddRole(role string) (*http.Response, string, []error) {
+// 	return cl.r.Post(cl.url("/v1/roles/")).
+// 		AddCookie(cl.token).
+// 		Send(multiusers.AddRoleReq{
+// 			Role: role,
+// 		}).
+// 		End()
+// }
 
-func (cl *UsersClient) DelRole(role string) (*http.Response, string, []error) {
-	return cl.r.Delete(cl.url("/v1/roles/")).
-		AddCookie(cl.token).
-		Send(multiusers.DelRoleReq{
-			Role: role,
-		}).
-		End()
-}
+// func (cl *UsersClient) DelRole(role string) (*http.Response, string, []error) {
+// 	return cl.r.Delete(cl.url("/v1/roles/")).
+// 		AddCookie(cl.token).
+// 		Send(multiusers.DelRoleReq{
+// 			Role: role,
+// 		}).
+// 		End()
+// }
 
 func (cl *UsersClient) ListRoles() (*http.Response, *multiusers.ListRolesResp, []error) {
-	resp, body, errs := cl.r.Get(cl.url("/v1/roles/list")).
+	resp, body, errs := cl.r.Get(cl.url("/v2/admin/roles/list")).
 		AddCookie(cl.token).
 		End()
 	if len(errs) > 0 {
@@ -175,7 +175,7 @@ func (cl *UsersClient) ListRoles() (*http.Response, *multiusers.ListRolesResp, [
 }
 
 func (cl *UsersClient) Self() (*http.Response, *multiusers.SelfResp, []error) {
-	resp, body, errs := cl.r.Get(cl.url("/v1/users/self")).
+	resp, body, errs := cl.r.Get(cl.url("/v2/my/self")).
 		AddCookie(cl.token).
 		End()
 	if len(errs) > 0 {
@@ -192,7 +192,7 @@ func (cl *UsersClient) Self() (*http.Response, *multiusers.SelfResp, []error) {
 }
 
 func (cl *UsersClient) SetPreferences(prefers *db.Preferences) (*http.Response, string, []error) {
-	return cl.r.Patch(cl.url("/v1/users/preferences")).
+	return cl.r.Patch(cl.url("/v2/my/preferences")).
 		Send(multiusers.SetPreferencesReq{
 			Preferences: prefers,
 		}).
@@ -201,7 +201,7 @@ func (cl *UsersClient) SetPreferences(prefers *db.Preferences) (*http.Response, 
 }
 
 func (cl *UsersClient) IsAuthed() (*http.Response, string, []error) {
-	return cl.r.Get(cl.url("/v1/users/isauthed")).
+	return cl.r.Get(cl.url("/v2/my/isauthed")).
 		AddCookie(cl.token).
 		End()
 }

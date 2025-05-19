@@ -7,7 +7,13 @@
 </p>
 <p align="center">
   <a href="https://github.com/ihexxa/quickshare/actions">
-    <img src="https://github.com/ihexxa/quickshare/workflows/quickshare-ci/badge.svg" />
+    <img src="https://github.com/ihexxa/quickshare/actions/workflows/ci_build.yml/badge.svg" />
+  </a>
+  <a href="https://github.com/ihexxa/quickshare/actions">
+    <img src="https://github.com/ihexxa/quickshare/actions/workflows/ci_docker.yml/badge.svg" />
+  </a>
+  <a href="https://github.com/ihexxa/quickshare/actions">
+    <img src="https://github.com/ihexxa/quickshare/actions/workflows/ci_github_binary.yml/badge.svg" />
   </a>
   <a href="https://goreportcard.com/report/github.com/ihexxa/quickshare">
     <img src="https://goreportcard.com/badge/github.com/ihexxa/quickshare" />
@@ -24,9 +30,9 @@
 
 - 文件管理
   - 支持上传，下载，创建，删除和移动文件和文件夹
+  - 支持文件与目录模糊查找，在几秒内返回结果
   - 可恢复的上传和下载（断点续传）
   - 在浏览器中管理文件和文件夹
-  - 多关键字的文件与目录查找，在几秒内返回结果
   - 将目录共享他人，包括未登录用户
   - 通过扫一扫访问共享文件夹/网站
   - 一次上传上百个文件

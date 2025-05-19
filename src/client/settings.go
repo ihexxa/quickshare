@@ -29,12 +29,12 @@ func (cl *SettingsClient) url(urlpath string) string {
 }
 
 func (cl *SettingsClient) Health() (*http.Response, string, []error) {
-	return cl.r.Options(cl.url("/v1/settings/health")).
+	return cl.r.Options(cl.url("/v2/public/settings/health")).
 		End()
 }
 
 func (cl *SettingsClient) GetClientCfg() (*http.Response, *settings.ClientCfgMsg, []error) {
-	resp, body, errs := cl.r.Get(cl.url("/v1/settings/client")).
+	resp, body, errs := cl.r.Get(cl.url("/v2/public/settings/client")).
 		AddCookie(cl.token).
 		End()
 
@@ -48,21 +48,21 @@ func (cl *SettingsClient) GetClientCfg() (*http.Response, *settings.ClientCfgMsg
 }
 
 func (cl *SettingsClient) SetClientCfg(cfgMsg *settings.ClientCfgMsg) (*http.Response, string, []error) {
-	return cl.r.Patch(cl.url("/v1/settings/client")).
+	return cl.r.Patch(cl.url("/v2/admin/client")).
 		AddCookie(cl.token).
 		Send(cfgMsg).
 		End()
 }
 
 func (cl *SettingsClient) ReportErrors(reports *settings.ClientErrorReports) (*http.Response, string, []error) {
-	return cl.r.Post(cl.url("/v1/settings/errors")).
+	return cl.r.Post(cl.url("/v2/my/errors")).
 		AddCookie(cl.token).
 		Send(reports).
 		End()
 }
 
 func (cl *SettingsClient) WorkerQueueLen() (*http.Response, *settings.WorkerQueueLenResp, []error) {
-	resp, body, errs := cl.r.Get(cl.url("/v1/settings/workers/queue-len")).
+	resp, body, errs := cl.r.Get(cl.url("/v2/admin/workers/queue-len")).
 		AddCookie(cl.token).
 		End()
 
