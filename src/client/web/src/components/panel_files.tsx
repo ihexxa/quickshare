@@ -1,5 +1,6 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
+import { createRef, Ref } from 'react';
 import { List, Map, Set } from "immutable";
 import FileSize from "filesize";
 
@@ -80,9 +81,9 @@ export interface State {
 
 export class FilesPanel extends React.Component<Props, State, {}> {
   private uploadInput: Element | Text;
-  private assignInput: (input: Element) => void;
   private onClickUpload: () => void;
   private hotkeyHandler: HotkeyHandler;
+  private inputRef: Ref<HTMLInputElement> = createRef();
 
   constructor(p: Props) {
     super(p);
@@ -97,9 +98,6 @@ export class FilesPanel extends React.Component<Props, State, {}> {
 
     Up().setStatusCb(this.updateProgress);
     this.uploadInput = undefined;
-    this.assignInput = (input) => {
-      this.uploadInput = ReactDOM.findDOMNode(input);
-    };
     this.onClickUpload = () => {
       if (!this.props.enabled) {
         return;
@@ -849,7 +847,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
                 onChange={this.addUploads}
                 multiple={true}
                 value={this.state.uploadFiles}
-                ref={this.assignInput}
+                ref={this.inputRef}
                 className="hidden"
               />
             </div>,
