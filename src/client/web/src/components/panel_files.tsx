@@ -1,6 +1,10 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
+<<<<<<< HEAD
 import { createRef, RefObject } from 'react';
+=======
+import { createRef, Ref } from 'react';
+>>>>>>> 75984b1 (chore: upgrade dependencies)
 import { List, Map, Set } from "immutable";
 import FileSize from "filesize";
 
@@ -95,7 +99,6 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     };
 
     Up().setStatusCb(this.updateProgress);
-
   }
 
   componentDidMount(): void {
