@@ -1,5 +1,6 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
+import { createRef, RefObject } from 'react';
 import { List, Map, Set } from "immutable";
 import FileSize from "filesize";
 
@@ -79,10 +80,8 @@ export interface State {
 }
 
 export class FilesPanel extends React.Component<Props, State, {}> {
-  private uploadInput: Element | Text;
-  private assignInput: (input: Element) => void;
-  private onClickUpload: () => void;
   private hotkeyHandler: HotkeyHandler;
+  private uploadInput: RefObject<HTMLInputElement> = createRef();
 
   constructor(p: Props) {
     super(p);
@@ -96,17 +95,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     };
 
     Up().setStatusCb(this.updateProgress);
-    this.uploadInput = undefined;
-    this.assignInput = (input) => {
-      this.uploadInput = ReactDOM.findDOMNode(input);
-    };
-    this.onClickUpload = () => {
-      if (!this.props.enabled) {
-        return;
-      }
-      const uploadInput = this.uploadInput as HTMLButtonElement;
-      uploadInput.click();
-    };
+
   }
 
   componentDidMount(): void {
@@ -130,6 +119,13 @@ export class FilesPanel extends React.Component<Props, State, {}> {
 
     document.removeEventListener("keyup", this.hotkeyHandler.handle);
   }
+
+  onClickUpload = () => {
+      if (!this.props.enabled) {
+        return;
+      }
+      this.uploadInput.current.click();
+  };
 
   onNewFolderNameChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ newFolderName: ev.target.value });
@@ -849,7 +845,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
                 onChange={this.addUploads}
                 multiple={true}
                 value={this.state.uploadFiles}
-                ref={this.assignInput}
+                ref={this.uploadInput}
                 className="hidden"
               />
             </div>,

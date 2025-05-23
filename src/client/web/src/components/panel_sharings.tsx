@@ -2,7 +2,7 @@ import * as React from "react";
 import { List, Map } from "immutable";
 
 import { BtnList } from "./control/btn_list";
-import { QRCodeIcon } from "./visual/qrcode";
+// import { QRCodeIcon } from "./visual/qrcode";
 import { getErrMsg } from "../common/utils";
 import { Env } from "../common/env";
 import { updater } from "./state_updater";
@@ -107,7 +107,7 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
               <Flexbox
                 children={List([
                   <span className="margin-r-m">
-                    <QRCodeIcon value={sharingURL} size={128} pos={false} />
+                    {/* <QRCodeIcon value={sharingURL} size={128} pos={false} /> */}
                   </span>,
 
                   <button
