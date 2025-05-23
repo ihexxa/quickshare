@@ -63,7 +63,7 @@ const icons = Map<string, IconType>({
 export function getIconWithProps(
   name: string,
   props: IconBaseProps
-): JSX.Element | null {
+): React.ReactElement<IconBaseProps> | null {
   const icon = icons.get(name);
   if (icon == null) {
     throw Error(`icon "${name}" is not found`);
@@ -76,7 +76,7 @@ export function getIcon(
   name: string,
   size: string,
   color: string
-): JSX.Element | null {
+): React.ReactElement<IconBaseProps> | null {
   const icon = icons.get(name);
   if (icon == null) {
     throw Error(`icon "${name}" is not found`);

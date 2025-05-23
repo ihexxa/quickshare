@@ -43,8 +43,8 @@ module.exports = {
     // new BundleAnalyzerPlugin()
   ],
   externals: {
-    react: "React",
-    "react-dom": "ReactDOM",
+    // react: "React",
+    // "react-dom": "ReactDOM",
     immutable: "Immutable",
   },
   optimization: {

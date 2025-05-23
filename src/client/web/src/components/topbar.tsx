@@ -7,7 +7,7 @@ import { LoginProps } from "./pane_login";
 import { updater } from "./state_updater";
 import { Flexbox } from "./layout/flexbox";
 import { ctrlOn, ctrlHidden, settingsDialogCtrl } from "../common/controls";
-import { QRCodeIcon } from "./visual/qrcode";
+// import { QRCodeIcon } from "./visual/qrcode";
 
 export interface State {}
 export interface Props {
@@ -67,12 +67,12 @@ export class TopBar extends React.Component<Props, State, {}> {
             >
               {this.props.ui.clientCfg.siteName}
             </a>,
-            <QRCodeIcon
-              value={document.URL}
-              size={128}
-              pos={true}
-              className="margin-l-m"
-            />,
+            // <QRCodeIcon
+            //   value={document.URL}
+            //   size={128}
+            //   pos={true}
+            //   className="margin-l-m"
+            // />,
 
             <Flexbox
               children={List([
@@ -98,7 +98,7 @@ export class TopBar extends React.Component<Props, State, {}> {
           ])}
           childrenStyles={List([
             { flex: "0 0 auto" },
-            { flex: "0 0 auto" },
+            // { flex: "0 0 auto" },
             { justifyContent: "flex-end", alignItems: "center" },
           ])}
         />

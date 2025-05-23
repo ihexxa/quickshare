@@ -1,5 +1,5 @@
 import * as React from "react";
-import * as ReactDOM from "react-dom";
+import * as ReactDOM from "react-dom/client";
 
 import { StateMgr } from "./components/state_mgr";
 import { ErrorLogger } from "./common/log_error";
@@ -19,4 +19,5 @@ window.onerror = (
   ErrorLogger().error(`${source}:${lineno}:${colno}: ${error.toString()}`);
 };
 
-ReactDOM.render(<StateMgr />, document.getElementById("mount"));
+const root = ReactDOM.createRoot(document.getElementById("mount"));
+root.render(<StateMgr />);
