@@ -33,7 +33,12 @@ module.exports = {
         loader: "ts-loader",
         include: [path.resolve(__dirname, "src")],
         exclude: [/node_modules/, /\.test\.(ts|tsx)$/],
-      }
+      },
+      {
+        test: /\.css$/i,
+        include: [path.resolve(__dirname, 'src')],
+        use: ['style-loader', 'css-loader', 'postcss-loader'],
+      },
     ],
   },
   resolve: {
