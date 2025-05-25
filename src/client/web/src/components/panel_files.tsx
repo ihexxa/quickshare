@@ -1,12 +1,11 @@
 import * as React from "react";
-import { createRef, RefObject } from 'react';
+import { createRef, RefObject } from "react";
 import { List, Map, Set } from "immutable";
 import FileSize from "filesize";
 
 import { RiFolder2Fill } from "@react-icons/all-files/ri/RiFolder2Fill";
 import { RiFile2Fill } from "@react-icons/all-files/ri/RiFile2Fill";
 import { RiCheckboxFill } from "@react-icons/all-files/ri/RiCheckboxFill";
-import { RiMenuUnfoldFill } from "@react-icons/all-files/ri/RiMenuUnfoldFill";
 import { RiRestartFill } from "@react-icons/all-files/ri/RiRestartFill";
 import { RiCheckboxBlankLine } from "@react-icons/all-files/ri/RiCheckboxBlankLine";
 
@@ -20,7 +19,6 @@ import { MetadataResp, roleVisitor, roleAdmin } from "../client";
 import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
 import { BtnList } from "./control/btn_list";
-import { Segments } from "./layout/segments";
 import { Columns } from "./layout/columns";
 import { Up } from "../worker/upload_mgr";
 import { UploadEntry, UploadState } from "../worker/interface";
@@ -35,6 +33,7 @@ import { HotkeyHandler } from "../common/hotkeys";
 import { CronJobs } from "../common/cron";
 import { Title } from "./visual/title";
 import { NotFoundBanner } from "./visual/banner_notfound";
+import { getIconWithProps } from "./visual/icons";
 
 export interface Item {
   name: string;
@@ -119,10 +118,10 @@ export class FilesPanel extends React.Component<Props, State, {}> {
   }
 
   onClickUpload = () => {
-      if (!this.props.enabled) {
-        return;
-      }
-      this.uploadInput.current.click();
+    if (!this.props.enabled) {
+      return;
+    }
+    this.uploadInput.current.click();
   };
 
   onNewFolderNameChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
@@ -521,9 +520,15 @@ export class FilesPanel extends React.Component<Props, State, {}> {
           ? "focus-font"
           : "major-font";
         const icon = item.isDir ? (
-          <RiFolder2Fill size="2rem" className="yellow0-font margin-r-m" />
+          <RiFolder2Fill
+            size="1.6rem"
+            className="yellow0-font mr-8 inline-block h-[3.2rem]"
+          />
         ) : (
-          <RiFile2Fill size="2rem" className="focus-font margin-r-m" />
+          <RiFile2Fill
+            size="1.6rem"
+            className="focus-font mr-8 inline-block h-[3.2rem]"
+          />
         );
 
         const modTimeDate = new Date(item.modTime);
@@ -532,9 +537,9 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         }-${modTimeDate.getDate()}`;
         const downloadPath = `/v1/fs/files?fp=${itemPath}`;
         const name = item.isDir ? (
-          <span className="title-m-wrap">
+          <span className="overflow-hidden break-words block">
             <span
-              className="clickable"
+              className="clickable leading-default"
               onClick={() => this.gotoChild(item.name)}
             >
               {item.name}
@@ -542,8 +547,12 @@ export class FilesPanel extends React.Component<Props, State, {}> {
             <span className="major-font">{` - ${modTimeFormatted}`}</span>
           </span>
         ) : (
-          <span className="title-m-wrap">
-            <a className="clickable" href={downloadPath} target="_blank">
+          <span className="overflow-hidden break-words block">
+            <a
+              className="clickable leading-default"
+              href={downloadPath}
+              target="_blank"
+            >
               {item.name}
             </a>
             <span className="major-font">{` - ${modTimeFormatted}`}</span>
@@ -552,30 +561,23 @@ export class FilesPanel extends React.Component<Props, State, {}> {
 
         const checkIcon = isSelected ? (
           <RiCheckboxFill
-            size="2rem"
-            className={`${selectedIconColor} ${shareModeClass}`}
+            size="1.6rem"
+            className={`${selectedIconColor} ${shareModeClass} inline-block h-[3.2rem]`}
             onClick={() => this.select(item.name)}
           />
         ) : (
           <RiCheckboxBlankLine
-            size="2rem"
-            className={`${selectedIconColor} ${shareModeClass}`}
+            size="1.6rem"
+            className={`${selectedIconColor} ${shareModeClass} inline-block h-[3.2rem]`}
             onClick={() => this.select(item.name)}
           />
         );
 
-        const op = item.isDir ? (
-          <div className={`txt-align-r icon-s ${showOp}`}>{checkIcon}</div>
-        ) : (
-          <div className={`txt-align-r icon-s ${showOp}`}>
-            <RiMenuUnfoldFill
-              size="2rem"
-              className={`${descIconColor} margin-r-m`}
-              onClick={() => this.toggleDetail(item.name)}
-            />
-            {checkIcon}
-          </div>
-        );
+        const detailIcon = getIconWithProps("GoUnfold", {
+          size: "1.6rem",
+          className: `${descIconColor} inline-block h-[3.2rem]`,
+          onClick: () => this.toggleDetail(item.name),
+        });
 
         const absDownloadURL = `${document.location.protocol}//${document.location.host}${downloadPath}`;
         const pathTitle = this.props.msg.pkg.get("item.downloadURL");
@@ -591,20 +593,18 @@ export class FilesPanel extends React.Component<Props, State, {}> {
             <div className="column">
               <div className="card">
                 <span className="title-m minor-font">{pathTitle}</span>
-                <span className="font-s work-break-all">{absDownloadURL}</span>
+                <span className="work-break-all">{absDownloadURL}</span>
               </div>
             </div>
 
             <div className="column">
               <div className="card">
                 <span className="title-m minor-font">{modTimeTitle}</span>
-                <span className="font-s work-break-all">
-                  {modTimeFormatted}
-                </span>
+                <span className="work-break-all">{modTimeFormatted}</span>
               </div>
               <div className="card">
                 <span className="title-m minor-font">{sizeTitle}</span>
-                <span className="font-s work-break-all">{itemSize}</span>
+                <span className="work-break-all">{itemSize}</span>
               </div>
             </div>
 
@@ -628,26 +628,34 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         );
 
         const cells = List<React.ReactNode>([
-          <div className="icon-s">{icon}</div>,
-          <div>{name}</div>,
-          <div className="title-m major-font padding-l-s">{itemSize}</div>,
-          <div className="txt-align-r">{op}</div>,
+          <Flexbox children={List([checkIcon])} childrenStyles={List([{}])} />,
+          <Flexbox children={List([icon])} childrenStyles={List([{}])} />,
+          name,
+          <div className="major-font padding-l-s leading-default">
+            {itemSize}
+          </div>,
+          detailIcon,
         ]);
 
         const tableCols = (
           <Columns
             rows={List([cells])}
-            widths={List(["3rem", "calc(100% - 18rem)", "8rem", "7rem"])}
-            childrenClassNames={List(["", "", "", ""])}
+            widths={List([
+              "3rem",
+              "3rem",
+              "calc(100% - 18rem)",
+              "8rem",
+              "3rem",
+            ])}
+            childrenClassNames={List(["", "", "", "", "text-right"])}
             colKey={`filesPanel-${i}`}
           />
         );
 
         return (
-          <div key={`filesPanel-row-${i}`}>
+          <div key={`filesPanel-row-${i}`} className="h-[3.6rem]">
             {tableCols}
             {desc}
-            <div className="hr"></div>
           </div>
         );
       }
@@ -740,13 +748,10 @@ export class FilesPanel extends React.Component<Props, State, {}> {
           <Flexbox
             children={List([
               <>
-                <button
-                  onClick={gotoRoot}
-                  className="button-default margin-r-m"
-                >
+                <button onClick={gotoRoot} className="mr-8">
                   {this.props.msg.pkg.get("endpoints.root")}
                 </button>
-                <button onClick={this.goHome} className="button-default">
+                <button onClick={this.goHome} className="">
                   {this.props.msg.pkg.get("endpoints.home")}
                 </button>
               </>,
@@ -758,18 +763,12 @@ export class FilesPanel extends React.Component<Props, State, {}> {
                   onKeyUp={this.searchKb}
                   value={this.state.searchKeywords}
                   placeholder={this.props.msg.pkg.get("hint.keywords")}
-                  className="inline-block margin-r-m"
+                  className="inline-block mr-8"
                 />
-                <button
-                  onClick={this.search}
-                  className="button-default margin-r-m"
-                >
+                <button onClick={this.search} className="mr-8">
                   {this.props.msg.pkg.get("term.search")}
                 </button>
-                <button
-                  onClick={this.truncateSearchResults}
-                  className="button-default"
-                >
+                <button onClick={this.truncateSearchResults}>
                   {this.props.msg.pkg.get("reset")}
                 </button>
               </>,
@@ -791,8 +790,11 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     const breadcrumb = this.props.filesInfo.dirPath.map(
       (pathPart: string, key: number) => {
         return (
-          <span key={`${pathPart}-${key}`}>
-            <a
+          <span
+            key={`${pathPart}-${key}`}
+            className="inline-block leading-default"
+          >
+            <button
               onClick={() =>
                 this.chdir(this.props.filesInfo.dirPath.slice(0, key + 1))
               }
@@ -801,7 +803,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
               <span className="content">
                 {pathPart === "/" ? "~" : pathPart}
               </span>
-            </a>
+            </button>
             <span className="item">
               <span className="content">{"/"}</span>
             </span>
@@ -809,87 +811,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         );
       }
     );
-
-    const ops = (
-      <div>
-        <Flexbox
-          children={List([
-            <div>
-              <button
-                onClick={this.mkDir}
-                className="inline-block focus-bg white-font margin-r-m"
-              >
-                {this.props.msg.pkg.get("browser.folder.add")}
-              </button>
-              <input
-                type="text"
-                onChange={this.onNewFolderNameChange}
-                onKeyUp={this.mkDirFromKb}
-                value={this.state.newFolderName}
-                placeholder={this.props.msg.pkg.get("browser.folder.name")}
-                className="inline-block"
-              />
-            </div>,
-
-            <div>
-              <button
-                onClick={this.onClickUpload}
-                className="focus-bg white-font"
-              >
-                {this.props.msg.pkg.get("browser.upload")}
-              </button>
-              <input
-                type="file"
-                onChange={this.addUploads}
-                multiple={true}
-                value={this.state.uploadFiles}
-                ref={this.uploadInput}
-                className="hidden"
-              />
-            </div>,
-          ])}
-          childrenStyles={List([
-            { flex: "0 0 70%" },
-            { flex: "0 0 30%", justifyContent: "flex-end" },
-          ])}
-        />
-      </div>
-    );
-
-    const orderByCallbacks = List([
-      () => {
-        this.orderBy(this.props.msg.pkg.get("item.name"));
-      },
-      () => {
-        this.orderBy(this.props.msg.pkg.get("item.type"));
-      },
-      () => {
-        this.orderBy(this.props.msg.pkg.get("item.modTime"));
-      },
-    ]);
-    const orderByButtons = (
-      <BtnList
-        titleIcon="BiSortUp"
-        btnNames={List([
-          this.props.msg.pkg.get("item.name"),
-          this.props.msg.pkg.get("item.type"),
-          this.props.msg.pkg.get("item.modTime"),
-        ])}
-        btnCallbacks={orderByCallbacks}
-      />
-    );
-    const viewType = this.props.ui.control.controls.get(filesViewCtrl);
-    const view =
-      this.props.filesInfo.items.size > 0 ? (
-        <div>
-          {orderByButtons}
-          <div className="margin-t-l">
-            {this.prepareColumns(this.props.filesInfo.items, showOp)}
-          </div>
-        </div>
-      ) : (
-        <NotFoundBanner title={this.props.msg.pkg.get("terms.nothingHere")} />
-      ); // TODO: support better views in the future
+    console.log(this.props.filesInfo.dirPath);
 
     const usedSpace = FileSize(
       // TODO: this a work around before transaction is introduced
@@ -912,6 +834,121 @@ export class FilesPanel extends React.Component<Props, State, {}> {
       }
     );
 
+    const ops = (
+      <div>
+        <Flexbox
+          children={List([
+            <div>
+              <button onClick={this.mkDir} className="inline-block mr-8">
+                {this.props.msg.pkg.get("browser.folder.add")}
+              </button>
+              <input
+                type="text"
+                onChange={this.onNewFolderNameChange}
+                onKeyUp={this.mkDirFromKb}
+                value={this.state.newFolderName}
+                placeholder={this.props.msg.pkg.get("browser.folder.name")}
+                className="inline-block"
+              />
+            </div>,
+
+            <div>
+              <span
+                id="space-used"
+                className={`minor-font mr-8 text-right leading-default ${shareModeClass}`}
+              >
+                {`${this.props.msg.pkg.get(
+                  "browser.used"
+                )} ${usedSpace} / ${spaceLimit}`}
+              </span>
+
+              <button onClick={this.onClickUpload}>
+                {this.props.msg.pkg.get("browser.upload")}
+              </button>
+              <input
+                type="file"
+                onChange={this.addUploads}
+                multiple={true}
+                value={this.state.uploadFiles}
+                ref={this.uploadInput}
+                className="hidden"
+              />
+            </div>,
+          ])}
+          childrenStyles={List([
+            { flex: "0 0 60%" },
+            { flex: "0 0 40%", justifyContent: "flex-end" },
+          ])}
+        />
+      </div>
+    );
+
+    const orderByCallbacks = List([
+      () => {
+        this.orderBy(this.props.msg.pkg.get("item.name"));
+      },
+      () => {
+        this.orderBy(this.props.msg.pkg.get("item.type"));
+      },
+      () => {
+        this.orderBy(this.props.msg.pkg.get("item.modTime"));
+      },
+    ]);
+    const orderByButtons = (
+      <BtnList
+        titleIcon="TbSortAscending2"
+        btnNames={List([
+          this.props.msg.pkg.get("item.name"),
+          this.props.msg.pkg.get("item.type"),
+          this.props.msg.pkg.get("item.modTime"),
+        ])}
+        btnCallbacks={orderByCallbacks}
+      />
+    );
+    const viewType = this.props.ui.control.controls.get(filesViewCtrl);
+    const view =
+      this.props.filesInfo.items.size > 0 ? (
+        <div className={`${showOp}`}>
+          <Flexbox
+            children={List([
+              <div>
+                <span className={`${showOp} mr-8`}>
+                  <button onClick={() => this.selectAll()}>
+                    {this.props.msg.pkg.get("browser.selectAll")}
+                  </button>
+                </span>
+                <span>
+                  {this.state.selectedItems.size > 0 ? (
+                    <span>
+                      <button
+                        type="button"
+                        onClick={() => this.delete()}
+                        className="mr-8"
+                      >
+                        {this.props.msg.pkg.get("browser.delete")}
+                      </button>
+
+                      <button type="button" onClick={() => this.moveHere()}>
+                        {this.props.msg.pkg.get("browser.paste")}
+                      </button>
+                    </span>
+                  ) : null}
+                </span>
+              </div>,
+
+              orderByButtons,
+            ])}
+            childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+          />
+
+          <div className="my-8">
+            {this.prepareColumns(this.props.filesInfo.items, showOp)}
+          </div>
+        </div>
+      ) : (
+        <NotFoundBanner title={this.props.msg.pkg.get("terms.nothingHere")} />
+      ); // TODO: support better views in the future
+
     const rowsViewColorClass =
       this.props.ui.control.controls.get(filesViewCtrl) === "rows"
         ? "focus-font"
@@ -929,13 +966,12 @@ export class FilesPanel extends React.Component<Props, State, {}> {
           <>
             <Flexbox
               children={List([
-                <span className="font-s">{searchResult}</span>,
+                <span>{searchResult}</span>,
                 <button
                   type="button"
                   onClick={() => {
                     this.gotoSearchResult(searchResult);
                   }}
-                  className="button-default"
                 >
                   {this.props.msg.pkg.get("action.go")}
                 </button>,
@@ -969,115 +1005,34 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         </div>
 
         <Container>
-          <div className={`${showOp} margin-b-m`}>
-            <Flexbox
-              children={List([
-                <span>
-                  {this.props.filesInfo.isSharing ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        this.deleteSharing(
-                          this.props.filesInfo.dirPath.join("/")
-                        );
-                      }}
-                      className="red0-bg white-font margin-r-m"
-                    >
-                      {this.props.msg.pkg.get("browser.share.del")}
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={this.addSharing}
-                      className="focus-bg white-font margin-r-m"
-                    >
-                      {this.props.msg.pkg.get("browser.share.add")}
-                    </button>
-                  )}
-                </span>,
-
-                <span>
-                  {this.state.selectedItems.size > 0 ? (
-                    <span>
-                      <button
-                        type="button"
-                        onClick={() => this.delete()}
-                        className="red0-bg white-font margin-r-m"
-                      >
-                        {this.props.msg.pkg.get("browser.delete")}
-                      </button>
-
-                      <button
-                        type="button"
-                        className="button-default"
-                        onClick={() => this.moveHere()}
-                      >
-                        {this.props.msg.pkg.get("browser.paste")}
-                      </button>
-                    </span>
-                  ) : null}
-                </span>,
-
-                <Flexbox
-                  children={List([
-                    // <BiListUl
-                    //   size="2rem"
-                    //   className={`${rowsViewColorClass} margin-r-s`}
-                    //   onClick={() => {
-                    //     this.setView("rows");
-                    //   }}
-                    // />,
-                    // <BiTable
-                    //   size="2rem"
-                    //   className={`${tableViewColorClass} margin-r-s`}
-                    //   onClick={() => {
-                    //     this.setView("table");
-                    //   }}
-                    // />,
-
-                    <span className={`${showOp}`}>
-                      <button
-                        onClick={() => this.selectAll()}
-                        className="inline-block button-default"
-                      >
-                        {this.props.msg.pkg.get("browser.selectAll")}
-                      </button>
-                    </span>,
-                  ])}
-                />,
-              ])}
-              childrenStyles={List([
-                { flex: "0 0 auto" },
-                { flex: "0 0 auto" },
-                { justifyContent: "flex-end" },
-              ])}
-            />
+          <div id="breadcrumb" className="leading-default">
+            <span className="location-item">
+              <span className="content">
+                {this.props.filesInfo.isSharing ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      this.deleteSharing(
+                        this.props.filesInfo.dirPath.join("/")
+                      );
+                    }}
+                  >
+                    {this.props.msg.pkg.get("browser.share.del")}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={this.addSharing}
+                    className="mr-4"
+                  >
+                    {this.props.msg.pkg.get("browser.share.add")}
+                  </button>
+                )}
+                {/* {`${this.props.msg.pkg.get("breadcrumb.loc")}:`} */}
+              </span>
+            </span>
+            {breadcrumb}
           </div>
-
-          <Segments
-            id="breadcrumb"
-            children={List([
-              <div>
-                <span className="location-item">
-                  <span className="content">
-                    {`${this.props.msg.pkg.get("breadcrumb.loc")}:`}
-                  </span>
-                </span>
-                {breadcrumb}
-              </div>,
-              <div
-                id="space-used"
-                className={`grey0-font ${shareModeClass}`}
-              >{`${this.props.msg.pkg.get(
-                "browser.used"
-              )} ${usedSpace} / ${spaceLimit}`}</div>,
-            ])}
-            ratios={List([60, 40])}
-            dir={true}
-          />
-
-          <div className="hr grey0-bg"></div>
-
           {view}
         </Container>
       </div>

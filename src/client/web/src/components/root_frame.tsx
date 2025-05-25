@@ -15,6 +15,7 @@ import { TopBar } from "./topbar";
 import { CronJobs } from "../common/cron";
 import { updater } from "./state_updater";
 import { dropAreaCtrl, ctrlOn, ctrlOff } from "../common/controls";
+import { Container } from "./layout/container";
 
 export const controlName = "panelTabs";
 const dragOverthrottlePeriod = 200;
@@ -140,7 +141,7 @@ export class RootFrame extends React.Component<Props, State, {}> {
         : "theme-dark";
     const theme = this.props.ui.clientCfg.autoTheme ? autoTheme : fixedTheme;
 
-    const fontSizeClass = "font-m";
+    const fontSizeClass = "font-xs";
 
     const displaying = this.props.ui.control.controls.get(controlName);
     const filesPanelClass = displaying === "filesPanel" ? "" : "hidden";
@@ -166,40 +167,40 @@ export class RootFrame extends React.Component<Props, State, {}> {
               update={this.props.update}
             />
 
-            <TopBar
-              login={this.props.login}
-              msg={this.props.msg}
-              ui={this.props.ui}
-              update={this.props.update}
-            />
+            <div className="container-center pt-8">
+              <Container>
+                <TopBar
+                  login={this.props.login}
+                  msg={this.props.msg}
+                  ui={this.props.ui}
+                  update={this.props.update}
+                />
+                <div className="hr"></div>
+                <Tabs
+                  targetControl={controlName}
+                  tabIcons={Map<string, IconProps>({
+                    filesPanel: {
+                      name: "RiFolder2Fill",
+                      size: iconSize("s"),
+                      color: "focus",
+                    },
+                    uploadingsPanel: {
+                      name: "RiUploadCloudFill",
+                      size: iconSize("s"),
+                      color: "focus",
+                    },
+                    sharingsPanel: {
+                      name: "RiShareBoxLine",
+                      size: iconSize("s"),
+                      color: "focus",
+                    },
+                  })}
+                  ui={this.props.ui}
+                  msg={this.props.msg}
+                  update={this.props.update}
+                />
+              </Container>
 
-            <div id="top-menu">
-              <Tabs
-                targetControl={controlName}
-                tabIcons={Map<string, IconProps>({
-                  filesPanel: {
-                    name: "RiFolder2Fill",
-                    size: iconSize("s"),
-                    color: "focus",
-                  },
-                  uploadingsPanel: {
-                    name: "RiUploadCloudFill",
-                    size: iconSize("s"),
-                    color: "focus",
-                  },
-                  sharingsPanel: {
-                    name: "RiShareBoxLine",
-                    size: iconSize("s"),
-                    color: "focus",
-                  },
-                })}
-                ui={this.props.ui}
-                msg={this.props.msg}
-                update={this.props.update}
-              />
-            </div>
-
-            <div className="container-center">
               <span className={filesPanelClass}>
                 <FilesPanel
                   filesInfo={this.props.filesInfo}

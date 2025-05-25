@@ -1,11 +1,12 @@
 import * as React from "react";
-import { Map } from "immutable";
+import { List, Map } from "immutable";
 
 import { updater } from "../state_updater";
 import { ICoreState, MsgProps, UIProps } from "../core_state";
 import { Env } from "../../common/env";
 import { IconProps, getIcon } from "../visual/icons";
 import { colorClass } from "../visual/colors";
+import { Flexbox } from "../layout/flexbox";
 
 const defaultIconProps: IconProps = {
   name: "RiFolder2Fill",
@@ -52,8 +53,8 @@ export class Tabs extends React.Component<Props, State, {}> {
 
       const iconColor = displaying === option ? iconProps.color : "normal";
       const icon = getIcon(iconProps.name, iconProps.size, iconColor);
-      const fontColor =
-        displaying === option ? `${colorClass(iconColor)}-font` : "normal-font";
+      const fontWeight =
+        displaying === option ? `font-bold` : "";
 
       return (
         <button
@@ -61,10 +62,10 @@ export class Tabs extends React.Component<Props, State, {}> {
           onClick={() => {
             this.setTab(this.props.targetControl, option);
           }}
-          className="float-l margin-r-m minor-bg"
+          className="float-left mr-12"
         >
-          <div className="float-l icon-s margin-r-s">{icon}</div>
-          <div className={`float-l font-xs ${fontColor}`}>
+          <div className="float-left icon-s margin-r-s">{icon}</div>
+          <div className={`float-left font-xs ${fontWeight}`}>
             {this.props.msg.pkg.get(
               `control.${this.props.targetControl}.${option}`
             )}
@@ -75,10 +76,21 @@ export class Tabs extends React.Component<Props, State, {}> {
     });
 
     return (
-      <div className={`tabs control-${this.props.targetControl}`}>
-        {tabs}
-        <div className="fix"></div>
-      </div>
+      <Flexbox
+        children={List([
+          <div className={`tabs control-${this.props.targetControl}`}>
+            {tabs}
+            <div className="fix"></div>
+          </div>,
+          <a href="//github.com/ihexxa/quickshare" className="major-font">
+            {getIcon("FaGithub", "2rem", "normal")}
+          </a>,
+        ])}
+        childrenStyles={List([
+          { flex: "0 0 auto" },
+          { justifyContent: "flex-end" },
+        ])}
+      />
     );
   }
 }

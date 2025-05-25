@@ -25,6 +25,13 @@ import { RiHardDriveFill } from "@react-icons/all-files/ri/RiHardDriveFill";
 import { RiGridFill } from "@react-icons/all-files/ri/RiGridFill";
 import { RiFolderUploadFill } from "@react-icons/all-files/ri/RiFolderUploadFill";
 import { RiFileSearchFill } from "@react-icons/all-files/ri/RiFileSearchFill";
+import { FaGithub } from "react-icons/fa";
+import { TbSortAscending2 } from "react-icons/tb";
+import { MdUnfoldMore } from "react-icons/md";
+import { LuUnfoldVertical } from "react-icons/lu";
+import { GoUnfold } from "react-icons/go";
+
+
 
 import { colorClass } from "./colors";
 
@@ -58,6 +65,11 @@ const icons = Map<string, IconType>({
   RiGridFill,
   RiFolderUploadFill,
   RiFileSearchFill,
+  FaGithub,
+  TbSortAscending2,
+  MdUnfoldMore,
+  LuUnfoldVertical,
+  GoUnfold,
 });
 
 export function getIconWithProps(

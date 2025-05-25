@@ -7,6 +7,7 @@ import { LoginProps } from "./pane_login";
 import { updater } from "./state_updater";
 import { Flexbox } from "./layout/flexbox";
 import { ctrlOn, ctrlHidden, settingsDialogCtrl } from "../common/controls";
+import { Container } from "./layout/container";
 // import { QRCodeIcon } from "./visual/qrcode";
 
 export interface State {}
@@ -55,18 +56,21 @@ export class TopBar extends React.Component<Props, State, {}> {
         : "";
 
     return (
-      <div id="top-bar" className="focus-font normal-bg">
+      <div className="my-[0.5rem]">
         <Flexbox
           children={List([
             <a
               id="topbar-title"
               href="https://github.com/ihexxa/quickshare"
               target="_blank"
-              className="h5 bold"
+              className="text-3xl leading-default mr-4"
               title={this.props.ui.clientCfg.siteDesc}
             >
               {this.props.ui.clientCfg.siteName}
             </a>,
+            <span className="text-[1rem] leading-default minor-font">
+              {this.props.ui.clientCfg.siteDesc}
+            </span>,
             // <QRCodeIcon
             //   value={document.URL}
             //   size={128}
@@ -78,14 +82,14 @@ export class TopBar extends React.Component<Props, State, {}> {
               children={List([
                 <button
                   onClick={this.openSettings}
-                  className={`button-default margin-r-m ${settingsPanelClass}`}
+                  className={`cyan1-font mr-12 ${settingsPanelClass}`}
                 >
                   {this.props.msg.pkg.get("settings")}
                 </button>,
 
                 <button
                   onClick={this.logout}
-                  className={`button-default ${loginPanelClass}`}
+                  className={`cyan1-font ${loginPanelClass}`}
                 >
                   {this.props.msg.pkg.get("login.logout")}
                 </button>,
@@ -97,6 +101,7 @@ export class TopBar extends React.Component<Props, State, {}> {
             />,
           ])}
           childrenStyles={List([
+            { flex: "0 0 auto" },
             { flex: "0 0 auto" },
             // { flex: "0 0 auto" },
             { justifyContent: "flex-end", alignItems: "center" },
