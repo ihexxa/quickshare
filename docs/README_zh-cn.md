@@ -3,7 +3,10 @@
 </h1>
 <p align="center">
   简单的文件共享服务, 使用Go/Golang, Typescript, Gin, React, Boltdb等构建.
-  (<a href="https://github.com/ihexxa/quickshare/blob/main/docs/screenshots.md">界面截图</a>)
+  (
+    <a href="https://github.com/ihexxa/quickshare/blob/main/docs/screenshots.md">界面截图</a>&nbsp;|&nbsp;
+    <a href="https://github.com/ihexxa/quickshare/blob/main/docs/imgs/v0.9.1/quickshare_1920.gif">录频</a>
+  )
 </p>
 <p align="center">
   <a href="https://github.com/ihexxa/quickshare/actions">
@@ -20,7 +23,7 @@
   </a>
 <p>
 
-<image src="./imgs/v0.9.1/quickshare_1920.gif" title="preview">
+<image src="./imgs/v0.11.0/newlook.png" title="preview">
 
 [English](../README.md) | 简体中文
 

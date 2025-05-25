@@ -653,8 +653,8 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         );
 
         return (
-          <div key={`filesPanel-row-${i}`} className="h-[3.6rem]">
-            {tableCols}
+          <div key={`filesPanel-row-${i}`}>
+            <div className="h-[3.6rem]">{tableCols}</div>
             {desc}
           </div>
         );
