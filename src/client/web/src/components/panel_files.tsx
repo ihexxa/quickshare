@@ -811,7 +811,6 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         );
       }
     );
-    console.log(this.props.filesInfo.dirPath);
 
     const usedSpace = FileSize(
       // TODO: this a work around before transaction is introduced
