@@ -15,8 +15,8 @@ export const BtnList = (props: Props) => {
   const titleIcon =
     props.titleIcon != null ? (
       getIconWithProps(props.titleIcon, {
-        size: "3rem",
-        className: "major-font margin-r-m",
+        size: "1.8rem",
+        className: "major-font mr-4",
       })
     ) : (
       <span></span>
@@ -24,15 +24,20 @@ export const BtnList = (props: Props) => {
 
   const btns = props.btnNames.map((btnName: string, i: number) => {
     const cb = props.btnCallbacks.get(i);
+    const isLast = i === props.btnNames.size - 1;
     return (
-      <button key={`rows-${i}`} className="inline-block margin-r-m button-default" onClick={cb}>
+      <button
+        key={`rows-${i}`}
+        className={`inline-block ${isLast ? "" : "mr-8"}`}
+        onClick={cb}
+      >
         {btnName}
       </button>
     );
   });
 
   return (
-    <div className="margin-b-l">
+    <div>
       <Flexbox
         children={List([titleIcon, <span>{btns}</span>])}
         childrenStyles={List([{ flex: "0 0 auto" }, { flex: "0 0 auto" }])}

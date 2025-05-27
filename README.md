@@ -3,7 +3,10 @@
 </h1>
 <p align="center">
   Quick and simple file sharing between different devices.
-  (<a href="https://github.com/ihexxa/quickshare/blob/main/docs/screenshots.md">Screenshots</a>)
+  (
+    <a href="https://github.com/ihexxa/quickshare/blob/main/docs/screenshots.md">Screenshots</a>&nbsp;|&nbsp;
+    <a href="https://github.com/ihexxa/quickshare/blob/main/docs/imgs/v0.9.1/quickshare_1920.gif">Demo</a>
+  )
 </p>
 <p align="center">
   <a href="https://github.com/ihexxa/quickshare/actions">
@@ -20,7 +23,7 @@
   </a>
 <p>
 
-<image src="./docs/imgs/v0.9.1/quickshare_1920.gif" title="preview">
+<image src="./docs/imgs/v0.11.0/newlook.png" title="preview">
 
 
 English | [简体中文](./docs/README_zh-cn.md)

@@ -5,6 +5,8 @@ import { StateMgr } from "./components/state_mgr";
 import { ErrorLogger } from "./common/log_error";
 import { errCorsScript } from "./common/errors";
 
+import './style/tailwind.css';
+
 window.onerror = (
   msg: string,
   source: string,

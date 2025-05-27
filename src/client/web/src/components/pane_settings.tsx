@@ -218,7 +218,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
           children={List([
             <h5 className="title-m">{this.props.msg.pkg.get("cfg.bg")}</h5>,
 
-            <button className="button-default" onClick={this.syncPreferences}>
+            <button className="" onClick={this.syncPreferences}>
               {this.props.msg.pkg.get("update")}
             </button>,
           ])}
@@ -303,13 +303,13 @@ export class PaneSettings extends React.Component<Props, State, {}> {
 
               <span>
                 <button
-                  className="button-default margin-r-m"
+                  className=" margin-r-m"
                   onClick={this.reportErrors}
                 >
                   {this.props.msg.pkg.get("op.submit")}
                 </button>
                 <button
-                  className="button-default"
+                  className=""
                   onClick={this.truncateErrors}
                 >
                   {this.props.msg.pkg.get("op.truncate")}
@@ -376,7 +376,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               <h5 className="title-m">
                 {this.props.msg.pkg.get("settings.pwd.update")}
               </h5>,
-              <button className="button-default" onClick={this.setPwd}>
+              <button className="" onClick={this.setPwd}>
                 {this.props.msg.pkg.get("update")}
               </button>,
             ])}
@@ -444,8 +444,8 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               }}
               className={`${
                 this.props.login.preferences.lan === "en_US"
-                  ? "focus-bg white-font"
-                  : "button-default"
+                  ? "focus-font"
+                  : ""
               } inline-block margin-r-m`}
             >
               {this.props.msg.pkg.get("enUS")}
@@ -456,8 +456,8 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               }}
               className={`${
                 this.props.login.preferences.lan === "zh_CN"
-                  ? "focus-bg white-font"
-                  : "button-default"
+                  ? "focus-font"
+                  : ""
               } inline-block margin-r-m`}
             >
               {this.props.msg.pkg.get("zhCN")}
@@ -482,8 +482,8 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               }}
               className={`${
                 this.props.login.preferences.theme === "light"
-                  ? "focus-bg white-font"
-                  : "button-default"
+                  ? "focus-font"
+                  : ""
               } inline-block margin-r-m`}
             >
               {this.props.msg.pkg.get("theme.light")}
@@ -494,8 +494,8 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               }}
               className={`${
                 this.props.login.preferences.theme === "dark"
-                  ? "focus-bg white-font"
-                  : "button-default"
+                  ? "focus-font"
+                  : ""
               } inline-block margin-r-m`}
             >
               {this.props.msg.pkg.get("theme.dark")}
@@ -513,7 +513,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
 
               <span>
                 <button
-                  className="button-default"
+                  className=""
                   onClick={this.syncPreferences}
                 >
                   {this.props.msg.pkg.get("update")}
@@ -552,7 +552,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
                 </span>,
 
                 <span>
-                  <button className="button-default" onClick={this.syncPreferences}>
+                  <button className="" onClick={this.syncPreferences}>
                     {this.props.msg.pkg.get("update")}
                   </button>
                 </span>,

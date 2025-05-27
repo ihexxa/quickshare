@@ -6,8 +6,9 @@
   "scripts": {
     "build:fe": "yarn && bash scripts/copy_js.sh && webpack --config src/client/web/webpack.app.prod.js",
     "build:fe:dev": "yarn && bash scripts/copy_js_dev.sh && webpack --config src/client/web/webpack.app.dev.js --watch",
-    "build:fe:watch": "yarn && bash scripts/copy_js.sh && webpack --config src/client/web/webpack.app.prod.js --watch",
+    "build:fe:prod": "yarn && bash scripts/copy_js.sh && webpack --config src/client/web/webpack.app.prod.js --watch",
     "start": "yarn build:fe && go run cmd/start/main.go -c `pwd`/configs/dev.yml",
+    "server:dev": "go run cmd/start/main.go -c `pwd`/configs/dev.yml",
     "build": "yarn build:fe && bash scripts/build_be.sh",
     "build:docker": "docker build . -f Dockerfile_default -t hexxa/quickshare:latest",
     "build:docker:heroku": "docker build . -t hexxa/quickshare:latest"

@@ -230,6 +230,12 @@
   line-height: 3.2rem;
 }
 
+.leading-default {
+  line-height: 3.2rem;
+  display: inline-block;
+  height: 3.2rem;
+}
+
 .title-l {
   font-size: 1.8rem;
   font-weight: bold;
@@ -265,8 +271,8 @@
 }
 
 .title-m-wrap {
-  font-size: 1.4rem;
-  line-height: 3.2rem;
+  /* font-size: 1.4rem;
+  line-height: 3.2rem; */
   overflow: hidden;
   overflow-wrap: break-word;
   display: block;

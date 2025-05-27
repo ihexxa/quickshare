@@ -118,7 +118,7 @@ export class Layers extends React.Component<Props, State, {}> {
               </div>
               <div className="col-r">
                 <button
-                  className="button-default"
+                  className=""
                   onClick={() => {
                     this.setControlOption(settingsDialogCtrl, ctrlOff);
                   }}

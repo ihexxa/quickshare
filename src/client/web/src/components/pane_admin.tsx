@@ -11,7 +11,7 @@ import { updater } from "./state_updater";
 import { Flexbox } from "./layout/flexbox";
 import { Container } from "./layout/container";
 import { loadingCtrl, ctrlOn, ctrlOff } from "../common/controls";
-import { iconSize } from "./visual/icons";
+import { getIconWithProps, iconSize } from "./visual/icons";
 import { Columns } from "./layout/columns";
 
 export interface AdminProps {
@@ -217,11 +217,11 @@ export class UserForm extends React.Component<
           rows={List([
             List([
               <div className="title-m-wrap">
-                <span className="bold">{`${this.props.msg.pkg.get(
+                <span className="">{`${this.props.msg.pkg.get(
                   "user.name"
                 )}: `}</span>
                 <span className="margin-r-m">{this.props.name}</span>
-                <span className="bold">{`${this.props.msg.pkg.get(
+                <span className="">{`${this.props.msg.pkg.get(
                   "user.id"
                 )}: `}</span>
                 <span>{this.props.id}</span>
@@ -229,15 +229,19 @@ export class UserForm extends React.Component<
 
               <div className="txt-align-r">
                 <div className="icon-s inline-block">
-                  <RiMenuUnfoldFill
+                  {getIconWithProps("GoUnfold", {
+                    size: iconSize("s"),
+                    className: `mr-8 ${foldIconColor}`,
+                    onClick: this.toggle,
+                  })}
+                  {/* <RiMenuUnfoldFill
                     size={iconSize("s")}
-                    className={`margin-r-m ${foldIconColor}`}
-                    onClick={this.toggle}
-                  />
+                   
+                  /> */}
                 </div>
               </div>,
 
-              <button className="button-default" onClick={this.delUser}>
+              <button className="" onClick={this.delUser}>
                 {this.props.msg.pkg.get("delete")}
               </button>,
             ]),
@@ -258,7 +262,7 @@ export class UserForm extends React.Component<
                     { round: 0 }
                   )}`}
                 </span>,
-                <button className="button-default" onClick={resetUsedSpace}>
+                <button className="" onClick={resetUsedSpace}>
                   {this.props.msg.pkg.get("resetUsedSpace")}
                 </button>,
               ])}
@@ -335,7 +339,7 @@ export class UserForm extends React.Component<
               </div>,
 
               <div>
-                <button className="button-default" onClick={this.setUser}>
+                <button className="" onClick={this.setUser}>
                   {this.props.msg.pkg.get("update")}
                 </button>
               </div>,
@@ -383,7 +387,7 @@ export class UserForm extends React.Component<
                 </div>
               </div>,
 
-              <button className="button-default" onClick={this.setPwd}>
+              <button className="" onClick={this.setPwd}>
                 {this.props.msg.pkg.get("update")}
               </button>,
             ])}
@@ -562,7 +566,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
                 onClick={() => {
                   this.delRole(role);
                 }}
-                className="button-default"
+                className=""
               >
                 {this.props.msg.pkg.get("delete")}
               </button>,
@@ -574,7 +578,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
     });
 
     return (
-      <div className="font-m">
+      <div>
         <Container>
           <SiteCfg
             ui={this.props.ui}
@@ -587,7 +591,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
           <Flexbox
             children={List([
               <h5 className="title-m">{this.props.msg.pkg.get("user.add")}</h5>,
-              <button onClick={this.addUser} className="button-default">
+              <button onClick={this.addUser} className="">
                 {this.props.msg.pkg.get("add")}
               </button>,
             ])}
@@ -677,7 +681,7 @@ export class AdminPane extends React.Component<Props, State, {}> {
                   value={this.state.newRole}
                   placeholder={this.props.msg.pkg.get("role.name")}
                 />,
-                <button className="button-default" onClick={this.addRole}>
+                <button className="" onClick={this.addRole}>
                   {this.props.msg.pkg.get("add")}
                 </button>,
               ])}
@@ -877,14 +881,11 @@ export class SiteCfg extends React.Component<SiteCfgProps, SiteCfgState, {}> {
             <span>
               <button
                 onClick={this.resetClientCfg}
-                className="inline-block margin-r-m button-default"
+                className="inline-block margin-r-m "
               >
                 {this.props.msg.pkg.get("reset")}
               </button>
-              <button
-                className="inline-block button-default"
-                onClick={this.setClientCfg}
-              >
+              <button className="inline-block " onClick={this.setClientCfg}>
                 {this.props.msg.pkg.get("update")}
               </button>
             </span>,
@@ -923,9 +924,7 @@ export class SiteCfg extends React.Component<SiteCfgProps, SiteCfgState, {}> {
               this.onChangeAllowSetBg(true);
             }}
             className={`${
-              this.props.ui.clientCfg.allowSetBg
-                ? "white-font focus-bg"
-                : "button-default"
+              this.props.ui.clientCfg.allowSetBg ? "focus-font" : ""
             } inline-block margin-r-m`}
           >
             {this.props.msg.pkg.get("term.enabled")}
@@ -935,9 +934,7 @@ export class SiteCfg extends React.Component<SiteCfgProps, SiteCfgState, {}> {
               this.onChangeAllowSetBg(false);
             }}
             className={`${
-              this.props.ui.clientCfg.allowSetBg
-                ? "button-default"
-                : "white-font focus-bg"
+              this.props.ui.clientCfg.allowSetBg ? "" : "focus-font"
             } inline-block margin-r-m`}
           >
             {this.props.msg.pkg.get("term.disabled")}
@@ -953,9 +950,7 @@ export class SiteCfg extends React.Component<SiteCfgProps, SiteCfgState, {}> {
               this.onChangeAutoTheme(true);
             }}
             className={`${
-              this.props.ui.clientCfg.autoTheme
-                ? "white-font focus-bg"
-                : "button-default"
+              this.props.ui.clientCfg.autoTheme ? "focus-font" : ""
             } inline-block margin-r-m`}
           >
             {this.props.msg.pkg.get("term.enabled")}
@@ -965,9 +960,7 @@ export class SiteCfg extends React.Component<SiteCfgProps, SiteCfgState, {}> {
               this.onChangeAutoTheme(false);
             }}
             className={`${
-              this.props.ui.clientCfg.autoTheme
-                ? "button-default"
-                : "white-font focus-bg"
+              this.props.ui.clientCfg.autoTheme ? "" : "focus-font"
             } inline-block margin-r-m`}
           >
             {this.props.msg.pkg.get("term.disabled")}
@@ -1046,7 +1039,7 @@ export class SiteCfg extends React.Component<SiteCfgProps, SiteCfgState, {}> {
           <div className="label">
             {this.props.msg.pkg.get("action.reindex.desc")}
           </div>
-          <button className="button-default" onClick={this.reindex}>
+          <button className="" onClick={this.reindex}>
             {this.props.msg.pkg.get("action.reindex")}
           </button>
         </div>

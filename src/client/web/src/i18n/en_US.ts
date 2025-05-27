@@ -158,7 +158,7 @@ export const msgs: Map<string, string> = Map({
   "term.results": "Results",
   "term.noResult": "No result found",
   "action.go": "Go",
-  "hint.keywords": "Please input keyword(s), separated by spaces",
+  "hint.keywords": "Input keyword(s), separated by spaces",
   "action.reindex": "Reindex",
   "action.reindex.desc": "Reconstruct the search index",
   "action.reindex.confirm": "If there are a lot of files and folders, rebuilding index may take some time.",
