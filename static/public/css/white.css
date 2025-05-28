@@ -245,13 +245,14 @@
 
 /* +composition */
 
-.theme-default .container {
+.theme-default .my-container {
   width: 100%;
   color: #34495e;
   background-color: white;
   /* border-radius: 0.8rem; */
   /* box-shadow: 0 5px 30px 0 rgb(31 38 135 / 10%); */
   margin: auto auto 1rem auto;
+  min-width: 60rem;
 }
 
 .theme-default .info {

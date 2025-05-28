@@ -241,12 +241,13 @@
 
 /* +composition */
 
-.theme-dark .container {
+.theme-dark .my-container {
   width: 100%;
   background-color: #242424;
   /* border-radius: 0.8rem; */
   /* box-shadow: 0 5px 30px 0 rgb(31 38 135 / 10%); */
   margin: auto auto 1rem auto;
+  min-width: 60rem;
 }
 
 .theme-dark .info {
