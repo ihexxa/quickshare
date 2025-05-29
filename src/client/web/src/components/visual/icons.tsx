@@ -30,6 +30,8 @@ import { TbSortAscending2 } from "react-icons/tb";
 import { MdUnfoldMore } from "react-icons/md";
 import { LuUnfoldVertical } from "react-icons/lu";
 import { GoUnfold } from "react-icons/go";
+import { FaSquareShareNodes } from "react-icons/fa6";
+
 
 
 
@@ -70,6 +72,7 @@ const icons = Map<string, IconType>({
   MdUnfoldMore,
   LuUnfoldVertical,
   GoUnfold,
+  FaSquareShareNodes,
 });
 
 export function getIconWithProps(

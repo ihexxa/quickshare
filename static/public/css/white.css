@@ -200,23 +200,20 @@
   width: calc(50% - 1rem);
   background-color: #eaebf6;
   margin: 0 0 0 2rem;
-  border-radius: 0.6rem;
-  height: 3.8rem;
+  height: 3.2rem;
 }
 
 .theme-default #pane-login input,
 .theme-default #pane-login input:hover,
 .theme-default #pane-login input:focus,
 .theme-default #pane-login input:active {
-  width: calc(100% - 1.6rem);
+  width: 100%;
   background-color: #eaebf6;
-  border-radius: 0.6rem;
   padding: 0.6rem 0.8rem;
   margin: auto auto 2rem auto;
   border: none;
   outline: none;
   box-shadow: none;
-  height: 2.6rem;
 }
 
 
