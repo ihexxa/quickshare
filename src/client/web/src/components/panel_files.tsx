@@ -589,21 +589,21 @@ export class FilesPanel extends React.Component<Props, State, {}> {
           ? "margin-t-m padding-m"
           : "no-height";
         const desc = (
-          <div className={`${descStateClass} major-font major-bg`}>
+          <div className={`${descStateClass}  major-bg`}>
             <div className="column">
               <div className="card">
-                <span className="title-m minor-font">{pathTitle}</span>
+                <span className="title-m ">{pathTitle}</span>
                 <span className="work-break-all">{absDownloadURL}</span>
               </div>
             </div>
 
             <div className="column">
               <div className="card">
-                <span className="title-m minor-font">{modTimeTitle}</span>
+                <span className="title-m ">{modTimeTitle}</span>
                 <span className="work-break-all">{modTimeFormatted}</span>
               </div>
               <div className="card">
-                <span className="title-m minor-font">{sizeTitle}</span>
+                <span className="title-m ">{sizeTitle}</span>
                 <span className="work-break-all">{itemSize}</span>
               </div>
             </div>
@@ -612,11 +612,11 @@ export class FilesPanel extends React.Component<Props, State, {}> {
               <div className="card">
                 <Flexbox
                   children={List([
-                    <span className="title-m minor-font">SHA1</span>,
+                    <span className="title-m ">SHA1</span>,
                     <RiRestartFill
                       onClick={() => this.generateHash(itemPath)}
                       size={"2rem"}
-                      className={`minor-font ${shareModeClass}`}
+                      className={` ${shareModeClass}`}
                     />,
                   ])}
                   childrenStyles={List([{}, { justifyContent: "flex-end" }])}
