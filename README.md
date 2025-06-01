@@ -23,7 +23,7 @@
   </a>
 <p>
 
-<image src="./docs/imgs/v0.11.0/newlook.png" title="preview">
+<image src="./docs/imgs/v0.11.0/screenshot.png" title="preview">
 
 
 English | [简体中文](./docs/README_zh-cn.md)
