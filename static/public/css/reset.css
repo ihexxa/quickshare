@@ -67,8 +67,6 @@ input {
   line-height: 3.2rem;
   height: 3.2rem;
   padding: 0.8rem 1rem;
-  /* border: solid 1px #95a5a6;
-  border-radius: 0.5rem; */
   transition: opacity 300ms, box-shadow 300ms;
 }
 
@@ -81,10 +79,7 @@ button {
 
   font-size: 1.2rem;
   line-height: 3.2rem;
-  /* padding: 1rem 1rem; */
-  /* font-weight: bold; */
   border: none;
-  border-radius: 0.5rem;
   outline: none;
   height: 3.2rem;
 

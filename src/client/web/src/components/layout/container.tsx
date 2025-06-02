@@ -6,7 +6,7 @@ export interface Props {
 
 export const Container = (props: Props) => {
   return (
-    <div className="container">
+    <div className="my-container">
       <div className="container-padding">{props.children}</div>
     </div>
   );

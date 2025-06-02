@@ -92,6 +92,11 @@ func (h *MultiUsersSvc) APIAccessControl() gin.HandlerFunc {
 			}
 		}
 
+		// TODO: listDir and download are exceptions: for sharing
+		if accessPath == "/v2/my/fs/dirs" {
+			matched = true
+		}
+
 		if matched {
 			c.Next()
 			return

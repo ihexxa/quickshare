@@ -23,7 +23,7 @@
   </a>
 <p>
 
-<image src="./imgs/v0.11.0/newlook.png" title="preview">
+<image src="./imgs/v0.11.0/screenshot.png" title="preview">
 
 [English](../README.md) | 简体中文
 

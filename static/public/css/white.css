@@ -15,7 +15,6 @@
 }
 
 .theme-default #breadcrumb .location-item {
-  margin: 0 0.5rem 0 0;
   display: inline-block;
   /* line-height: 3rem; */
 }
@@ -113,7 +112,7 @@
 .theme-default .container-center {
   margin: 0 auto auto auto;
   width: 96%;
-  max-width: 100rem;
+  max-width: 128rem;
   z-index: 9;
 }
 
@@ -200,23 +199,20 @@
   width: calc(50% - 1rem);
   background-color: #eaebf6;
   margin: 0 0 0 2rem;
-  border-radius: 0.6rem;
-  height: 3.8rem;
+  height: 3.2rem;
 }
 
 .theme-default #pane-login input,
 .theme-default #pane-login input:hover,
 .theme-default #pane-login input:focus,
 .theme-default #pane-login input:active {
-  width: calc(100% - 1.6rem);
+  width: 100%;
   background-color: #eaebf6;
-  border-radius: 0.6rem;
   padding: 0.6rem 0.8rem;
   margin: auto auto 2rem auto;
   border: none;
   outline: none;
   box-shadow: none;
-  height: 2.6rem;
 }
 
 
@@ -233,7 +229,7 @@
 }
 
 .theme-default #root-container {
-  max-width: 100rem;
+  max-width: 128rem;
   width: 96%;
   text-align: left;
   margin: 3rem auto auto auto;
@@ -245,13 +241,14 @@
 
 /* +composition */
 
-.theme-default .container {
+.theme-default .my-container {
   width: 100%;
   color: #34495e;
   background-color: white;
   /* border-radius: 0.8rem; */
   /* box-shadow: 0 5px 30px 0 rgb(31 38 135 / 10%); */
   margin: auto auto 1rem auto;
+  min-width: 60rem;
 }
 
 .theme-default .info {

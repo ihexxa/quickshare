@@ -15,7 +15,6 @@
 }
 
 .theme-dark #breadcrumb .location-item {
-  margin: 0 0.5rem 0 0;
   display: inline-block;
   line-height: 3.2rem;
 }
@@ -112,7 +111,7 @@
 .theme-dark .container-center {
   margin: 0 auto auto auto;
   width: 96%;
-  max-width: 100rem;
+  max-width: 128rem;
   z-index: 9;
 }
 
@@ -229,7 +228,7 @@
 }
 
 .theme-dark #root-container {
-  max-width: 100rem;
+  max-width: 128rem;
   width: 96%;
   text-align: left;
   margin: 3rem auto auto auto;
@@ -241,12 +240,13 @@
 
 /* +composition */
 
-.theme-dark .container {
+.theme-dark .my-container {
   width: 100%;
   background-color: #242424;
   /* border-radius: 0.8rem; */
   /* box-shadow: 0 5px 30px 0 rgb(31 38 135 / 10%); */
   margin: auto auto 1rem auto;
+  min-width: 60rem;
 }
 
 .theme-dark .info {

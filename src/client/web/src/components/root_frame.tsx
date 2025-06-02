@@ -190,7 +190,7 @@ export class RootFrame extends React.Component<Props, State, {}> {
                       color: "focus",
                     },
                     sharingsPanel: {
-                      name: "RiShareBoxLine",
+                      name: "FaSquareShareNodes",
                       size: iconSize("s"),
                       color: "focus",
                     },

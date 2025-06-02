@@ -114,7 +114,6 @@ export class SharingsPanel extends React.Component<Props, State, {}> {
                     onClick={() => {
                       this.deleteSharing(dirPath);
                     }}
-                    className="button-default"
                   >
                     {this.props.msg.pkg.get("op.cancel")}
                   </button>,

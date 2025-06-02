@@ -589,21 +589,21 @@ export class FilesPanel extends React.Component<Props, State, {}> {
           ? "margin-t-m padding-m"
           : "no-height";
         const desc = (
-          <div className={`${descStateClass} major-font major-bg`}>
+          <div className={`${descStateClass}  major-bg`}>
             <div className="column">
               <div className="card">
-                <span className="title-m minor-font">{pathTitle}</span>
+                <span className="title-m ">{pathTitle}</span>
                 <span className="work-break-all">{absDownloadURL}</span>
               </div>
             </div>
 
             <div className="column">
               <div className="card">
-                <span className="title-m minor-font">{modTimeTitle}</span>
+                <span className="title-m">{modTimeTitle}</span>
                 <span className="work-break-all">{modTimeFormatted}</span>
               </div>
               <div className="card">
-                <span className="title-m minor-font">{sizeTitle}</span>
+                <span className="title-m">{sizeTitle}</span>
                 <span className="work-break-all">{itemSize}</span>
               </div>
             </div>
@@ -612,11 +612,11 @@ export class FilesPanel extends React.Component<Props, State, {}> {
               <div className="card">
                 <Flexbox
                   children={List([
-                    <span className="title-m minor-font">SHA1</span>,
+                    <span className="title-m">SHA1</span>,
                     <RiRestartFill
                       onClick={() => this.generateHash(itemPath)}
                       size={"2rem"}
-                      className={`minor-font ${shareModeClass}`}
+                      className={` ${shareModeClass}`}
                     />,
                   ])}
                   childrenStyles={List([{}, { justifyContent: "flex-end" }])}
@@ -907,39 +907,40 @@ export class FilesPanel extends React.Component<Props, State, {}> {
     const viewType = this.props.ui.control.controls.get(filesViewCtrl);
     const view =
       this.props.filesInfo.items.size > 0 ? (
-        <div className={`${showOp}`}>
-          <Flexbox
-            children={List([
-              <div>
-                <span className={`${showOp} mr-8`}>
-                  <button onClick={() => this.selectAll()}>
-                    {this.props.msg.pkg.get("browser.selectAll")}
-                  </button>
-                </span>
-                <span>
-                  {this.state.selectedItems.size > 0 ? (
-                    <span>
-                      <button
-                        type="button"
-                        onClick={() => this.delete()}
-                        className="mr-8"
-                      >
-                        {this.props.msg.pkg.get("browser.delete")}
-                      </button>
+        <div>
+          <div className={`${showOp}`}>
+            <Flexbox
+              children={List([
+                <div>
+                  <span className={`${showOp} mr-8`}>
+                    <button onClick={() => this.selectAll()}>
+                      {this.props.msg.pkg.get("browser.selectAll")}
+                    </button>
+                  </span>
+                  <span>
+                    {this.state.selectedItems.size > 0 ? (
+                      <span>
+                        <button
+                          type="button"
+                          onClick={() => this.delete()}
+                          className="mr-8"
+                        >
+                          {this.props.msg.pkg.get("browser.delete")}
+                        </button>
 
-                      <button type="button" onClick={() => this.moveHere()}>
-                        {this.props.msg.pkg.get("browser.paste")}
-                      </button>
-                    </span>
-                  ) : null}
-                </span>
-              </div>,
+                        <button type="button" onClick={() => this.moveHere()}>
+                          {this.props.msg.pkg.get("browser.paste")}
+                        </button>
+                      </span>
+                    ) : null}
+                  </span>
+                </div>,
 
-              orderByButtons,
-            ])}
-            childrenStyles={List([{}, { justifyContent: "flex-end" }])}
-          />
-
+                orderByButtons,
+              ])}
+              childrenStyles={List([{}, { justifyContent: "flex-end" }])}
+            />
+          </div>
           <div className="my-8">
             {this.prepareColumns(this.props.filesInfo.items, showOp)}
           </div>
@@ -1004,34 +1005,32 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         </div>
 
         <Container>
-          <div id="breadcrumb" className="leading-default">
-            <span className="location-item">
-              <span className="content">
-                {this.props.filesInfo.isSharing ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      this.deleteSharing(
-                        this.props.filesInfo.dirPath.join("/")
-                      );
-                    }}
-                  >
-                    {this.props.msg.pkg.get("browser.share.del")}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={this.addSharing}
-                    className="mr-4"
-                  >
-                    {this.props.msg.pkg.get("browser.share.add")}
-                  </button>
-                )}
-                {/* {`${this.props.msg.pkg.get("breadcrumb.loc")}:`} */}
+          {this.props.login.userRole === roleVisitor || (
+            <div id="breadcrumb" className="leading-default">
+              <span className="location-item mr-4">
+                <span className="content">
+                  {this.props.filesInfo.isSharing ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        this.deleteSharing(
+                          this.props.filesInfo.dirPath.join("/")
+                        );
+                      }}
+                    >
+                      {`${this.props.msg.pkg.get("browser.share.del")}`}
+                    </button>
+                  ) : (
+                    <button type="button" onClick={this.addSharing}>
+                      {`${this.props.msg.pkg.get("browser.share.add")}`}
+                    </button>
+                  )}
+                  {/* {`${this.props.msg.pkg.get("breadcrumb.loc")}:`} */}
+                </span>
               </span>
-            </span>
-            {breadcrumb}
-          </div>
+              {breadcrumb}
+            </div>
+          )}
           {view}
         </Container>
       </div>
