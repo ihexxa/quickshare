@@ -8,7 +8,7 @@ import { updater } from "./state_updater";
 import { Flexbox } from "./layout/flexbox";
 import { ctrlOn, ctrlHidden, settingsDialogCtrl } from "../common/controls";
 import { Container } from "./layout/container";
-// import { QRCodeIcon } from "./visual/qrcode";
+import { QRCodeIcon } from "./visual/qrcode";
 
 export interface State {}
 export interface Props {
@@ -71,12 +71,12 @@ export class TopBar extends React.Component<Props, State, {}> {
             <span className="text-[1rem] leading-default minor-font">
               {this.props.ui.clientCfg.siteDesc}
             </span>,
-            // <QRCodeIcon
-            //   value={document.URL}
-            //   size={128}
-            //   pos={true}
-            //   className="margin-l-m"
-            // />,
+            <QRCodeIcon
+              value={document.URL}
+              size={128}
+              pos={true}
+              className="margin-l-m"
+            />,
 
             <Flexbox
               children={List([
