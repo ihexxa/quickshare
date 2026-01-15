@@ -252,15 +252,27 @@ export class Updater {
   };
 
   refreshFiles = async (): Promise<string> => {
-    const status = await this.setItems(this.props.filesInfo.dirPath);
+    const status = await this.setItems(this.props.filesInfo.dirPath, true);
     if (status !== "") {
       return status;
     }
   };
 
-  setItems = async (dirParts: List<string>): Promise<string> => {
+  setItems = async (
+    dirParts: List<string>,
+    isRefreshing?: boolean
+  ): Promise<string> => {
     const dirPath = dirParts.join("/");
     const listResp = await this.filesClient.list(dirPath);
+
+    // The listing result could be returned after user has been gone to another directory
+    // isStillInThePath compares the listing one with the current one
+    // TODO: in the long-term listing result should be ordered and canceled
+    const isStillInThePath = dirPath === this.props.filesInfo.dirPath.join("/");
+    if (isRefreshing && !isStillInThePath) {
+      // ignore the result
+      return "";
+    }
 
     if (listResp.status === 200) {
       this.props.filesInfo.dirPath = dirParts;
@@ -1037,7 +1049,7 @@ export class Updater {
   reindex = async (): Promise<string> => {
     const resp = await this.filesClient.reindex();
     return resp.status === 200 ? "" : errServer;
-  }
+  };
 
   hasResult = (): boolean => {
     return this.props.filesInfo.searchResults.size > 0;
