@@ -135,7 +135,7 @@ export const msgs: Map<string, string> = Map({
   "op.cancel": "Cancel",
   "term.time": "Time",
   "breadcrumb.loc": "Location",
-  endpoints: "Endpoints",
+  endpoints: "Root Folders",
   "endpoints.root": "Root",
   "endpoints.home": "Home",
   "state.stopped": "Stopped",

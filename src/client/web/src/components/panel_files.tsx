@@ -792,7 +792,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
         return (
           <span
             key={`${pathPart}-${key}`}
-            className="inline-block leading-default"
+            className="inline-block leading-default major-font"
           >
             <button
               onClick={() =>
@@ -1012,6 +1012,7 @@ export class FilesPanel extends React.Component<Props, State, {}> {
                   {this.props.filesInfo.isSharing ? (
                     <button
                       type="button"
+                      className={"focus-font"}
                       onClick={() => {
                         this.deleteSharing(
                           this.props.filesInfo.dirPath.join("/")
