@@ -103,7 +103,7 @@ export class TopBar extends React.Component<Props, State, {}> {
           childrenStyles={List([
             { flex: "0 0 auto" },
             { flex: "0 0 auto" },
-            // { flex: "0 0 auto" },
+            { flex: "0 0 auto" },
             { justifyContent: "flex-end", alignItems: "center" },
           ])}
         />
