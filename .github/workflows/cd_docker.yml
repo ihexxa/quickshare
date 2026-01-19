@@ -1,12 +1,9 @@
-name: ci-docker
+name: cd-docker
 
 on:
   release:
     types: [published]
   workflow_dispatch: {}
-  # push:
-  #   branches:
-  #     - "dev-docker"
 
 jobs:
   push_to_registry:

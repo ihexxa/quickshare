@@ -3,7 +3,7 @@ ADD . /quickshare
 WORKDIR /quickshare
 RUN yarn run build:fe
 
-FROM golang:1.18 AS build-be
+FROM golang:1.24 AS build-be
 COPY --from=build-fe /quickshare /quickshare
 WORKDIR /quickshare
 RUN /quickshare/scripts/build_exec.sh
