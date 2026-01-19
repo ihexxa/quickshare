@@ -1,4 +1,4 @@
-name: ci-docker-test
+name: cd-docker-github
 
 on:
   # release:

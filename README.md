@@ -13,10 +13,10 @@
     <img src="https://github.com/ihexxa/quickshare/actions/workflows/ci_build.yml/badge.svg" />
   </a>
   <a href="https://github.com/ihexxa/quickshare/actions">
-    <img src="https://github.com/ihexxa/quickshare/actions/workflows/ci_docker.yml/badge.svg" />
+    <img src="https://github.com/ihexxa/quickshare/actions/workflows/cd_docker.yml/badge.svg" />
   </a>
   <a href="https://github.com/ihexxa/quickshare/actions">
-    <img src="https://github.com/ihexxa/quickshare/actions/workflows/ci_github_binary.yml/badge.svg" />
+    <img src="https://github.com/ihexxa/quickshare/actions/workflows/cd_github_binary.yml/badge.svg" />
   </a>
   <a href="https://goreportcard.com/report/github.com/ihexxa/quickshare">
     <img src="https://goreportcard.com/badge/github.com/ihexxa/quickshare" />
