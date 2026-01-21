@@ -58,7 +58,7 @@
     "css-loader": "^5.0.0",
     "filesize": "^6.1.0",
     "immutable": "^4.0.0-rc.12",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "object-hash": "^2.2.0",
     "react": "19.1.0",
     "react-copy-to-clipboard": "5.1.0",
