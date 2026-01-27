@@ -2,6 +2,7 @@ import { Map, Set } from "immutable";
 
 import { msgs as enMsgs } from "./en_US";
 import { msgs as cnMsgs } from "./zh_CN";
+import { msgs as esMsgs } from "./es_ES";
 
 export class Msger {
   private msgs: Map<string, string>;
@@ -20,6 +21,8 @@ export class MsgPackage {
         return Map(enMsgs);
       case "zh_CN":
         return Map(cnMsgs);
+      case "es_ES":
+        return Map(esMsgs);
       default:
         return Map(enMsgs);
     }
