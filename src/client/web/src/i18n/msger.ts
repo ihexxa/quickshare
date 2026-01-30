@@ -4,6 +4,12 @@ import { msgs as enMsgs } from "./en_US";
 import { msgs as cnMsgs } from "./zh_CN";
 import { msgs as esMsgs } from "./es_ES";
 
+export const lanPkgs: Map<string, Map<string, string>> = Map({
+  "en_US": Map(enMsgs),
+  "zh_CN": Map(cnMsgs),
+  "es_ES": Map(esMsgs),
+});
+
 export class Msger {
   private msgs: Map<string, string>;
   constructor(msgs: Map<string, string>) {
@@ -16,16 +22,10 @@ export class Msger {
 
 export class MsgPackage {
   static get(key: string): Map<string, string> {
-    switch (key) {
-      case "en_US":
-        return Map(enMsgs);
-      case "zh_CN":
-        return Map(cnMsgs);
-      case "es_ES":
-        return Map(esMsgs);
-      default:
-        return Map(enMsgs);
+    if (lanPkgs.has(key)) {
+      return lanPkgs.get(key);
     }
+    return Map(enMsgs);
   }
 }
 
@@ -115,8 +115,9 @@ export const lanPackKeys = Set<string>([
   "role.add",
   "role.name",
   "admin.roles",
-  "zhCN",
-  "enUS",
+  "zh_CN",
+  "es_ES",
+  "en_US",
   "move.fail",
   "share.404.title",
   "share.404.desc",

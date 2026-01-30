@@ -12,6 +12,7 @@ import { Card } from "./layout/card";
 import { Rows } from "./layout/rows";
 import { ClientErrorV001, ErrorLogger } from "../common/log_error";
 import { loadingCtrl, ctrlOn, ctrlOff } from "../common/controls";
+import { lanPkgs } from "../i18n/msger";
 export interface Props {
   login: LoginProps;
   msg: MsgProps;
@@ -133,7 +134,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
     try {
       const status = await updater().setPwd(
         this.state.oldPwd,
-        this.state.newPwd1
+        this.state.newPwd1,
       );
       if (status !== "") {
         Env().alertMsg(this.props.msg.pkg.get("update.fail"));
@@ -302,16 +303,10 @@ export class PaneSettings extends React.Component<Props, State, {}> {
               </h5>,
 
               <span>
-                <button
-                  className=" margin-r-m"
-                  onClick={this.reportErrors}
-                >
+                <button className=" margin-r-m" onClick={this.reportErrors}>
                   {this.props.msg.pkg.get("op.submit")}
                 </button>
-                <button
-                  className=""
-                  onClick={this.truncateErrors}
-                >
+                <button className="" onClick={this.truncateErrors}>
                   {this.props.msg.pkg.get("op.truncate")}
                 </button>
               </span>,
@@ -325,6 +320,21 @@ export class PaneSettings extends React.Component<Props, State, {}> {
         </Container>
       ) : null;
 
+    const languageButtons = lanPkgs.keySeq().map((lanPkgName) => {
+      return (
+        <button
+          key={lanPkgName}
+          onClick={() => {
+            this.setLan(lanPkgName);
+          }}
+          className={`${
+            this.props.login.preferences.lan === lanPkgName ? "focus-font" : ""
+          } inline-block margin-r-m`}
+        >
+          {this.props.msg.pkg.get(lanPkgName)}
+        </button>
+      );
+    });
     return (
       <div id="pane-settings">
         <Container>
@@ -350,7 +360,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
                   parseInt(this.props.login.quota.spaceLimit, 10),
                   {
                     round: 0,
-                  }
+                  },
                 )}`}
               />
               <Card
@@ -437,32 +447,7 @@ export class PaneSettings extends React.Component<Props, State, {}> {
 
           <div className="hr"></div>
 
-          <div>
-            <button
-              onClick={() => {
-                this.setLan("en_US");
-              }}
-              className={`${
-                this.props.login.preferences.lan === "en_US"
-                  ? "focus-font"
-                  : ""
-              } inline-block margin-r-m`}
-            >
-              {this.props.msg.pkg.get("enUS")}
-            </button>
-            <button
-              onClick={() => {
-                this.setLan("zh_CN");
-              }}
-              className={`${
-                this.props.login.preferences.lan === "zh_CN"
-                  ? "focus-font"
-                  : ""
-              } inline-block margin-r-m`}
-            >
-              {this.props.msg.pkg.get("zhCN")}
-            </button>
-          </div>
+          <div>{languageButtons}</div>
         </Container>
 
         <Container>

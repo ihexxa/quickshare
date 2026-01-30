@@ -40,7 +40,7 @@ import {
   ctrlHidden,
 } from "../common/controls";
 
-import { MsgPackage, isValidLanPack } from "../i18n/msger";
+import { MsgPackage, isValidLanPack, lanPkgs } from "../i18n/msger";
 
 export class Updater {
   props: ICoreState;
@@ -807,21 +807,14 @@ export class Updater {
     return resp.status === 200 ? "" : errServer;
   };
 
-  setLan = (lan: string) => {
-    switch (lan) {
-      case "en_US":
-        this.props.msg.lan = "en_US";
-        this.props.msg.pkg = MsgPackage.get(lan);
-        this.props.login.preferences.lan = "en_US";
-        break;
-      case "zh_CN":
-        this.props.msg.lan = "zh_CN";
-        this.props.msg.pkg = MsgPackage.get(lan);
-        this.props.login.preferences.lan = "zh_CN";
-        break;
-      default:
-        Env().alertMsg("language package not found");
+  setLan = (pkgName: string) => {
+    if (lanPkgs.has(pkgName)) {
+        this.props.msg.lan = pkgName;
+        this.props.msg.pkg = MsgPackage.get(pkgName);
+        this.props.login.preferences.lan = pkgName;
+        return;
     }
+    Env().alertMsg("language package not found");
   };
 
   setTheme = (theme: string) => {
