@@ -27,7 +27,7 @@
     "deep-diff": "^1.0.2",
     "html-webpack-plugin": "^5.5.0",
     "jest": "^27.2.0",
-    "postcss": "^8.5.3",
+    "postcss": "^8.5.10",
     "postcss-loader": "^8.1.1",
     "style-loader": "^4.0.0",
     "tailwindcss": "^4.1.7",
