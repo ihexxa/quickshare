@@ -19,7 +19,7 @@ require (
 	github.com/robbert229/jwt v2.0.0+incompatible
 	github.com/robfig/cron/v3 v3.0.1
 	go.uber.org/zap v1.16.0
-	golang.org/x/crypto v0.51.0
+	golang.org/x/crypto v0.52.0
 	modernc.org/sqlite v1.20.4
 )
 
